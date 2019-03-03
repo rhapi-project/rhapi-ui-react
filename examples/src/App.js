@@ -102,10 +102,9 @@ export default class App extends React.Component {
     );
 
     return (
-      <div>
-        <Grid>
+        <Grid style={{minHeight : window.screen.height }}>
           <Grid.Column width={4}>
-            <Menu pointing={true} secondary={true} vertical={true}>
+            <Menu pointing={true} vertical={true} inverted={true} style={{minHeight : "100%"}}>
               {ccam}
               {patients}
               {plannings}
@@ -125,7 +124,6 @@ export default class App extends React.Component {
             )}
           </Grid.Column>
         </Grid>
-      </div>
     );
   }
 }
