@@ -8,27 +8,25 @@ const client = new Client("https://demo.rhapi.net/demo01");
 
 export default class CcamSearchBasic extends React.Component {
   render() {
-    return(
-      <div>
-        <div>
-          Un petit descriptif de comment ce composant fonction, les props, les fonctions callbacks etc. <br />
-          Dire que ce composant est basé sur le composant <strong>Search</strong> de
-          &nbsp;
-          <a
-            href="https://react.semantic-ui.com/modules/search/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Semantic-ui-react
-          </a>
-        </div>
+    return (
+      <React.Fragment>
+        <p>
+          Cet exemple utilise <b>CcamSearch</b> pour la recherche des actes en
+          CCAM et retourne simplement les résultats en console.
+        </p>
+        <a
+          href="https://react.semantic-ui.com/modules/search/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Semantic-ui-react
+        </a>
         <Divider hidden={true} />
-        <div>
-          <CcamSearch
-            client={client}
-          />
-        </div>
-      </div>
+        <CcamSearch
+          client={client}
+          getActesObject={results => console.log(results)}
+        />
+      </React.Fragment>
     );
   }
 }

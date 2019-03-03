@@ -4,23 +4,23 @@ import { Divider, Grid, Header, Icon, Menu } from "semantic-ui-react";
 import _ from "lodash";
 
 // Les exemples
-import ExampleCcamSearch from "./CCAM/ExampleCcamSearch";
-import ExampleCcamList from "./CCAM/ExampleCcamList";
+import CcamSearchBasic from "./CCAM/CcamSearchBasic";
+import CcamSearchList from "./CCAM/CcamSearchList";
 
-const githubBaseUrl = "https://google.fr";
+const ghBaseUrl =
+  "https://github.com/rhapi-project/rhapi-ui-react/blob/master/examples/src";
 
 export default class App extends React.Component {
   state = {
     component: null,
-    link: "", // à concatener avec githubBaseUrl
     name: ""
   };
 
-  handleClickItem = (name, link, component) => {
+  handleClickItem = (group, name, component) => {
     this.setState({
-      component: component,
-      link: link,
-      name: name
+      group: group,
+      name: name,
+      component: component
     });
   };
 
@@ -30,14 +30,18 @@ export default class App extends React.Component {
         <Menu.Header>CCAM</Menu.Header>
         <Menu.Menu>
           <Menu.Item
-            name="CcamDetailFact"
-            active={this.state.component === "CcamDetailFact"}
-            onClick={() => {}}
+            name="CcamSearchBasic"
+            active={this.state.component === "CcamSearchBasic"}
+            onClick={(e, d) =>
+              this.handleClickItem("CCAM", d.name, <CcamSearchBasic />)
+            }
           />
           <Menu.Item
-            name="CcamList"
-            active={this.state.component === "CcamList"}
-            onClick={(e, d) => this.handleClickItem(d.name, "", <ExampleCcamList />)}
+            name="CcamSearchList"
+            active={this.state.component === "CcamSearchList"}
+            onClick={(e, d) =>
+              this.handleClickItem("CCAM", d.name, <CcamSearchList />)
+            }
           />
           <Menu.Item
             name="CcamSaisie"
@@ -45,11 +49,10 @@ export default class App extends React.Component {
             onClick={() => {}}
           />
           <Menu.Item
-            name="CcamSearch"
-            active={this.state.component === "CcamSearch"}
-            onClick={(e, d) => this.handleClickItem(d.name, "", <ExampleCcamSearch />)}
+            name="CcamDetailFact"
+            active={this.state.component === "CcamDetailFact"}
+            onClick={() => {}}
           />
-          
         </Menu.Menu>
       </Menu.Item>
     );
@@ -111,35 +114,29 @@ export default class App extends React.Component {
     return (
       <div>
         <Grid>
-          <Grid.Column width={2}>
-            <div style={{ position: "fixed" }}>
-              <Menu
-                pointing={true}
-                secondary={true}
-                vertical={true}
-              >
-                {ccam}
-                {patients}
-                {plannings}
-                {shared}
-              </Menu>
-            </div>
+          <Grid.Column width={4}>
+            <Menu pointing={true} secondary={true} vertical={true}>
+              {ccam}
+              {patients}
+              {plannings}
+              {shared}
+            </Menu>
           </Grid.Column>
-          <Grid.Column stretched={true} width={14}>
-            <div style={{ paddingLeft: "20px", paddingRight: "20px", paddingTop: "15px" }}>
-              {_.isNull(this.state.component)
-                ? <Description />
-                : <ViewExample
-                    name={this.state.name}
-                    component={this.state.component}
-                    link={this.state.link}
-                  />
-              }
-            </div>
+          <Grid.Column stretched={true} width={10}>
+            <Divider hidden={true} />
+            {_.isNull(this.state.component) ? (
+              <Description />
+            ) : (
+              <ViewExample
+                name={this.state.name}
+                component={this.state.component}
+                group={this.state.group}
+              />
+            )}
           </Grid.Column>
         </Grid>
       </div>
-    );   
+    );
   }
 }
 
@@ -152,9 +149,13 @@ class Description extends React.Component {
         </div>
         <Divider hidden={true} />
         <div>
-          Mettre ici une description de <strong>rhapi-ui-react</strong>, et comment l'utiliser par exemple 
+          Mettre ici une description de <strong>rhapi-ui-react</strong>, et
+          comment l'utiliser par exemple
           <Divider hidden={true} />
-          Aucun composant séléctionné. <strong>Cliquer sur un composant pour voir un exemple de son utilisation.</strong>
+          Aucun composant selectionné.{" "}
+          <strong>
+            Cliquer sur un composant pour voir un exemple de son utilisation.
+          </strong>
         </div>
       </div>
     );
@@ -162,32 +163,23 @@ class Description extends React.Component {
 }
 
 class ViewExample extends React.Component {
-  state = {
-    name: "Composant"
-  }
   render() {
-    let url = githubBaseUrl + "";
-    return(
-      <div>
-        <div style={{ display: "flex" }}>
-          <div style={{ flexGrow: "1" }}>
-            <Header as="h2">{this.props.name}</Header>
-          </div>
-          <div style={{ verticalAlign: "center" }}>
-            <Icon name="github"/>
-            <a href={url} 
-              target="_blank"
-              title="Ce lien fera référence au code source de cet exemple sur Github"
-              rel="noopener noreferrer"
-            >
-              Code source de l'exemple
-            </a>
-          </div>
-        </div>
+    let url =
+      ghBaseUrl + "/" + this.props.group + "/" + this.props.name + ".js";
+    return (
+      <div style={{ minHeight: "100%" }}>
+        <Header as="h2">{this.props.name}</Header>
+        <Icon name="github" />
+        <a
+          href={url}
+          target="_blank"
+          title="Ce lien fera référence au code source de cet exemple sur Github"
+          rel="noopener noreferrer"
+        >
+          Code source de l'exemple
+        </a>
         <Divider hidden={true} />
-        <div>
-          {this.props.component}
-        </div>
+        {this.props.component}
       </div>
     );
   }

@@ -15,7 +15,7 @@ export default class CcamSearchList extends React.Component {
 
   onClearSearch = () => {
     this.setState({ actesObject: {}, actes: [] });
-  }
+  };
 
   getActesObject = obj => {
     this.setState({ actesObject: obj, actes: obj.results });
@@ -24,16 +24,16 @@ export default class CcamSearchList extends React.Component {
   render() {
     // Les props que l'on souhaite passer au Search de semantic
     let searchProps = {
-      placeholder: "Recherche des actes",
-    }
+      placeholder: "Recherche des actes"
+    };
 
     // Les props que l'on souhaite passer au Table de semantic
     let tableProps = {
       basic: true,
       celled: true,
-      collapsing: true,
+      collapsing: true
       //style: { textAlign: "center" } // le inline CSS sera passé comme ceci
-    }
+    };
 
     // Les champs qu'on veut obtenir dans le résultat
     // Si ces champs ne sont pas définis, par défaut le résultat comportera
@@ -42,16 +42,17 @@ export default class CcamSearchList extends React.Component {
       { champ: "codActe", title: "Code" }, // le champ qu'on veut récupérer et le titre qu'on lui donne dans le Header de la Table de semantic
       { champ: "dtCreatio", title: "Date création" },
       { champ: "nomLong", title: "Nom long" },
-      { champ: "dtModif", title: "Date Modification"}
+      { champ: "dtModif", title: "Date Modification" }
     ];
 
-    return(
+    return (
       <div>
         <div>
-          Un pétit descriptif de comment ce composant : fonctionnement, les props, les fonctions callbacks etc. <br/>
-          Ce composant utilise <strong>CcamSearch</strong> pour faire la recherche des actes. <br />
-          Ce composant est basé sur le composant <strong>Table</strong> de&nbsp;
-           <a
+          <p>
+            Cet exemple utilise <b>CcamSearch</b> pour la recherche des actes en
+            CCAM et <b>CcamList</b> pour afficher les résultats.
+          </p>
+          <a
             href="https://react.semantic-ui.com/collections/table/"
             target="_blank"
             rel="noopener noreferrer"
@@ -72,7 +73,7 @@ export default class CcamSearchList extends React.Component {
               />
             </Form.Input>
           </Form>
-          <Divider hidden={true}/>
+          <Divider hidden={true} />
           <CcamList
             actes={this.state.actes}
             headers={headers}
