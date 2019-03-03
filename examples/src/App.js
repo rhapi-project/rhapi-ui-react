@@ -4,8 +4,8 @@ import { Divider, Grid, Header, Icon, Menu } from "semantic-ui-react";
 import _ from "lodash";
 
 // Les exemples
-import CcamSearchBasic from "./CCAM/CcamSearchBasic";
-import CcamSearchList from "./CCAM/CcamSearchList";
+import SearchBasic from "./CCAM/SearchBasic";
+import SearchList from "./CCAM/SearchList";
 
 const ghBaseUrl =
   "https://github.com/rhapi-project/rhapi-ui-react/blob/master/examples/src";
@@ -30,28 +30,18 @@ export default class App extends React.Component {
         <Menu.Header>CCAM</Menu.Header>
         <Menu.Menu>
           <Menu.Item
-            name="CcamSearchBasic"
-            active={this.state.component === "CcamSearchBasic"}
+            name="SearchBasic"
+            active={this.state.component === "SearchBasic"}
             onClick={(e, d) =>
-              this.handleClickItem("CCAM", d.name, <CcamSearchBasic />)
+              this.handleClickItem("CCAM", d.name, <SearchBasic />)
             }
           />
           <Menu.Item
-            name="CcamSearchList"
-            active={this.state.component === "CcamSearchList"}
+            name="SearchList"
+            active={this.state.component === "SearchList"}
             onClick={(e, d) =>
-              this.handleClickItem("CCAM", d.name, <CcamSearchList />)
+              this.handleClickItem("CCAM", d.name, <SearchList />)
             }
-          />
-          <Menu.Item
-            name="CcamSaisie"
-            active={this.state.component === "CcamSaisie"}
-            onClick={() => {}}
-          />
-          <Menu.Item
-            name="CcamDetailFact"
-            active={this.state.component === "CcamDetailFact"}
-            onClick={() => {}}
           />
         </Menu.Menu>
       </Menu.Item>
@@ -168,7 +158,7 @@ class ViewExample extends React.Component {
       ghBaseUrl + "/" + this.props.group + "/" + this.props.name + ".js";
     return (
       <div style={{ minHeight: "100%" }}>
-        <Header as="h2">{this.props.name}</Header>
+        <Header as="h2">{this.props.group} - {this.props.name}</Header>
         <Icon name="github" />
         <a
           href={url}
