@@ -1,0 +1,58 @@
+
+
+Réaliser une documentation générée automatiquement par un script en js et en reprenant
+les valeurs et commentaires propTypes de chaque Component dans un objet doc.
+
+Exemple avec SearchActes
+
+export doc = {
+  title: "SearchActes",
+  comment: "Composant pour la recherche des actes en CCAM retourne la liste des actes au format etc...",
+  props:  {
+    client: {
+      type: "PropTypes.any.isRequired",
+      comment: "le client RHAPI"
+    },
+    onClearSearch: {
+      type: "PropTypes.func",
+      comment: "callback d'une ràz"
+    },
+    onSelectionChange: {
+      type: "PropTypes.func.isRequired",
+      comment: "callback pour retourner les actes sélectionnés"
+    },
+    search: {
+      type: "PropTypes.object",
+      comment: "semantic" // le comment "semantic" renverra au lien #Search dans la doc semantic-ui-react
+    },
+    searchInputLength: {
+      type: "PropTypes.number",
+      comment: "nombre minimum de caractères pour déclencher une requête"
+    }
+}
+
+export default class SearchActes extends React.Component {
+  static propTypes = {
+    client: PropTypes.any.isRequired,
+    onClearSearch: PropTypes.func, // callback ràz
+    onSelectionChange: PropTypes.func.isRequired, // callback les actes sélectionnés
+    search: PropTypes.object, // semantic Search
+    searchInputLength: PropTypes.number // taille minimal de la saisie pour pouvoir faire la requête
+  }
+  ......
+
+Produirait un document .md et/ou html donnant quelque chose comme :
+
+SearchActes
+Composant pour la recherche des actes en CCAM retourne la liste des actes au format etc...
+
+Définition des props :
+- client (object, requis)
+  le client RHAPI
+- onClearSearch (fonction)
+  callback d'une ràz
+- onSelectionChange (fonction, requis)
+  callback pour retourner les actes sélectionné
+etc..
+
+

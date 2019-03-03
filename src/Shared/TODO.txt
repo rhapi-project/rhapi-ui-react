@@ -1,0 +1,6 @@
+
+Placer ici tous les composants utiles et non spécifiques à chaque groupe :
+- un date picker
+- une grille de saisie des localisations dentaires
+- une fenêtre de login
+- ....
