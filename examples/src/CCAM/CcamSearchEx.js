@@ -15,7 +15,7 @@ export default class CcamSearchEx extends React.Component {
           Dire que ce composant est basé sur le composant <strong>Search</strong> de
           &nbsp;
           <a
-            href=
+            href="https://react.semantic-ui.com/modules/search/"
             target="_blank"
             rel="noopener noreferrer"
           >
