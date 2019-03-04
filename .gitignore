@@ -1,0 +1,11 @@
+# Répertoire dist
+/dist
+
+# examples
+/examples/node_modules
+/example/package-lock.json
+
+# Racine du repository
+.editorconfig
+package-lock.json
+/node_modules
