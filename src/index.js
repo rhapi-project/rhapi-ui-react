@@ -1,5 +1,5 @@
 // CCAM
-export Ccam from "./CCAM/Ccam";
+export CCAM from "./CCAM";
 
 // Patients
 // ...
