@@ -1,6 +1,6 @@
 import React from "react";
 import { Client } from "rhapi-client";
-import { Ccam } from "rhapi-ui-react";
+import { CCAM } from "rhapi-ui-react";
 import { Divider } from "semantic-ui-react";
 
 // Instanciation du client RHAPI sans authentification
@@ -31,19 +31,19 @@ export default class SearchPagination extends React.Component {
           boutons de navigations entre plusieurs pages du résultat obtenu.
         </p>
         <Divider hidden={true} />
-        <Ccam.Search 
+        <CCAM.Search 
           client={client}
           onLoadActes={this.onLoadActes}
         />
         <Divider hidden={true} />
-        <Ccam.Pagination 
+        <CCAM.Pagination 
           client={client}
           actes={this.state.actes}
           informations={this.state.informations}
           onLoadResult={this.changePage}
         />
         <Divider hidden={true} />
-        <Ccam.Table 
+        <CCAM.Table 
           actes={this.state.actes}
         />
         

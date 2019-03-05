@@ -5,7 +5,7 @@ import _ from "lodash";
 
 // Les exemples
 import SearchBasic from "./CCAM/SearchBasic";
-import SearchList from "./CCAM/SearchList";
+import SearchList from "./CCAM/SearchTable";
 import SearchPagination from "./CCAM/SearchPagination";
 
 const ghBaseUrl =
@@ -30,25 +30,25 @@ export default class App extends React.Component {
       <Menu.Item>
         <Menu.Header>CCAM</Menu.Header>
         <Menu.Menu>
-          <Menu.Item 
-            name="Pagination"
-            active={this.state.component === "Pagination"}
-            onClick={(e, d) => 
-              this.handleClickItem("Ccam", d.name, <SearchPagination />)
-            }
-          />
           <Menu.Item
-            name="Search"
-            active={this.state.component === "Search"}
+            name="SearchBasic"
+            active={this.state.component === "SearchBasic"}
             onClick={(e, d) =>
-              this.handleClickItem("Ccam", d.name, <SearchBasic />)
+              this.handleClickItem("CCAM", d.name, <SearchBasic />)
             }
           />
           <Menu.Item
-            name="Table"
+            name="SearchTable"
             active={this.state.component === "Table"}
             onClick={(e, d) =>
-              this.handleClickItem("Ccam", d.name, <SearchList />)
+              this.handleClickItem("CCAM", d.name, <SearchList />)
+            }
+          />
+        <Menu.Item 
+            name="SearchPagination"
+            active={this.state.component === "Pagination"}
+            onClick={(e, d) => 
+              this.handleClickItem("CCAM", d.name, <SearchPagination />)
             }
           />
         </Menu.Menu>
