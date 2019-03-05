@@ -6,6 +6,7 @@ import _ from "lodash";
 // Les exemples
 import SearchBasic from "./CCAM/SearchBasic";
 import SearchList from "./CCAM/SearchList";
+import SearchPagination from "./CCAM/SearchPagination";
 
 const ghBaseUrl =
   "https://github.com/rhapi-project/rhapi-ui-react/blob/master/examples/src";
@@ -29,18 +30,25 @@ export default class App extends React.Component {
       <Menu.Item>
         <Menu.Header>CCAM</Menu.Header>
         <Menu.Menu>
-          <Menu.Item
-            name="SearchBasic"
-            active={this.state.component === "SearchBasic"}
-            onClick={(e, d) =>
-              this.handleClickItem("CCAM", d.name, <SearchBasic />)
+          <Menu.Item 
+            name="Pagination"
+            active={this.state.component === "Pagination"}
+            onClick={(e, d) => 
+              this.handleClickItem("Ccam", d.name, <SearchPagination />)
             }
           />
           <Menu.Item
-            name="SearchList"
-            active={this.state.component === "SearchList"}
+            name="Search"
+            active={this.state.component === "Search"}
             onClick={(e, d) =>
-              this.handleClickItem("CCAM", d.name, <SearchList />)
+              this.handleClickItem("Ccam", d.name, <SearchBasic />)
+            }
+          />
+          <Menu.Item
+            name="Table"
+            active={this.state.component === "Table"}
+            onClick={(e, d) =>
+              this.handleClickItem("Ccam", d.name, <SearchList />)
             }
           />
         </Menu.Menu>
@@ -102,29 +110,29 @@ export default class App extends React.Component {
     );
 
     return (
-        <Grid style={{minHeight : window.screen.height }}>
-          <Grid.Column width={4}>
-            <Menu pointing={true} vertical={true} inverted={true} style={{minHeight : "100%"}}>
-              {ccam}
-              {patients}
-              {plannings}
-              {shared}
-            </Menu>
-          </Grid.Column>
-          <Grid.Column stretched={true} width={10}>
-            <Divider hidden={true} />
-            {_.isNull(this.state.component) ? (
-              <Description />
-            ) : (
-              <ViewExample
-                name={this.state.name}
-                component={this.state.component}
-                group={this.state.group}
-              />
-            )}
-          </Grid.Column>
-        </Grid>
-    );
+      <Grid style={{minHeight : window.screen.height }}>
+        <Grid.Column width={4}>
+          <Menu pointing={true} vertical={true} inverted={true} style={{ height: "100vh" }}>
+            {ccam}
+            {patients}
+            {plannings}
+            {shared}
+          </Menu>
+        </Grid.Column>
+        <Grid.Column width={10}>
+          <Divider hidden={true} />
+          {_.isNull(this.state.component) ? (
+            <Description />
+          ) : (
+            <ViewExample
+              name={this.state.name}
+              component={this.state.component}
+              group={this.state.group}
+            />
+          )}
+        </Grid.Column>
+      </Grid>
+  );
   }
 }
 
@@ -156,7 +164,7 @@ class ViewExample extends React.Component {
       ghBaseUrl + "/" + this.props.group + "/" + this.props.name + ".js";
     return (
       <div style={{ minHeight: "100%" }}>
-        <Header as="h2">{this.props.group} - {this.props.name}</Header>
+        <Header as="h2">{this.props.group}.{this.props.name}</Header>
         <Icon name="github" />
         <a
           href={url}

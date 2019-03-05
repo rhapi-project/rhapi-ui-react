@@ -1,5 +1,5 @@
 import React from "react";
-import { CcamList, CcamSearch } from "rhapi-ui-react";
+import { Ccam } from "rhapi-ui-react";
 import { Divider, Form } from "semantic-ui-react";
 
 import { Client } from "rhapi-client";
@@ -17,7 +17,7 @@ export default class SearchList extends React.Component {
     this.setState({ actesObject: {}, actes: [] });
   };
 
-  getActesObject = obj => {
+  onLoadActes = obj => {
     this.setState({ actesObject: obj, actes: obj.results });
   };
 
@@ -46,11 +46,11 @@ export default class SearchList extends React.Component {
     ];
 
     return (
-      <div>
+      <React.Fragment>
         <div>
           <p>
-            Cet exemple utilise <b>CcamSearch</b> pour la recherche des actes en
-            CCAM et <b>CcamList</b> pour afficher les résultats.
+            Cet exemple utilise <b>Ccam.Search</b> pour la recherche des actes en
+            CCAM et <b>Ccam.Table</b> pour afficher les résultats.
           </p>
           <a
             href="https://react.semantic-ui.com/collections/table/"
@@ -64,23 +64,23 @@ export default class SearchList extends React.Component {
         <div>
           <Form>
             <Form.Input inline={true} label="Recherche d'un acte CCAM">
-              <CcamSearch
+              <Ccam.Search
                 client={client}
-                clearSearch={this.onClearSearch}
-                getActesObject={this.getActesObject}
+                onClear={this.onClearSearch}
+                onLoadActes={this.onLoadActes}
                 search={searchProps}
                 searchInputLength={3}
               />
             </Form.Input>
           </Form>
           <Divider hidden={true} />
-          <CcamList
+          <Ccam.Table
             actes={this.state.actes}
             headers={headers}
             table={tableProps}
           />
         </div>
-      </div>
+      </React.Fragment>
     );
   }
 }

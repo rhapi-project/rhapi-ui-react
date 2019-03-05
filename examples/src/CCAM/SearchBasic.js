@@ -1,6 +1,6 @@
 import React from "react";
 import { Client } from "rhapi-client";
-import { CcamSearch } from "rhapi-ui-react";
+import { Ccam } from "rhapi-ui-react";
 import { Divider } from "semantic-ui-react";
 
 // Instanciation du client RHAPI sans authentification
@@ -11,7 +11,7 @@ export default class SearchBasic extends React.Component {
     return (
       <React.Fragment>
         <p>
-          Cet exemple utilise <b>CcamSearch</b> pour la recherche des actes en
+          Cet exemple utilise <b>Ccam.Search</b> pour la recherche des actes en
           CCAM et retourne simplement les résultats en console.
         </p>
         <a
@@ -22,9 +22,9 @@ export default class SearchBasic extends React.Component {
           Semantic-ui-react
         </a>
         <Divider hidden={true} />
-        <CcamSearch
+        <Ccam.Search
           client={client}
-          getActesObject={results => console.log(results)}
+          onLoadActes={results => console.log(results)}
         />
       </React.Fragment>
     );

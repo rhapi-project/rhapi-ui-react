@@ -8,15 +8,26 @@ const styles = {
   coveredTableRow: {
     fontWeight: "bold"
   }
-}
+};
 
-export default class CcamList extends React.Component {
-  static propTypes = {
+const propDefs = {
+  description: "Composant montrant sous forme d'un tableau les actes obtenus après une recherche par mot clé.",
+  propDocs: {
+    actes: "Tableau d'actes CCAM",
+    headers: "Tableau décrivant les champs à retourner dans le résultat",
+    onSelectionItem: "callback à la sélection d'un acte",
+    table: "semantic.modules"
+  },
+  propTypes: {
     actes: PropTypes.array,
     headers: PropTypes.array,
-    selectActe: PropTypes.func,
-    table: PropTypes.object // les props semantic de TABLE
-  };
+    onSelectionItem: PropTypes.func,
+    table: PropTypes.object
+  }
+};
+
+export default class CTable extends React.Component {
+  static propTypes = propDefs.propTypes;
 
   componentWillMount() {
     this.setState({
@@ -39,9 +50,9 @@ export default class CcamList extends React.Component {
     }
   };
 
-  selectActe = acte => {
-    if (!_.isUndefined(this.props.selectActe)) {
-      this.props.selectActe(acte);
+  onSelectionItem = acte => {
+    if (!_.isUndefined(this.props.onSelectionItem)) {
+      this.props.onSelectionItem(acte);
     }
   };
 
@@ -69,7 +80,7 @@ export default class CcamList extends React.Component {
               ? _.map(this.props.actes, acte =>
                   <Table.Row
                     key={acte.codActe}
-                    onClick={(e, d) => this.selectActe(acte)}
+                    onClick={(e, d) => this.onSelectionItem(acte)}
                     onMouseOver={(e) => {this.setState({ mouseOverItem: acte })}}
                     onMouseOut={(e) => {this.setState({ mouseOverItem: {} })}}
                     style={acte === this.state.mouseOverItem ? styles.coveredTableRow : {}}
@@ -81,7 +92,7 @@ export default class CcamList extends React.Component {
               : _.map(this.props.actes, acte =>
                   <Table.Row
                     key={acte.codActe}
-                    onClick={(e, d) => this.selectActe(acte)}
+                    onClick={(e, d) => this.onSelectionItem(acte)}
                     onMouseOver={(e) => {this.setState({ mouseOverItem: acte })}}
                     onMouseOut={(e) => {this.setState({ mouseOverItem: {} })}}
                     style={acte === this.state.mouseOverItem ? styles.coveredTableRow : {}}  

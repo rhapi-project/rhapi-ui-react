@@ -4,7 +4,7 @@ import { Table } from "semantic-ui-react";
 
 import _ from "lodash";
 
-export default class CcamDetailFact extends React.Component {
+export default class DetailFact extends React.Component {
   render() {
     return(
       <div>

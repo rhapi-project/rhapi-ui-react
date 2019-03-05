@@ -8,28 +8,24 @@ const propDefs = {
   description: "Composant pour la recherche des actes en CCAM retourne la liste des actes au format etc...",
   propDocs:  {
     // client est documenté automatiquement
-    onClearSearch: "callback d'une ràz",
+    onClear: "callback d'une ràz",
     onSelectionChange: "callback pour retourner les actes sélectionnés",
     search: "semantic.modules",
     searchInputLength: "nombre minimum de caractères pour déclencher une requête"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
-    onClearSearch: PropTypes.func, // callback ràz
+    onClear: PropTypes.func, // callback ràz
+    onLoadActes: PropTypes.func, // callback résultat de la recherche
     onSelectionChange: PropTypes.func, // callback mot clé sélectionné
     search: PropTypes.object, // semantic Search
     searchInputLength: PropTypes.number // taille minimal de la saisie pour pouvoir faire la requête
   }
 };
 
-export default class CcamSearch extends React.Component {
-
+export default class CSearch extends React.Component {
   static propTypes = propDefs.propTypes; // peut s'utiliser comme ceci
   // https://reactjs.org/docs/typechecking-with-proptypes.html
-
-  /*static propTypes = () => {
-    return propDefs.propTypes;
-  }*/
 
   componentWillMount() {
     this.setState({
@@ -63,8 +59,8 @@ export default class CcamSearch extends React.Component {
           keywords.push(obj);
         }
         this.setState({ results: keywords });
-        if (!_.isUndefined(this.props.getActesObject)) {
-          this.props.getActesObject(actes);
+        if (!_.isUndefined(this.props.onLoadActes)) {
+          this.props.onLoadActes(actes);
         } else {
           console.log("RESULTAT DE LA RECHERCHE");
           console.log(actes);
@@ -93,8 +89,8 @@ export default class CcamSearch extends React.Component {
     // + appel à la fonction this.props.clearSearch (si elle est définie)
     if (_.isEmpty(inputVal)) {
       this.setState({ results: [] }); // vider les mots clé
-      if (!_.isUndefined(this.props.clearSearch)) {
-        this.props.clearSearch();
+      if (!_.isUndefined(this.props.onClear)) {
+        this.props.onClear();
       }
     }
 
@@ -102,7 +98,7 @@ export default class CcamSearch extends React.Component {
 
   render() {
     return(
-      <div>
+      <React.Fragment>
         <Search
           onSearchChange={(e, d) => this.search(d.value)}
           onResultSelect={(e, d) => this.search(d.result.title)}
@@ -110,7 +106,7 @@ export default class CcamSearch extends React.Component {
           value={this.state.value}
           {...this.state.search}
         />
-      </div>
+      </React.Fragment>
     );
   }
 }
