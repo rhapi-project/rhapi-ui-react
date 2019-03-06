@@ -1,3 +1,0 @@
-
-Placer ici tous les scripts utiles (par exemple celui ou ceux pour générer la documentation)
-
