@@ -5,8 +5,9 @@ import _ from "lodash";
 
 // Les exemples
 import SearchBasic from "./CCAM/SearchBasic";
-import SearchList from "./CCAM/SearchTable";
+import SearchTable from "./CCAM/SearchTable";
 import SearchPagination from "./CCAM/SearchPagination";
+import SearchTarification from "./CCAM/SearchTarification";
 
 const ghBaseUrl =
   "https://github.com/rhapi-project/rhapi-ui-react/blob/master/examples/src";
@@ -39,17 +40,22 @@ export default class App extends React.Component {
           />
           <Menu.Item
             name="SearchTable"
-            active={this.state.component === "Table"}
+            active={this.state.component === "SearchTable"}
             onClick={(e, d) =>
-              this.handleClickItem("CCAM", d.name, <SearchList />)
+              this.handleClickItem("CCAM", d.name, <SearchTable />)
             }
           />
-        <Menu.Item 
+          <Menu.Item
             name="SearchPagination"
-            active={this.state.component === "Pagination"}
-            onClick={(e, d) => 
+            active={this.state.component === "SearchPagination"}
+            onClick={(e, d) =>
               this.handleClickItem("CCAM", d.name, <SearchPagination />)
             }
+          />
+          <Menu.Item
+            name="SearchTarification"
+            active={this.state.component === "SearchTarification"}
+            onClick={(e, d) => this.handleClickItem("CCAM", d.name, <SearchTarification />)}
           />
         </Menu.Menu>
       </Menu.Item>
@@ -110,9 +116,14 @@ export default class App extends React.Component {
     );
 
     return (
-      <Grid style={{minHeight : window.screen.height }}>
+      <Grid style={{ minHeight: window.screen.height }}>
         <Grid.Column width={4}>
-          <Menu pointing={true} vertical={true} inverted={true} style={{ height: "100vh" }}>
+          <Menu
+            pointing={true}
+            vertical={true}
+            inverted={true}
+            style={{ height: "100vh" }}
+          >
             {ccam}
             {patients}
             {plannings}
@@ -132,7 +143,7 @@ export default class App extends React.Component {
           )}
         </Grid.Column>
       </Grid>
-  );
+    );
   }
 }
 
@@ -164,7 +175,9 @@ class ViewExample extends React.Component {
       ghBaseUrl + "/" + this.props.group + "/" + this.props.name + ".js";
     return (
       <div style={{ minHeight: "100%" }}>
-        <Header as="h2">{this.props.group}.{this.props.name}</Header>
+        <Header as="h2">
+          {this.props.group} - {this.props.name}
+        </Header>
         <Icon name="github" />
         <a
           href={url}

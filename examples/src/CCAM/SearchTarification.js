@@ -8,46 +8,39 @@ const client = new Client("https://demo.rhapi.net/demo01");
 
 export default class SearchPagination extends React.Component {
   state = {
-    actes: [],
-    informations: {}
+    selectedActe: {},
+    actes: []
   };
 
-  onClearSearch = () => {
-    this.setState({ actes: [], informations: {} });
+  onSelection = acte => {
+    // Après la selection d'un acte masquer le tableau des résultats
+    this.setState({ selectedActe: acte, actes: [] });
   };
 
   onLoadActes = obj => {
-    this.setState({ actes: obj.results, informations: obj.informations });
-  };
-
-  onPageSelect = obj => {
-    this.setState({
-      actes: obj.actes,
-      informations: obj.informations
-    });
+    this.setState({ actes: obj.results });
   };
 
   render() {
+    //console.log(this.state.selectedActe);
     return (
       <React.Fragment>
         <p>
-          Cet exemple utilise <b>Ccam.Search</b> pour la recherche des actes en
-          CCAM et le résultat obtenu est affiché par le composant{" "}
-          <b>Ccam.Table</b>.<br />
+          Description de l'exemple...
         </p>
         <Divider hidden={true} />
         <CCAM.Search
           client={client}
-          onClear={this.onClearSearch}
           onLoadActes={this.onLoadActes}
         />
         <Divider hidden={true} />
         <CCAM.Table
-          client={client}
           actes={this.state.actes}
-          informations={this.state.informations}
-          onPageSelect={this.onPageSelect}
-          showPagination={true}          
+          onSelection={acte => this.onSelection(acte)}  
+        />
+        <CCAM.Tarification 
+          client={client}
+          acte={this.state.selectedActe}
         />
       </React.Fragment>
     );

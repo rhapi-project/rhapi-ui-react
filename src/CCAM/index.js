@@ -4,12 +4,12 @@
 import React from "react";
 import Search from "./Search";
 import Table from "./Table";
-import Pagination from "./Pagination";
+import Tarification from "./Tarification";
 
 export default class CCAM extends React.Component {
   static Search = Search;
   static Table = Table;
-  static Pagination = Pagination;
+  static Tarification = Tarification;
   render() {
     const { children } = this.props;
     return(

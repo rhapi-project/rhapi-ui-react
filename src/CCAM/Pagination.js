@@ -5,34 +5,46 @@ import { Button } from "semantic-ui-react";
 import _ from "lodash";
 
 const propDefs = {
-  description: "Options de pagination",
+  description: "Options de pagination (passées au tableau sous forme d'objet)",
   propDocs: {
-    btnFirstContent: "Contenu textuel du bouton - première page",
-    btnLastContent: "Contenu textuel du bouton - dernière page",
-    btnNextContent: "Contenu textuel du bouton - page suivante",
-    btnPrevContent: "Contenu textuel du bouton - page précédente",
+    btnFirstContent: "contenu textuel du bouton (première page)",
+    btnLastContent: "contenu textuel du bouton (dernière page)",
+    btnMoreContent: "contenu textuel du bouton (plus de résutats)",
+    btnNextContent: "contenu textuel du bouton (page suivante)",
+    btnPrevContent: "contenu textuel du bouton (page précédente)",
     btnFirstIcon: "Semantic Icon",
     btnLastIcon: "Semantic Icon",
+    btnMoreIcon: "Semantic Icon",
     btnNextIcon: "Semantic Icon",
     btnPrevIcon: "Semantic Icon",
-    client: "auto documenté",
-    actes: "Un tableau contenant les actes",
+    btnFirst: "Props semantic bouton",
+    btnLast: "Props semantic bouton",
+    btnNext: "Props semantic bouton",
+    btnPrev: "Props semantic bouton",
+    btnMore: "Props semantic bouton",
     informations: "Informations sur la pagination sous forme d'objet",
-    onLoadResult: "Callback résultat obtenu"
+    mode: "mode de pagination ('pages' ou 'more')",
+    onPageSelect: "Callback changement de page" // à voir comment documenter
   },
   propTypes: {
     btnFirstContent: PropTypes.string,
     btnLastContent: PropTypes.string,
+    btnMoreContent: PropTypes.string,
     btnNextContent: PropTypes.string,
     btnPrevContent: PropTypes.string,
     btnFirstIcon: PropTypes.string,
     btnLastIcon: PropTypes.string,
+    btnMoreIcon: PropTypes.string,
     btnNextIcon: PropTypes.string,
     btnPrevIcon: PropTypes.string,
-    client: PropTypes.any.isRequired,
-    actes: PropTypes.array,
+    btnFirst: PropTypes.object,
+    btnLast: PropTypes.object,
+    btnNext: PropTypes.object,
+    btnPrev: PropTypes.object,
+    btnMore: PropTypes.object,
     informations: PropTypes.object,
-    onLoadResult: PropTypes.func
+    mode: PropTypes.string,
+    onPageSelect: PropTypes.func // à voir
   }
 };
 export default class Pagination extends React.Component {
@@ -40,70 +52,103 @@ export default class Pagination extends React.Component {
   static defaultProps = {
     btnFirstContent: "Début",
     btnLastContent: "Fin",
+    btnMoreContent: "Plus de résultats",
     btnNextContent: "",
     btnPrevContent: "",
     btnFirstIcon: "",
     btnLastIcon: "",
+    btnMoreIcon: "",
     btnNextIcon: "arrow right",
     btnPrevIcon: "arrow left",
-    actes: [],
-    informations: {}
-  }
+    btnFirst: {},
+    btnLast: {},
+    btnNext: {},
+    btnPrev: {},
+    btnMore: {},
+    informations: {},
+    mode: "pages"
+  };
 
   handleClick = query => {
-    this.props.client.CCAM.readAll(
-      query,
-      results => {
-        let actesToLoad = [];
-        let actes = results.results;
-        for (let i = 0 ; i < actes.length ; i++) {
-          if (!_.includes(this.props.actes, actes[i])) {
-            actesToLoad.push(actes[i]);
-          }
-        }
-        let obj = {
-          actes: actesToLoad,
-          informations: results.informations
-        };
-        this.props.onLoadResult(obj);
-      },
-      error => {
-        console.log(error);
-      }
-    );
+    this.props.onPageSelect(query);
+  };
+
+  loadMoreQuery = query => {
+    let pageSize = this.props.informations.pageSize;
+    let q = query;
+    q.offset += pageSize;
+    return q;
+  };
+
+  btnSemanticProps = propsObj => {
+    let obj = propsObj;
+    _.unset(obj, "disabled");
+    _.unset(obj, "icon");
+    _.unset(obj, "content");
+    _.unset(obj, "labelPosition");
+    _.unset(obj, "onClick");
+    return obj;
   };
 
   render() {
     let informations = this.props.informations;
     let show = !_.isUndefined(informations.queries);
-    if (show) {
+    let btnFirst = this.btnSemanticProps(this.props.btnFirst);
+    let btnLast = this.btnSemanticProps(this.props.btnLast);
+    let btnNext = this.btnSemanticProps(this.props.btnNext);
+    let btnPrev = this.btnSemanticProps(this.props.btnPrev);
+    let btnMore = this.btnSemanticProps(this.props.btnMore);
+    //console.log(informations);
+    if (show && (this.props.mode === "pages")) {
       return(
         <React.Fragment>
-          <Button 
-            icon={this.props.btnFirstIcon !== "" ? this.props.btnFirstIcon : false}
+          <Button
+            disabled={_.isUndefined(informations.queries.prev)}
+            icon={this.props.btnFirstIcon !== "" ? this.props.btnFirstIcon : null}
             content={this.props.btnFirstContent !== "" ? this.props.btnFirstContent : null}
-            onClick={(e, d) => this.handleClick(informations.queries.first)}
+            labelPosition={this.props.btnFirstContent !== "" && this.props.btnFirstIcon !== "" ? "left" : null}
+            onClick={() => this.handleClick(informations.queries.first)}
+            {...btnFirst}
           />
-          {!_.isUndefined(informations.queries.prev)
-            ? <Button 
-                icon={this.props.btnPrevIcon !== "" ? this.props.btnPrevIcon : false}
-                content={this.props.btnPrevContent !== "" ? this.props.btnPrevContent : null}
-                onClick={(e, d) => this.handleClick(informations.queries.prev)}
-              />
-            : ""
-          }
-          {!_.isUndefined(informations.queries.next)
-            ? <Button 
-                icon={this.props.btnNextIcon !== "" ? this.props.btnNextIcon : false}
-                content={this.props.btnNextContent !== "" ? this.props.btnNextContent : null}
-                onClick={(e, d) => this.handleClick(informations.queries.next)}
-              />
-            : ""
-          }
-          <Button 
-            icon={this.props.btnLastIcon !== "" ? this.props.btnLastIcon : false}
+          <Button
+            disabled={_.isUndefined(informations.queries.prev)}
+            icon={this.props.btnPrevIcon !== "" ? this.props.btnPrevIcon : null}
+            content={this.props.btnPrevContent !== "" ? this.props.btnPrevContent : null}
+            labelPosition={this.props.btnPrevContent !== "" && this.props.btnPrevIcon !== "" ? "left" : null}
+            onClick={() => this.handleClick(informations.queries.prev)}
+            {...btnPrev}
+          />
+          <Button
+            disabled={_.isUndefined(informations.queries.next)}
+            icon={this.props.btnNextIcon !== "" ? this.props.btnNextIcon : null}
+            content={this.props.btnNextContent !== "" ? this.props.btnNextContent : null}
+            labelPosition={this.props.btnNextContent !== "" && this.props.btnNextIcon !== "" ? "right" : null}
+            onClick={() => this.handleClick(informations.queries.next)}
+            {...btnNext}
+          />
+          <Button
+            disabled={_.isUndefined(informations.queries.next)}
+            icon={this.props.btnLastIcon !== "" ? this.props.btnLastIcon : null}
             content={this.props.btnLastContent !== "" ? this.props.btnLastContent : null}
-            onClick={(e, d) => this.handleClick(informations.queries.last)}
+            labelPosition={this.props.btnLastContent !== "" && this.props.btnLastIcon !== "" ? "right" : null}
+            onClick={() => this.handleClick(informations.queries.last)}
+            {...btnLast}
+          />
+        </React.Fragment>
+      );
+    } else if (show && (this.props.mode === "more")) {
+      return (
+        <React.Fragment>
+          <Button
+            disabled={_.isUndefined(informations.queries.next)}
+            icon={this.props.btnMoreIcon !== "" ? this.props.btnMoreIcon : null}
+            content={this.props.btnMoreContent !== "" ? this.props.btnMoreContent : null}
+            labelPosition={this.props.btnMoreContent !== "" && this.props.btnMoreIcon !== "" ? "right" : null}
+            onClick={() => {
+              let query = this.loadMoreQuery(informations.queries.next);
+              this.handleClick(query);
+            }}
+            {...btnMore}
           />
         </React.Fragment>
       );
