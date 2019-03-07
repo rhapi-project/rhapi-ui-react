@@ -6,7 +6,7 @@ import { Divider } from "semantic-ui-react";
 // Instanciation du client RHAPI sans authentification
 const client = new Client("https://demo.rhapi.net/demo01");
 
-export default class SearchPagination extends React.Component {
+export default class CCAMPaginationPages extends React.Component {
   state = {
     actes: [],
     informations: {}
@@ -28,12 +28,16 @@ export default class SearchPagination extends React.Component {
   };
 
   render() {
+    // options de pagination
+    let pagination = {
+      mode: "more"
+    };
     return (
       <React.Fragment>
         <p>
-          Cet exemple utilise <b>Ccam.Search</b> pour la recherche des actes en
-          CCAM et le résultat obtenu est affiché par le composant{" "}
-          <b>Ccam.Table</b>.<br />
+          Cet exemple utilise <b>CCAM.Search</b> pour la recherche d'actes CCAM
+          et <b>CCAM.Table</b> pour afficher les résultats (avec des options de
+          pagination).
         </p>
         <Divider hidden={true} />
         <CCAM.Search
@@ -46,8 +50,9 @@ export default class SearchPagination extends React.Component {
           client={client}
           actes={this.state.actes}
           informations={this.state.informations}
+          pagination={pagination}
           onPageSelect={this.onPageSelect}
-          showPagination={true}          
+          showPagination={true}
         />
       </React.Fragment>
     );

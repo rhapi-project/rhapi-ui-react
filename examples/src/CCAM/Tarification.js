@@ -6,7 +6,7 @@ import { Divider } from "semantic-ui-react";
 // Instanciation du client RHAPI sans authentification
 const client = new Client("https://demo.rhapi.net/demo01");
 
-export default class SearchPagination extends React.Component {
+export default class CCAMTarification extends React.Component {
   state = {
     selectedActe: {},
     actes: []
@@ -22,23 +22,19 @@ export default class SearchPagination extends React.Component {
   };
 
   render() {
-    //console.log(this.state.selectedActe);
+    console.log(this.state.selectedActe);
     return (
       <React.Fragment>
-        <p>
-          Description de l'exemple...
-        </p>
+        <p>Description de l'exemple...</p>
         <Divider hidden={true} />
-        <CCAM.Search
-          client={client}
-          onLoadActes={this.onLoadActes}
-        />
+        <CCAM.Search client={client} onLoadActes={this.onLoadActes} />
         <Divider hidden={true} />
         <CCAM.Table
+          client={client}
           actes={this.state.actes}
-          onSelection={acte => this.onSelection(acte)}  
+          onSelection={acte => this.onSelection(acte)}
         />
-        <CCAM.Tarification 
+        <CCAM.Tarification
           client={client}
           acte={this.state.selectedActe}
         />

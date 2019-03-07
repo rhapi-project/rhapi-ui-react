@@ -1,61 +1,87 @@
 import React from "react";
 import { Divider, Grid, Header, Icon, Menu } from "semantic-ui-react";
 
-import _ from "lodash";
+//import _ from "lodash";
 
 // Les exemples
-import SearchBasic from "./CCAM/SearchBasic";
-import SearchTable from "./CCAM/SearchTable";
-import SearchPagination from "./CCAM/SearchPagination";
-import SearchTarification from "./CCAM/SearchTarification";
+import CCAMSearchBasic from "./CCAM/SearchBasic";
+import CCAMSearchTable from "./CCAM/SearchTable";
+import CCAMPaginationPages from "./CCAM/PaginationPages";
+import CCAMPaginationMore from "./CCAM/PaginationMore";
+import CCAMTarification from "./CCAM/Tarification";
 
 const ghBaseUrl =
   "https://github.com/rhapi-project/rhapi-ui-react/blob/master/examples/src";
 
 export default class App extends React.Component {
   state = {
-    component: null,
+    group: "",
     name: ""
   };
 
-  handleClickItem = (group, name, component) => {
+  componentWillMount() {
+    let parts = window.location.hash.split("/");
+    if (parts.length === 2) {
+      this.setState({
+        group: parts[0].substring(1),
+        name: parts[1]
+      });
+    }
+  }
+
+  handleClickItem = (group, name) => {
+    let originPath = window.location.pathname;
+    window.location = originPath + "#" + group + "/" + name;
     this.setState({
       group: group,
-      name: name,
-      component: component
+      name: name
     });
   };
 
   render() {
+    /*let originPath = window.location.pathname;
+    let subApp = window.location.hash.split("/")[0];
+    console.log(subApp);*/
     let ccam = (
       <Menu.Item>
         <Menu.Header>CCAM</Menu.Header>
         <Menu.Menu>
           <Menu.Item
             name="SearchBasic"
-            active={this.state.component === "SearchBasic"}
-            onClick={(e, d) =>
-              this.handleClickItem("CCAM", d.name, <SearchBasic />)
+            active={
+              this.state.group === "CCAM" && this.state.name === "SearchBasic"
             }
+            onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
           />
           <Menu.Item
             name="SearchTable"
-            active={this.state.component === "SearchTable"}
-            onClick={(e, d) =>
-              this.handleClickItem("CCAM", d.name, <SearchTable />)
+            active={
+              this.state.group === "CCAM" && this.state.name === "SearchTable"
             }
+            onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
           />
           <Menu.Item
-            name="SearchPagination"
-            active={this.state.component === "SearchPagination"}
-            onClick={(e, d) =>
-              this.handleClickItem("CCAM", d.name, <SearchPagination />)
+            name="PaginationPages"
+            active={
+              this.state.group === "CCAM" &&
+              this.state.name === "PaginationPages"
             }
+            onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
           />
           <Menu.Item
-            name="SearchTarification"
-            active={this.state.component === "SearchTarification"}
-            onClick={(e, d) => this.handleClickItem("CCAM", d.name, <SearchTarification />)}
+            name="PaginationMore"
+            active={
+              this.state.group === "CCAM" &&
+              this.state.name === "PaginationMore"
+            }
+            onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
+          />
+          <Menu.Item
+            name="Tarification"
+            active={
+              this.state.group === "CCAM" && this.state.name === "Tarification"
+            }
+            onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
           />
         </Menu.Menu>
       </Menu.Item>
@@ -132,14 +158,10 @@ export default class App extends React.Component {
         </Grid.Column>
         <Grid.Column width={10}>
           <Divider hidden={true} />
-          {_.isNull(this.state.component) ? (
-            <Description />
+          {this.state.group !== "" && this.state.name !== "" ? (
+            <ViewExample name={this.state.name} group={this.state.group} />
           ) : (
-            <ViewExample
-              name={this.state.name}
-              component={this.state.component}
-              group={this.state.group}
-            />
+            <Description />
           )}
         </Grid.Column>
       </Grid>
@@ -170,9 +192,27 @@ class Description extends React.Component {
 }
 
 class ViewExample extends React.Component {
+  component = (group, name) => {
+    if (group === "CCAM") {
+      if (name === "SearchBasic") {
+        return <CCAMSearchBasic />;
+      } else if (name === "SearchTable") {
+        return <CCAMSearchTable />;
+      } else if (name === "PaginationPages") {
+        return <CCAMPaginationPages />;
+      } else if (name === "PaginationMore") {
+        return <CCAMPaginationMore />;
+      } else if (name === "Tarification") {
+        return <CCAMTarification />;
+      } else {
+        return "";
+      }
+    } else {
+      return "";
+    }
+  };
+
   render() {
-    let url =
-      ghBaseUrl + "/" + this.props.group + "/" + this.props.name + ".js";
     return (
       <div style={{ minHeight: "100%" }}>
         <Header as="h2">
@@ -180,7 +220,9 @@ class ViewExample extends React.Component {
         </Header>
         <Icon name="github" />
         <a
-          href={url}
+          href={
+            ghBaseUrl + "/" + this.props.group + "/" + this.props.name + ".js"
+          }
           target="_blank"
           title="Ce lien fera référence au code source de cet exemple sur Github"
           rel="noopener noreferrer"
@@ -188,7 +230,7 @@ class ViewExample extends React.Component {
           Code source de l'exemple
         </a>
         <Divider hidden={true} />
-        {this.props.component}
+        {this.component(this.props.group, this.props.name)}
       </div>
     );
   }

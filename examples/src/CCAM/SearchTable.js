@@ -7,7 +7,7 @@ import { Client } from "rhapi-client";
 // Instanciation du Client RHAPI sans authentification
 const client = new Client("https://demo.rhapi.net/demo01");
 
-export default class SearchTable extends React.Component {
+export default class CCAMSearchTable extends React.Component {
   state = {
     actes: [],
     actesObject: {}
@@ -75,6 +75,7 @@ export default class SearchTable extends React.Component {
           </Form>
           <Divider hidden={true} />
           <CCAM.Table
+            client={client}
             actes={this.state.actes}
             headers={headers}
             table={tableProps}

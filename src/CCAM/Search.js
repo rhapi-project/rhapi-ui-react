@@ -6,6 +6,7 @@ import _ from "lodash";
 
 const propDefs = {
   description: "Composant pour la recherche des actes en CCAM retourne la liste des actes au format etc...",
+  example: "SearchBasic",
   propDocs:  {
     // client est documenté automatiquement
     onClear: "callback d'une ràz",
