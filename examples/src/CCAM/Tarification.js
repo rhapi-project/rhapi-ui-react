@@ -22,7 +22,7 @@ export default class CCAMTarification extends React.Component {
   };
 
   render() {
-    console.log(this.state.selectedActe);
+    //console.log(this.state.selectedActe);
     return (
       <React.Fragment>
         <p>Description de l'exemple...</p>
@@ -34,10 +34,7 @@ export default class CCAMTarification extends React.Component {
           actes={this.state.actes}
           onSelection={acte => this.onSelection(acte)}
         />
-        <CCAM.Tarification
-          client={client}
-          acte={this.state.selectedActe}
-        />
+        <CCAM.Tarification client={client} acte={this.state.selectedActe} />
       </React.Fragment>
     );
   }
