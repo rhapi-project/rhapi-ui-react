@@ -39,7 +39,8 @@ export default class Tarification extends React.Component {
     doms: [],
     grilles: [],
     modificateurs: [],
-    phases: []
+    phases: [],
+    selectModificateurs: []
   }
 
   componentWillMount() {
@@ -50,6 +51,22 @@ export default class Tarification extends React.Component {
       currentGrille: this.props.grille,
       currentPhase: this.props.phase
     });
+  };
+
+  checkedModif = modif => {
+    return _.includes(this.state.selectModificateurs, modif);
+  };
+
+  handleCheckModif = modif => {
+    let s = this.state.selectModificateurs;
+    let index = s.indexOf(modif);
+    if (index > -1) { // modif est déjà sélectionné
+      s.splice(index, 1);
+    } else {
+      s.push(modif);
+    }
+    this.setState({ selectModificateurs: s });
+    // calcul tarif
   };
 
   optionsActivites = activites => {
@@ -118,12 +135,13 @@ export default class Tarification extends React.Component {
     );
   };
 
+  // TODO : prendre en compte des modificateurs
   tarif = () => {
     let params = {
       activite: this.state.currentActivite,
       phase: this.state.currentPhase,
       grille: this.state.currentGrille,
-      //dom: this.state.currentDom
+      dom: this.state.currentDom
     }
     this.props.client.CCAM.tarif(
       this.props.acte.codActe,
@@ -135,6 +153,7 @@ export default class Tarification extends React.Component {
         console.log(error);
       }
     );
+    return null;
   };
 
   render() {
@@ -146,9 +165,9 @@ export default class Tarification extends React.Component {
       let optionsGrilles = this.optionsGrilles(this.state.grilles);
       let listModificateurs = this.listModificateurs(this.state.modificateurs, this.state.currentGrille);
       //let phases = this.state.phases;
-      //let tarif = this.tarif();
-      //console.log(tarif);
-      //console.log(listModificateurs);
+
+      this.tarif(); // test calcul du prix
+
       return (
         <React.Fragment>
           <Header as="h3">{acte.codActe}</Header>
@@ -206,6 +225,12 @@ export default class Tarification extends React.Component {
               <div>
                 <Checkbox 
                   label="Aucun modificateur"
+                  checked={_.isEmpty(this.state.selectModificateurs)}
+                  onChange={() => {
+                    if (!_.isEmpty(this.state.selectModificateurs)) {
+                      this.setState({ selectModificateurs: [] });
+                    }
+                  }}
                 />
                 {!_.isEmpty(listModificateurs)
                   ? <Segment>
@@ -214,6 +239,8 @@ export default class Tarification extends React.Component {
                           <div key={modif.libelle + "" + modif.coef}>
                             <Checkbox
                               label={modif.libelle}
+                              checked={this.checkedModif(modif)}
+                              onChange={() => this.handleCheckModif(modif)}
                             />
                           </div>
                         )}
@@ -224,6 +251,9 @@ export default class Tarification extends React.Component {
               </div>              
             </Form.Input>
           </Form>
+          {/*<Header as="h2">
+            Tarif : {!_.isNull(tarif) ? tarif.pu + " €" : "erreur"}
+          </Header>*/}
         </React.Fragment>
       );
     } else {

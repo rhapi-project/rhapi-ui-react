@@ -216,13 +216,13 @@ export default class Table2 extends React.Component {
 class Pagination extends React.Component {
   static propTypes = paginationPropDefs.propTypes;
   static defaultProps = {
-    btnFirstContent: "Début",
-    btnLastContent: "Fin",
+    btnFirstContent: "",
+    btnLastContent: "",
     btnMoreContent: "Plus de résultats",
     btnNextContent: "",
     btnPrevContent: "",
-    btnFirstIcon: "",
-    btnLastIcon: "",
+    btnFirstIcon: "fast backward",
+    btnLastIcon: "fast forward",
     btnMoreIcon: "",
     btnNextIcon: "arrow right",
     btnPrevIcon: "arrow left",
