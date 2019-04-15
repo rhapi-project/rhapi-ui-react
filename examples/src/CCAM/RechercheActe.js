@@ -11,16 +11,20 @@ export default class CCAMSearchBasic extends React.Component {
     return (
       <React.Fragment>
         <p>
-          Cet exemple utilise <b>CCAM.Search</b> pour la recherche des actes en
-          CCAM et retourne simplement les résultats en console.
+          Utilisation du composant <b color="primary">CCAM.Search</b> pour la recherche des actes en
+          CCAM. Le résultat de la recherche est retourné en console (<kbd>Ctrl</kbd> + <kbd>12</kbd>).
         </p>
-        <a
-          href="https://react.semantic-ui.com/modules/search/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Semantic-ui-react
-        </a>
+        <p>
+          Ce composant est basé sur le composant <b>Search</b> de&nbsp;
+          <a
+            href="https://react.semantic-ui.com/modules/search/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Semantic-ui-react
+          </a>
+        </p>
+        
         <Divider hidden={true} />
         <CCAM.Search
           client={client}

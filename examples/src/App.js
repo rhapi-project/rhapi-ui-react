@@ -4,11 +4,11 @@ import { Divider, Grid, Header, Icon, Menu } from "semantic-ui-react";
 //import _ from "lodash";
 
 // Les exemples
-import CCAMSearchBasic from "./CCAM/SearchBasic";
-import CCAMSearchTable from "./CCAM/SearchTable";
-import CCAMPaginationPages from "./CCAM/PaginationPages";
-import CCAMPaginationMore from "./CCAM/PaginationMore";
-import CCAMTarification from "./CCAM/Tarification";
+import CCAMSearchBasic from "./CCAM/RechercheActe";
+import CCAMSearchTable from "./CCAM/TableActes";
+import CCAMPaginationPages from "./CCAM/TableAvecPagination";
+import CCAMPaginationMore from "./CCAM/TableSansPagination";
+import CCAMTarification from "./CCAM/TarificationActe";
 
 const ghBaseUrl =
   "https://github.com/rhapi-project/rhapi-ui-react/blob/master/examples/src";
@@ -47,39 +47,39 @@ export default class App extends React.Component {
         <Menu.Header>CCAM</Menu.Header>
         <Menu.Menu>
           <Menu.Item
-            name="SearchBasic"
+            name="RechercheActe"
             active={
-              this.state.group === "CCAM" && this.state.name === "SearchBasic"
+              this.state.group === "CCAM" && this.state.name === "RechercheActe"
             }
             onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
           />
           <Menu.Item
-            name="SearchTable"
+            name="TableActes"
             active={
-              this.state.group === "CCAM" && this.state.name === "SearchTable"
+              this.state.group === "CCAM" && this.state.name === "TableActes"
             }
             onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
           />
           <Menu.Item
-            name="PaginationPages"
+            name="TableAvecPagination"
             active={
               this.state.group === "CCAM" &&
-              this.state.name === "PaginationPages"
+              this.state.name === "TableAvecPagination"
             }
             onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
           />
           <Menu.Item
-            name="PaginationMore"
+            name="TableSansPagination"
             active={
               this.state.group === "CCAM" &&
-              this.state.name === "PaginationMore"
+              this.state.name === "TableSansPagination"
             }
             onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
           />
           <Menu.Item
-            name="Tarification"
+            name="TarificationActe"
             active={
-              this.state.group === "CCAM" && this.state.name === "Tarification"
+              this.state.group === "CCAM" && this.state.name === "TarificationActe"
             }
             onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
           />
@@ -194,15 +194,15 @@ class Description extends React.Component {
 class ViewExample extends React.Component {
   component = (group, name) => {
     if (group === "CCAM") {
-      if (name === "SearchBasic") {
+      if (name === "RechercheActe") {
         return <CCAMSearchBasic />;
-      } else if (name === "SearchTable") {
+      } else if (name === "TableActes") {
         return <CCAMSearchTable />;
-      } else if (name === "PaginationPages") {
+      } else if (name === "TableAvecPagination") {
         return <CCAMPaginationPages />;
-      } else if (name === "PaginationMore") {
+      } else if (name === "TableSansPagination") {
         return <CCAMPaginationMore />;
-      } else if (name === "Tarification") {
+      } else if (name === "TarificationActe") {
         return <CCAMTarification />;
       } else {
         return "";

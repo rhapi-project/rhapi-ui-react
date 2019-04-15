@@ -32,7 +32,7 @@ export default class CCAMSearchTable extends React.Component {
       basic: true,
       celled: true,
       collapsing: true
-      //style: { textAlign: "center" } // le inline CSS sera passé comme ceci
+      //style: { textAlign: "center" } // le inline CSS peut être utilisé comme ceci
     };
 
     // Les champs qu'on veut obtenir dans le résultat
@@ -49,16 +49,20 @@ export default class CCAMSearchTable extends React.Component {
       <React.Fragment>
         <div>
           <p>
-            Cet exemple utilise <b>CCAM.Search</b> pour la recherche d'actes
-            CCAM et <b>CCAM.Table</b> pour afficher les résultats.
+            Utilisation du composant <b>CCAM.Search</b> pour la recherche d'actes
+            CCAM et affichage du résultat avec le composant <b>CCAM.Table</b>.
           </p>
-          <a
-            href="https://react.semantic-ui.com/collections/table/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Semantic-ui-react
-          </a>
+          <p>
+            Le composant <b>CCAM.Table</b> est base sur le composant <b>Table</b> de&nbsp;
+            <a
+              href="https://react.semantic-ui.com/collections/table/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Semantic-ui-react
+            </a>
+          </p>
+          
         </div>
         <Divider hidden={true} />
         <div>
