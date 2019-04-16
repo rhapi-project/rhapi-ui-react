@@ -6,10 +6,6 @@ import _ from "lodash";
 
 export default class Saisie extends React.Component {
   render() {
-    return(
-      <div>
-        CCAM SAISIE ACTES
-      </div>
-    );
+    return <div>CCAM SAISIE ACTES</div>;
   }
 }

@@ -12,9 +12,9 @@ export default class CCAM extends React.Component {
   static Tarification = Tarification;
   render() {
     const { children } = this.props;
-    return(
+    return (
       <React.Fragment>
-        {React.Children.map(children, child => child )}
+        {React.Children.map(children, child => child)}
       </React.Fragment>
     );
   }

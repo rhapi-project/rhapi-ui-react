@@ -5,14 +5,16 @@ import { Search } from "semantic-ui-react";
 import _ from "lodash";
 
 const propDefs = {
-  description: "Composant pour la recherche des actes en CCAM retourne la liste des actes au format etc...",
+  description:
+    "Composant pour la recherche des actes en CCAM retourne la liste des actes au format etc...",
   example: "SearchBasic",
-  propDocs:  {
+  propDocs: {
     // client est documenté automatiquement
     onClear: "callback d'une ràz",
     onSelectionChange: "callback pour retourner les actes sélectionnés",
     search: "semantic.modules",
-    searchInputLength: "nombre minimum de caractères pour déclencher une requête"
+    searchInputLength:
+      "nombre minimum de caractères pour déclencher une requête"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
@@ -32,10 +34,12 @@ export default class Search2 extends React.Component {
     this.setState({
       typeSearch: "keyword",
       results: [], // mots clés résultat de la recherche
-      search: _.isUndefined(this.props.search) ? this.getSemanticSearchProps({}) : this.getSemanticSearchProps(this.props.search),
+      search: _.isUndefined(this.props.search)
+        ? this.getSemanticSearchProps({})
+        : this.getSemanticSearchProps(this.props.search),
       value: ""
     });
-  };
+  }
 
   getSemanticSearchProps = search => {
     let obj = search;
@@ -54,7 +58,7 @@ export default class Search2 extends React.Component {
       actes => {
         //console.log(actes);
         let keywords = [];
-        for (let i = 0 ; i < actes.keywords.length ; i++) {
+        for (let i = 0; i < actes.keywords.length; i++) {
           let obj = {};
           obj.title = actes.keywords[i];
           keywords.push(obj);
@@ -70,7 +74,7 @@ export default class Search2 extends React.Component {
       error => {
         console.log(error);
       }
-    )
+    );
   };
 
   // Pour pouvoir lancer une recherche, il faut que la longueur de la saisie
@@ -79,7 +83,9 @@ export default class Search2 extends React.Component {
   // est de 1
   search = inputVal => {
     this.setState({ value: inputVal });
-    let searchInputLength = _.isUndefined(this.props.searchInputLength) ? 1 : this.props.searchInputLength;
+    let searchInputLength = _.isUndefined(this.props.searchInputLength)
+      ? 1
+      : this.props.searchInputLength;
     if (inputVal.length >= searchInputLength) {
       if (this.state.typeSearch === "keyword") {
         this.loadActes(inputVal);
@@ -94,11 +100,10 @@ export default class Search2 extends React.Component {
         this.props.onClear();
       }
     }
-
-  }
+  };
 
   render() {
-    return(
+    return (
       <React.Fragment>
         <Search
           onSearchChange={(e, d) => this.search(d.value)}
@@ -111,4 +116,3 @@ export default class Search2 extends React.Component {
     );
   }
 }
-
