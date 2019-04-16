@@ -79,7 +79,8 @@ export default class App extends React.Component {
           <Menu.Item
             name="TarificationActe"
             active={
-              this.state.group === "CCAM" && this.state.name === "TarificationActe"
+              this.state.group === "CCAM" &&
+              this.state.name === "TarificationActe"
             }
             onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
           />

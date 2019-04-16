@@ -35,9 +35,9 @@ export default class CCAMPaginationPages extends React.Component {
     return (
       <React.Fragment>
         <p>
-          Utilisation du composant <b>CCAM.Search</b> pour la recherche d'actes CCAM
-          et <b>CCAM.Table</b> pour afficher les résultats (avec des options de
-          pagination).
+          Utilisation du composant <b>CCAM.Search</b> pour la recherche d'actes
+          CCAM et <b>CCAM.Table</b> pour afficher les résultats (avec des
+          options de pagination).
         </p>
         <Divider hidden={true} />
         <CCAM.Search

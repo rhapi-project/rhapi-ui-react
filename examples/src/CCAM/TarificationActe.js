@@ -8,13 +8,13 @@ const client = new Client("https://demo.rhapi.net/demo01");
 
 export default class CCAMTarification extends React.Component {
   state = {
-    selectedActe: {},
-    actes: []
+    actes: [],
+    codActe: null
   };
 
   onSelection = acte => {
     // Après la selection d'un acte masquer le tableau des résultats
-    this.setState({ selectedActe: acte, actes: [] });
+    this.setState({ codActe: acte.codActe, actes: [] });
   };
 
   onLoadActes = obj => {
@@ -22,10 +22,12 @@ export default class CCAMTarification extends React.Component {
   };
 
   render() {
-    //console.log(this.state.selectedActe);
     return (
       <React.Fragment>
-        <p>Description de l'exemple...</p>
+        <p>
+          Utilisation du composant <b>CCAM.Tarification</b> pour la tarification
+          d'un acte CCAM.
+        </p>
         <Divider hidden={true} />
         <CCAM.Search client={client} onLoadActes={this.onLoadActes} />
         <Divider hidden={true} />
@@ -34,7 +36,7 @@ export default class CCAMTarification extends React.Component {
           actes={this.state.actes}
           onSelection={acte => this.onSelection(acte)}
         />
-        <CCAM.Tarification client={client} acte={this.state.selectedActe} />
+        <CCAM.Tarification client={client} codActe={this.state.codActe} />
       </React.Fragment>
     );
   }
