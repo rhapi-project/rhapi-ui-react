@@ -2,8 +2,8 @@
 /dist
 
 # examples
-/examples/node_modules
-/example/package-lock.json
+/exemples/node_modules
+/exemples/package-lock.json
 
 # Racine du repository
 .editorconfig

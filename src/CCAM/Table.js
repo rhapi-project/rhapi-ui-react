@@ -21,7 +21,7 @@ const propDefs = {
     informations: "se référer à la documentation RHAPI sur la pagination",
     onSelection: "callback à la sélection d'un acte",
     onPageSelect: "callback changement de page",
-    pagination: paginationPropDefs,
+    //pagination: paginationPropDefs,
     showPagination: "afficher les options de paginations",
     table: "semantic.collections"
   },
@@ -32,7 +32,7 @@ const propDefs = {
     informations: PropTypes.object,
     onSelection: PropTypes.func,
     onPageSelect: PropTypes.func,
-    pagination: PropTypes.object,
+    //pagination: PropTypes.object,
     showPagination: PropTypes.bool,
     table: PropTypes.object
   }

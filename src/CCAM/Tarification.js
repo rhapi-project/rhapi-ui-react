@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Checkbox, Form, Header, Segment } from "semantic-ui-react";
 
 import _ from "lodash";
-import moment from "moment";
+//import moment from "moment";
 
 const propDefs = {
   description: "Détail de la facturation d'un acte",
@@ -14,7 +14,8 @@ const propDefs = {
     codDom: "code DOM",
     codGrille: "code grille",
     codPhase: "code phase",
-    date: "date de la tarification"
+    date: "date de la tarification",
+    dynamic: "activation de la tarification dynamique"
   },
   propTypes: {
     codActe: PropTypes.string,
@@ -23,7 +24,8 @@ const propDefs = {
     codGrille: PropTypes.number,
     codPhase: PropTypes.number,
     client: PropTypes.any.isRequired,
-    date: PropTypes.string
+    date: PropTypes.instanceOf(Date),
+    dynamic: PropTypes.bool
   }
 };
 
@@ -35,7 +37,8 @@ export default class Tarification extends React.Component {
     codDom: 0,
     codGrille: 0,
     codPhase: 0,
-    date: moment().toISOString()
+    date: new Date(),
+    dynamic: false
   };
 
   state = {
@@ -46,6 +49,7 @@ export default class Tarification extends React.Component {
     modificateurs: [],
     phases: [],
     selectedModif: [], // modificateurs sélectionnés
+    modifShow: false, // true -> afficher les modificateurs possibles
     tarif: {}
   };
 
@@ -71,6 +75,8 @@ export default class Tarification extends React.Component {
         this.state.currentDom,
         this.state.selectedModif
       );
+    } else {
+      this.setState({ acte: {}, selectedModif: [], modifShow: false });
     }
   }
 
@@ -118,74 +124,11 @@ export default class Tarification extends React.Component {
     );
   };
 
-  /**
-   * @possActiv array de codActivite possibles pour cet acte
-   * @allActiv toutes les activités retournées par CONTEXTES
-   * ATTENTION : dans 'allActiv' les codActiv sont des chaines de caracteres tandis que les
-   * 'possActiv' sont des entiers. Une conversion est faite avant la comparaison.
-   */
-  optionsActivites = (allActiv, possActiv) => {
-    let opt = [];
-    _.forEach(allActiv, activite => {
-      if (_.includes(possActiv, parseInt(activite.codActiv))) {
-        let obj = {};
-        obj.text = activite.libelle;
-        obj.value = activite.codActiv;
-        opt.push(obj);
-      }
-    });
-    return opt;
-  };
-
-  optionsGrilles = grilles => {
-    let opt = [];
-    _.forEach(grilles, g => {
-      let obj = {};
-      obj.text = g.libelle;
-      obj.value = g.codGrille;
-      opt.push(obj);
-    });
-    return opt;
-  };
-
-  /**
-   * @possPhases array de codPhase possibles pour cet acte
-   * @allAPhases toutes les phases retournées par CONTEXTES
-   */
-  optionsPhases = (allPhases, possPhases) => {
-    let opt = [];
-    _.forEach(allPhases, phase => {
-      if (_.includes(possPhases, phase.codPhase)) {
-        let obj = {};
-        obj.text = phase.libelle;
-        obj.value = phase.codPhase;
-        opt.push(obj);
-      }
-    });
-    return opt;
-  };
-
-  optionsDoms = doms => {
-    let opt = [];
-    _.forEach(doms, dom => {
-      let obj = {};
-      obj.text = dom.libelle;
-      obj.value = dom.codDom;
-      opt.push(obj);
-    });
-
-    // option qui sera utilisé par défaut
-    let obj = {};
-    obj.text = "METROPOLE";
-    obj.value = 0;
-    opt.push(obj);
-    return opt;
-  };
-
   // définition d'une grille - description
   defGrille = (codGrille, grilles) => {
     let grille = _.find(grilles, g => {
-      return codGrille === g.codGrille;
+      return _.isUndefined(g.codGrille) ? codGrille === g.value : codGrille === g.codGrille;
+      //return codGrille === g.codGrille;
     });
     return _.isUndefined(grille) ? "" : grille.definition;
   };
@@ -208,6 +151,7 @@ export default class Tarification extends React.Component {
     this.props.client.CCAM.read(
       codActe,
       error => {
+        this.setState({ acte: {} });
         console.log(error);
       },
       result => {
@@ -227,10 +171,12 @@ export default class Tarification extends React.Component {
       activite: codActiv,
       phase: codPhase,
       grille: codGrille,
-      date: date,
+      date: date, // ? Quelle type passer ici ? String ou Date ?
       dom: codDom,
       modificateurs: m
     };
+
+    //console.log(params);
 
     // si on n'a pas de modificateurs, on utilisera pas
     // le champ 'modificateurs'
@@ -250,31 +196,67 @@ export default class Tarification extends React.Component {
         this.setState({ tarif: result });
       },
       error => {
+        this.setState({ tarif: {} });
         console.log(error);
       }
     );
   };
 
   render() {
-    if (!_.isEmpty(this.state.acte)) {
-      
+    if (!_.isEmpty(this.state.acte) && this.props.dynamic) {
+
       // les variables options* contiennent les valeurs des options
       // qui seront utilisées dans les Dropdown
 
-      let optionsActivites = this.optionsActivites(
-        this.state.activites,
-        this.state.acte.codActivites
-      );
-      let optionsDoms = this.optionsDoms(this.state.doms);
-      let optionsGrilles = this.optionsGrilles(this.state.grilles);
-      let optionsPhases = this.optionsPhases(
-        this.state.phases,
-        this.state.acte.codPhases
-      );
+      let optionsActivites = _.filter(this.state.activites, activite => {
+        activite.text = activite.libelle;
+        activite.value = _.isUndefined(activite.codActiv) ? activite.value : activite.codActiv;
+
+        // IMPORTANT : enlever la propriété 'codActiv' sinon erreur du type =>
+        // Warning: React does not recognize the `codActiv` prop on a DOM element.
+        // If you intentionally want it to appear in the DOM as a custom attribute,
+        // spell it as lowercase `codactiv` instead. If you accidentally passed it from a parent component,
+        // remove it from the DOM element.
+
+        // Après la suppression de ce champ, il sera 'undefined' dans les activités
+        // de 'this.state.activites'. Faire une vérification avant de créer le champ 'activite.value'.
+        _.unset(activite, "codActiv");
+        return _.includes(this.state.acte.codActivites, _.toInteger(activite.value));
+      });
+
+      let metropole = {};
+      metropole.text = "METROPOLE";
+      metropole.value = 0;
+
+      // Au tableau d'options des DOM, rajouter METROPOLE
+      let optionsDoms = _.map(this.state.doms, d => {
+        d.text = d.libelle;
+        d.value = _.isUndefined(d.codDom) ? d.value : d.codDom;
+        _.unset(d, "codDom");
+        return d;
+      });
+      optionsDoms.push(metropole);
+
+      let optionsGrilles = _.map(this.state.grilles, g => {
+        g.text = g.libelle;
+        g.value = _.isUndefined(g.codGrille) ? g.value : g.codGrille;
+        _.unset(g, "codGrille");
+        return g;
+      });
+
+      let optionsPhases = _.filter(this.state.phases, phase => {
+        phase.text = phase.libelle;
+        phase.value = _.isUndefined(phase.codPhase) ? phase.value : phase.codPhase;
+        _.unset(phase, "codPhase");
+        return _.includes(this.state.acte.codPhases, phase.value);
+      });
+
       let listModificateurs = this.listModificateurs(
         this.state.modificateurs,
         this.state.currentGrille
       );
+
+      //console.log(listModificateurs);
 
       return (
         <React.Fragment>
@@ -285,7 +267,7 @@ export default class Tarification extends React.Component {
               label="Activité"
               placeholder="Sélectionner une activité"
               onChange={(e, d) => {
-                this.setState({ currentActivite: d.value });
+                this.setState({ currentActivite: d.value, selectedModif: [], modifShow: false });
                 this.tarif(
                   this.props.codActe,
                   d.value,
@@ -293,7 +275,7 @@ export default class Tarification extends React.Component {
                   this.state.currentGrille,
                   this.props.date,
                   this.state.currentDom,
-                  this.state.selectedModif
+                  []
                 );
               }}
               options={optionsActivites}
@@ -310,7 +292,7 @@ export default class Tarification extends React.Component {
               }
               placeholder="Sélectionner une grille"
               onChange={(e, d) => {
-                this.setState({ currentGrille: d.value });
+                this.setState({ currentGrille: d.value, selectedModif: [], modifShow: false });
                 this.tarif(
                   this.props.codActe,
                   this.state.currentActivite,
@@ -318,7 +300,7 @@ export default class Tarification extends React.Component {
                   d.value,
                   this.props.date,
                   this.state.currentDom,
-                  this.state.selectedModif
+                  []
                 );
               }}
               options={optionsGrilles}
@@ -330,7 +312,7 @@ export default class Tarification extends React.Component {
               label="Phase"
               placeholder="Sélectionner une phase"
               onChange={(e, d) => {
-                this.setState({ currentPhase: d.value });
+                this.setState({ currentPhase: d.value, selectedModif: [], modifShow: false });
                 this.tarif(
                   this.props.codActe,
                   this.state.currentActivite,
@@ -338,7 +320,7 @@ export default class Tarification extends React.Component {
                   this.state.currentGrille,
                   this.props.date,
                   this.state.currentDom,
-                  this.state.selectedModif
+                  []
                 );
               }}
               options={optionsPhases}
@@ -350,7 +332,7 @@ export default class Tarification extends React.Component {
               label="DOM"
               placeholder="Métropole par défaut"
               onChange={(e, d) => {
-                this.setState({ currentDom: d.value });
+                this.setState({ currentDom: d.value, selectedModif: [], modifShow: false });
                 this.tarif(
                   this.props.codActe,
                   this.state.currentActivite,
@@ -358,7 +340,7 @@ export default class Tarification extends React.Component {
                   this.state.currentGrille,
                   this.props.date,
                   d.value,
-                  this.state.selectedModif
+                  []
                 );
               }}
               options={optionsDoms}
@@ -370,10 +352,11 @@ export default class Tarification extends React.Component {
               <div>
                 <Checkbox
                   label="Aucun modificateur"
-                  checked={_.isEmpty(this.state.selectedModif)}
+                  //checked={_.isEmpty(this.state.selectedModif)}
+                  checked={!this.state.modifShow}
                   onChange={() => {
                     if (!_.isEmpty(this.state.selectedModif)) {
-                      this.setState({ selectedModif: [] });
+                      this.setState({ selectedModif: [], modifShow: false });
                       this.tarif(
                         this.props.codActe,
                         this.state.currentActivite,
@@ -383,10 +366,12 @@ export default class Tarification extends React.Component {
                         this.state.currentDom,
                         []
                       );
+                    } else {
+                      this.setState({ modifShow: !this.state.modifShow });
                     }
                   }}
                 />
-                {!_.isEmpty(listModificateurs) ? (
+                {(!_.isEmpty(listModificateurs) && this.state.modifShow) ? (
                   <Segment>
                     <div style={{ overflow: "auto", height: "220px" }}>
                       {_.map(listModificateurs, modif => (
@@ -406,10 +391,24 @@ export default class Tarification extends React.Component {
               </div>
             </Form.Input>
           </Form>
+
+          {/* Tarif affiché : 2 chiffres après la virgule (fonction toFixed)*/}
           <Header as="h2">
             Tarif :{" "}
             {!_.isEmpty(this.state.tarif)
-              ? this.state.tarif.pu + " €"
+              ? this.state.tarif.pu.toFixed(2) + " €"
+              : "Inconnu"}
+          </Header>
+        </React.Fragment>
+      );
+    } else if (!_.isEmpty(this.state.acte) && !this.props.dynamic){
+      // Tarification statique
+      return (
+        <React.Fragment>
+          <Header as="h2">
+            Tarif :{" "}
+            {!_.isEmpty(this.state.tarif)
+              ? this.state.tarif.pu.toFixed(2) + " €"
               : "Inconnu"}
           </Header>
         </React.Fragment>

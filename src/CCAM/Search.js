@@ -6,15 +6,16 @@ import _ from "lodash";
 
 const propDefs = {
   description:
-    "Composant pour la recherche des actes en CCAM retourne la liste des actes au format etc...",
+    "Composant pour la recherche des actes en CCAM. Retourne la liste des actes sous forme d'un tableau "
+    + "d'objets JSON.",
   example: "SearchBasic",
   propDocs: {
-    // client est documenté automatiquement
     onClear: "callback d'une ràz",
-    onSelectionChange: "callback pour retourner les actes sélectionnés",
+    onLoadActes: "callback résultat de la recherche",
+    onSelectionChange: "callback pour retourner l'acte sélectionné",
     search: "semantic.modules",
     searchInputLength:
-      "nombre minimum de caractères pour déclencher une requête"
+      "nombre minimum de caractères pour déclencher la recherche d'actes"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
