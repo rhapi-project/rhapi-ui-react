@@ -15,8 +15,8 @@ makeDocMd = propDefs => {
   docStream.write("\n## " + propDefs.component + "\n");
   docStream.write(propDefs.description + "\n");
   docStream.write("#### Props du composant" + "\n");
-  docStream.write("| Props | Description |\n"); // new
-  docStream.write("| ---- | ------ |\n"); // new
+  docStream.write("| Props | Type | Description |\n"); // new
+  docStream.write("| ---- | ----- | ------ |\n"); // new
   _.forEach(propDefs.propTypes, (v, p) => {
     let parts = v.split(".");
     parts.shift();
@@ -25,7 +25,7 @@ makeDocMd = propDefs => {
       doc = "[Documentation générale du client RHAPI](" + docClient + ")";
     } else if (_.startsWith(doc, "semantic.")) {
       doc =
-        "documentation semantic-ui-react [" +
+        "Documentation semantic-ui-react [" +
         _.upperFirst(p) +
         "](https://react.semantic-ui.com/" +
         doc.split(".")[1] +
@@ -34,7 +34,7 @@ makeDocMd = propDefs => {
         ")";
     }
     //docStream.write("* " + p + " (" + parts.join(", ") + ") : " + doc + "\n");
-    docStream.write("| " + p + " (" + parts.join(", ") + ") | " + doc + " |\n");
+    docStream.write("| " + p + " | " + parts.join(", ") + " | " + doc + " |\n");
   });
 };
 
@@ -59,7 +59,7 @@ parseComponent = path => {
     }
     parts = parts[1].split(/\n\s*};/);
     let defs = "{" + parts[0] + "}";
-    defs = defs.replace(/(PropTypes[\.\w]*[\w(\w)]*)/g, '"$1"');
+    defs = defs.replace(/(PropTypes[\.\w]*)/g, '"$1"');
     eval("var propDefs = " + defs);
     propDefs.component = component;
     makeDoc(propDefs, format);
