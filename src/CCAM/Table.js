@@ -16,49 +16,54 @@ const propDefs = {
     "Composant montrant sous forme d'un tableau les actes obtenus après une recherche par mot clé.",
   example: "SearchTable",
   propDocs: {
-    actes: "actes CCAM à afficher",
-    headers: "en-têtes du tableau",
-    informations: "se référer à la documentation RHAPI sur la pagination",
-    onSelection: "callback à la sélection d'un acte",
-    onPageSelect: "callback changement de page",
-    //pagination: paginationPropDefs,
-    showPagination: "afficher les options de paginations",
-    table: "semantic.collections"
+    actes: "Actes CCAM à afficher",
+    headers: "En-têtes du tableau",
+    informations: "Se référer à la documentation RHAPI sur la pagination",
+    onSelection: "Callback à la sélection d'un acte",
+    onPageSelect: "Callback changement de page",
+    showPagination: 'Afficher les options de paginations, par défaut "false"',
+    table: "semantic.collections",
+    btnFirstContent:
+      'Texte du bouton pour aller à la première page, par défaut ""',
+    btnLastContent:
+      'Texte du bouton pour aller à la dernière page, par défaut ""',
+    btnMoreContent:
+      'Texte du bouton pour afficher plus de résutats, par défaut "Plus de résultats"',
+    btnNextContent:
+      'Texte du bouton pour aller à la page suivante, par défaut ""',
+    btnPrevContent:
+      'Texte du bouton pour aller à la page précédente, par défaut ""',
+    btnFirstIcon:
+      'Icon semantic du bouton pour aller à la première page, par défaut "fast backward"',
+    btnLastIcon:
+      'Icon semantic du bouton pour aller à la dernière page, par défaut "fast forward"',
+    btnMoreIcon:
+      'Icon semantic du bouton pour afficher plus de résultats, par défaut ""',
+    btnNextIcon:
+      'Icon semantic du bouton pour aller à la page suivante, par défaut "arrow right"',
+    btnPrevIcon:
+      'Icon semantic du bouton pour aller à la page précédente, par défaut "arrow left"',
+    btnFirst:
+      'Props semantic du bouton pour aller à la première page, par défaut un objet vide "{}"',
+    btnLast:
+      'Props semantic du bouton pour aller à la dernière page, par défaut un objet vide "{}"',
+    btnNext:
+      'Props semantic du bouton pour aller à la page suivante, par défaut un objet vide "{}"',
+    btnPrev:
+      'Props semantic du bouton pour aller à la page précédente, par défaut un objet vide "{}"',
+    btnMore:
+      'Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}"',
+    mode: "mode de pagination 'pages' ou 'more', par défaut \"pages\""
   },
   propTypes: {
-    actes: PropTypes.array,
     client: PropTypes.any.isRequired,
+    actes: PropTypes.array,
     headers: PropTypes.array,
     informations: PropTypes.object,
     onSelection: PropTypes.func,
     onPageSelect: PropTypes.func,
-    //pagination: PropTypes.object,
     showPagination: PropTypes.bool,
-    table: PropTypes.object
-  }
-};
-
-const paginationPropDefs = {
-  description: "Options de pagination",
-  propDocs: {
-    btnFirstContent: "contenu textuel du bouton (première page)",
-    btnLastContent: "contenu textuel du bouton (dernière page)",
-    btnMoreContent: "contenu textuel du bouton (plus de résutats)",
-    btnNextContent: "contenu textuel du bouton (page suivante)",
-    btnPrevContent: "contenu textuel du bouton (page précédente)",
-    btnFirstIcon: "Semantic Icon",
-    btnLastIcon: "Semantic Icon",
-    btnMoreIcon: "Semantic Icon",
-    btnNextIcon: "Semantic Icon",
-    btnPrevIcon: "Semantic Icon",
-    btnFirst: "Props semantic bouton",
-    btnLast: "Props semantic bouton",
-    btnNext: "Props semantic bouton",
-    btnPrev: "Props semantic bouton",
-    btnMore: "Props semantic bouton",
-    mode: "mode de pagination ('pages' ou 'more')"
-  },
-  propTypes: {
+    table: PropTypes.object,
     btnFirstContent: PropTypes.string,
     btnLastContent: PropTypes.string,
     btnMoreContent: PropTypes.string,
@@ -86,7 +91,25 @@ export default class Table2 extends React.Component {
     informations: {},
     pagination: {},
     showPagination: false,
-    table: {}
+    table: {},
+    // props pour le composant de pagination
+    btnFirstContent: "",
+    btnLastContent: "",
+    btnMoreContent: "Plus de résultats",
+    btnNextContent: "",
+    btnPrevContent: "",
+    btnFirstIcon: "fast backward",
+    btnLastIcon: "fast forward",
+    btnMoreIcon: "",
+    btnNextIcon: "arrow right",
+    btnPrevIcon: "arrow left",
+    btnFirst: {},
+    btnLast: {},
+    btnNext: {},
+    btnPrev: {},
+    btnMore: {},
+    informations: {},
+    mode: "pages"
   };
   componentWillMount() {
     this.setState({
@@ -153,6 +176,26 @@ export default class Table2 extends React.Component {
   render() {
     let noHeaders = _.isEmpty(this.props.headers);
     let showPagination = this.props.showPagination;
+    let pagination = {
+      btnFirstContent: this.props.btnFirstContent,
+      btnLastContent: this.props.btnLastContent,
+      btnMoreContent: this.props.btnMoreContent,
+      btnNextContent: this.props.btnNextContent,
+      btnPrevContent: this.props.btnPrevContent,
+      btnFirstIcon: this.props.btnFirstIcon,
+      btnLastIcon: this.props.btnLastIcon,
+      btnMoreIcon: this.props.btnMoreIcon,
+      btnNextIcon: this.props.btnNextIcon,
+      btnPrevIcon: this.props.btnPrevIcon,
+      btnFirst: this.props.btnFirst,
+      btnLast: this.props.btnLast,
+      btnNext: this.props.btnNext,
+      btnPrev: this.props.btnPrev,
+      btnMore: this.props.btnMore,
+      informations: this.props.informations,
+      mode: this.props.mode
+    };
+
     if (!_.isEmpty(this.props.actes)) {
       return (
         <React.Fragment>
@@ -226,7 +269,7 @@ export default class Table2 extends React.Component {
               <Pagination
                 informations={this.state.informations}
                 onPageSelect={this.onPageSelect}
-                {...this.props.pagination}
+                {...pagination}
               />
             ) : (
               ""
@@ -241,27 +284,6 @@ export default class Table2 extends React.Component {
 }
 
 class Pagination extends React.Component {
-  static propTypes = paginationPropDefs.propTypes;
-  static defaultProps = {
-    btnFirstContent: "",
-    btnLastContent: "",
-    btnMoreContent: "Plus de résultats",
-    btnNextContent: "",
-    btnPrevContent: "",
-    btnFirstIcon: "fast backward",
-    btnLastIcon: "fast forward",
-    btnMoreIcon: "",
-    btnNextIcon: "arrow right",
-    btnPrevIcon: "arrow left",
-    btnFirst: {},
-    btnLast: {},
-    btnNext: {},
-    btnPrev: {},
-    btnMore: {},
-    informations: {},
-    mode: "pages"
-  };
-
   state = {
     loadingMore: false
   };
