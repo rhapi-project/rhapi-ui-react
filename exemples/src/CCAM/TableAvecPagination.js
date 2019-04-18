@@ -28,12 +28,13 @@ export default class CCAMPaginationPages extends React.Component {
   };
 
   render() {
+    // props semantic du bouton
+    let btn = { secondary: true };
     return (
       <React.Fragment>
         <p>
           Utilisation du composant <b>CCAM.Search</b> pour la recherche d'actes
-          CCAM et <b>CCAM.Table</b> pour afficher les résultats (avec des
-          options de pagination).
+          CCAM et <b>CCAM.Table</b> pour afficher les résultats.
         </p>
         <Divider hidden={true} />
         <CCAM.Search
@@ -48,6 +49,8 @@ export default class CCAMPaginationPages extends React.Component {
           informations={this.state.informations}
           onPageSelect={this.onPageSelect}
           showPagination={true}
+          btnFirst={btn}
+          btnLast={btn}
         />
       </React.Fragment>
     );
