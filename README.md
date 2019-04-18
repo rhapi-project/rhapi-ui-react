@@ -10,7 +10,8 @@
 git clone https://github.com/rhapi-project/rhapi-ui-react.git
 ```
 
-Après avoir téléchargé la bibliothèque **rhapi-ui-react**, vous pouvez tester les exemples de son utilisation comme suit : 
+Pour tester les exemples :
+
 ```bash
 cd rhapi-ui-react/exemples
 npm install
@@ -32,7 +33,7 @@ npm install --save rhapi-ui-react
 
 ## Utilisation
 
-Les composants **rhapi-ui-react** utilisent le client **rhapi-client** qui doit être préalablement installé dans le projet.
+Les composants **rhapi-ui-react** utilisent le client [rhapi-client](https://github.com/rhapi-project/rhapi-client) qui doit être préalablement installé dans le projet.
 
 Exemple d'utilisation du composant **CCAM.Search** pour la recherche d'une acte en CCAM : 
 
@@ -58,7 +59,7 @@ export default class RechercheActe extends React.Component {
 }
 ```
 
-Autres exemples d'utilisation dans le répertoire ***rhapi-ui-react/exemples*** ou [sur ce lien](https://github.com/rhapi-project/rhapi-ui-react/tree/master/exemples).
+Voir les autres exemples d'utilisation dans le répertoire [rhapi-ui-react/exemples](https://github.com/rhapi-project/rhapi-ui-react/tree/master/exemples).
 
 ## License
 

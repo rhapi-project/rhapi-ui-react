@@ -1,41 +1,57 @@
 # CCAM
 
 ## Tarification
-Détail de la facturation d'un acte
+Composant de facturation d'un acte CCAM
 #### Props du composant
-| Props | Description |
-| ---- | ------ |
-| codActe (string) | code Acte CCAM |
-| codActivite (string) | code de l'activité |
-| codDom (number) | code DOM |
-| codGrille (number) | code grille |
-| codPhase (number) | code phase |
-| client (any, isRequired) | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| date (instanceOf(Date)) | date de la tarification |
-| dynamic (bool) | activation de la tarification dynamique |
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| codActe | string | Code de l'acte CCAM, par défaut "" |
+| codActivite | string | Code de l'activité, par défaut "1" |
+| codDom | number | Code du DOM, par défaut c'est la métropole. Code 0 |
+| codGrille | number | Code grille, par défaut 0 |
+| codPhase | number | Code phase, par défaut 0 |
+| date | string | Date de la tarification de l'acte, au format ISO. Par défaut la date du jour |
+| dynamic | bool | Activation de la tarification dynamique, par défaut "false" |
 
 ## Search
 Composant pour la recherche des actes en CCAM. Retourne la liste des actes sous forme d'un tableau d'objets JSON.
 #### Props du composant
-| Props | Description |
-| ---- | ------ |
-| client (any, isRequired) | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| onClear (func) | callback d'une ràz |
-| onLoadActes (func) | callback résultat de la recherche |
-| onSelectionChange (func) | callback pour retourner l'acte sélectionné |
-| search (object) | documentation semantic-ui-react [Search](https://react.semantic-ui.com/modules/search) |
-| searchInputLength (number) | nombre minimum de caractères pour déclencher la recherche d'actes |
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| onClear | func | Callback d'une ràz |
+| onLoadActes | func | Callback résultat de la recherche |
+| onSelectionChange | func | Callback pour retourner l'acte sélectionné |
+| search | object | Documentation semantic-ui-react [Search](https://react.semantic-ui.com/modules/search) |
+| searchInputLength | number | Nombre minimum de caractères pour déclencher la recherche d'actes |
 
 ## Table
 Composant montrant sous forme d'un tableau les actes obtenus après une recherche par mot clé.
 #### Props du composant
-| Props | Description |
-| ---- | ------ |
-| actes (array) | actes CCAM à afficher |
-| client (any, isRequired) | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| headers (array) | en-têtes du tableau |
-| informations (object) | se référer à la documentation RHAPI sur la pagination |
-| onSelection (func) | callback à la sélection d'un acte |
-| onPageSelect (func) | callback changement de page |
-| showPagination (bool) | afficher les options de paginations |
-| table (object) | documentation semantic-ui-react [Table](https://react.semantic-ui.com/collections/table) |
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| actes | array | Actes CCAM à afficher |
+| headers | array | En-têtes du tableau |
+| informations | object | Se référer à la documentation RHAPI sur la pagination |
+| onSelection | func | Callback à la sélection d'un acte |
+| onPageSelect | func | Callback changement de page |
+| showPagination | bool | Afficher les options de paginations, par défaut "false" |
+| table | object | Documentation semantic-ui-react [Table](https://react.semantic-ui.com/collections/table) |
+| btnFirstContent | string | Texte du bouton pour aller à la première page, par défaut "" |
+| btnLastContent | string | Texte du bouton pour aller à la dernière page, par défaut "" |
+| btnMoreContent | string | Texte du bouton pour afficher plus de résutats, par défaut "Plus de résultats" |
+| btnNextContent | string | Texte du bouton pour aller à la page suivante, par défaut "" |
+| btnPrevContent | string | Texte du bouton pour aller à la page précédente, par défaut "" |
+| btnFirstIcon | string | Icon semantic du bouton pour aller à la première page, par défaut "fast backward" |
+| btnLastIcon | string | Icon semantic du bouton pour aller à la dernière page, par défaut "fast forward" |
+| btnMoreIcon | string | Icon semantic du bouton pour afficher plus de résultats, par défaut "" |
+| btnNextIcon | string | Icon semantic du bouton pour aller à la page suivante, par défaut "arrow right" |
+| btnPrevIcon | string | Icon semantic du bouton pour aller à la page précédente, par défaut "arrow left" |
+| btnFirst | object | Props semantic du bouton pour aller à la première page, par défaut un objet vide "{}" |
+| btnLast | object | Props semantic du bouton pour aller à la dernière page, par défaut un objet vide "{}" |
+| btnNext | object | Props semantic du bouton pour aller à la page suivante, par défaut un objet vide "{}" |
+| btnPrev | object | Props semantic du bouton pour aller à la page précédente, par défaut un objet vide "{}" |
+| btnMore | object | Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}" |
+| mode | string | mode de pagination 'pages' ou 'more', par défaut "pages" |
