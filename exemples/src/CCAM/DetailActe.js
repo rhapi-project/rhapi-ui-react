@@ -6,10 +6,11 @@ import { Divider } from "semantic-ui-react";
 // Instanciation du client RHAPI sans authentification
 const client = new Client("https://demo.rhapi.net/demo01");
 
-export default class CCAMTarificationStatique extends React.Component {
+export default class CCAMDetailActe extends React.Component {
   state = {
     actes: [],
-    codActe: ""
+    codActe: "",
+    detail: {}
   };
 
   onSelection = acte => {
@@ -17,15 +18,17 @@ export default class CCAMTarificationStatique extends React.Component {
   };
 
   onLoadActes = obj => {
-    this.setState({ actes: obj.results, codActe: "" });
+    this.setState({ actes: obj.results, codActe: "", detail: {} });
   };
 
+  onSuccess = obj => {
+    this.setState({ detail: obj });
+  }
   render() {
     return (
       <React.Fragment>
         <p>
-          Utilisation du composant <b>CCAM.Tarification</b> pour la tarification
-          d'un acte CCAM.
+          Utilisation du composant <b>CCAM.Detail</b> pour l'aperçu du détail d'un acte tarifé.
         </p>
         <Divider hidden={true} />
         <CCAM.Search client={client} onLoadActes={this.onLoadActes} />
@@ -35,7 +38,15 @@ export default class CCAMTarificationStatique extends React.Component {
           actes={this.state.actes}
           onSelection={acte => this.onSelection(acte)}
         />
-        <CCAM.Tarification client={client} codActe={this.state.codActe} dynamic={false}/>
+        <Divider hidden={true} />
+        <CCAM.Tarification
+          client={client}
+          codActe={this.state.codActe}
+          success={detail => this.onSuccess(detail)}
+          dynamic={true}
+        />
+        <Divider />
+        <CCAM.Detail detail={this.state.detail} />
       </React.Fragment>
     );
   }

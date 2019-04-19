@@ -13,7 +13,6 @@ export default class CCAMTarificationDynamique extends React.Component {
   };
 
   onSelection = acte => {
-    // Après la selection d'un acte masquer le tableau des résultats
     this.setState({ codActe: acte.codActe, actes: [] });
   };
 
@@ -36,7 +35,12 @@ export default class CCAMTarificationDynamique extends React.Component {
           actes={this.state.actes}
           onSelection={acte => this.onSelection(acte)}
         />
-        <CCAM.Tarification client={client} codActe={this.state.codActe} dynamic={true}/>
+        <CCAM.Tarification
+          client={client}
+          codActe={this.state.codActe}
+          dynamic={true}
+          success={obj => console.log(obj)}
+        />
       </React.Fragment>
     );
   }

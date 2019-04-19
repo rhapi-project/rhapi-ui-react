@@ -4,6 +4,7 @@ import { Divider, Grid, Header, Icon, Menu } from "semantic-ui-react";
 //import _ from "lodash";
 
 // Les exemples
+import CCAMDetailActe from "./CCAM/DetailActe";
 import CCAMSearchBasic from "./CCAM/RechercheActe";
 import CCAMSearchTable from "./CCAM/TableActes";
 import CCAMPaginationPages from "./CCAM/TableAvecPagination";
@@ -90,6 +91,14 @@ export default class App extends React.Component {
             active={
               this.state.group === "CCAM" &&
               this.state.name === "TarificationActeDynamique"
+            }
+            onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
+          />
+          <Menu.Item
+            name="DetailActe"
+            active={
+              this.state.group === "CCAM" &&
+              this.state.name === "DetailActe"
             }
             onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
           />
@@ -216,6 +225,8 @@ class ViewExample extends React.Component {
         return <CCAMTarificationDynamique />;
       } else if (name === "TarificationActeStatique") {
         return <CCAMTarificationStatique />;
+      } else if (name === "DetailActe") {
+        return <CCAMDetailActe />
       } else {
         return "";
       }
