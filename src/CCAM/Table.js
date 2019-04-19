@@ -40,9 +40,9 @@ const propDefs = {
     btnMoreIcon:
       'Icon semantic du bouton pour afficher plus de résultats, par défaut ""',
     btnNextIcon:
-      'Icon semantic du bouton pour aller à la page suivante, par défaut "arrow right"',
+      'Icon semantic du bouton pour aller à la page suivante, par défaut "step forward"',
     btnPrevIcon:
-      'Icon semantic du bouton pour aller à la page précédente, par défaut "arrow left"',
+      'Icon semantic du bouton pour aller à la page précédente, par défaut "step backward"',
     btnFirst:
       'Props semantic du bouton pour aller à la première page, par défaut un objet vide "{}"',
     btnLast:
@@ -101,8 +101,8 @@ export default class Table2 extends React.Component {
     btnFirstIcon: "fast backward",
     btnLastIcon: "fast forward",
     btnMoreIcon: "",
-    btnNextIcon: "arrow right",
-    btnPrevIcon: "arrow left",
+    btnNextIcon: "step forward",
+    btnPrevIcon: "step backward",
     btnFirst: {},
     btnLast: {},
     btnNext: {},

@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Checkbox, Form, Header, Segment } from "semantic-ui-react";
+import { Checkbox, Form, Header, Icon, Message, Segment } from "semantic-ui-react";
 
 import _ from "lodash";
 import moment from "moment";
@@ -17,9 +17,10 @@ const propDefs = {
     codPhase: "Code phase, par défaut 0",
     date:
       "Date de la tarification de l'acte, au format ISO. Par défaut la date du jour",
-    dynamic: 'Activation de la tarification dynamique, par défaut "false"',
-    //error: "Message d'erreur ou Callback acte non tarifé à la date donnée",
-    //success: "Callback succès de la tarification"
+    dynamic: 'Affichage de l\'interface dynamique de tarification, par défaut "false"',
+    error: "Message d'erreur ou Callback acte non tarifé à la date donnée",
+    hidden: "Cacher l'interface du composant de tarification",
+    success: "Callback succès de la tarification"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
@@ -30,8 +31,9 @@ const propDefs = {
     codPhase: PropTypes.number,
     date: PropTypes.string,
     dynamic: PropTypes.bool,
-    //error: PropTypes.oneOfType([ PropTypes.string, PropTypes.func ]),
-    //success: PropTypes.func
+    error: PropTypes.oneOfType([ PropTypes.string, PropTypes.func ]),
+    hidden: PropTypes.bool,
+    success: PropTypes.func
   }
 };
 
@@ -44,7 +46,8 @@ export default class Tarification extends React.Component {
     codGrille: 0,
     codPhase: 0,
     date: new Date().toISOString(),
-    dynamic: false
+    dynamic: false,
+    hidden: false
   };
 
   state = {
@@ -56,7 +59,8 @@ export default class Tarification extends React.Component {
     phases: [],
     selectedModif: [], // modificateurs sélectionnés
     modifShow: false, // true -> afficher les modificateurs possibles
-    tarif: {}
+    tarif: {},
+    errorMessage: ""
   };
 
   componentWillMount() {
@@ -81,38 +85,32 @@ export default class Tarification extends React.Component {
   }
 
   componentWillReceiveProps(next) {
-    if (!_.isEmpty(next.codActe)) {
-      this.readActe(next.codActe);
-      this.tarif(
-        next.codActe,
-        this.state.currentActivite,
-        this.state.currentPhase,
-        this.state.currentGrille,
-        this.props.date,
-        this.state.currentDom,
-        this.state.selectedModif
-      );
-    } else {
+    if (_.isEmpty(next.codActe)) {
       this.setState({ acte: {}, selectedModif: [], modifShow: false });
+    }
+    if (!_.isEmpty(next.codActe) && (next.codActe !== this.props.codActe)) {
+      this.readActe(next.codActe, next.date);
     }
   }
 
   checkedModif = modif => {
-    return _.includes(this.state.selectedModif, modif.codModifi);
+    //return _.includes(this.state.selectedModif, modif.codModifi);
+    return _.includes(this.state.selectedModif, modif);
   };
 
   handleCheckModif = modif => {
     let s = this.state.selectedModif;
-    let index = s.indexOf(modif.codModifi);
+    //let index = s.indexOf(modif.codModifi);
+    let index = s.indexOf(modif);
     if (index > -1) {
       // modif est déjà sélectionné
       s.splice(index, 1);
     } else {
-      s.push(modif.codModifi);
+      //s.push(modif.codModifi);
+      s.push(modif);
     }
     this.setState({ selectedModif: s });
 
-    // calcul du tarif
     this.tarif(
       this.props.codActe,
       this.state.currentActivite,
@@ -158,29 +156,42 @@ export default class Tarification extends React.Component {
     });
   };
 
-  readActe = codActe => {
-    let params = {};
-    params.date = this.props.date;
+  readActe = (codActe, date) => {
     this.props.client.CCAM.read(
       codActe,
-      params,
+      { date: date },
       result => {
-        console.log(result);
-        this.setState({ acte: result });
+        //console.log(result);
+        this.setState({ acte: result, errorMessage: "" });
+        this.tarif(
+          result.codActe,
+          this.state.currentActivite,
+          this.state.currentPhase,
+          this.state.currentGrille,
+          date,
+          this.props.codDom,
+          this.state.selectedModif
+        );
       },
       error => {
         console.log(error);
         this.setState({ acte: {} });
+        if (!_.isUndefined(this.props.error)) {
+          if (_.isFunction(this.props.error)) {
+            this.props.error();
+          } else {
+            this.setState({ errorMessage: this.props.error });
+          }
+        }
       }
     );
   };
 
-  // modif : array de codModifi
-  tarif = (codActe, codActiv, codPhase, codGrille, date, codDom, modif) => {
+  tarif = (codActe, codActiv, codPhase, codGrille, date, codDom, modificateurs) => {
     let m = "";
-    _.forEach(modif, codModifi => {
-      m += codModifi;
-    });
+    _.forEach(modificateurs, modificateur => {
+      m += modificateur.codModifi;
+    })
     let params = {
       activite: codActiv,
       phase: codPhase,
@@ -204,18 +215,59 @@ export default class Tarification extends React.Component {
       codActe,
       params,
       result => {
-        //console.log(result);
-        this.setState({ tarif: result });
+        this.setState({ tarif: result, errorMessage: "" });
+        if (!_.isUndefined(this.props.success)) {
+          let activite = _.find(this.state.activites, a => a.value === codActiv);
+          let grille = _.find(this.state.grilles, g => g.value === codGrille);
+          let phase = _.find(this.state.phases, p => p.value === codPhase);
+          
+          let obj = {};
+          obj.acte = this.state.acte;
+          obj.activite = activite;
+          obj.date = date;
+          obj.grille = grille;
+          obj.phase = phase;
+          obj.modificateurs = modificateurs;
+          obj.tarif = result;
+          if (codDom !== 0) {
+            obj.dom = _.find(this.state.doms, d => d.value === codDom);
+          }
+
+          this.props.success(obj);
+        }
       },
       error => {
         this.setState({ tarif: {} });
         console.log(error);
+        if (!_.isUndefined(this.props.error)) {
+          if (_.isFunction(this.props.error)) {
+            this.props.error();
+          } else {
+            this.setState({ errorMessage: this.props.error });
+          }
+        }
       }
     );
   };
 
   render() {
-    //console.log(this.state.modificateurs);
+    if (this.props.hidden) {
+      return "";
+    }
+
+    if (!_.isEmpty(this.state.errorMessage)) {
+      return (
+        <React.Fragment>
+          <Message 
+            icon="info"
+            info={true}
+            header="Message d'erreur"
+            content={this.state.errorMessage}
+          />
+        </React.Fragment>
+      );
+    }
+
     if (!_.isEmpty(this.state.acte) && this.props.dynamic) {
       let optionsActivites = _.filter(this.state.activites, activite => {
         activite.text = activite.libelle;
@@ -395,7 +447,7 @@ export default class Tarification extends React.Component {
                   }}
                 />
                 {!_.isEmpty(listModificateurs) && this.state.modifShow ? (
-                  <Segment>
+                  <Segment compact={false}>
                     <div style={{ overflow: "auto", height: "220px" }}>
                       {_.map(listModificateurs, modif => (
                         <div key={modif.libelle + "" + modif.coef}>
