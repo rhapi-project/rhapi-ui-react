@@ -60,6 +60,11 @@ parseComponent = path => {
     parts = parts[1].split(/\n\s*};/);
     let defs = "{" + parts[0] + "}";
     defs = defs.replace(/(PropTypes[\.\w]*)/g, '"$1"');
+    defs = defs.replace(/(\"\s*\(\s*\[\s*\")|(\]\s*\)\s*)/g, " ");
+    defs = defs.replace(/\"\s*,\s*\"/g, ",");
+    defs = defs.replace(/PropTypes\.oneOfType\s*/g, "");
+    defs = defs.replace(/,PropTypes\./g, ".");
+    //console.log(defs);
     eval("var propDefs = " + defs);
     propDefs.component = component;
     makeDoc(propDefs, format);
