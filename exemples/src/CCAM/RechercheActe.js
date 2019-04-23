@@ -12,8 +12,8 @@ export default class CCAMSearchBasic extends React.Component {
       <React.Fragment>
         <p>
           Utilisation du composant <b color="primary">CCAM.Search</b> pour la
-          recherche des actes en CCAM. Le résultat de la recherche est retourné
-          en console (<kbd>Ctrl</kbd> + <kbd>12</kbd>).
+          recherche des actes en CCAM. <br />
+          Le résultat de la recherche est retourné en console (<kbd>Ctrl</kbd> + <kbd>F12</kbd>).
         </p>
         <p>
           Ce composant est basé sur le composant <b>Search</b> de&nbsp;

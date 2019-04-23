@@ -50,12 +50,11 @@ export default class CCAMSearchTable extends React.Component {
         <div>
           <p>
             Utilisation du composant <b>CCAM.Search</b> pour la recherche
-            d'actes CCAM et affichage du résultat avec le composant{" "}
-            <b>CCAM.Table</b>.
+            d'actes CCAM. <br />
+            Le résultat de la recherche est affiché par le composant <b>CCAM.Table</b>.
           </p>
           <p>
-            Le composant <b>CCAM.Table</b> est base sur le composant{" "}
-            <b>Table</b> de&nbsp;
+            <b>CCAM.Table</b> est base sur le composant <b>Table</b> de&nbsp;
             <a
               href="https://react.semantic-ui.com/collections/table/"
               target="_blank"

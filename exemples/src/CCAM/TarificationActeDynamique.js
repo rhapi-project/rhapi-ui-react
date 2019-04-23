@@ -24,7 +24,7 @@ export default class CCAMTarificationDynamique extends React.Component {
     return (
       <React.Fragment>
         <p>
-          Utilisation du composant <b>CCAM.Tarification</b> pour la tarification
+          Utilisation de <b>CCAM.Tarification</b>, composant de tarification
           d'un acte CCAM.
         </p>
         <Divider hidden={true} />
@@ -39,7 +39,6 @@ export default class CCAMTarificationDynamique extends React.Component {
           client={client}
           codActe={this.state.codActe}
           dynamic={true}
-          success={obj => console.log(obj)}
         />
       </React.Fragment>
     );

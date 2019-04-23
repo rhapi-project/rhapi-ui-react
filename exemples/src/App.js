@@ -13,7 +13,7 @@ import CCAMTarificationDynamique from "./CCAM/TarificationActeDynamique";
 import CCAMTarificationStatique from "./CCAM/TarificationActeStatique";
 
 const ghBaseUrl =
-  "https://github.com/rhapi-project/rhapi-ui-react/blob/master/examples/src";
+  "https://github.com/rhapi-project/rhapi-ui-react/blob/master/exemples/src";
 
 export default class App extends React.Component {
   state = {

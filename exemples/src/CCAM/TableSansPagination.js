@@ -32,10 +32,23 @@ export default class CCAMPaginationPages extends React.Component {
     let btnMore = { secondary: true };
     return (
       <React.Fragment>
-        <p>
-          Utilisation du composant <b>CCAM.Search</b> pour la recherche d'actes
-          CCAM et <b>CCAM.Table</b> pour afficher les résultats.
-        </p>
+        <div>
+          <p>
+            Utilisation du composant <b>CCAM.Search</b> pour la recherche
+            d'actes CCAM. <br />
+            Le résultat de la recherche est affiché par le composant <b>CCAM.Table</b>.
+          </p>
+          <p>
+            <b>CCAM.Table</b> est base sur le composant <b>Table</b> de&nbsp;
+            <a
+              href="https://react.semantic-ui.com/collections/table/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Semantic-ui-react
+            </a>
+          </p>
+        </div>
         <Divider hidden={true} />
         <CCAM.Search
           client={client}

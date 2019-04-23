@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Checkbox, Form, Header, Icon, Message, Segment } from "semantic-ui-react";
+import { Checkbox, Form, Header, Message, Segment } from "semantic-ui-react";
 
 import _ from "lodash";
 import moment from "moment";
@@ -191,7 +191,7 @@ export default class Tarification extends React.Component {
     let m = "";
     _.forEach(modificateurs, modificateur => {
       m += modificateur.codModifi;
-    })
+    });
     let params = {
       activite: codActiv,
       phase: codPhase,

@@ -28,7 +28,7 @@ export default class CCAMDetailActe extends React.Component {
     return (
       <React.Fragment>
         <p>
-          Utilisation du composant <b>CCAM.Detail</b> pour l'aperçu du détail d'un acte tarifé.
+          Utilisation de <b>CCAM.Detail</b> pour l'aperçu du détail d'un acte tarifé.
         </p>
         <Divider hidden={true} />
         <CCAM.Search client={client} onLoadActes={this.onLoadActes} />
@@ -45,7 +45,7 @@ export default class CCAMDetailActe extends React.Component {
           success={detail => this.onSuccess(detail)}
           dynamic={true}
         />
-        <Divider />
+        <Divider hidden={true}/>
         <CCAM.Detail detail={this.state.detail} />
       </React.Fragment>
     );
