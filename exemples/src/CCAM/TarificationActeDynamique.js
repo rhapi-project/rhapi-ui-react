@@ -8,8 +8,7 @@ const client = new Client("https://demo.rhapi.net/demo01");
 
 export default class CCAMTarificationDynamique extends React.Component {
   state = {
-    actes: [],
-    codActe: ""
+    actes: []
   };
 
   onSelection = acte => {

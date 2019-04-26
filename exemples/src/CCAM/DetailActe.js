@@ -22,6 +22,7 @@ export default class CCAMDetailActe extends React.Component {
   };
 
   onSuccess = obj => {
+    console.log(obj);
     this.setState({ detail: obj });
   }
   render() {
