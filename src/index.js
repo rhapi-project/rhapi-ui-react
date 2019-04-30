@@ -1,5 +1,6 @@
 // CCAM
 export CCAM from "./CCAM";
+export Shared from "./Shared";
 
 // Patients
 // ...

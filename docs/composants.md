@@ -21,6 +21,18 @@ Composant de présentation d'une fiche d'un acte. Celui-ci utilise le composant 
 | date | string | Date de la tarification de l'acte, au format ISO. Par défaut la date du jour |
 | modificateurs | string | Modificateurs appliqués à l'acte, par défaut une chaîne de caractères vide |
 
+## Search
+Composant pour la recherche des actes en CCAM. Retourne la liste des actes sous forme d'un tableau d'objets JSON.
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| onClear | func | Callback d'une ràz |
+| onLoadActes | func | Callback résultat de la recherche |
+| onSelectionChange | func | Callback pour retourner l'acte sélectionné |
+| search | object | Documentation semantic-ui-react [Search](https://react.semantic-ui.com/modules/search) |
+| searchInputLength | number | Nombre minimum de caractères pour déclencher la recherche d'actes |
+
 ## Tarification
 Composant de facturation d'un acte CCAM
 #### Props du composant
@@ -38,18 +50,6 @@ Composant de facturation d'un acte CCAM
 | hidden | bool | Cacher l'interface du composant de tarification |
 | modificateurs | string | Modificateurs appliqués à l'acte, par défaut une chaîne de caractères vide |
 | success | func | Callback succès de la tarification |
-
-## Search
-Composant pour la recherche des actes en CCAM. Retourne la liste des actes sous forme d'un tableau d'objets JSON.
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| onClear | func | Callback d'une ràz |
-| onLoadActes | func | Callback résultat de la recherche |
-| onSelectionChange | func | Callback pour retourner l'acte sélectionné |
-| search | object | Documentation semantic-ui-react [Search](https://react.semantic-ui.com/modules/search) |
-| searchInputLength | number | Nombre minimum de caractères pour déclencher la recherche d'actes |
 
 ## Table
 Composant montrant sous forme d'un tableau les actes obtenus après une recherche par mot clé.

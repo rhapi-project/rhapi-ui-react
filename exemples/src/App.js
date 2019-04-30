@@ -3,7 +3,7 @@ import { Divider, Grid, Header, Icon, Menu } from "semantic-ui-react";
 
 //import _ from "lodash";
 
-// Les exemples
+// Exemples CCAM
 import CCAMDetailActe from "./CCAM/DetailActe";
 import CCAMFicheActe from "./CCAM/FicheActe";
 import CCAMSearchBasic from "./CCAM/RechercheActe";
@@ -12,6 +12,9 @@ import CCAMPaginationPages from "./CCAM/TableAvecPagination";
 import CCAMPaginationMore from "./CCAM/TableSansPagination";
 import CCAMTarificationDynamique from "./CCAM/TarificationActeDynamique";
 import CCAMTarificationStatique from "./CCAM/TarificationActeStatique";
+
+// Exemples Shared
+import SharedGrilleDents from "./Shared/GrilleDents";
 
 const ghBaseUrl =
   "https://github.com/rhapi-project/rhapi-ui-react/blob/master/exemples/src";
@@ -156,9 +159,12 @@ export default class App extends React.Component {
         <Menu.Header>Shared</Menu.Header>
         <Menu.Menu>
           <Menu.Item
-            name="Composant 1"
-            //active
-            //onClick
+            name="GrilleDents"
+            active={
+              this.state.group === "Shared" &&
+              this.state.name === "GrilleDents"
+            }
+            onClick={(e, d) => this.handleClickItem("Shared", d.name)}
           />
           <Menu.Item
             name="Composant 2"
@@ -241,8 +247,14 @@ class ViewExample extends React.Component {
       } else {
         return "";
       }
-    } else {
-      return "";
+    }
+
+    if (group === "Shared") {
+      if (name === "GrilleDents") {
+        return <SharedGrilleDents />;
+      } else {
+        return "";
+      }
     }
   };
 
