@@ -1,12 +1,5 @@
 # CCAM
 
-## Detail
-Détail d'un acte tarifé
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| detail | object | Objet contenant le détail d'un acte. Toutes les informations sur un acte tarifé, la date, l'activité, la grille de tarification, les modificateurs appliqués, la phase et le tarif. |
-
 ## Fiche
 Composant de présentation d'une fiche d'un acte. Celui-ci utilise le composant de Tarification
 #### Props du composant
@@ -80,3 +73,10 @@ Composant montrant sous forme d'un tableau les actes obtenus après une recherch
 | btnPrev | object | Props semantic du bouton pour aller à la page précédente, par défaut un objet vide "{}" |
 | btnMore | object | Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}" |
 | mode | string | mode de pagination 'pages' ou 'more', par défaut "pages" |
+
+## Detail
+Détail d'un acte tarifé
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| detail | object | Objet contenant le détail d'un acte. Toutes les informations sur un acte tarifé, la date, l'activité, la grille de tarification, les modificateurs appliqués, la phase et le tarif. |

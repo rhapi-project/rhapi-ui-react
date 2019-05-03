@@ -1,8 +1,8 @@
 import React from "react";
-import GrilleDents from "./GrilleDents";
+import Localisations from "./Localisations";
 
-export default class CCAM extends React.Component {
-  static GrilleDents = GrilleDents;
+export default class Shared extends React.Component {
+  static Localisations = Localisations;
   render() {
     const { children } = this.props;
     return (

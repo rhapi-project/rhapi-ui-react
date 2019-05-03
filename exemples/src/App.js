@@ -14,7 +14,7 @@ import CCAMTarificationDynamique from "./CCAM/TarificationActeDynamique";
 import CCAMTarificationStatique from "./CCAM/TarificationActeStatique";
 
 // Exemples Shared
-import SharedGrilleDents from "./Shared/GrilleDents";
+import SharedLocalisations from "./Shared/Localisations";
 
 const ghBaseUrl =
   "https://github.com/rhapi-project/rhapi-ui-react/blob/master/exemples/src";
@@ -159,10 +159,10 @@ export default class App extends React.Component {
         <Menu.Header>Shared</Menu.Header>
         <Menu.Menu>
           <Menu.Item
-            name="GrilleDents"
+            name="Localisations"
             active={
               this.state.group === "Shared" &&
-              this.state.name === "GrilleDents"
+              this.state.name === "Localisations"
             }
             onClick={(e, d) => this.handleClickItem("Shared", d.name)}
           />
@@ -250,8 +250,8 @@ class ViewExample extends React.Component {
     }
 
     if (group === "Shared") {
-      if (name === "GrilleDents") {
-        return <SharedGrilleDents />;
+      if (name === "Localisations") {
+        return <SharedLocalisations />;
       } else {
         return "";
       }
