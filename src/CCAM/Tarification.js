@@ -4,7 +4,8 @@ import { Checkbox, Form, Header, Message, Segment } from "semantic-ui-react";
 
 import _ from "lodash";
 import moment from "moment";
-//import "moment/locale/fr";
+
+import { tarif } from "../lib/Helpers";
 
 const propDefs = {
   description: "Composant de facturation d'un acte CCAM",
@@ -296,6 +297,17 @@ export default class Tarification extends React.Component {
       return "";
     }
 
+    let tarifPrint = (
+      <React.Fragment>
+        <Header as="h2">
+          Tarif :{" "}
+          {!_.isEmpty(this.state.tarif)
+            ? tarif(this.state.tarif.pu)
+            : "Inconnu"}
+        </Header>
+      </React.Fragment>
+    );
+
     if (!_.isEmpty(this.state.errorMessage)) {
       return (
         <React.Fragment>
@@ -505,28 +517,12 @@ export default class Tarification extends React.Component {
               </div>
             </Form.Input>
           </Form>
-
-          {/* Tarif affiché : 2 chiffres après la virgule (fonction toFixed)*/}
-          <Header as="h2">
-            Tarif :{" "}
-            {!_.isEmpty(this.state.tarif)
-              ? this.state.tarif.pu.toFixed(2) + " €"
-              : "Inconnu"}
-          </Header>
+          {tarifPrint}
         </React.Fragment>
       );
     } else if (!_.isEmpty(this.state.acte) && !this.props.dynamic) {
       // Tarification statique
-      return (
-        <React.Fragment>
-          <Header as="h2">
-            Tarif :{" "}
-            {!_.isEmpty(this.state.tarif)
-              ? this.state.tarif.pu.toFixed(2) + " €"
-              : "Inconnu"}
-          </Header>
-        </React.Fragment>
-      );
+      return tarifPrint;
     } else {
       return "";
     }

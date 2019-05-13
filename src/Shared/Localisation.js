@@ -7,9 +7,9 @@ export default class Localisation extends React.Component {
     content: PropTypes.string.isRequired,
     isSelected: PropTypes.bool.isRequired,
     onClick: PropTypes.func.isRequired
-  }
+  };
   render() {
-    return(
+    return (
       <div>
         <Button
           basic={!this.props.isSelected}
@@ -19,6 +19,6 @@ export default class Localisation extends React.Component {
           onClick={(e, d) => this.props.onClick(d.content)}
         />
       </div>
-    )
+    );
   }
 }

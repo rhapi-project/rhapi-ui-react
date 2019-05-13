@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { Search } from "semantic-ui-react";
 
 import _ from "lodash";
+import moment from "moment";
 
 const propDefs = {
   description:
@@ -10,6 +11,9 @@ const propDefs = {
     "d'objets JSON.",
   example: "SearchBasic",
   propDocs: {
+    date: "Date effective de l'acte. Par défaut date du jour",
+    executant: "Limiter la recherche d'actes à un domaine",
+    localisation: "Limiter la recherche aux seuls concernant les dents renseignées",
     onClear: "Callback d'une ràz",
     onLoadActes: "Callback résultat de la recherche",
     onSelectionChange: "Callback pour retourner l'acte sélectionné",
@@ -19,6 +23,8 @@ const propDefs = {
   },
   propTypes: {
     client: PropTypes.any.isRequired,
+    executant: PropTypes.string,
+    localisation: PropTypes.string,
     onClear: PropTypes.func,
     onLoadActes: PropTypes.func,
     onSelectionChange: PropTypes.func,
@@ -31,6 +37,12 @@ export default class Search2 extends React.Component {
   static propTypes = propDefs.propTypes; // peut s'utiliser comme ceci
   // https://reactjs.org/docs/typechecking-with-proptypes.html
 
+  static defaultProps = {
+    date: moment().toISOString(),
+    executant: "",
+    localisation: ""
+  };
+
   componentWillMount() {
     this.setState({
       typeSearch: "keyword",
@@ -40,7 +52,7 @@ export default class Search2 extends React.Component {
         : this.getSemanticSearchProps(this.props.search),
       value: ""
     });
-  }
+  };
 
   getSemanticSearchProps = search => {
     let obj = search;
@@ -53,7 +65,18 @@ export default class Search2 extends React.Component {
   // fonction this.props.getActesObject est faite (si elle est définie)
   // Cette fonction est sensée renvoyer le résultat de la recherche au composant parent.
   loadActes = inputVal => {
-    let params = { texte: inputVal };
+    let params = {
+      texte: inputVal,
+      date: this.props.date,
+      executant: this.props.executant,
+      localisation: this.props.localisation
+    };
+    if (_.isEmpty(params.executant)) {
+      _.unset(params, "executant");
+    }
+    if (_.isEmpty(params.localisation)) {
+      _.unset(params, "localisation");
+    }
     this.props.client.CCAM.readAll(
       params,
       actes => {

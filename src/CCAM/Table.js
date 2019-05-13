@@ -4,13 +4,6 @@ import { Button, Table } from "semantic-ui-react";
 
 import _ from "lodash";
 
-const styles = {
-  coveredTableRow: {
-    cursor: "pointer",
-    fontWeight: "bold"
-  }
-};
-
 const propDefs = {
   description:
     "Composant montrant sous forme d'un tableau les actes obtenus après une recherche par mot clé.",
@@ -98,11 +91,11 @@ export default class Table2 extends React.Component {
     btnMoreContent: "Plus de résultats",
     btnNextContent: "",
     btnPrevContent: "",
-    btnFirstIcon: "fast backward",
-    btnLastIcon: "fast forward",
+    btnFirstIcon: "angle double left",
+    btnLastIcon: "angle double right",
     btnMoreIcon: "",
-    btnNextIcon: "step forward",
-    btnPrevIcon: "step backward",
+    btnNextIcon: "chevron right",
+    btnPrevIcon: "chevron left",
     btnFirst: {},
     btnLast: {},
     btnNext: {},
@@ -114,8 +107,7 @@ export default class Table2 extends React.Component {
   componentWillMount() {
     this.setState({
       actes: this.props.actes,
-      informations: this.props.informations,
-      mouseOverItem: {}
+      informations: this.props.informations
     });
   }
 
@@ -199,7 +191,7 @@ export default class Table2 extends React.Component {
     if (!_.isEmpty(this.props.actes)) {
       return (
         <React.Fragment>
-          <Table {...this.props.table}>
+          <Table {...this.props.table} selectable={true}>
             {noHeaders ? (
               <Table.Header />
             ) : (
@@ -220,17 +212,6 @@ export default class Table2 extends React.Component {
                     <Table.Row
                       key={acte.codActe}
                       onClick={(e, d) => this.onSelection(acte)}
-                      onMouseOver={e => {
-                        this.setState({ mouseOverItem: acte });
-                      }}
-                      onMouseOut={e => {
-                        this.setState({ mouseOverItem: {} });
-                      }}
-                      style={
-                        acte === this.state.mouseOverItem
-                          ? styles.coveredTableRow
-                          : {}
-                      }
                     >
                       <Table.Cell>{acte.codActe}</Table.Cell>
                       <Table.Cell>{acte.nomLong}</Table.Cell>
@@ -240,17 +221,6 @@ export default class Table2 extends React.Component {
                     <Table.Row
                       key={acte.codActe}
                       onClick={(e, d) => this.onSelection(acte)}
-                      onMouseOver={e => {
-                        this.setState({ mouseOverItem: acte });
-                      }}
-                      onMouseOut={e => {
-                        this.setState({ mouseOverItem: {} });
-                      }}
-                      style={
-                        acte === this.state.mouseOverItem
-                          ? styles.coveredTableRow
-                          : {}
-                      }
                     >
                       {_.map(this.props.headers, header => (
                         <Table.Cell key={header.champ}>
