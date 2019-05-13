@@ -1,6 +1,6 @@
 import React from "react";
 import { Shared } from "rhapi-ui-react";
-import { Divider, Input, Modal } from "semantic-ui-react";
+import { Divider, Input } from "semantic-ui-react";
 
 export default class SharedLocalisations extends React.Component {
   componentWillMount() {
@@ -25,18 +25,18 @@ export default class SharedLocalisations extends React.Component {
           onClick={(e, d) => this.setState({ openLocalisations: true })}
           value={this.state.dents}
         />
-        <Modal size="large" open={this.state.openLocalisations} onClose={this.close}>
-          <Modal.Header>Sélectionner une ou plusieurs dents</Modal.Header>
-          <Modal.Content>
-            <Shared.Localisations
-              dents={this.state.dents}
-              onSelection={dents => {
-                this.setState({ dents: dents });
-                this.close();
-              }}
-            />
-          </Modal.Content>
-        </Modal>
+        <Divider hidden={true} />
+        <Shared.Localisations 
+          dents={this.state.dents}
+          onSelection={dents => {
+            this.setState({ dents: dents });
+          }}
+          modal={{
+            size: "large",
+            open: this.state.openLocalisations,
+            onClose: this.close
+          }}
+        />
       </React.Fragment>
     );
   }

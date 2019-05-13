@@ -28,8 +28,6 @@ export default class CCAMPaginationPages extends React.Component {
   };
 
   render() {
-    // props semantic du bouton
-    let btn = { secondary: true };
     return (
       <React.Fragment>
         <div>
@@ -62,8 +60,6 @@ export default class CCAMPaginationPages extends React.Component {
           informations={this.state.informations}
           onPageSelect={this.onPageSelect}
           showPagination={true}
-          btnFirst={btn}
-          btnLast={btn}
         />
       </React.Fragment>
     );

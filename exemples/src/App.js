@@ -12,6 +12,7 @@ import CCAMPaginationPages from "./CCAM/TableAvecPagination";
 import CCAMPaginationMore from "./CCAM/TableSansPagination";
 import CCAMTarificationDynamique from "./CCAM/TarificationActeDynamique";
 import CCAMTarificationStatique from "./CCAM/TarificationActeStatique";
+import CCAMTarificationDentaire from "./CCAM/TarificationDentaire";
 
 // Exemples Shared
 import SharedLocalisations from "./Shared/Localisations";
@@ -95,6 +96,14 @@ export default class App extends React.Component {
             active={
               this.state.group === "CCAM" &&
               this.state.name === "TarificationActeDynamique"
+            }
+            onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
+          />
+          <Menu.Item
+            name="TarificationDentaire"
+            active={
+              this.state.group === "CCAM" &&
+              this.state.name === "TarificationDentaire"
             }
             onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
           />
@@ -244,6 +253,8 @@ class ViewExample extends React.Component {
         return <CCAMDetailActe />
       } else if (name === "FicheActe") {
         return <CCAMFicheActe />
+      } else if (name === "TarificationDentaire"){
+        return <CCAMTarificationDentaire />;
       } else {
         return "";
       }

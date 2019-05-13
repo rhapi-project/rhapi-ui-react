@@ -7,10 +7,11 @@
   "dependencies": {
     "prop-types": "^15.6.2",
     "react": "^16.4.1",
+    "react-day-picker": "^7.3.0",
     "react-dom": "^16.4.1",
     "react-scripts": "^1.1.4",
-    "rhapi-ui-react": "file:..",
     "rhapi-client": "^1.0.17",
+    "rhapi-ui-react": "file:..",
     "semantic-ui-css": "2.2",
     "semantic-ui-react": "^0.80.0"
   },
