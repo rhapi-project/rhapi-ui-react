@@ -7,13 +7,19 @@ import moment from "moment";
 
 const propDefs = {
   description:
-    "Composant pour la recherche des actes en CCAM. Retourne la liste des actes sous forme d'un tableau " +
+    "Composant pour la recherche des actes en CCAM (par code CCAM ou mot-clé). Retourne la liste des actes sous forme d'un tableau " +
     "d'objets JSON.",
   example: "SearchBasic",
   propDocs: {
+    code: "Code d'un acte recherché",
     date: "Date effective de l'acte. Par défaut date du jour",
-    executant: "Limiter la recherche d'actes à un domaine",
-    localisation: "Limiter la recherche aux seuls concernant les dents renseignées",
+    executant: "Limiter la recherche aux seuls actes d'une profession de santé. "
+      + "Exemple : D1(dentistes), SF(sages-femmes)",
+    limit: "Valeur de pagination",
+    localisation: "Limiter la recherche aux actes concernant les dents renseignées "
+      + "selon la norme internationale ISO-3950, sans séparateur entre les numéros des dents "
+      + "(par exemple localisation=1121 pour les deux incisives centrales maxillaires ou "
+      + "localisation=18 pour la dent de sagesse maxillaire droite)",
     onClear: "Callback d'une ràz",
     onLoadActes: "Callback résultat de la recherche",
     onSelectionChange: "Callback pour retourner l'acte sélectionné",
@@ -24,6 +30,7 @@ const propDefs = {
   propTypes: {
     client: PropTypes.any.isRequired,
     executant: PropTypes.string,
+    limit: PropTypes.number,
     localisation: PropTypes.string,
     onClear: PropTypes.func,
     onLoadActes: PropTypes.func,
@@ -38,8 +45,10 @@ export default class Search2 extends React.Component {
   // https://reactjs.org/docs/typechecking-with-proptypes.html
 
   static defaultProps = {
+    code: "",
     date: moment().toISOString(),
     executant: "",
+    limit: 10,
     localisation: ""
   };
 
@@ -50,8 +59,18 @@ export default class Search2 extends React.Component {
       search: _.isUndefined(this.props.search)
         ? this.getSemanticSearchProps({})
         : this.getSemanticSearchProps(this.props.search),
-      value: ""
+      value: this.props.code
     });
+  };
+
+  componentWillReceiveProps(next) {
+    if (next.code !== this.props.code ||
+        next.date !== this.props.date ||
+        next.executant !== this.props.executant ||
+        next.limit !== this.props.limit ||
+        next.localisation !== this.props.localisation) {
+          this.search(next.code);
+    }
   };
 
   getSemanticSearchProps = search => {
@@ -69,7 +88,8 @@ export default class Search2 extends React.Component {
       texte: inputVal,
       date: this.props.date,
       executant: this.props.executant,
-      localisation: this.props.localisation
+      localisation: this.props.localisation,
+      limit: this.props.limit
     };
     if (_.isEmpty(params.executant)) {
       _.unset(params, "executant");
