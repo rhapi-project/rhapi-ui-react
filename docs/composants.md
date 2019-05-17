@@ -1,23 +1,5 @@
 # CCAM
 
-## Code
-Composant pour la recherche des actes en CCAM. Retourne la liste des actes sous forme d'un tableau d'objets JSON.
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| executant | string | Limiter la recherche aux seuls actes d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes) |
-| limit | number | Valeur de pagination |
-| localisation | string | Limiter la recherche aux actes concernant les dents renseignées selon la norme internationale ISO-3950, sans séparateur entre les numéros des dents (par exemple localisation=1121 pour les deux incisives centrales maxillaires ou localisation=18 pour la dent de sagesse maxillaire droite) |
-| onSelection | func | Callback à la sélection d'un acte |
-
-## Detail
-Détail d'un acte tarifé
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| detail | object | Objet contenant le détail d'un acte. Toutes les informations sur un acte tarifé, la date, l'activité, la grille de tarification, les modificateurs appliqués, la phase et le tarif. |
-
 ## Fiche
 Composant de présentation d'une fiche d'un acte. Celui-ci utilise le composant de Tarification
 #### Props du composant
@@ -32,12 +14,20 @@ Composant de présentation d'une fiche d'un acte. Celui-ci utilise le composant 
 | date | string | Date de la tarification de l'acte, au format ISO. Par défaut la date du jour |
 | modificateurs | string | Modificateurs appliqués à l'acte, par défaut une chaîne de caractères vide |
 
+## Detail
+Détail d'un acte tarifé
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| detail | object | Objet contenant le détail d'un acte. Toutes les informations sur un acte tarifé, la date, l'activité, la grille de tarification, les modificateurs appliqués, la phase et le tarif. |
+
 ## Search
 Composant pour la recherche des actes en CCAM (par code CCAM ou mot-clé). Retourne la liste des actes sous forme d'un tableau d'objets JSON.
 #### Props du composant
 | Props | Type | Description |
 | ---- | ----- | ------ |
 | client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
 | executant | string | Limiter la recherche aux seuls actes d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes) |
 | limit | number | Valeur de pagination |
 | localisation | string | Limiter la recherche aux actes concernant les dents renseignées selon la norme internationale ISO-3950, sans séparateur entre les numéros des dents (par exemple localisation=1121 pour les deux incisives centrales maxillaires ou localisation=18 pour la dent de sagesse maxillaire droite) |
@@ -76,6 +66,20 @@ Composant montrant sous forme d'un tableau les actes obtenus après une recherch
 | btnPrev | object | Props semantic du bouton pour aller à la page précédente, par défaut un objet vide "{}" |
 | btnMore | object | Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}" |
 | mode | string | mode de pagination 'pages' ou 'more', par défaut "pages" |
+
+## ModalSearch
+Ce composant est une modal Semantic de recherche d'un acte. Il intègre un date picker, les composants CCAM.Search, CCAM.Table et Shared.Localisations
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| acte | object | Acte sélectionné |
+| date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
+| dents | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
+| executant | string | Limiter la recherche aux seuls actes d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes) |
+| localisationPicker | bool | Affichage de la grille de saisie des localisations dentaires |
+| open | bool | Ouverture de la modal |
+| onClose | func | Callback à la fermeture de la modal |
 
 ## Tarification
 Composant de facturation d'un acte CCAM
