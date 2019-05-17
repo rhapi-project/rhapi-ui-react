@@ -12,10 +12,10 @@ import CCAMPaginationPages from "./CCAM/TableAvecPagination";
 import CCAMPaginationMore from "./CCAM/TableSansPagination";
 import CCAMTarificationDynamique from "./CCAM/TarificationActeDynamique";
 import CCAMTarificationStatique from "./CCAM/TarificationActeStatique";
-import CCAMTarificationDentaire from "./CCAM/TarificationDentaire";
 
 // Exemples Shared
 import SharedLocalisations from "./Shared/Localisations";
+import SharedSaisieActesDentaire from "./Shared/SaisieActes";
 
 const ghBaseUrl =
   "https://github.com/rhapi-project/rhapi-ui-react/blob/master/exemples/src";
@@ -100,14 +100,6 @@ export default class App extends React.Component {
             onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
           />
           <Menu.Item
-            name="TarificationDentaire"
-            active={
-              this.state.group === "CCAM" &&
-              this.state.name === "TarificationDentaire"
-            }
-            onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
-          />
-          <Menu.Item
             name="DetailActe"
             active={
               this.state.group === "CCAM" &&
@@ -172,6 +164,14 @@ export default class App extends React.Component {
             active={
               this.state.group === "Shared" &&
               this.state.name === "Localisations"
+            }
+            onClick={(e, d) => this.handleClickItem("Shared", d.name)}
+          />
+          <Menu.Item
+            name="SaisieActes"
+            active={
+              this.state.group === "Shared" &&
+              this.state.name === "SaisieActes"
             }
             onClick={(e, d) => this.handleClickItem("Shared", d.name)}
           />
@@ -253,8 +253,6 @@ class ViewExample extends React.Component {
         return <CCAMDetailActe />
       } else if (name === "FicheActe") {
         return <CCAMFicheActe />
-      } else if (name === "TarificationDentaire"){
-        return <CCAMTarificationDentaire />;
       } else {
         return "";
       }
@@ -263,6 +261,8 @@ class ViewExample extends React.Component {
     if (group === "Shared") {
       if (name === "Localisations") {
         return <SharedLocalisations />;
+      } else if (name === "SaisieActes") {
+        return <SharedSaisieActesDentaire />
       } else {
         return "";
       }
