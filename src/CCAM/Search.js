@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Search } from "semantic-ui-react";
-
 import _ from "lodash";
 import moment from "moment";
 
@@ -11,8 +10,7 @@ const propDefs = {
     "d'objets JSON.",
   example: "SearchBasic",
   propDocs: {
-    code: "Code d'un acte recherché",
-    date: "Date effective de l'acte. Par défaut date du jour",
+    date: "Date effective de l'acte au format ISO. Par défaut date du jour",
     executant: "Limiter la recherche aux seuls actes d'une profession de santé. "
       + "Exemple : D1(dentistes), SF(sages-femmes)",
     limit: "Valeur de pagination",
@@ -29,6 +27,7 @@ const propDefs = {
   },
   propTypes: {
     client: PropTypes.any.isRequired,
+    date: PropTypes.string,
     executant: PropTypes.string,
     limit: PropTypes.number,
     localisation: PropTypes.string,
@@ -45,11 +44,10 @@ export default class Search2 extends React.Component {
   // https://reactjs.org/docs/typechecking-with-proptypes.html
 
   static defaultProps = {
-    code: "",
     date: moment().toISOString(),
     executant: "",
     limit: 10,
-    localisation: ""
+    localisation: "",
   };
 
   componentWillMount() {
@@ -59,17 +57,16 @@ export default class Search2 extends React.Component {
       search: _.isUndefined(this.props.search)
         ? this.getSemanticSearchProps({})
         : this.getSemanticSearchProps(this.props.search),
-      value: this.props.code
+      value: "",
     });
   };
 
   componentWillReceiveProps(next) {
-    if (next.code !== this.props.code ||
-        next.date !== this.props.date ||
+    if( next.date !== this.props.date ||
         next.executant !== this.props.executant ||
         next.limit !== this.props.limit ||
         next.localisation !== this.props.localisation) {
-          this.search(next.code);
+          this.search(this.state.value, next.date, next.localisation);
     }
   };
 
@@ -83,12 +80,12 @@ export default class Search2 extends React.Component {
   // Au moment de la recherche des actes, un appel de la
   // fonction this.props.getActesObject est faite (si elle est définie)
   // Cette fonction est sensée renvoyer le résultat de la recherche au composant parent.
-  loadActes = inputVal => {
+  loadActes = (inputVal, dateStr, localisation) => {
     let params = {
       texte: inputVal,
-      date: this.props.date,
+      date: dateStr,
       executant: this.props.executant,
-      localisation: this.props.localisation,
+      localisation: localisation,
       limit: this.props.limit
     };
     if (_.isEmpty(params.executant)) {
@@ -125,14 +122,18 @@ export default class Search2 extends React.Component {
   // soit >= à this.props.searchInputLenght.
   // Sinon par défaut, la longeur de la saisie nécessaire pour lancer une recherche
   // est de 1
-  search = inputVal => {
-    this.setState({ value: inputVal });
+  search = (inputVal, dateStr, localisation) => {
+    this.setState({
+      value: inputVal,
+      date: dateStr,
+      localisation: localisation
+    });
     let searchInputLength = _.isUndefined(this.props.searchInputLength)
       ? 1
       : this.props.searchInputLength;
     if (inputVal.length >= searchInputLength) {
       if (this.state.typeSearch === "keyword") {
-        this.loadActes(inputVal);
+        this.loadActes(inputVal, dateStr, localisation);
       }
     }
 
@@ -148,15 +149,13 @@ export default class Search2 extends React.Component {
 
   render() {
     return (
-      <React.Fragment>
-        <Search
-          onSearchChange={(e, d) => this.search(d.value)}
-          onResultSelect={(e, d) => this.search(d.result.title)}
-          results={this.state.results}
-          value={this.state.value}
-          {...this.state.search}
-        />
-      </React.Fragment>
+      <Search
+        onSearchChange={(e, d) => this.search(d.value, this.props.date, this.props.localisation)}
+        onResultSelect={(e, d) => this.search(d.result.title)}
+        results={this.state.results}
+        value={this.state.value}
+        {...this.state.search}
+      />
     );
   }
 }

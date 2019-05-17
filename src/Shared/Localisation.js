@@ -17,6 +17,7 @@ export default class Localisation extends React.Component {
           content={this.props.content}
           icon={true}
           onClick={(e, d) => this.props.onClick(d.content)}
+          size="mini"
         />
       </div>
     );

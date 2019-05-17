@@ -2,17 +2,17 @@
 //https://www.jakewiesler.com/blog/compound-component-basics/
 
 import React from "react";
-import Code from "./Code";
 import Detail from "./Detail";
 import Fiche from "./Fiche";
+import ModalSearch from "./ModalSearch";
 import Search from "./Search";
 import Table from "./Table";
 import Tarification from "./Tarification";
 
 export default class CCAM extends React.Component {
-  static Code = Code;
   static Detail = Detail;
   static Fiche = Fiche;
+  static ModalSearch = ModalSearch;
   static Table = Table;
   static Search = Search;
   static Tarification = Tarification;

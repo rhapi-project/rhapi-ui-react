@@ -10,7 +10,7 @@ const propDefs = {
   description: "Grille de saisie des localisations dentaires",
   example: "Grille",
   propDocs: {
-    dents: 'Liste des dents sélectionnées. Par défaut ""',
+    dents: 'Liste des dents sélectionnées, séparées par des espaces. Par défaut ""',
     modal: "semantic.modules",
     onSelection: "Callback à la selection d'une liste de dents"
   },
@@ -79,7 +79,7 @@ export default class Localisations extends React.Component {
   render() {
     let padding = "3px";
     let clean = (
-      <div>
+      <span>
         <Button
           icon={true}
           onClick={(e, d) => {
@@ -91,13 +91,14 @@ export default class Localisations extends React.Component {
               this.setState({ selected: [] });
             }
           }}
+          size="tiny"
         >
           <Icon name="erase" color="red" />
         </Button>
-      </div>
+      </span>
     );
     let check = (
-      <div>
+      <span>
         <Button
           icon={true}
           onClick={(e, d) => {
@@ -107,6 +108,7 @@ export default class Localisations extends React.Component {
               this.setState({ multSelection: true });
             }
           }}
+          size="tiny"
         >
           {this.state.multSelection ? (
             <Icon name="check" color="green" />
@@ -114,23 +116,34 @@ export default class Localisations extends React.Component {
             <Icon name="add" />
           )}
         </Button>
-      </div>
+      </span>
+    );
+    let close = (
+      <span>
+        <Button
+          icon={true}
+          onClick={(e, d) => {
+            this.finish(this.state.selected);
+          }}
+          size="tiny"
+        >
+          <Icon name="close" />
+        </Button>
+      </span>
     );
     let grille = (
-      <Grid style={{ position: "relative" }}>
+      <Grid>
       
         {/* 1ère ligne */}
-        <Grid.Row stretched={true} centered={true} style={{ padding: padding }}>
-          <div
+        {/*<Grid.Row stretched={true} centered={true} style={{ padding: padding }}>
+          <span
             style={{
-              display: "flex",
               position: "absolute",
               paddingRight: "60%"
             }}
           >
-            {clean}
-            {check}
-          </div>
+            {clean}{check}
+          </span>
           <Grid.Column>
             <Localisation
               content="01"
@@ -138,17 +151,25 @@ export default class Localisations extends React.Component {
               onClick={d => this.selection(d)}
             />
           </Grid.Column>
-        </Grid.Row>
+        </Grid.Row>*/}
 
         {/* Quadrant */}
         <Grid.Row
-          divided={true}
+          //divided={true}
           stretched={true}
           centered={true}
           style={{ padding: padding }}
         >
-          {_.map(["10", "20"], num => (
-            <Grid.Column key={num} textAlign="center" width={5}>
+          <span
+            style={{
+              position: "absolute",
+              paddingLeft: "55%"
+            }}
+          >
+            {clean}{check}{_.isUndefined(this.props.modal) ? null : close}
+          </span>
+          {_.map(["10", "01", "20"], num => (
+            <Grid.Column key={num} textAlign="center" width={2}>
               <Localisation
                 content={num}
                 isSelected={this.isSelected(num)}
@@ -425,16 +446,15 @@ export default class Localisations extends React.Component {
             />
           </Grid.Column>
         </Grid.Row>
-
-        {/* Quadrant */}
+        
+        {/* Dernière ligne */}
         <Grid.Row
-          divided={true}
           stretched={true}
           centered={true}
           style={{ padding: padding }}
         >
-          {_.map(["40", "30"], num => (
-            <Grid.Column key={num} textAlign="center" width={5}>
+          {_.map(["40", "02", "30"], num => (
+            <Grid.Column key={num} textAlign="center" width={2}>
               <Localisation
                 content={num}
                 isSelected={this.isSelected(num)}
@@ -442,15 +462,6 @@ export default class Localisations extends React.Component {
               />
             </Grid.Column>
           ))}
-        </Grid.Row>
-
-        {/* Dernière ligne */}
-        <Grid.Row stretched={true} centered={true} style={{ padding: padding }}>
-          <Localisation
-            content="02"
-            isSelected={this.isSelected("02")}
-            onClick={d => this.selection(d)}
-          />
         </Grid.Row>
       </Grid>
     );
