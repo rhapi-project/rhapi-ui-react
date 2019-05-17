@@ -4,7 +4,10 @@
 
 [![NPM](https://img.shields.io/npm/v/rhapi-ccam.svg)](https://www.npmjs.com/package/rhapi-ui-react) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
-## Installation et test de la bibliothèque
+
+Tous les composant de cette bibliothèque sont documentés [ici](https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md)
+
+## Installation pour développement et tests sur les exemples
 
 ```bash
 git clone https://github.com/rhapi-project/rhapi-ui-react.git
@@ -25,27 +28,33 @@ npm install
 npm start
 ```
 
-## Installation dans un projet
+## Utilisation dans un projet React
+
+Les librairies [semantic-ui-react](https://react.semantic-ui.com/) et le [client RHAPI](https://github.com/rhapi-project/rhapi-client) sont requis pour ce projet.
+
+A titre d'exemple, nous allons partir sur un projet React créé en utilisant l'outil [create-react-app](https://www.npmjs.com/package/create-react-app).
 
 ```bash
+create-react-app reactapp
+cd reactapp
+npm install --save semantic-ui-react
+npm install --save semantic-ui-css
+npm install --save rhapi-client
 npm install --save rhapi-ui-react
 ```
 
-## Utilisation
-
-Les composants **rhapi-ui-react** utilisent le client [rhapi-client](https://github.com/rhapi-project/rhapi-client) qui doit être préalablement installé dans le projet.
-
-Exemple d'utilisation du composant **CCAM.Search** pour la recherche d'une acte en CCAM : 
+Dans le fichier ***src/App.js*** de notre projet **reactapp** nous allons utiliser les composants **rhapi-ui-react**.
 
 ```jsx
-import React from "react";
+import React from 'react';
 import { Client } from "rhapi-client";
 import { CCAM } from "rhapi-ui-react";
+import "semantic-ui-css/semantic.css";
 
 // Instanciation du client RHAPI sans authentification
 const client = new Client("https://demo.rhapi.net/demo01");
 
-export default class RechercheActe extends React.Component {
+class App extends React.Component {
   render() {
     return (
       <React.Fragment>
@@ -57,9 +66,13 @@ export default class RechercheActe extends React.Component {
     );
   }
 }
+
+export default App;
 ```
 
-Voir les autres exemples d'utilisation dans le répertoire [rhapi-ui-react/exemples](https://github.com/rhapi-project/rhapi-ui-react/tree/master/exemples).
+Cet exemple montre une utilisation simple du composant **CCAM.Search** pour la recherche d'une acte en CCAM.
+
+Voir plus d'exemples d'utilisation [rhapi-ui-react/exemples](https://github.com/rhapi-project/rhapi-ui-react/tree/master/exemples).
 
 ## License
 
