@@ -4,7 +4,11 @@
   "description": "",
   "author": "",
   "license": "MIT",
-  "repository": "",
+  "homepage": "https://github.com/rhapi-project/rhapi-ui-react",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rhapi-project/rhapi-ui-react.git"
+  },
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "jsnext:main": "dist/index.es.js",
@@ -30,15 +34,16 @@
     "semantic-ui-react": "^0.80.0"
   },
   "devDependencies": {
+    "ajv": "^5.0.0",
     "@svgr/rollup": "^2.4.1",
     "babel-core": "^6.26.3",
-    "babel-eslint": "^8.2.5",
+    "babel-eslint": "^7.2.3",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "cross-env": "^5.1.4",
-    "eslint": "^5.0.1",
+    "eslint": "^4.19.1",
     "eslint-config-standard": "^11.0.0",
     "eslint-config-standard-react": "^6.0.0",
     "eslint-plugin-import": "^2.13.0",
