@@ -16,7 +16,7 @@ import CCAMTarificationStatique from "./CCAM/TarificationActeStatique";
 // Exemples Shared
 import SharedLocalisations from "./Shared/Localisations";
 import SharedSaisieActesDentaire from "./Shared/SaisieActes";
-
+import SharedHistoriqueActes from "./Shared/HistoriqueActes";
 const ghBaseUrl =
   "https://github.com/rhapi-project/rhapi-ui-react/blob/master/exemples/src";
 
@@ -102,16 +102,14 @@ export default class App extends React.Component {
           <Menu.Item
             name="DetailActe"
             active={
-              this.state.group === "CCAM" &&
-              this.state.name === "DetailActe"
+              this.state.group === "CCAM" && this.state.name === "DetailActe"
             }
             onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
           />
           <Menu.Item
             name="FicheActe"
             active={
-              this.state.group === "CCAM" &&
-              this.state.name === "FicheActe"
+              this.state.group === "CCAM" && this.state.name === "FicheActe"
             }
             onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
           />
@@ -170,15 +168,17 @@ export default class App extends React.Component {
           <Menu.Item
             name="SaisieActes"
             active={
-              this.state.group === "Shared" &&
-              this.state.name === "SaisieActes"
+              this.state.group === "Shared" && this.state.name === "SaisieActes"
             }
             onClick={(e, d) => this.handleClickItem("Shared", d.name)}
           />
           <Menu.Item
-            name="Composant 2"
-            //active
-            //onClick
+            name="HistoriqueActes"
+            active={
+              this.state.group === "Shared" &&
+              this.state.name === "HistoriqueActes"
+            }
+            onClick={(e, d) => this.handleClickItem("Shared", d.name)}
           />
         </Menu.Menu>
       </Menu.Item>
@@ -250,9 +250,9 @@ class ViewExample extends React.Component {
       } else if (name === "TarificationActeStatique") {
         return <CCAMTarificationStatique />;
       } else if (name === "DetailActe") {
-        return <CCAMDetailActe />
+        return <CCAMDetailActe />;
       } else if (name === "FicheActe") {
-        return <CCAMFicheActe />
+        return <CCAMFicheActe />;
       } else {
         return "";
       }
@@ -262,7 +262,9 @@ class ViewExample extends React.Component {
       if (name === "Localisations") {
         return <SharedLocalisations />;
       } else if (name === "SaisieActes") {
-        return <SharedSaisieActesDentaire />
+        return <SharedSaisieActesDentaire />;
+      } else if (name === "HistoriqueActes") {
+        return <SharedHistoriqueActes />;
       } else {
         return "";
       }
