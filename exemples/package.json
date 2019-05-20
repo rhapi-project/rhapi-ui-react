@@ -23,6 +23,7 @@
     "prettier": "prettier --write src/App.js src/index.js"
   },
   "devDependencies": {
+    "ajv": "^6.9.1",
     "prettier": "^1.16.4"
   }
 }
