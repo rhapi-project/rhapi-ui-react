@@ -50,7 +50,7 @@ export default class HistoriqueActes extends React.Component {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {_.map(this.state.actes, actes => {
+          {_.map(this.state.actes, acte => {
             // Ne pas afficher les codes en # mais colorer la ligne
             // => ex. vert pour #FSE, jaune pour #note, etc...
             // Revoir le rendu de chaque champ (avec moment pour la date, un montant avec ','...)
