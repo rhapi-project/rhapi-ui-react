@@ -15,8 +15,11 @@ import CCAMTarificationStatique from "./CCAM/TarificationActeStatique";
 
 // Exemples Shared
 import SharedLocalisations from "./Shared/Localisations";
-import SharedSaisieActesDentaire from "./Shared/SaisieActes";
-import SharedHistoriqueActes from "./Shared/HistoriqueActes";
+
+// Exemples Actes
+import ActesHistorique from "./Actes/Historique";
+import ActesSaisie from "./Actes/Saisie";
+
 const ghBaseUrl =
   "https://github.com/rhapi-project/rhapi-ui-react/blob/master/exemples/src";
 
@@ -153,6 +156,29 @@ export default class App extends React.Component {
       </Menu.Item>
     );
 
+    let actes = (
+      <Menu.Item>
+        <Menu.Header>Actes</Menu.Header>
+        <Menu.Menu>
+          <Menu.Item
+            name="Saisie"
+            active={
+              this.state.group === "Actes" && this.state.name === "Saisie"
+            }
+            onClick={(e, d) => this.handleClickItem("Actes", d.name)}
+          />
+          <Menu.Item
+            name="Historique"
+            active={
+              this.state.group === "Actes" &&
+              this.state.name === "Historique"
+            }
+            onClick={(e, d) => this.handleClickItem("Actes", d.name)}
+          />
+        </Menu.Menu>
+      </Menu.Item>
+    );
+
     let shared = (
       <Menu.Item>
         <Menu.Header>Shared</Menu.Header>
@@ -162,21 +188,6 @@ export default class App extends React.Component {
             active={
               this.state.group === "Shared" &&
               this.state.name === "Localisations"
-            }
-            onClick={(e, d) => this.handleClickItem("Shared", d.name)}
-          />
-          <Menu.Item
-            name="SaisieActes"
-            active={
-              this.state.group === "Shared" && this.state.name === "SaisieActes"
-            }
-            onClick={(e, d) => this.handleClickItem("Shared", d.name)}
-          />
-          <Menu.Item
-            name="HistoriqueActes"
-            active={
-              this.state.group === "Shared" &&
-              this.state.name === "HistoriqueActes"
             }
             onClick={(e, d) => this.handleClickItem("Shared", d.name)}
           />
@@ -196,6 +207,7 @@ export default class App extends React.Component {
             {ccam}
             {patients}
             {plannings}
+            {actes}
             {shared}
           </Menu>
         </Grid.Column>
@@ -261,10 +273,16 @@ class ViewExample extends React.Component {
     if (group === "Shared") {
       if (name === "Localisations") {
         return <SharedLocalisations />;
-      } else if (name === "SaisieActes") {
-        return <SharedSaisieActesDentaire />;
-      } else if (name === "HistoriqueActes") {
-        return <SharedHistoriqueActes />;
+      } else {
+        return "";
+      }
+    }
+
+    if (group === "Actes") {
+      if (name === "Saisie") {
+        return <ActesSaisie />;
+      } else if (name === "Historique") {
+        return <ActesHistorique />;
       } else {
         return "";
       }

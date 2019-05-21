@@ -11,13 +11,15 @@ const propDefs = {
   example: "SearchBasic",
   propDocs: {
     date: "Date effective de l'acte au format ISO. Par défaut date du jour",
-    executant: "Limiter la recherche aux seuls actes d'une profession de santé. "
-      + "Exemple : D1(dentistes), SF(sages-femmes)",
+    executant:
+      "Limiter la recherche aux seuls actes d'une profession de santé. " +
+      "Exemple : D1(dentistes), SF(sages-femmes)",
     limit: "Valeur de pagination",
-    localisation: "Limiter la recherche aux actes concernant les dents renseignées "
-      + "selon la norme internationale ISO-3950, sans séparateur entre les numéros des dents "
-      + "(par exemple localisation=1121 pour les deux incisives centrales maxillaires ou "
-      + "localisation=18 pour la dent de sagesse maxillaire droite)",
+    localisation:
+      "Limiter la recherche aux actes concernant les dents renseignées " +
+      "selon la norme internationale ISO-3950, sans séparateur entre les numéros des dents " +
+      "(par exemple localisation=1121 pour les deux incisives centrales maxillaires ou " +
+      "localisation=18 pour la dent de sagesse maxillaire droite)",
     onClear: "Callback d'une ràz",
     onLoadActes: "Callback résultat de la recherche",
     onSelectionChange: "Callback pour retourner l'acte sélectionné",
@@ -47,7 +49,7 @@ export default class Search2 extends React.Component {
     date: moment().toISOString(),
     executant: "",
     limit: 10,
-    localisation: "",
+    localisation: ""
   };
 
   componentWillMount() {
@@ -57,18 +59,20 @@ export default class Search2 extends React.Component {
       search: _.isUndefined(this.props.search)
         ? this.getSemanticSearchProps({})
         : this.getSemanticSearchProps(this.props.search),
-      value: "",
+      value: ""
     });
-  };
+  }
 
   componentWillReceiveProps(next) {
-    if( next.date !== this.props.date ||
-        next.executant !== this.props.executant ||
-        next.limit !== this.props.limit ||
-        next.localisation !== this.props.localisation) {
-          this.search(this.state.value, next.date, next.localisation);
+    if (
+      next.date !== this.props.date ||
+      next.executant !== this.props.executant ||
+      next.limit !== this.props.limit ||
+      next.localisation !== this.props.localisation
+    ) {
+      this.search(this.state.value, next.date, next.localisation);
     }
-  };
+  }
 
   getSemanticSearchProps = search => {
     let obj = search;
@@ -150,7 +154,9 @@ export default class Search2 extends React.Component {
   render() {
     return (
       <Search
-        onSearchChange={(e, d) => this.search(d.value, this.props.date, this.props.localisation)}
+        onSearchChange={(e, d) =>
+          this.search(d.value, this.props.date, this.props.localisation)
+        }
         onResultSelect={(e, d) => this.search(d.result.title)}
         results={this.state.results}
         value={this.state.value}

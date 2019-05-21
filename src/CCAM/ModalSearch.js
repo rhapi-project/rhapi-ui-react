@@ -10,16 +10,20 @@ import moment from "moment";
 import { toISOLocalisation } from "../lib/Helpers";
 
 const propDefs = {
-  description: "Ce composant est une modal Semantic de recherche d'un acte. Il intègre "
-    + "un date picker, les composants CCAM.Search, CCAM.Table et Shared.Localisations",
+  description:
+    "Ce composant est une modal Semantic de recherche d'un acte. Il intègre " +
+    "un date picker, les composants CCAM.Search, CCAM.Table et Shared.Localisations",
   example: "ModalSearch",
   propDocs: {
     acte: "Acte sélectionné",
     date: "Date effective de l'acte au format ISO. Par défaut date du jour",
-    dents: 'Liste des dents sélectionnées, séparées par des espaces. Par défaut ""',
-    executant: "Limiter la recherche aux seuls actes d'une profession de santé. "
-    + "Exemple : D1(dentistes), SF(sages-femmes)",
-    localisationPicker: "Affichage de la grille de saisie des localisations dentaires",
+    dents:
+      'Liste des dents sélectionnées, séparées par des espaces. Par défaut ""',
+    executant:
+      "Limiter la recherche aux seuls actes d'une profession de santé. " +
+      "Exemple : D1(dentistes), SF(sages-femmes)",
+    localisationPicker:
+      "Affichage de la grille de saisie des localisations dentaires",
     open: "Ouverture de la modal",
     onClose: "Callback à la fermeture de la modal"
   },
@@ -53,7 +57,7 @@ export default class ModalSearch extends React.Component {
       dents: this.props.dents,
       informations: {}
     });
-  };
+  }
 
   onClose = () => {
     if (!_.isUndefined(this.props.onClose)) {
@@ -62,7 +66,11 @@ export default class ModalSearch extends React.Component {
   };
 
   onLoadActes = obj => {
-    this.setState({ actes: obj.results, acte:{}, informations: obj.informations });
+    this.setState({
+      actes: obj.results,
+      acte: {},
+      informations: obj.informations
+    });
   };
 
   onPageSelect = obj => {
@@ -73,18 +81,22 @@ export default class ModalSearch extends React.Component {
   };
 
   onSelection = acte => {
-    this.props.onSelectionActe(this.props.rowIndex, acte, this.state.date, this.state.dents);
+    this.props.onSelectionActe(
+      this.props.rowIndex,
+      acte,
+      this.state.date,
+      this.state.dents
+    );
     this.props.onClose();
-  }
+  };
 
   render() {
-    let localisation = 
-      this.props.localisationPicker
-        ? <Localisations
-            dents={this.state.dents}
-            onSelection={dents => this.setState({ dents: dents }) }
-          />
-        : null;
+    let localisation = this.props.localisationPicker ? (
+      <Localisations
+        dents={this.state.dents}
+        onSelection={dents => this.setState({ dents: dents })}
+      />
+    ) : null;
     let tableProps = {
       celled: true,
       style: { width: "100%" }
@@ -94,7 +106,7 @@ export default class ModalSearch extends React.Component {
         <Modal.Content>
           {localisation}
           <Divider />
-          <Search2 
+          <Search2
             client={this.props.client}
             date={this.state.date}
             executant={this.props.executant}
@@ -104,25 +116,28 @@ export default class ModalSearch extends React.Component {
           />
           <Divider hidden={true} />
           <div style={{ height: "350px", overflow: "auto" }}>
-              {_.isEmpty(this.state.actes)
-                ? <div style={{ textAlign: "center" }}> 
-                    <Header as="h3" icon={true} style={{ marginTop: "10%", verticalAlign: "middle" }}>
-                      <Icon name="search" />
-                      Recherche d'un acte en CCAM
-                    </Header>
-                  </div>
-                : null
-              }
-              <Table2 
-                client={this.props.client}
-                actes={this.state.actes}
-                informations={this.state.informations}
-                onPageSelect={this.onPageSelect}
-                onSelection={this.onSelection}
-                table={tableProps}
-                showPagination={true}
-              />
-            </div>
+            {_.isEmpty(this.state.actes) ? (
+              <div style={{ textAlign: "center" }}>
+                <Header
+                  as="h3"
+                  icon={true}
+                  style={{ marginTop: "10%", verticalAlign: "middle" }}
+                >
+                  <Icon name="search" />
+                  Recherche d'un acte en CCAM
+                </Header>
+              </div>
+            ) : null}
+            <Table2
+              client={this.props.client}
+              actes={this.state.actes}
+              informations={this.state.informations}
+              onPageSelect={this.onPageSelect}
+              onSelection={this.onSelection}
+              table={tableProps}
+              showPagination={true}
+            />
+          </div>
         </Modal.Content>
       </Modal>
     );

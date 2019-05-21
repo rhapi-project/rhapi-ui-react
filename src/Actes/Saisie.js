@@ -18,7 +18,7 @@ const propDefs = {
   }
 };
 
-export default class SaisiesDentaires extends React.Component {
+export default class Saisie extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
     lignes: 5
