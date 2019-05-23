@@ -63,24 +63,19 @@ export default class Historique extends React.Component {
     });
   };
 
-  onHandleRow = (e,id) => {
+  onHandleRow = (e, id) => {
     console.log(id);
 
-    if(e.type === 'click') {
+    if (e.type === "click") {
       console.log("Left click");
-    } else if (e.type === 'contextmenu') {
-      console.log("Right click")
+    } else if (e.type === "contextmenu") {
+      console.log("Right click");
     }
-  }
+  };
 
   render() {
     return (
-      <Table 
-        celled={true} 
-        striped={true} 
-        selectable={true} 
-        sortable={true}
-      >
+      <Table celled={true} striped={true} selectable={true} sortable={true}>
         <Table.Header>
           <Table.Row textAlign="center">
             <Table.HeaderCell
@@ -124,11 +119,11 @@ export default class Historique extends React.Component {
             }
 
             return (
-              <Table.Row 
+              <Table.Row
                 key={acte.id}
-                onClick={(e) => this.onHandleRow(e,acte.id)}
-                onContextMenu={(e) => this.onHandleRow(e,acte.id)}
-                style={{ 
+                onClick={e => this.onHandleRow(e, acte.id)}
+                onContextMenu={e => this.onHandleRow(e, acte.id)}
+                style={{
                   color: textColor
                 }}
               >
@@ -145,7 +140,7 @@ export default class Historique extends React.Component {
                   {acte.cotation}
                 </Table.Cell>
                 <Table.Cell style={{ backgroundColor: backColor }}>
-                  {_.isEmpty(icon)?'':<Icon name={icon} />}
+                  {_.isEmpty(icon) ? "" : <Icon name={icon} />}
                   {acte.description}
                 </Table.Cell>
                 <Table.Cell
