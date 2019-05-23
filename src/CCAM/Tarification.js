@@ -300,7 +300,6 @@ export default class Tarification extends React.Component {
     let tarifPrint = (
       <React.Fragment>
         <Header as="h2">
-          Tarif :{" "}
           {!_.isEmpty(this.state.tarif)
             ? tarif(this.state.tarif.pu)
             : "Inconnu"}
