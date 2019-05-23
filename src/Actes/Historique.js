@@ -63,24 +63,19 @@ export default class Historique extends React.Component {
     });
   };
 
-  onHandleRow = (e,id) => {
+  onHandleRow = (e, id) => {
     console.log(id);
 
-    if(e.type === 'click') {
+    if (e.type === "click") {
       console.log("Left click");
-    } else if (e.type === 'contextmenu') {
-      console.log("Right click")
+    } else if (e.type === "contextmenu") {
+      console.log("Right click");
     }
-  }
+  };
 
   render() {
     return (
-      <Table 
-        celled={true} 
-        striped={true} 
-        selectable={true} 
-        sortable={true}
-      >
+      <Table celled={true} striped={true} selectable={true} sortable={true}>
         <Table.Header>
           <Table.Row textAlign="center">
             <Table.HeaderCell
@@ -103,55 +98,38 @@ export default class Historique extends React.Component {
             // => ex. vert pour #FSE, jaune pour #note, etc...
             // Revoir le rendu de chaque champ (avec moment pour la date, un montant avec ','...)
             let backColor = "";
-            let textColor = "";
             let code = "";
             let icon = "";
             if (_.isEqual(acte.code, "#NOTE")) {
-              backColor = "#1C5D83"; //jaune
-              textColor = "white";
-              icon = "calculator";
+              backColor = "yellow";
+              icon = "sticky note outline";
             } else if (_.isEqual(acte.code, "#TODO")) {
-              backColor = "#CC0000"; //rouge
-              textColor = "white";
-              icon = "list ul";
-            } else if (_.isEqual(acte.code, "#FSE")) {
-              backColor = "#1C874B"; //vert
-              textColor = "white";
+              backColor = "red";
               icon = "check";
+            } else if (_.isEqual(acte.code, "#FSE")) {
+              backColor = "lightgreen";
+              icon = "list";
             } else {
               backColor = "";
-              code = acte.code;
+              code = acte.code; 
             }
 
             return (
-              <Table.Row 
+              <Table.Row
                 key={acte.id}
-                onClick={(e) => this.onHandleRow(e,acte.id)}
-                onContextMenu={(e) => this.onHandleRow(e,acte.id)}
-                style={{ 
-                  color: textColor
-                }}
+                onClick={e => this.onHandleRow(e, acte.id)}
+                onContextMenu={e => this.onHandleRow(e, acte.id)}
+                style={{ backgroundColor: backColor }}
               >
-                <Table.Cell style={{ backgroundColor: backColor }}>
-                  {moment(acte.doneAt).format("L")}
-                </Table.Cell>
-                <Table.Cell style={{ backgroundColor: backColor }}>
-                  {acte.localisation}
-                </Table.Cell>
-                <Table.Cell style={{ backgroundColor: backColor }}>
-                  {code}
-                </Table.Cell>
-                <Table.Cell style={{ backgroundColor: backColor }}>
-                  {acte.cotation}
-                </Table.Cell>
-                <Table.Cell style={{ backgroundColor: backColor }}>
-                  {_.isEmpty(icon)?'':<Icon name={icon} />}
+                <Table.Cell>{moment(acte.doneAt).format("L")}</Table.Cell>
+                <Table.Cell>{acte.localisation}</Table.Cell>
+                <Table.Cell>{code}</Table.Cell>
+                <Table.Cell>{acte.cotation}</Table.Cell>
+                <Table.Cell>
+                  {_.isEmpty(icon) ? "" : <Icon name={icon} />}
                   {acte.description}
                 </Table.Cell>
-                <Table.Cell
-                  style={{ backgroundColor: backColor }}
-                  textAlign="right"
-                >
+                <Table.Cell textAlign="right">
                   {acte.montant.toLocaleString("fr-FR", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
