@@ -27,7 +27,8 @@ export default class ActesHistorique extends React.Component {
           })}}
         />
         <Actes.Historique 
-          client={client} 
+          client={client}
+          showPagination={true}
           idPatient={Number(this.state.idPatient)} 
         />
       </React.Fragment>

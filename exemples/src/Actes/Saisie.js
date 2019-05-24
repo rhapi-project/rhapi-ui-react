@@ -13,7 +13,7 @@ export default class ActesSaisie extends React.Component {
         <p>
           Utilisation du composant <b>Actes.Saisie</b> pour la saisie des actes dentaires.
         </p>
-        <Divider hidden={true} />       
+        <Divider hidden={true} />    
         <Actes.Saisie
           client={client}
           lignes={5}
