@@ -16,7 +16,7 @@ export default class ActesSaisie extends React.Component {
         <Divider hidden={true} />    
         <Actes.Saisie
           client={client}
-          lignes={10}
+          lignes={5}
         />
       </React.Fragment>
     );

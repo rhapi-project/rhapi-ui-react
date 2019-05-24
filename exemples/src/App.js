@@ -19,6 +19,7 @@ import SharedLocalisations from "./Shared/Localisations";
 // Exemples Actes
 import ActesHistorique from "./Actes/Historique";
 import ActesSaisie from "./Actes/Saisie";
+import ActesValidation from "./Actes/Validation";
 
 const ghBaseUrl =
   "https://github.com/rhapi-project/rhapi-ui-react/blob/master/exemples/src";
@@ -175,6 +176,14 @@ export default class App extends React.Component {
             }
             onClick={(e, d) => this.handleClickItem("Actes", d.name)}
           />
+          <Menu.Item
+            name="Validation"
+            active={
+              this.state.group === "Actes" &&
+              this.state.name === "Validation"
+            }
+            onClick={(e, d) => this.handleClickItem("Actes", d.name)}
+          />
         </Menu.Menu>
       </Menu.Item>
     );
@@ -283,6 +292,8 @@ class ViewExample extends React.Component {
         return <ActesSaisie />;
       } else if (name === "Historique") {
         return <ActesHistorique />;
+      } else if (name === "Validation") {
+        return <ActesValidation />;
       } else {
         return "";
       }

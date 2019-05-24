@@ -6,10 +6,13 @@ import _ from "lodash";
 
 import moment from "moment";
 
+import { tarif } from "../lib/Helpers";
+
 const propDefs = {
   description: "Tableau de saisie des actes pour les dentistes",
   example: "Tableau",
   propDocs: {
+    idPatient: "Identifiant du patient dans la base de données",
     lignes: "Nombre de lignes à afficher pour ce tableau. Par défaut 5"
   },
   propTypes: {
@@ -21,32 +24,42 @@ const propDefs = {
 export default class Saisie extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
+    idPatient: 0,
     lignes: 5
   };
 
   componentWillMount() {
     this.setState({
       activeRow: 0,
-      saisies: []
+      actes: []
     });
   }
 
-  notExistSaisie = index => {
-    return _.isUndefined(this.state.saisies[index]);
+  existActe = index => {
+    return !_.isUndefined(this.state.actes[index]);
   };
 
-  onSelectionActe = (rowKey, acte, date, localisation) => {
+  onSelectionActe = (rowKey, acte, date, localisation, tarif) => {
     let obj = {};
     obj.acte = acte;
     obj.date = date;
     obj.localisation = localisation;
-    let s = this.state.saisies;
+    obj.tarif = tarif;
+    let a = this.state.actes;
     if (rowKey === this.state.activeRow) {
-      s.push(obj);
-      this.setState({ activeRow: rowKey + 1, saisies: s });
+      a.push(obj);
+      this.setState({ activeRow: rowKey + 1, actes: a });
     } else {
-      s[rowKey] = obj;
-      this.setState({ saisies: s });
+      if (
+        _.isEqual(acte, a[rowKey].acte) &&
+        _.isEqual(date, a[rowKey].date) &&
+        _.isEqual(localisation, a[rowKey].localisation) &&
+        _.isEqual(tarif, a[rowKey].tarif)
+      ) {
+        return;
+      }
+      a[rowKey] = obj;
+      this.setState({ actes: a });
     }
   };
 
@@ -58,6 +71,7 @@ export default class Saisie extends React.Component {
             <Table.HeaderCell>Date</Table.HeaderCell>
             <Table.HeaderCell>Localisation</Table.HeaderCell>
             <Table.HeaderCell>Code</Table.HeaderCell>
+            <Table.HeaderCell>Cotation</Table.HeaderCell>
             <Table.HeaderCell>Libellé</Table.HeaderCell>
             <Table.HeaderCell>Montant</Table.HeaderCell>
           </Table.Row>
@@ -68,17 +82,17 @@ export default class Saisie extends React.Component {
               key={i}
               index={i}
               client={this.props.client}
-              acte={this.notExistSaisie(i) ? {} : this.state.saisies[i].acte}
+              acte={this.existActe(i) ? this.state.actes[i].acte : {}}
               date={
-                this.notExistSaisie(i)
-                  ? moment().toISOString()
-                  : this.state.saisies[i].date
+                this.existActe(i)
+                  ? this.state.actes[i].date
+                  : moment().toISOString()
               }
               localisation={
-                this.notExistSaisie(i) ? "" : this.state.saisies[i].localisation
+                this.existActe(i) ? this.state.actes[i].localisation : ""
               }
-              moment={
-                this.notExistSaisie(i) ? "" : this.state.saisies[i].montant
+              montant={
+                this.existActe(i) ? tarif(this.state.actes[i].tarif.pu) : ""
               }
               disabled={this.state.activeRow < i}
               onSelectionActe={this.onSelectionActe}

@@ -1,7 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Table } from "semantic-ui-react";
-import ModalSearch from "../CCAM/ModalSearch";
+import ModalSearch from "./ModalSearch";
+import Tarification from "../CCAM/Tarification";
 
 import _ from "lodash";
 import moment from "moment";
@@ -62,6 +63,23 @@ export default class SaisieDentaire extends React.Component {
   onCloseModalSearch = () => {
     this.setState({ modalSearchOpen: false });
   };
+
+  onSelection = (index, acte, date, dents) => {
+    this.setState({
+      acte: acte,
+      currentDate: date,
+      localisation: dents
+    });
+  };
+  successTarification = detail => {
+    this.props.onSelectionActe(
+      this.props.index,
+      detail.acte,
+      detail.date,
+      this.state.localisation,
+      detail.tarif
+    );
+  };
   render() {
     return (
       <React.Fragment>
@@ -80,11 +98,20 @@ export default class SaisieDentaire extends React.Component {
           <Table.Cell collapsing={true} style={{ minWidth: "90px" }}>
             {_.isEmpty(this.state.acte) ? "" : this.state.acte.codActe}
           </Table.Cell>
+          <Table.Cell collapsing={true}> </Table.Cell>
           <Table.Cell textAlign="left">
             {_.isEmpty(this.state.acte) ? "" : this.state.acte.nomLong}
           </Table.Cell>
           <Table.Cell collapsing={true} textAlign="right">
-            {" "}
+            <Tarification
+              client={this.props.client}
+              codActe={this.state.acte.codActe}
+              date={this.props.date}
+              dynamic={false}
+              hidden={true}
+              success={this.successTarification}
+            />
+            {this.state.montant}
           </Table.Cell>
         </Table.Row>
         <ModalSearch
@@ -95,7 +122,8 @@ export default class SaisieDentaire extends React.Component {
           localisationPicker={true}
           open={this.state.modalSearchOpen}
           onClose={this.onCloseModalSearch}
-          onSelectionActe={this.props.onSelectionActe}
+          //onSelectionActe={this.props.onSelectionActe}
+          onSelectionActe={this.onSelection}
           rowIndex={this.props.index}
         />
       </React.Fragment>
