@@ -86,18 +86,28 @@ export default class Tarification extends React.Component {
   }
 
   componentWillReceiveProps(next) {
-    if (next.codActe) {
-      this.readActe(
-        next.codActe,
-        next.codActivite,
-        next.codPhase,
-        next.codGrille,
-        next.date,
-        next.codDom,
-        next.modificateurs
-      );
-    } else {
-      this.setState({ acte: {}, selectedModif: [], modifShow: false });
+    if (
+      next.codActe !== this.props.codActe ||
+      next.codActivite !== this.props.codActivite ||
+      next.codPhase !== this.props.codPhase ||
+      next.codGrille !== this.props.codGrille ||
+      next.date !== this.props.date ||
+      next.codDom !== this.props.codDom ||
+      next.modificateurs !== this.props.modificateurs
+    ) {
+      if (next.codActe) {
+        this.readActe(
+          next.codActe,
+          next.codActivite,
+          next.codPhase,
+          next.codGrille,
+          next.date,
+          next.codDom,
+          next.modificateurs
+        );
+      } else {
+        this.setState({ acte: {}, selectableModif: [], modifShow: false });
+      }
     }
   }
 
