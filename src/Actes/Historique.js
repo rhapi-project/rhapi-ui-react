@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Button, Icon, Table } from "semantic-ui-react";
 import _ from "lodash";
-import { tarif } from '../lib/Helpers';
+import { tarif } from "../lib/Helpers";
 import moment from "moment";
 
 const propDefs = {
@@ -96,13 +96,14 @@ export default class Historique extends React.Component {
 
   componentWillMount() {
     this.setState({
+      idPatient: this.props.idPatient,
       actes: [],
       informations: {},
       limit: 5,
       sorted: null
     });
 
-    setInterval(this.reload,30000);
+    setInterval(this.reload, 30000);
   }
 
   componentWillReceiveProps(next) {
@@ -113,8 +114,32 @@ export default class Historique extends React.Component {
         offset: 0,
         sort: "doneAt",
         order: "DESC"
-      }, // TODO : Introduire des filtres (dont le principal est celui du patient),
-      // de la pagination, ordonner... Exclure le champ patientJO du résultat...
+      },
+      result => {
+        // console.log(result);
+        this.setState({
+          idPatient: next.idPatient,
+          actes: result.results,
+          informations: result.informations,
+          sorted: "descending"
+        });
+      },
+      error => {
+        console.log(error);
+      }
+    );
+  }
+
+  reload = () => {
+    console.log("reload");
+    this.props.client.Actes.readAll(
+      {
+        _idPatient: this.state.idPatient,
+        limit: this.state.limit,
+        offset: 0,
+        sort: "doneAt",
+        order: "DESC"
+      },
       result => {
         // console.log(result);
         this.setState({
@@ -127,7 +152,7 @@ export default class Historique extends React.Component {
         console.log(error);
       }
     );
-  }
+  };
 
   onHandleSort = () => {
     this.setState({
@@ -136,23 +161,13 @@ export default class Historique extends React.Component {
     });
   };
 
-  onHandleRow = (e, id) => {
-    console.log(id);
-
-    if (e.type === "click") {
-      console.log("Left click");
-    } else if (e.type === "contextmenu") {
-      console.log("Right click");
-    }
-  };
-
-  decoration = (code) => {
+  decoration = code => {
     let deco = {};
     deco.color = "";
     deco.icon = "";
     deco.code = "";
 
-    if (_.startsWith(code,'#')) {
+    if (_.startsWith(code, "#")) {
       if (_.isEqual(code, "#NOTE")) {
         deco.color = "yellow";
         deco.icon = "sticky note outline";
@@ -169,7 +184,17 @@ export default class Historique extends React.Component {
       deco.code = code;
       return deco;
     }
-  }
+  };
+
+  onHandleRow = (e, id) => {
+    console.log(id);
+
+    if (e.type === "click") {
+      console.log("Left click");
+    } else if (e.type === "contextmenu") {
+      console.log("Right click");
+    }
+  };
 
   onPageSelect = query => {
     this.props.client.Actes.readAll(
@@ -186,10 +211,6 @@ export default class Historique extends React.Component {
       }
     );
   };
-
-  reload = () => {
-    console.log("reload"); 
-  }
 
   render() {
     let showPagination = this.props.showPagination;
@@ -224,7 +245,9 @@ export default class Historique extends React.Component {
               >
                 Date
               </Table.HeaderCell>
-              <Table.HeaderCell collapsing={true}>Localisation</Table.HeaderCell>
+              <Table.HeaderCell collapsing={true}>
+                Localisation
+              </Table.HeaderCell>
               <Table.HeaderCell collapsing={true}>Code/Type</Table.HeaderCell>
               <Table.HeaderCell collapsing={true}>Cotation</Table.HeaderCell>
               <Table.HeaderCell>Description</Table.HeaderCell>
@@ -233,10 +256,6 @@ export default class Historique extends React.Component {
           </Table.Header>
           <Table.Body>
             {_.map(this.state.actes, acte => {
-              // Ne pas afficher les codes en # mais colorer la ligne
-              // => ex. vert pour #FSE, jaune pour #note, etc...
-              // Revoir le rendu de chaque champ (avec moment pour la date, un montant avec ','...)
-
               let deco = this.decoration(acte.code);
 
               return (
@@ -249,7 +268,9 @@ export default class Historique extends React.Component {
                   <Table.Cell>{moment(acte.doneAt).format("L")}</Table.Cell>
                   <Table.Cell>{acte.localisation}</Table.Cell>
                   <Table.Cell>{deco.code}</Table.Cell>
-                  <Table.Cell>{_.isEqual(acte.cotation,0)?'':acte.cotation}</Table.Cell>
+                  <Table.Cell>
+                    {_.isEqual(acte.cotation, 0) ? "" : acte.cotation}
+                  </Table.Cell>
                   <Table.Cell>
                     {_.isEmpty(deco.icon) ? "" : <Icon name={deco.icon} />}
                     {acte.description}
