@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Button, Icon, Table } from "semantic-ui-react";
 import _ from "lodash";
-import { tarif } from '../lib/Helpers';
+import { tarif } from "../lib/Helpers";
 import moment from "moment";
 
 const propDefs = {
@@ -102,7 +102,7 @@ export default class Historique extends React.Component {
       sorted: null
     });
 
-    setInterval(this.reload,30000);
+    setInterval(this.reload, 30000);
   }
 
   componentWillReceiveProps(next) {
@@ -146,13 +146,13 @@ export default class Historique extends React.Component {
     }
   };
 
-  decoration = (code) => {
+  decoration = code => {
     let deco = {};
     deco.color = "";
     deco.icon = "";
     deco.code = "";
 
-    if (_.startsWith(code,'#')) {
+    if (_.startsWith(code, "#")) {
       if (_.isEqual(code, "#NOTE")) {
         deco.color = "yellow";
         deco.icon = "sticky note outline";
@@ -188,8 +188,8 @@ export default class Historique extends React.Component {
   };
 
   reload = () => {
-    console.log("reload"); 
-  }
+    console.log("reload");
+  };
 
   render() {
     let showPagination = this.props.showPagination;
@@ -224,7 +224,9 @@ export default class Historique extends React.Component {
               >
                 Date
               </Table.HeaderCell>
-              <Table.HeaderCell collapsing={true}>Localisation</Table.HeaderCell>
+              <Table.HeaderCell collapsing={true}>
+                Localisation
+              </Table.HeaderCell>
               <Table.HeaderCell collapsing={true}>Code/Type</Table.HeaderCell>
               <Table.HeaderCell collapsing={true}>Cotation</Table.HeaderCell>
               <Table.HeaderCell>Description</Table.HeaderCell>
@@ -249,7 +251,9 @@ export default class Historique extends React.Component {
                   <Table.Cell>{moment(acte.doneAt).format("L")}</Table.Cell>
                   <Table.Cell>{acte.localisation}</Table.Cell>
                   <Table.Cell>{deco.code}</Table.Cell>
-                  <Table.Cell>{_.isEqual(acte.cotation,0)?'':acte.cotation}</Table.Cell>
+                  <Table.Cell>
+                    {_.isEqual(acte.cotation, 0) ? "" : acte.cotation}
+                  </Table.Cell>
                   <Table.Cell>
                     {_.isEmpty(deco.icon) ? "" : <Icon name={deco.icon} />}
                     {acte.description}
