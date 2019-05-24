@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, Icon, Table } from "semantic-ui-react";
+import { Button, Icon, Menu, Table } from "semantic-ui-react";
 import _ from "lodash";
 import { tarif } from "../lib/Helpers";
 import moment from "moment";
@@ -12,6 +12,11 @@ const propDefs = {
     idPatient: "Id du patient",
     showPagination: 'Afficher les options de paginations, par défaut "false"',
     table: "semantic.collections",
+    limit: "Valeur de pagination",
+    sort: 
+      'Le champs sur lequel le tri va être effectué. Par défaut, le tri se fait sur id',
+    order: 
+      'Un tri ascendant ou descendant [ASC,DESC]. Par défaut, le tri est ascendant (ASC)',
     btnFirstContent:
       'Texte du bouton pour aller à la première page, par défaut ""',
     btnLastContent:
@@ -49,6 +54,9 @@ const propDefs = {
     idPatient: PropTypes.number,
     showPagination: PropTypes.bool,
     table: PropTypes.object,
+    limit: PropTypes.number,
+    sort: PropTypes.string,
+    order: PropTypes.string,
     btnFirstContent: PropTypes.string,
     btnLastContent: PropTypes.string,
     btnMoreContent: PropTypes.string,
@@ -74,6 +82,9 @@ export default class Historique extends React.Component {
     idPatient: 0,
     showPagination: false,
     table: {},
+    limit: 10,
+    sort: "id",
+    order: "ASC",
     // props pour le composant de pagination
     btnFirstContent: "",
     btnLastContent: "",
@@ -99,54 +110,48 @@ export default class Historique extends React.Component {
       idPatient: this.props.idPatient,
       actes: [],
       informations: {},
-      limit: 5,
-      sorted: null
+      limit: this.props.limit,
+      offset: 0,
+      sort: this.props.sort,
+      order: this.props.order,
+      sorted: _.isEqual(this.props.order,"DESC")?"descending":"ascending",
+      lockRevision: ""
     });
-
-    setInterval(this.reload, 30000);
   }
 
   componentWillReceiveProps(next) {
-    this.props.client.Actes.readAll(
-      {
-        _idPatient: next.idPatient,
-        limit: this.state.limit,
-        offset: 0,
-        sort: "doneAt",
-        order: "DESC"
-      },
-      result => {
-        // console.log(result);
-        this.setState({
-          idPatient: next.idPatient,
-          actes: result.results,
-          informations: result.informations,
-          sorted: "descending"
-        });
-      },
-      error => {
-        console.log(error);
-      }
-    );
+    this.loadActe(next.idPatient, this.state.limit, this.state.offset, this.state.sort, this.state.order);
   }
 
-  reload = () => {
-    console.log("reload");
+  componentDidMount() {
+    setInterval(() => {
+      this.loadActe(this.state.idPatient, this.state.limit, this.state.offset, this.state.sort, this.state.order);
+    }, 10000);
+  }
+
+  loadActe = (idPatient, limit, offset, sort, order) => {
     this.props.client.Actes.readAll(
       {
-        _idPatient: this.state.idPatient,
-        limit: this.state.limit,
-        offset: 0,
-        sort: "doneAt",
-        order: "DESC"
+        _idPatient: idPatient,
+        limit: limit,
+        offset: offset,
+        sort: sort,
+        order: order
       },
       result => {
-        // console.log(result);
-        this.setState({
-          actes: result.results,
-          informations: result.informations,
-          sorted: "descending"
-        });
+        if (!_.isEqual(this.state.lockRevision,result.informations.lockRevision)) {
+          this.setState({
+            idPatient: idPatient,
+            actes: result.results,
+            informations: result.informations,
+            limit: limit,
+            offset: offset,
+            sort: sort,
+            order: order,
+            sorted: _.isEqual(order,"DESC")?"descending":"ascending",
+            lockRevision: result.informations.lockRevision
+          });
+        }
       },
       error => {
         console.log(error);
@@ -154,11 +159,16 @@ export default class Historique extends React.Component {
     );
   };
 
+  onPageSelect = query => {
+    this.loadActe(query._idPatient,query.limit, query.offset, query.sort, query.order);
+  };
+
   onHandleSort = () => {
-    this.setState({
-      actes: this.state.actes.reverse(),
-      sorted: this.state.sorted === "descending" ? "ascending" : "descending"
-    });
+    if (_.isEqual(this.state.order,"DESC")) {
+      this.loadActe(this.state.idPatient, this.state.limit, this.state.offset, this.state.sort, "ASC");
+    } else {
+      this.loadActe(this.state.idPatient, this.state.limit, this.state.offset, this.state.sort, "DESC");
+    }
   };
 
   decoration = code => {
@@ -191,25 +201,19 @@ export default class Historique extends React.Component {
 
     if (e.type === "click") {
       console.log("Left click");
+
+      return(
+        <div>
+          <Menu vertical>
+            <Menu.Item>
+              <p>Supprimer</p>
+            </Menu.Item>
+          </Menu>
+        </div>
+      );
     } else if (e.type === "contextmenu") {
       console.log("Right click");
     }
-  };
-
-  onPageSelect = query => {
-    this.props.client.Actes.readAll(
-      query,
-      result => {
-        this.setState({
-          actes: result.results,
-          informations: result.informations,
-          sorted: "descending"
-        });
-      },
-      error => {
-        console.log(error);
-      }
-    );
   };
 
   render() {
@@ -235,7 +239,7 @@ export default class Historique extends React.Component {
 
     return (
       <React.Fragment>
-        <Table celled={true} striped={true} selectable={true} sortable={true}>
+        <Table celled={true} striped={false} selectable={true} sortable={true}>
           <Table.Header>
             <Table.Row textAlign="center">
               <Table.HeaderCell
