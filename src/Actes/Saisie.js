@@ -12,12 +12,16 @@ const propDefs = {
   description: "Tableau de saisie des actes pour les dentistes",
   example: "Tableau",
   propDocs: {
+    fse: "Feuille de Soin Electronique en cours",
     idPatient: "Identifiant du patient dans la base de données",
-    lignes: "Nombre de lignes à afficher pour ce tableau. Par défaut 5"
+    lignes: "Nombre de lignes à afficher pour ce tableau. Par défaut 5",
+    onUpdate: "Callback mise à jour de la feuille de soin"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
-    lignes: PropTypes.number
+    fse: PropTypes.object,
+    lignes: PropTypes.number,
+    onUpdate: PropTypes.func
   }
 };
 
@@ -31,7 +35,15 @@ export default class Saisie extends React.Component {
   componentWillMount() {
     this.setState({
       activeRow: 0,
-      actes: []
+      actes: _.get(this.props.fse, "contentJO.actes", [])
+    });
+  }
+
+  componentWillReceiveProps(next) {
+    console.log(next.fse);
+    this.setState({
+      activeRow: _.get(next.fse, "contentJO.actes", []).length,
+      actes: _.get(next.fse, "contentJO.actes", [])
     });
   }
 
@@ -40,26 +52,43 @@ export default class Saisie extends React.Component {
   };
 
   onSelectionActe = (rowKey, acte, date, localisation, tarif) => {
+    //console.log("Saisie on selection acte ");
+    //console.log("rowkey " + rowKey);
+    //console.log("this.state.activeRow " + this.state.activeRow);
     let obj = {};
-    obj.acte = acte;
     obj.date = date;
     obj.localisation = localisation;
-    obj.tarif = tarif;
+    obj.codActe = acte.codActe;
+    obj.description = acte.nomLong;
+    obj.montant = tarif.pu;
     let a = this.state.actes;
     if (rowKey === this.state.activeRow) {
       a.push(obj);
-      this.setState({ activeRow: rowKey + 1, actes: a });
+      if (!_.isUndefined(this.props.onUpdate)) {
+        this.props.onUpdate(a);
+      } else {
+        this.setState({ activeRow: rowKey + 1, actes: a });
+      }
     } else {
+      //console.log("on another rowKey");
+      //console.log(acte);
+      /*if (_.isEmpty(acte)) {
+        return;
+      }*/
       if (
-        _.isEqual(acte, a[rowKey].acte) &&
+        _.isEqual(acte.codActe, a[rowKey].codActe) &&
         _.isEqual(date, a[rowKey].date) &&
         _.isEqual(localisation, a[rowKey].localisation) &&
-        _.isEqual(tarif, a[rowKey].tarif)
+        _.isEqual(tarif.pu, a[rowKey].montant)
       ) {
         return;
       }
       a[rowKey] = obj;
-      this.setState({ actes: a });
+      if (!_.isUndefined(this.props.onUpdate)) {
+        this.props.onUpdate(a);
+      } else {
+        this.setState({ actes: a });
+      }
     }
   };
 
@@ -82,17 +111,20 @@ export default class Saisie extends React.Component {
               key={i}
               index={i}
               client={this.props.client}
-              acte={this.existActe(i) ? this.state.actes[i].acte : {}}
+              codActe={this.existActe(i) ? this.state.actes[i].codActe : ""}
               date={
                 this.existActe(i)
                   ? this.state.actes[i].date
                   : moment().toISOString()
               }
+              description={
+                this.existActe(i) ? this.state.actes[i].description : ""
+              }
               localisation={
                 this.existActe(i) ? this.state.actes[i].localisation : ""
               }
               montant={
-                this.existActe(i) ? tarif(this.state.actes[i].tarif.pu) : ""
+                this.existActe(i) ? tarif(this.state.actes[i].montant) : ""
               }
               disabled={this.state.activeRow < i}
               onSelectionActe={this.onSelectionActe}

@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Divider, Form, Header, Icon, Modal } from "semantic-ui-react";
+import { Divider, Header, Icon, Modal } from "semantic-ui-react";
 import Search2 from "../CCAM/Search";
 import Table2 from "../CCAM/Table";
 import Localisations from "../Shared/Localisations";
@@ -81,17 +81,8 @@ export default class ModalSearch extends React.Component {
     });
   };
 
+  errorTarification = () => {};
   onSelection = acte => {
-    this.props.onSelectionActe(
-      this.props.rowIndex,
-      acte,
-      this.state.date,
-      this.state.dents
-    );
-    this.props.onClose();
-  };
-
-  /*onSelection = acte => {
     this.setState({
       acte: acte
     });
@@ -106,7 +97,7 @@ export default class ModalSearch extends React.Component {
       detail.tarif
     );
     this.props.onClose();
-  };*/
+  };
 
   render() {
     let localisation = this.props.localisationPicker ? (
@@ -157,14 +148,15 @@ export default class ModalSearch extends React.Component {
               showPagination={true}
             />
           </div>
-          {/*<Tarification
+          <Tarification
             client={this.props.client}
             codActe={this.state.acte.codActe}
             date={this.state.date}
             dynamic={false}
-            hidden={false}
+            hidden={true}
             success={this.successTarification}
-          />*/}
+            error={this.errorTarification}
+          />
         </Modal.Content>
       </Modal>
     );

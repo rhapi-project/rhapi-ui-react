@@ -13,7 +13,8 @@ const propDefs = {
     "Composant correspondant à une ligne du tableau de saisie des actes pour les dentistes",
   example: "Tableau",
   propDocs: {
-    acte: "Acte sélectionné",
+    codActe: "Code de l'Acte sélectionné",
+    description: "Description de l'acte",
     date: "Date effective de l'acte au format ISO. Par défaut date du jour",
     localisation:
       'Liste des dents sélectionnées, séparées par des espaces. Par défaut ""',
@@ -23,7 +24,8 @@ const propDefs = {
   },
   propTypes: {
     client: PropTypes.any.isRequired,
-    acte: PropTypes.object,
+    codActe: PropTypes.string,
+    description: PropTypes.string,
     date: PropTypes.string,
     localisation: PropTypes.string,
     disabled: PropTypes.bool,
@@ -35,7 +37,8 @@ const propDefs = {
 export default class SaisieDentaire extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
-    acte: {},
+    codActe: "",
+    description: "",
     date: moment().toISOString(),
     localisation: "",
     disabled: true,
@@ -43,7 +46,7 @@ export default class SaisieDentaire extends React.Component {
   };
   componentWillMount() {
     this.setState({
-      acte: this.props.acte,
+      codActe: this.props.codActe,
       date: this.props.date,
       localisation: this.props.localisation,
       montant: this.props.montant,
@@ -53,7 +56,7 @@ export default class SaisieDentaire extends React.Component {
 
   componentWillReceiveProps(next) {
     this.setState({
-      acte: next.acte,
+      codActe: next.codActe,
       date: next.date,
       localisation: next.localisation,
       montant: next.montant
@@ -64,22 +67,6 @@ export default class SaisieDentaire extends React.Component {
     this.setState({ modalSearchOpen: false });
   };
 
-  onSelection = (index, acte, date, dents) => {
-    this.setState({
-      acte: acte,
-      currentDate: date,
-      localisation: dents
-    });
-  };
-  successTarification = detail => {
-    this.props.onSelectionActe(
-      this.props.index,
-      detail.acte,
-      detail.date,
-      this.state.localisation,
-      detail.tarif
-    );
-  };
   render() {
     return (
       <React.Fragment>
@@ -90,27 +77,17 @@ export default class SaisieDentaire extends React.Component {
           onClick={() => this.setState({ modalSearchOpen: true })}
         >
           <Table.Cell collapsing={true} style={{ minWidth: "100px" }}>
-            {_.isEmpty(this.state.acte)
+            {_.isEmpty(this.state.codActe)
               ? ""
               : moment(this.state.date).format("L")}
           </Table.Cell>
           <Table.Cell collapsing={true}>{this.state.localisation}</Table.Cell>
           <Table.Cell collapsing={true} style={{ minWidth: "90px" }}>
-            {_.isEmpty(this.state.acte) ? "" : this.state.acte.codActe}
+            {this.state.codActe}
           </Table.Cell>
           <Table.Cell collapsing={true}> </Table.Cell>
-          <Table.Cell textAlign="left">
-            {_.isEmpty(this.state.acte) ? "" : this.state.acte.nomLong}
-          </Table.Cell>
+          <Table.Cell textAlign="left">{this.props.description}</Table.Cell>
           <Table.Cell collapsing={true} textAlign="right">
-            <Tarification
-              client={this.props.client}
-              codActe={this.state.acte.codActe}
-              date={this.props.date}
-              dynamic={false}
-              hidden={true}
-              success={this.successTarification}
-            />
             {this.state.montant}
           </Table.Cell>
         </Table.Row>
@@ -122,8 +99,7 @@ export default class SaisieDentaire extends React.Component {
           localisationPicker={true}
           open={this.state.modalSearchOpen}
           onClose={this.onCloseModalSearch}
-          //onSelectionActe={this.props.onSelectionActe}
-          onSelectionActe={this.onSelection}
+          onSelectionActe={this.props.onSelectionActe}
           rowIndex={this.props.index}
         />
       </React.Fragment>
