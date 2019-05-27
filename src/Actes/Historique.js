@@ -126,7 +126,7 @@ export default class Historique extends React.Component {
   componentDidMount() {
     setInterval(() => {
       this.loadActe(this.state.idPatient, this.state.limit, this.state.offset, this.state.sort, this.state.order);
-    }, 10000);
+    }, 30000);
   }
 
   loadActe = (idPatient, limit, offset, sort, order) => {
