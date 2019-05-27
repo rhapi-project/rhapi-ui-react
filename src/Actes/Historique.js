@@ -117,13 +117,21 @@ export default class Historique extends React.Component {
       sorted: _.isEqual(this.props.order, "DESC") ? "descending" : "ascending",
       lockRevision: ""
     });
+
+    this.loadActe(
+      this.props.idPatient,
+      this.props.limit,
+      0,
+      this.props.sort,
+      this.props.order
+    );
   }
 
   componentWillReceiveProps(next) {
     this.loadActe(
       next.idPatient,
       this.state.limit,
-      this.state.offset,
+      0,
       this.state.sort,
       this.state.order
     );
@@ -138,18 +146,21 @@ export default class Historique extends React.Component {
         this.state.sort,
         this.state.order
       );
-    }, 30000);
+    }, 15000);
   }
 
   loadActe = (idPatient, limit, offset, sort, order) => {
+    let params = {
+      _idPatient: idPatient,
+      _etat: 0,
+      limit: limit,
+      offset: offset,
+      sort: sort,
+      order: order
+    };
+
     this.props.client.Actes.readAll(
-      {
-        _idPatient: idPatient,
-        limit: limit,
-        offset: offset,
-        sort: sort,
-        order: order
-      },
+      params,
       result => {
         if (
           !_.isEqual(this.state.lockRevision, result.informations.lockRevision)
@@ -229,10 +240,10 @@ export default class Historique extends React.Component {
   };
 
   onHandleRow = (e, id) => {
-    console.log(id);
+    console.log("onHandleRow " + id);
 
     if (e.type === "click") {
-      console.log("Left click");
+      // console.log("Left click");
 
       return (
         <div>
@@ -244,8 +255,12 @@ export default class Historique extends React.Component {
         </div>
       );
     } else if (e.type === "contextmenu") {
-      console.log("Right click");
+      // console.log("Right click");
     }
+  };
+
+  onRemoveActe = id => {
+    console.log("onRemoveActe " + id);
   };
 
   render() {
@@ -288,6 +303,7 @@ export default class Historique extends React.Component {
               <Table.HeaderCell collapsing={true}>Cotation</Table.HeaderCell>
               <Table.HeaderCell>Description</Table.HeaderCell>
               <Table.HeaderCell collapsing={true}>Montant</Table.HeaderCell>
+              <Table.HeaderCell collapsing={true} />
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -295,26 +311,52 @@ export default class Historique extends React.Component {
               let deco = this.decoration(acte.code);
 
               return (
-                <Table.Row
-                  key={acte.id}
-                  onClick={e => this.onHandleRow(e, acte.id)}
-                  onContextMenu={e => this.onHandleRow(e, acte.id)}
-                  style={{ backgroundColor: deco.color }}
-                >
-                  <Table.Cell>{moment(acte.doneAt).format("L")}</Table.Cell>
-                  <Table.Cell>{acte.localisation}</Table.Cell>
-                  <Table.Cell>{deco.code}</Table.Cell>
-                  <Table.Cell>
-                    {_.isEqual(acte.cotation, 0) ? "" : acte.cotation}
-                  </Table.Cell>
-                  <Table.Cell>
-                    {_.isEmpty(deco.icon) ? "" : <Icon name={deco.icon} />}
-                    {acte.description}
-                  </Table.Cell>
-                  <Table.Cell textAlign="right">
-                    {tarif(acte.montant)}
-                  </Table.Cell>
-                </Table.Row>
+                <React.Fragment>
+                  <Table.Row
+                    key={acte.id}
+                    onClick={e => this.onHandleRow(e, acte.id)}
+                    onContextMenu={e => this.onHandleRow(e, acte.id)}
+                    style={{ backgroundColor: deco.color }}
+                  >
+                    <Table.Cell>{moment(acte.doneAt).format("L")}</Table.Cell>
+                    <Table.Cell>{acte.localisation}</Table.Cell>
+                    <Table.Cell>{deco.code}</Table.Cell>
+                    <Table.Cell>
+                      {_.isEqual(acte.cotation, 0) ? "" : acte.cotation}
+                    </Table.Cell>
+                    <Table.Cell>
+                      {_.isEmpty(deco.icon) ? "" : <Icon name={deco.icon} />}
+                      {acte.description}
+                    </Table.Cell>
+                    <Table.Cell textAlign="right">
+                      {tarif(acte.montant)}
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Button
+                        negative
+                        size="mini"
+                        icon="trash"
+                        onClick={(e, d) => this.onRemoveActe(acte.id)}
+                      />
+                    </Table.Cell>
+                  </Table.Row>
+                  {_.map(acte.contentJO.actes, contentJO => {
+                    return (
+                      <Table.Row>
+                        <Table.Cell>
+                          {moment(contentJO.date).format("L")}
+                        </Table.Cell>
+                        <Table.Cell>{contentJO.localisation}</Table.Cell>
+                        <Table.Cell>{contentJO.codActe}</Table.Cell>
+                        <Table.Cell />
+                        <Table.Cell>{contentJO.description}</Table.Cell>
+                        <Table.Cell textAlign="right">
+                          {tarif(contentJO.montant)}
+                        </Table.Cell>
+                      </Table.Row>
+                    );
+                  })}
+                </React.Fragment>
               );
             })}
           </Table.Body>

@@ -45,7 +45,7 @@ export default class ActesHistorique extends React.Component {
         <Actes.Historique 
           client={client}
           showPagination={true}
-          idPatient={Number(this.state.idPatient)}
+          idPatient={this.state.idPatient}
           limit={5}
           sort="doneAt"
           order="DESC"
