@@ -294,7 +294,6 @@ class Pagination extends React.Component {
 
   render() {
     let informations = this.props.informations;
-    console.log(informations);
     let show = !_.isUndefined(informations.queries);
     let btnFirst = this.btnSemanticProps(this.props.btnFirst);
     let btnLast = this.btnSemanticProps(this.props.btnLast);
