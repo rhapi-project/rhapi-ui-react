@@ -5,7 +5,7 @@
 [![NPM](https://img.shields.io/npm/v/rhapi-ccam.svg)](https://www.npmjs.com/package/rhapi-ui-react) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
 
-Tous les composant de cette bibliothèque sont documentés [ici](https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md)
+Les composants de cette bibliothèque sont documentés [ici](https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md)
 
 ## Installation pour développement et tests sur les exemples
 
