@@ -18,8 +18,7 @@ import SharedLocalisations from "./Shared/Localisations";
 
 // Exemples Actes
 import ActesHistorique from "./Actes/Historique";
-import ActesSaisie from "./Actes/Saisie";
-import ActesValidation from "./Actes/Validation";
+import ActesSaisieValidation from "./Actes/SaisieValidation";
 
 const ghBaseUrl =
   "https://github.com/rhapi-project/rhapi-ui-react/blob/master/exemples/src";
@@ -162,13 +161,6 @@ export default class App extends React.Component {
         <Menu.Header>Actes</Menu.Header>
         <Menu.Menu>
           <Menu.Item
-            name="Saisie"
-            active={
-              this.state.group === "Actes" && this.state.name === "Saisie"
-            }
-            onClick={(e, d) => this.handleClickItem("Actes", d.name)}
-          />
-          <Menu.Item
             name="Historique"
             active={
               this.state.group === "Actes" &&
@@ -177,10 +169,10 @@ export default class App extends React.Component {
             onClick={(e, d) => this.handleClickItem("Actes", d.name)}
           />
           <Menu.Item
-            name="Validation"
+            name="SaisieValidation"
             active={
               this.state.group === "Actes" &&
-              this.state.name === "Validation"
+              this.state.name === "SaisieValidation"
             }
             onClick={(e, d) => this.handleClickItem("Actes", d.name)}
           />
@@ -288,12 +280,10 @@ class ViewExample extends React.Component {
     }
 
     if (group === "Actes") {
-      if (name === "Saisie") {
-        return <ActesSaisie />;
-      } else if (name === "Historique") {
+      if (name === "Historique") {
         return <ActesHistorique />;
-      } else if (name === "Validation") {
-        return <ActesValidation />;
+      } else if (name === "SaisieValidation") {
+        return <ActesSaisieValidation />;
       } else {
         return "";
       }
