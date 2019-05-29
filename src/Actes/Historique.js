@@ -79,12 +79,12 @@ const propDefs = {
 export default class Historique extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
-    idPatient: 0,
-    showPagination: false,
+    idPatient: -1,
+    showPagination: true,
     table: {},
-    limit: 10,
-    sort: "id",
-    order: "ASC",
+    limit: 5,
+    sort: "doneAt",
+    order: "DESC",
     // props pour le composant de pagination
     btnFirstContent: "",
     btnLastContent: "",
@@ -110,7 +110,6 @@ export default class Historique extends React.Component {
       idPatient: this.props.idPatient,
       actes: [],
       informations: {},
-      limit: this.props.limit,
       offset: 0,
       sort: this.props.sort,
       order: this.props.order,
@@ -118,30 +117,17 @@ export default class Historique extends React.Component {
       lockRevision: ""
     });
 
-    this.loadActe(
-      this.props.idPatient,
-      this.props.limit,
-      0,
-      this.props.sort,
-      this.props.order
-    );
+    this.loadActe(this.props.idPatient, 0, this.props.sort, this.props.order);
   }
 
   componentWillReceiveProps(next) {
-    this.loadActe(
-      next.idPatient,
-      this.state.limit,
-      0,
-      this.state.sort,
-      this.state.order
-    );
+    this.loadActe(next.idPatient, 0, this.state.sort, this.state.order);
   }
 
   componentDidMount() {
-    setInterval(() => {
+    this.interval = setInterval(() => {
       this.loadActe(
         this.state.idPatient,
-        this.state.limit,
         this.state.offset,
         this.state.sort,
         this.state.order
@@ -149,11 +135,15 @@ export default class Historique extends React.Component {
     }, 15000);
   }
 
-  loadActe = (idPatient, limit, offset, sort, order) => {
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  }
+
+  loadActe = (idPatient, offset, sort, order) => {
     let params = {
       _idPatient: idPatient,
       _etat: 0,
-      limit: limit,
+      limit: this.props.limit,
       offset: offset,
       sort: sort,
       order: order
@@ -169,7 +159,6 @@ export default class Historique extends React.Component {
             idPatient: idPatient,
             actes: result.results,
             informations: result.informations,
-            limit: limit,
             offset: offset,
             sort: sort,
             order: order,
@@ -185,20 +174,13 @@ export default class Historique extends React.Component {
   };
 
   onPageSelect = query => {
-    this.loadActe(
-      query._idPatient,
-      query.limit,
-      query.offset,
-      query.sort,
-      query.order
-    );
+    this.loadActe(query._idPatient, query.offset, query.sort, query.order);
   };
 
   onHandleSort = () => {
     if (_.isEqual(this.state.order, "DESC")) {
       this.loadActe(
         this.state.idPatient,
-        this.state.limit,
         this.state.offset,
         this.state.sort,
         "ASC"
@@ -206,7 +188,6 @@ export default class Historique extends React.Component {
     } else {
       this.loadActe(
         this.state.idPatient,
-        this.state.limit,
         this.state.offset,
         this.state.sort,
         "DESC"
@@ -240,27 +221,13 @@ export default class Historique extends React.Component {
   };
 
   onHandleRow = (e, id) => {
-    console.log("onHandleRow " + id);
-
-    if (e.type === "click") {
-      // console.log("Left click");
-
-      return (
-        <div>
-          <Menu vertical>
-            <Menu.Item>
-              <p>Supprimer</p>
-            </Menu.Item>
-          </Menu>
-        </div>
-      );
-    } else if (e.type === "contextmenu") {
-      // console.log("Right click");
-    }
-  };
-
-  onRemoveActe = id => {
-    console.log("onRemoveActe " + id);
+    this.props.onHandleRow(e, id);
+    this.loadActe(
+      this.state.idPatient,
+      this.state.offset,
+      this.state.sort,
+      this.state.order
+    );
   };
 
   render() {
@@ -303,7 +270,6 @@ export default class Historique extends React.Component {
               <Table.HeaderCell collapsing={true}>Cotation</Table.HeaderCell>
               <Table.HeaderCell>Description</Table.HeaderCell>
               <Table.HeaderCell collapsing={true}>Montant</Table.HeaderCell>
-              <Table.HeaderCell collapsing={true} />
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -311,11 +277,11 @@ export default class Historique extends React.Component {
               let deco = this.decoration(acte.code);
 
               return (
-                <React.Fragment>
+                <React.Fragment key={acte.id}>
                   <Table.Row
                     key={acte.id}
                     onClick={e => this.onHandleRow(e, acte.id)}
-                    onContextMenu={e => this.onHandleRow(e, acte.id)}
+                    // onContextMenu={e => this.onHandleRow(acte.id)}
                     style={{ backgroundColor: deco.color }}
                   >
                     <Table.Cell>{moment(acte.doneAt).format("L")}</Table.Cell>
@@ -331,16 +297,8 @@ export default class Historique extends React.Component {
                     <Table.Cell textAlign="right">
                       {tarif(acte.montant)}
                     </Table.Cell>
-                    <Table.Cell>
-                      <Button
-                        negative
-                        size="mini"
-                        icon="trash"
-                        onClick={(e, d) => this.onRemoveActe(acte.id)}
-                      />
-                    </Table.Cell>
                   </Table.Row>
-                  {_.map(acte.contentJO.actes, contentJO => {
+                  {/* {_.map(acte.contentJO.actes, contentJO => {
                     return (
                       <Table.Row>
                         <Table.Cell>
@@ -353,9 +311,10 @@ export default class Historique extends React.Component {
                         <Table.Cell textAlign="right">
                           {tarif(contentJO.montant)}
                         </Table.Cell>
+                        <Table.Cell />
                       </Table.Row>
                     );
-                  })}
+                  })} */}
                 </React.Fragment>
               );
             })}
