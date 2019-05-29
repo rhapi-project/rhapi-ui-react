@@ -1,21 +1,22 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, Table } from "semantic-ui-react";
-
+import { Button, Icon, Menu, Table } from "semantic-ui-react";
 import _ from "lodash";
+import { tarif } from "../lib/Helpers";
+import moment from "moment";
 
 const propDefs = {
-  description:
-    "Composant montrant sous forme d'un tableau les actes obtenus après une recherche par mot clé.",
-  example: "SearchTable",
+  description: "Historique des actes d'un patient",
+  example: "Tableau",
   propDocs: {
-    actes: "Actes CCAM à afficher",
-    headers: "En-têtes du tableau",
-    informations: "Se référer à la documentation RHAPI sur la pagination",
-    onSelection: "Callback à la sélection d'un acte",
-    onPageSelect: "Callback changement de page",
+    idPatient: "Id du patient",
     showPagination: 'Afficher les options de paginations, par défaut "false"',
     table: "semantic.collections",
+    limit: "Valeur de pagination",
+    sort:
+      "Le champs sur lequel le tri va être effectué. Par défaut, le tri se fait sur id",
+    order:
+      "Un tri ascendant ou descendant [ASC,DESC]. Par défaut, le tri est ascendant (ASC)",
     btnFirstContent:
       'Texte du bouton pour aller à la première page, par défaut ""',
     btnLastContent:
@@ -50,13 +51,12 @@ const propDefs = {
   },
   propTypes: {
     client: PropTypes.any.isRequired,
-    actes: PropTypes.array,
-    headers: PropTypes.array,
-    informations: PropTypes.object,
-    onSelection: PropTypes.func,
-    onPageSelect: PropTypes.func,
+    idPatient: PropTypes.number,
     showPagination: PropTypes.bool,
     table: PropTypes.object,
+    limit: PropTypes.number,
+    sort: PropTypes.string,
+    order: PropTypes.string,
     btnFirstContent: PropTypes.string,
     btnLastContent: PropTypes.string,
     btnMoreContent: PropTypes.string,
@@ -76,15 +76,15 @@ const propDefs = {
   }
 };
 
-export default class Table2 extends React.Component {
+export default class Historique extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
-    actes: [],
-    headers: [],
-    informations: {},
-    pagination: {},
-    showPagination: false,
+    idPatient: -1,
+    showPagination: true,
     table: {},
+    limit: 5,
+    sort: "doneAt",
+    order: "DESC",
     // props pour le composant de pagination
     btnFirstContent: "",
     btnLastContent: "",
@@ -104,59 +104,67 @@ export default class Table2 extends React.Component {
     informations: {},
     mode: "pages"
   };
+
   componentWillMount() {
     this.setState({
-      actes: this.props.actes,
-      informations: this.props.informations
+      idPatient: this.props.idPatient,
+      actes: [],
+      informations: {},
+      offset: 0,
+      sort: this.props.sort,
+      order: this.props.order,
+      sorted: _.isEqual(this.props.order, "DESC") ? "descending" : "ascending",
+      lockRevision: ""
     });
+
+    this.loadActe(this.props.idPatient, 0, this.props.sort, this.props.order);
   }
 
   componentWillReceiveProps(next) {
-    this.setState({
-      actes: next.actes,
-      informations: next.informations
-    });
+    this.loadActe(next.idPatient, 0, this.state.sort, this.state.order);
   }
 
-  displayValue = (champ, value) => {
-    if (_.isNull(value)) {
-      return "";
-    }
+  componentDidMount() {
+    this.interval = setInterval(() => {
+      this.loadActe(
+        this.state.idPatient,
+        this.state.offset,
+        this.state.sort,
+        this.state.order
+      );
+    }, 15000);
+  }
 
-    let dates = [
-      "dtArrete",
-      "dtCreatio",
-      "dtEffet",
-      "dtFin",
-      "dtJo",
-      "dtModif"
-    ];
-    if (_.includes(dates, champ)) {
-      let d = new Date(value);
-      return d.toLocaleDateString("fr-FR");
-    } else {
-      return value;
-    }
-  };
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  }
 
-  onSelection = acte => {
-    if (!_.isUndefined(this.props.onSelection)) {
-      this.props.onSelection(acte);
-    }
-  };
+  loadActe = (idPatient, offset, sort, order) => {
+    let params = {
+      _idPatient: idPatient,
+      _etat: 0,
+      limit: this.props.limit,
+      offset: offset,
+      sort: sort,
+      order: order
+    };
 
-  onPageSelect = query => {
-    this.props.client.CCAM.readAll(
-      query,
-      results => {
-        if (!_.isUndefined(this.props.onPageSelect)) {
-          let obj = {};
-          obj.actes = results.results;
-          obj.informations = results.informations;
-          this.props.onPageSelect(obj);
-        } else {
-          console.log("Callback onPageSelect non défini");
-          console.log(results);
+    this.props.client.Actes.readAll(
+      params,
+      result => {
+        if (
+          !_.isEqual(this.state.lockRevision, result.informations.lockRevision)
+        ) {
+          this.setState({
+            idPatient: idPatient,
+            actes: result.results,
+            informations: result.informations,
+            offset: offset,
+            sort: sort,
+            order: order,
+            sorted: _.isEqual(order, "DESC") ? "descending" : "ascending",
+            lockRevision: result.informations.lockRevision
+          });
         }
       },
       error => {
@@ -165,8 +173,64 @@ export default class Table2 extends React.Component {
     );
   };
 
+  onPageSelect = query => {
+    this.loadActe(query._idPatient, query.offset, query.sort, query.order);
+  };
+
+  onHandleSort = () => {
+    if (_.isEqual(this.state.order, "DESC")) {
+      this.loadActe(
+        this.state.idPatient,
+        this.state.offset,
+        this.state.sort,
+        "ASC"
+      );
+    } else {
+      this.loadActe(
+        this.state.idPatient,
+        this.state.offset,
+        this.state.sort,
+        "DESC"
+      );
+    }
+  };
+
+  decoration = code => {
+    let deco = {};
+    deco.color = "";
+    deco.icon = "";
+    deco.code = "";
+
+    if (_.startsWith(code, "#")) {
+      if (_.isEqual(code, "#NOTE")) {
+        deco.color = "yellow";
+        deco.icon = "sticky note outline";
+      } else if (_.isEqual(code, "#TODO")) {
+        deco.color = "lightgrey";
+        deco.icon = "check";
+      } else if (_.isEqual(code, "#FSE")) {
+        deco.color = "lightgreen";
+        deco.icon = "list";
+      }
+
+      return deco;
+    } else {
+      deco.code = code;
+      return deco;
+    }
+  };
+
+  onHandleRow = (e, id) => {
+    this.props.onHandleRow(e, id);
+    this.loadActe(
+      this.state.idPatient,
+      this.state.offset,
+      this.state.sort,
+      this.state.order
+    );
+  };
+
   render() {
-    let noHeaders = _.isEmpty(this.props.headers);
     let showPagination = this.props.showPagination;
     let pagination = {
       btnFirstContent: this.props.btnFirstContent,
@@ -184,72 +248,91 @@ export default class Table2 extends React.Component {
       btnNext: this.props.btnNext,
       btnPrev: this.props.btnPrev,
       btnMore: this.props.btnMore,
-      informations: this.props.informations,
       mode: this.props.mode
     };
 
-    if (!_.isEmpty(this.props.actes)) {
-      return (
-        <React.Fragment>
-          <Table {...this.props.table} selectable={true}>
-            {noHeaders ? (
-              <Table.Header />
-            ) : (
-              <Table.Header>
-                <Table.Row>
-                  {_.map(this.props.headers, header => (
-                    <Table.HeaderCell key={header.champ}>
-                      {header.title}
-                    </Table.HeaderCell>
-                  ))}
-                </Table.Row>
-              </Table.Header>
-            )}
+    return (
+      <React.Fragment>
+        <Table celled={true} striped={false} selectable={true} sortable={true}>
+          <Table.Header>
+            <Table.Row textAlign="center">
+              <Table.HeaderCell
+                sorted={this.state.sorted}
+                onClick={() => this.onHandleSort()}
+                collapsing={true}
+              >
+                Date
+              </Table.HeaderCell>
+              <Table.HeaderCell collapsing={true}>
+                Localisation
+              </Table.HeaderCell>
+              <Table.HeaderCell collapsing={true}>Code/Type</Table.HeaderCell>
+              <Table.HeaderCell collapsing={true}>Cotation</Table.HeaderCell>
+              <Table.HeaderCell>Description</Table.HeaderCell>
+              <Table.HeaderCell collapsing={true}>Montant</Table.HeaderCell>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {_.map(this.state.actes, acte => {
+              let deco = this.decoration(acte.code);
 
-            <Table.Body>
-              {noHeaders
-                ? _.map(this.props.actes, acte => (
-                    <Table.Row
-                      key={acte.codActe}
-                      onClick={(e, d) => this.onSelection(acte)}
-                    >
-                      <Table.Cell>{acte.codActe}</Table.Cell>
-                      <Table.Cell>{acte.nomLong}</Table.Cell>
-                    </Table.Row>
-                  ))
-                : _.map(this.props.actes, acte => (
-                    <Table.Row
-                      key={acte.codActe}
-                      onClick={(e, d) => this.onSelection(acte)}
-                    >
-                      {_.map(this.props.headers, header => (
-                        <Table.Cell key={header.champ}>
-                          {this.displayValue(
-                            header.champ,
-                            _.get(acte, [header.champ])
-                          )}
+              return (
+                <React.Fragment key={acte.id}>
+                  <Table.Row
+                    key={acte.id}
+                    onClick={e => this.onHandleRow(e, acte.id)}
+                    // onContextMenu={e => this.onHandleRow(acte.id)}
+                    style={{ backgroundColor: deco.color }}
+                  >
+                    <Table.Cell>{moment(acte.doneAt).format("L")}</Table.Cell>
+                    <Table.Cell>{acte.localisation}</Table.Cell>
+                    <Table.Cell>{deco.code}</Table.Cell>
+                    <Table.Cell>
+                      {_.isEqual(acte.cotation, 0) ? "" : acte.cotation}
+                    </Table.Cell>
+                    <Table.Cell>
+                      {_.isEmpty(deco.icon) ? "" : <Icon name={deco.icon} />}
+                      {acte.description}
+                    </Table.Cell>
+                    <Table.Cell textAlign="right">
+                      {tarif(acte.montant)}
+                    </Table.Cell>
+                  </Table.Row>
+                  {/* {_.map(acte.contentJO.actes, contentJO => {
+                    return (
+                      <Table.Row>
+                        <Table.Cell>
+                          {moment(contentJO.date).format("L")}
                         </Table.Cell>
-                      ))}
-                    </Table.Row>
-                  ))}
-            </Table.Body>
-          </Table>
-          <div style={{ textAlign: "center" }}>
-            {showPagination ? (
-              <Pagination
-                informations={this.state.informations}
-                onPageSelect={this.onPageSelect}
-                {...pagination}
-              />
-            ) : (
-              ""
-            )}
-          </div>
-        </React.Fragment>
-      );
-    } else {
-      return "";
-    }
+                        <Table.Cell>{contentJO.localisation}</Table.Cell>
+                        <Table.Cell>{contentJO.codActe}</Table.Cell>
+                        <Table.Cell />
+                        <Table.Cell>{contentJO.description}</Table.Cell>
+                        <Table.Cell textAlign="right">
+                          {tarif(contentJO.montant)}
+                        </Table.Cell>
+                        <Table.Cell />
+                      </Table.Row>
+                    );
+                  })} */}
+                </React.Fragment>
+              );
+            })}
+          </Table.Body>
+        </Table>
+        <div style={{ textAlign: "center" }}>
+          {showPagination ? (
+            <Pagination
+              informations={this.state.informations}
+              onPageSelect={this.onPageSelect}
+              {...pagination}
+            />
+          ) : (
+            ""
+          )}
+        </div>
+      </React.Fragment>
+    );
   }
 }
 

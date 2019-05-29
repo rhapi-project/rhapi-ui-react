@@ -10,7 +10,8 @@ const propDefs = {
   description: "Grille de saisie des localisations dentaires",
   example: "Grille",
   propDocs: {
-    dents: 'Liste des dents sélectionnées, séparées par des espaces. Par défaut ""',
+    dents:
+      'Liste des dents sélectionnées, séparées par des espaces. Par défaut ""',
     modal: "semantic.modules",
     onSelection: "Callback à la selection d'une liste de dents"
   },
@@ -133,7 +134,6 @@ export default class Localisations extends React.Component {
     );
     let grille = (
       <Grid>
-      
         {/* 1ère ligne */}
         {/*<Grid.Row stretched={true} centered={true} style={{ padding: padding }}>
           <span
@@ -166,7 +166,9 @@ export default class Localisations extends React.Component {
               paddingLeft: "55%"
             }}
           >
-            {clean}{check}{_.isUndefined(this.props.modal) ? null : close}
+            {clean}
+            {check}
+            {_.isUndefined(this.props.modal) ? null : close}
           </span>
           {_.map(["10", "01", "20"], num => (
             <Grid.Column key={num} textAlign="center" width={2}>
@@ -446,13 +448,9 @@ export default class Localisations extends React.Component {
             />
           </Grid.Column>
         </Grid.Row>
-        
+
         {/* Dernière ligne */}
-        <Grid.Row
-          stretched={true}
-          centered={true}
-          style={{ padding: padding }}
-        >
+        <Grid.Row stretched={true} centered={true} style={{ padding: padding }}>
           {_.map(["40", "02", "30"], num => (
             <Grid.Column key={num} textAlign="center" width={2}>
               <Localisation

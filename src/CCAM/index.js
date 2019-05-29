@@ -4,7 +4,6 @@
 import React from "react";
 import Detail from "./Detail";
 import Fiche from "./Fiche";
-import ModalSearch from "./ModalSearch";
 import Search from "./Search";
 import Table from "./Table";
 import Tarification from "./Tarification";
@@ -12,7 +11,6 @@ import Tarification from "./Tarification";
 export default class CCAM extends React.Component {
   static Detail = Detail;
   static Fiche = Fiche;
-  static ModalSearch = ModalSearch;
   static Table = Table;
   static Search = Search;
   static Tarification = Tarification;

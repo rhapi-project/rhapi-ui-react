@@ -1,8 +1,12 @@
 import React from "react";
-import Localisations from "./Localisations";
+import Saisie from "./Saisie";
+import Historique from "./Historique";
+import ModalSearch from "./ModalSearch";
 
 export default class Shared extends React.Component {
-  static Localisations = Localisations;
+  static Saisie = Saisie;
+  static Historique = Historique;
+  static ModalSearch = ModalSearch;
   render() {
     const { children } = this.props;
     return (
