@@ -8,17 +8,16 @@ import Tarification from "../CCAM/Tarification";
 
 import moment from "moment";
 
-import { toISOLocalisation } from "../lib/Helpers";
-
 const propDefs = {
   description:
     "Ce composant est une modal Semantic de recherche d'un acte. Il intègre " +
     "un date picker, les composants CCAM.Search, CCAM.Table et Shared.Localisations",
   example: "ModalSearch",
   propDocs: {
-    acte: "Acte sélectionné",
+    cotation:
+      "Cotation/coefficient applicable au code (significatif uniquement en NGAP, 0 si non significatif)",
     date: "Date effective de l'acte au format ISO. Par défaut date du jour",
-    dents:
+    localisation:
       'Liste des dents sélectionnées, séparées par des espaces. Par défaut ""',
     executant:
       "Limiter la recherche aux seuls actes d'une profession de santé. " +
@@ -26,36 +25,39 @@ const propDefs = {
     localisationPicker:
       "Affichage de la grille de saisie des localisations dentaires",
     open: "Ouverture de la modal",
-    onClose: "Callback à la fermeture de la modal"
+    onClose: "Callback à la fermeture de la modal",
+    rowIndex:
+      "Indice de la ligne sur laquelle on a cliqué dans le tableau de saisie des actes"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
-    acte: PropTypes.object,
+    cotation: PropTypes.number,
     date: PropTypes.string,
-    dents: PropTypes.string,
+    localisation: PropTypes.string,
     executant: PropTypes.string,
     localisationPicker: PropTypes.bool,
     open: PropTypes.bool,
-    onClose: PropTypes.func
+    onClose: PropTypes.func,
+    rowIndex: PropTypes.number
   }
 };
 
 export default class ModalSearch extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
-    acte: {},
     date: moment().toISOString(),
-    dents: "",
+    localisation: "",
+    cotation: 0,
     executant: "",
     localisationPicker: false
   };
 
   componentWillMount() {
     this.setState({
-      acte: this.props.acte,
+      acte: {},
       actes: [],
       date: this.props.date,
-      dents: this.props.dents,
+      localisation: this.props.localisation,
       informations: {}
     });
   }
@@ -82,6 +84,7 @@ export default class ModalSearch extends React.Component {
   };
 
   errorTarification = () => {};
+
   onSelection = acte => {
     this.setState({
       acte: acte
@@ -93,7 +96,8 @@ export default class ModalSearch extends React.Component {
       this.props.rowIndex,
       detail.acte,
       detail.date,
-      this.state.dents,
+      this.state.localisation,
+      this.props.cotation,
       detail.tarif
     );
     this.props.onClose();
@@ -102,8 +106,8 @@ export default class ModalSearch extends React.Component {
   render() {
     let localisation = this.props.localisationPicker ? (
       <Localisations
-        dents={this.state.dents}
-        onSelection={dents => this.setState({ dents: dents })}
+        dents={this.state.localisation}
+        onSelection={dents => this.setState({ localisation: dents })}
       />
     ) : null;
     let tableProps = {
@@ -121,7 +125,7 @@ export default class ModalSearch extends React.Component {
             date={this.state.date}
             executant={this.props.executant}
             limit={7}
-            localisation={toISOLocalisation(this.state.dents)}
+            localisation={this.state.localisation}
             onLoadActes={this.onLoadActes}
           />
           <Divider hidden={true} />
