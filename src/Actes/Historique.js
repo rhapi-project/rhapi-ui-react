@@ -79,12 +79,12 @@ const propDefs = {
 export default class Historique extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
-    idPatient: 0,
-    showPagination: false,
+    idPatient: -1,
+    showPagination: true,
     table: {},
-    limit: 10,
-    sort: "id",
-    order: "ASC",
+    limit: 5,
+    sort: "doneAt",
+    order: "DESC",
     // props pour le composant de pagination
     btnFirstContent: "",
     btnLastContent: "",
@@ -110,46 +110,47 @@ export default class Historique extends React.Component {
       idPatient: this.props.idPatient,
       actes: [],
       informations: {},
-      limit: this.props.limit,
       offset: 0,
       sort: this.props.sort,
       order: this.props.order,
       sorted: _.isEqual(this.props.order, "DESC") ? "descending" : "ascending",
       lockRevision: ""
     });
+
+    this.loadActe(this.props.idPatient, 0, this.props.sort, this.props.order);
   }
 
   componentWillReceiveProps(next) {
-    this.loadActe(
-      next.idPatient,
-      this.state.limit,
-      this.state.offset,
-      this.state.sort,
-      this.state.order
-    );
+    this.loadActe(next.idPatient, 0, this.state.sort, this.state.order);
   }
 
   componentDidMount() {
-    setInterval(() => {
+    this.interval = setInterval(() => {
       this.loadActe(
         this.state.idPatient,
-        this.state.limit,
         this.state.offset,
         this.state.sort,
         this.state.order
       );
-    }, 30000);
+    }, 15000);
   }
 
-  loadActe = (idPatient, limit, offset, sort, order) => {
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  }
+
+  loadActe = (idPatient, offset, sort, order) => {
+    let params = {
+      _idPatient: idPatient,
+      _etat: 0,
+      limit: this.props.limit,
+      offset: offset,
+      sort: sort,
+      order: order
+    };
+
     this.props.client.Actes.readAll(
-      {
-        _idPatient: idPatient,
-        limit: limit,
-        offset: offset,
-        sort: sort,
-        order: order
-      },
+      params,
       result => {
         if (
           !_.isEqual(this.state.lockRevision, result.informations.lockRevision)
@@ -158,7 +159,6 @@ export default class Historique extends React.Component {
             idPatient: idPatient,
             actes: result.results,
             informations: result.informations,
-            limit: limit,
             offset: offset,
             sort: sort,
             order: order,
@@ -174,20 +174,13 @@ export default class Historique extends React.Component {
   };
 
   onPageSelect = query => {
-    this.loadActe(
-      query._idPatient,
-      query.limit,
-      query.offset,
-      query.sort,
-      query.order
-    );
+    this.loadActe(query._idPatient, query.offset, query.sort, query.order);
   };
 
   onHandleSort = () => {
     if (_.isEqual(this.state.order, "DESC")) {
       this.loadActe(
         this.state.idPatient,
-        this.state.limit,
         this.state.offset,
         this.state.sort,
         "ASC"
@@ -195,7 +188,6 @@ export default class Historique extends React.Component {
     } else {
       this.loadActe(
         this.state.idPatient,
-        this.state.limit,
         this.state.offset,
         this.state.sort,
         "DESC"
@@ -229,23 +221,13 @@ export default class Historique extends React.Component {
   };
 
   onHandleRow = (e, id) => {
-    console.log(id);
-
-    if (e.type === "click") {
-      console.log("Left click");
-
-      return (
-        <div>
-          <Menu vertical>
-            <Menu.Item>
-              <p>Supprimer</p>
-            </Menu.Item>
-          </Menu>
-        </div>
-      );
-    } else if (e.type === "contextmenu") {
-      console.log("Right click");
-    }
+    this.props.onHandleRow(e, id);
+    this.loadActe(
+      this.state.idPatient,
+      this.state.offset,
+      this.state.sort,
+      this.state.order
+    );
   };
 
   render() {
@@ -295,26 +277,45 @@ export default class Historique extends React.Component {
               let deco = this.decoration(acte.code);
 
               return (
-                <Table.Row
-                  key={acte.id}
-                  onClick={e => this.onHandleRow(e, acte.id)}
-                  onContextMenu={e => this.onHandleRow(e, acte.id)}
-                  style={{ backgroundColor: deco.color }}
-                >
-                  <Table.Cell>{moment(acte.doneAt).format("L")}</Table.Cell>
-                  <Table.Cell>{acte.localisation}</Table.Cell>
-                  <Table.Cell>{deco.code}</Table.Cell>
-                  <Table.Cell>
-                    {_.isEqual(acte.cotation, 0) ? "" : acte.cotation}
-                  </Table.Cell>
-                  <Table.Cell>
-                    {_.isEmpty(deco.icon) ? "" : <Icon name={deco.icon} />}
-                    {acte.description}
-                  </Table.Cell>
-                  <Table.Cell textAlign="right">
-                    {tarif(acte.montant)}
-                  </Table.Cell>
-                </Table.Row>
+                <React.Fragment key={acte.id}>
+                  <Table.Row
+                    key={acte.id}
+                    onClick={e => this.onHandleRow(e, acte.id)}
+                    // onContextMenu={e => this.onHandleRow(acte.id)}
+                    style={{ backgroundColor: deco.color }}
+                  >
+                    <Table.Cell>{moment(acte.doneAt).format("L")}</Table.Cell>
+                    <Table.Cell>{acte.localisation}</Table.Cell>
+                    <Table.Cell>{deco.code}</Table.Cell>
+                    <Table.Cell>
+                      {_.isEqual(acte.cotation, 0) ? "" : acte.cotation}
+                    </Table.Cell>
+                    <Table.Cell>
+                      {_.isEmpty(deco.icon) ? "" : <Icon name={deco.icon} />}
+                      {acte.description}
+                    </Table.Cell>
+                    <Table.Cell textAlign="right">
+                      {tarif(acte.montant)}
+                    </Table.Cell>
+                  </Table.Row>
+                  {/* {_.map(acte.contentJO.actes, contentJO => {
+                    return (
+                      <Table.Row>
+                        <Table.Cell>
+                          {moment(contentJO.date).format("L")}
+                        </Table.Cell>
+                        <Table.Cell>{contentJO.localisation}</Table.Cell>
+                        <Table.Cell>{contentJO.codActe}</Table.Cell>
+                        <Table.Cell />
+                        <Table.Cell>{contentJO.description}</Table.Cell>
+                        <Table.Cell textAlign="right">
+                          {tarif(contentJO.montant)}
+                        </Table.Cell>
+                        <Table.Cell />
+                      </Table.Row>
+                    );
+                  })} */}
+                </React.Fragment>
               );
             })}
           </Table.Body>
