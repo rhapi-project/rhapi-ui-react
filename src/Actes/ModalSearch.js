@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Divider, Header, Icon, Modal } from "semantic-ui-react";
+import { Accordion, Button, Divider, Form, Header, Icon, Input, Modal, Table } from "semantic-ui-react";
 import Search2 from "../CCAM/Search";
 import Table2 from "../CCAM/Table";
 import Localisations from "../Shared/Localisations";
@@ -58,6 +58,7 @@ export default class ModalSearch extends React.Component {
       actes: [],
       date: this.props.date,
       localisation: this.props.localisation,
+      openLocalisation: false,
       informations: {}
     });
   }
@@ -103,6 +104,12 @@ export default class ModalSearch extends React.Component {
     this.props.onClose();
   };
 
+  openLocalisation = () => {
+    this.setState({
+      openLocalisation: !this.state.openLocalisation
+    });
+  };
+
   render() {
     let localisation = this.props.localisationPicker ? (
       <Localisations
@@ -118,16 +125,64 @@ export default class ModalSearch extends React.Component {
     return (
       <Modal open={this.props.open} onClose={this.onClose} size="large">
         <Modal.Content>
-          {localisation}
-          <Divider />
-          <Search2
-            client={this.props.client}
-            date={this.state.date}
-            executant={this.props.executant}
-            limit={7}
-            localisation={this.state.localisation}
-            onLoadActes={this.onLoadActes}
-          />
+          <Table basic="very" style={{ marginBottom: "0px" }}>
+            <Table.Body>
+              <Table.Row>
+                <Table.Cell collapsing={true}>
+                  <Form>
+                    <Form.Input label="Recherche d'un acte">
+                      <Search2
+                        client={this.props.client}
+                        date={this.state.date}
+                        executant={this.props.executant}
+                        limit={7}
+                        localisation={this.state.localisation}
+                        onLoadActes={this.onLoadActes}
+                      />
+                    </Form.Input>
+                  </Form>
+                </Table.Cell>
+                <Table.Cell collapsing={true}>
+                  <Form>
+                    <Form.Input label="Date"/>
+                  </Form>
+                </Table.Cell>
+                <Table.Cell collapsing={true}>
+                  <Form>
+                    <Form.Input label="Localisation"/>
+                  </Form>
+                </Table.Cell>
+                <Table.Cell collapsing={true}>
+                  <Form>
+                    <Form.Input label="Modificateurs"/>
+                  </Form>
+                </Table.Cell>
+                <Table.Cell collapsing={true}>
+                  <Form>
+                    <Form.Input label="Montant"/>
+                  </Form>
+                </Table.Cell>
+              </Table.Row>
+
+              <Table.Row>
+                <Table.Cell colSpan={4}>
+                    <Input fluid={true}/>
+                </Table.Cell>
+                <Table.Cell>
+                  <Input fluid={true}/>
+                </Table.Cell>
+              </Table.Row>
+            </Table.Body>
+          </Table>
+          <Accordion styled={true} fluid={true}>
+            <Accordion.Title active={this.state.openLocalisation} onClick={this.openLocalisation}>
+              <Icon name="dropdown" />
+              Localisation
+            </Accordion.Title>
+            <Accordion.Content active={this.state.openLocalisation}>
+              {localisation}
+            </Accordion.Content>
+          </Accordion>
           <Divider hidden={true} />
           <div style={{ height: "350px", overflow: "auto" }}>
             {_.isEmpty(this.state.actes) ? (
@@ -162,6 +217,15 @@ export default class ModalSearch extends React.Component {
             error={this.errorTarification}
           />
         </Modal.Content>
+        <Modal.Actions>
+          <Button 
+            content="Annuler"
+            onClick={this.onClose}
+          />
+          <Button 
+            content="Valider"
+          />
+        </Modal.Actions>
       </Modal>
     );
   }

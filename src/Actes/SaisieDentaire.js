@@ -98,6 +98,7 @@ export default class SaisieDentaire extends React.Component {
             {_.isEmpty(this.state.code) ? "" : this.state.cotation}
           </Table.Cell>
           <Table.Cell textAlign="left">{this.props.description}</Table.Cell>
+          <Table.Cell textAlign="center" collapsing={true}></Table.Cell>
           <Table.Cell collapsing={true} textAlign="right">
             {_.isEmpty(this.state.code) ? "" : tarif(this.state.montant)}
           </Table.Cell>

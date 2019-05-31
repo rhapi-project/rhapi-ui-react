@@ -144,6 +144,7 @@ export default class Saisie extends React.Component {
                 <Table.HeaderCell>Code</Table.HeaderCell>
                 <Table.HeaderCell>Cotation</Table.HeaderCell>
                 <Table.HeaderCell>Libellé</Table.HeaderCell>
+                <Table.HeaderCell>Modificateurs</Table.HeaderCell>
                 <Table.HeaderCell>Montant</Table.HeaderCell>
               </Table.Row>
             </Table.Header>
@@ -155,7 +156,7 @@ export default class Saisie extends React.Component {
                   client={this.props.client}
                   code={this.existActe(i) ? this.state.actes[i].code : ""}
                   cotation={
-                    this.existActe(i) ? this.state.actes[i].cotation : 0
+                    this.existActe(i) ? this.state.actes[i].cotation : 1
                   }
                   date={
                     this.existActe(i)
