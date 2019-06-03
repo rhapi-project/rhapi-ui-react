@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, Icon, Menu, Table } from "semantic-ui-react";
+import { Button, Dropdown, Icon, Table } from "semantic-ui-react";
 import _ from "lodash";
 import { tarif } from "../lib/Helpers";
 import moment from "moment";
@@ -76,6 +76,11 @@ const propDefs = {
   }
 };
 
+const actions = [
+  { icon: "edit", text: "Editer", value: 1 },
+  { icon: "trash", text: "Supprimer", value: 2 }
+];
+
 export default class Historique extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
@@ -106,6 +111,7 @@ export default class Historique extends React.Component {
   };
 
   componentWillMount() {
+    console.log("componentWillMount");
     this.setState({
       idPatient: this.props.idPatient,
       actes: [],
@@ -121,10 +127,21 @@ export default class Historique extends React.Component {
   }
 
   componentWillReceiveProps(next) {
-    this.loadActe(next.idPatient, 0, this.state.sort, this.state.order);
+    console.log("componentWillReceiveProps");
+    if (_.isEqual(this.state.idPatient, next.idPatient)) {
+      this.loadActe(
+        next.idPatient,
+        this.state.offset,
+        this.state.sort,
+        this.state.order
+      );
+    } else {
+      this.loadActe(next.idPatient, 0, this.state.sort, this.state.order);
+    }
   }
 
   componentDidMount() {
+    console.log("componentDidMount");
     this.interval = setInterval(() => {
       this.loadActe(
         this.state.idPatient,
@@ -156,7 +173,7 @@ export default class Historique extends React.Component {
           !_.isEqual(this.state.lockRevision, result.informations.lockRevision)
         ) {
           this.setState({
-            idPatient: idPatient,
+            idPatient: Number(idPatient),
             actes: result.results,
             informations: result.informations,
             offset: offset,
@@ -174,6 +191,7 @@ export default class Historique extends React.Component {
   };
 
   onPageSelect = query => {
+    console.log("onPageSelect");
     this.loadActe(query._idPatient, query.offset, query.sort, query.order);
   };
 
@@ -220,17 +238,24 @@ export default class Historique extends React.Component {
     }
   };
 
-  onHandleRow = (e, id) => {
-    this.props.onHandleRow(e, id);
-    this.loadActe(
-      this.state.idPatient,
-      this.state.offset,
-      this.state.sort,
-      this.state.order
-    );
+  onActeDoubleClick = id => {
+    console.log("DoubleClick");
+    this.props.onActeDoubleClick(id);
+  };
+
+  onSelectionChange = (e, id) => {
+    console.log("click " + id);
+    this.props.onSelectionChange(e, id);
+  };
+
+  onAction = (id, action) => {
+    this.props.onAction(id, action);
   };
 
   render() {
+    console.log("src : ");
+    console.log(this.state);
+
     let showPagination = this.props.showPagination;
     let pagination = {
       btnFirstContent: this.props.btnFirstContent,
@@ -253,7 +278,7 @@ export default class Historique extends React.Component {
 
     return (
       <React.Fragment>
-        <Table celled={true} striped={false} selectable={true} sortable={true}>
+        <Table celled={true} striped={false} selectable={false} sortable={true}>
           <Table.Header>
             <Table.Row textAlign="center">
               <Table.HeaderCell
@@ -270,19 +295,24 @@ export default class Historique extends React.Component {
               <Table.HeaderCell collapsing={true}>Cotation</Table.HeaderCell>
               <Table.HeaderCell>Description</Table.HeaderCell>
               <Table.HeaderCell collapsing={true}>Montant</Table.HeaderCell>
+              <Table.HeaderCell collapsing={true}>Action</Table.HeaderCell>
             </Table.Row>
           </Table.Header>
           <Table.Body>
             {_.map(this.state.actes, acte => {
               let deco = this.decoration(acte.code);
+              let rowSelected = _.includes(this.props.actesSelected, acte.id);
 
               return (
                 <React.Fragment key={acte.id}>
                   <Table.Row
                     key={acte.id}
-                    onClick={e => this.onHandleRow(e, acte.id)}
-                    // onContextMenu={e => this.onHandleRow(acte.id)}
-                    style={{ backgroundColor: deco.color }}
+                    onClick={(e, d) => this.onSelectionChange(e, acte.id)}
+                    onDoubleClick={() => this.onActeDoubleClick(acte.id)}
+                    style={{
+                      backgroundColor: rowSelected ? "#E88615" : deco.color,
+                      color: rowSelected ? "white" : "black"
+                    }}
                   >
                     <Table.Cell>{moment(acte.doneAt).format("L")}</Table.Cell>
                     <Table.Cell>{acte.localisation}</Table.Cell>
@@ -296,6 +326,12 @@ export default class Historique extends React.Component {
                     </Table.Cell>
                     <Table.Cell textAlign="right">
                       {tarif(acte.montant)}
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Dropdown
+                        options={actions}
+                        onChange={(e, d) => this.onAction(acte.id, d.value)}
+                      />
                     </Table.Cell>
                   </Table.Row>
                   {/* {_.map(acte.contentJO.actes, contentJO => {

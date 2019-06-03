@@ -1,7 +1,9 @@
 import React from "react";
+// import ReactDOM from 'react-dom';
 import { Client } from "rhapi-client";
 import { Actes } from "rhapi-ui-react";
-import { Divider, Form } from "semantic-ui-react";
+import { Confirm, Divider, Form } from "semantic-ui-react";
+import _ from "lodash";
 
 // Instanciation du client RHAPI sans authentification
 const client = new Client("https://demo.rhapi.net/demo01");
@@ -12,35 +14,89 @@ const patients = [
   { text: "2", value: 2 },
   { text: "3", value: 3 },
   { text: "4", value: 4 },
+  { text: "5", value: 5 },
+  { text: "6", value: 6 },
   { text: "8", value: 8 },
 ]
 
 export default class ActesHistorique extends React.Component {
   componentWillMount() {
     this.setState({
-      idPatient : 0
+      idPatient : -1,
+      showModal: false,
+      actesSelected: []
     });
   }
+
+  // componentDidMount() {
+  //   document.addEventListener('click',this.onClickOutside, true);
+  // }
+
+  // componentWillUnmount() {
+  //   document.removeEventListener('click',this.onClickOutside, true);
+  // }
+
+  // onClickOutside = (event) => {
+  //   const domNode = ReactDOM.findDOMNode(this);
+
+  //   if (!domNode || !domNode.contains(event.target)) {
+  //     this.setState({
+  //       actesSelected: []
+  //     });
+  //   }
+  // }
 
   onPatientChange = id => {
     this.setState({ idPatient: id });
   };
 
-  onHandleRow = (e,id) => {
-    console.log("onHandleRow " + id);
-
-    // client.Actes.destroy(
-    //   id,
-    //   result => {
-    //     console.log(result);
-    //   },
-    //   error => {
-    //     console.log(error);
-    //   }
-    // )
+  onActeDoubleClick = (id) => {
+    let single_acte = [];
+    single_acte.push(id);
+    this.setState({ actesSelected: single_acte })
   }
-  
+
+  onSelectionChange = (e, id) => {
+    if (e.ctrlKey) {
+      let multi_actes = this.state.actesSelected;
+
+      // Possibilité d'améliorer avec lodash
+      if (_.includes(multi_actes,id)) {
+        const index = multi_actes.indexOf(id);
+        multi_actes.splice(index,1);
+        this.setState({ actesSelected: multi_actes });
+      } else {
+        multi_actes.push(id);
+        this.setState({ actesSelected: multi_actes });
+      }
+    } else {
+      let single_acte = [];
+      single_acte.push(id);
+      this.setState({ actesSelected: single_acte });
+    }
+  }
+
+  onAction = (id, action) => {
+    console.log("onAction " + id + " action : " + action);
+    
+    // Supprimer
+    if (_.isEqual(action,2)) {
+      this.setState({
+        showModal: true
+      })
+    }
+  }
+
+  remove = () => {
+    this.setState({
+      showModal: false
+    });
+  }
+
   render() {
+    console.log("exe : ");
+    console.log(this.state);
+
     return (
       <React.Fragment>
         <p>
@@ -63,7 +119,16 @@ export default class ActesHistorique extends React.Component {
         <Actes.Historique 
           client={client}
           idPatient={this.state.idPatient}
-          onHandleRow={this.onHandleRow}
+          actesSelected={this.state.actesSelected}
+          onSelectionChange={this.onSelectionChange}
+          onActeDoubleClick={this.onActeDoubleClick}
+          onAction={this.onAction}
+        />
+        <Confirm
+          open={this.state.showModal}
+          content="Etes-vous sûr de vouloir supprimer ?"
+          onCancel={this.remove}
+          onConfirm={this.remove}
         />
       </React.Fragment>
     );
