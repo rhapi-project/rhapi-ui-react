@@ -1,5 +1,5 @@
 import React from "react";
-// import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom';
 import { Client } from "rhapi-client";
 import { Actes } from "rhapi-ui-react";
 import { Confirm, Divider, Form } from "semantic-ui-react";
@@ -22,29 +22,31 @@ const patients = [
 export default class ActesHistorique extends React.Component {
   componentWillMount() {
     this.setState({
-      idPatient : -1,
+      idPatient : 0,
       showModal: false,
       actesSelected: []
     });
   }
 
-  // componentDidMount() {
-  //   document.addEventListener('click',this.onClickOutside, true);
-  // }
+  componentDidMount() {
+    document.addEventListener('click',this.onClickOutside, true);
+  }
 
-  // componentWillUnmount() {
-  //   document.removeEventListener('click',this.onClickOutside, true);
-  // }
+  componentWillUnmount() {
+    document.removeEventListener('click',this.onClickOutside, true);
+  }
 
-  // onClickOutside = (event) => {
-  //   const domNode = ReactDOM.findDOMNode(this);
+  onClickOutside = (event) => {
+    const domNode = ReactDOM.findDOMNode(this);
 
-  //   if (!domNode || !domNode.contains(event.target)) {
-  //     this.setState({
-  //       actesSelected: []
-  //     });
-  //   }
-  // }
+    if (!event.ctrlKey) {
+      if (!domNode || !domNode.contains(event.target)) {
+        this.setState({
+          actesSelected: []
+        });
+      }
+    }
+  }
 
   onPatientChange = id => {
     this.setState({ idPatient: id });
@@ -77,13 +79,11 @@ export default class ActesHistorique extends React.Component {
   }
 
   onAction = (id, action) => {
-    console.log("onAction " + id + " action : " + action);
-    
-    // Supprimer
-    if (_.isEqual(action,2)) {
-      this.setState({
-        showModal: true
-      })
+    console.log("onAction : " + id);
+    if (_.isEqual(action,"Supprimer")) {
+      console.log("action : " + action);
+    } else if (_.isEqual(action,"Editer")) {
+      console.log("action : " + action);
     }
   }
 
@@ -94,9 +94,6 @@ export default class ActesHistorique extends React.Component {
   }
 
   render() {
-    console.log("exe : ");
-    console.log(this.state);
-
     return (
       <React.Fragment>
         <p>
@@ -126,6 +123,7 @@ export default class ActesHistorique extends React.Component {
         />
         <Confirm
           open={this.state.showModal}
+          header="Supression"
           content="Etes-vous sûr de vouloir supprimer ?"
           onCancel={this.remove}
           onConfirm={this.remove}

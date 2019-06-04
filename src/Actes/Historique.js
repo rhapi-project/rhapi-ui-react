@@ -77,8 +77,16 @@ const propDefs = {
 };
 
 const actions = [
-  { icon: "edit", text: "Editer", value: 1 },
-  { icon: "trash", text: "Supprimer", value: 2 }
+  {
+    icon: "edit",
+    text: "Editer",
+    value: "Editer"
+  },
+  {
+    icon: "trash",
+    text: "Supprimer",
+    value: "Supprimer"
+  }
 ];
 
 export default class Historique extends React.Component {
@@ -111,7 +119,6 @@ export default class Historique extends React.Component {
   };
 
   componentWillMount() {
-    console.log("componentWillMount");
     this.setState({
       idPatient: this.props.idPatient,
       actes: [],
@@ -127,7 +134,6 @@ export default class Historique extends React.Component {
   }
 
   componentWillReceiveProps(next) {
-    console.log("componentWillReceiveProps");
     if (_.isEqual(this.state.idPatient, next.idPatient)) {
       this.loadActe(
         next.idPatient,
@@ -141,7 +147,6 @@ export default class Historique extends React.Component {
   }
 
   componentDidMount() {
-    console.log("componentDidMount");
     this.interval = setInterval(() => {
       this.loadActe(
         this.state.idPatient,
@@ -191,7 +196,6 @@ export default class Historique extends React.Component {
   };
 
   onPageSelect = query => {
-    console.log("onPageSelect");
     this.loadActe(query._idPatient, query.offset, query.sort, query.order);
   };
 
@@ -253,9 +257,6 @@ export default class Historique extends React.Component {
   };
 
   render() {
-    console.log("src : ");
-    console.log(this.state);
-
     let showPagination = this.props.showPagination;
     let pagination = {
       btnFirstContent: this.props.btnFirstContent,
@@ -328,29 +329,21 @@ export default class Historique extends React.Component {
                       {tarif(acte.montant)}
                     </Table.Cell>
                     <Table.Cell>
-                      <Dropdown
-                        options={actions}
-                        onChange={(e, d) => this.onAction(acte.id, d.value)}
-                      />
+                      <Dropdown>
+                        <Dropdown.Menu>
+                          {_.map(actions, action => (
+                            <Dropdown.Item
+                              key={action.value}
+                              {...action}
+                              onClick={(e, d) =>
+                                this.onAction(acte.id, d.value)
+                              }
+                            />
+                          ))}
+                        </Dropdown.Menu>
+                      </Dropdown>
                     </Table.Cell>
                   </Table.Row>
-                  {/* {_.map(acte.contentJO.actes, contentJO => {
-                    return (
-                      <Table.Row>
-                        <Table.Cell>
-                          {moment(contentJO.date).format("L")}
-                        </Table.Cell>
-                        <Table.Cell>{contentJO.localisation}</Table.Cell>
-                        <Table.Cell>{contentJO.codActe}</Table.Cell>
-                        <Table.Cell />
-                        <Table.Cell>{contentJO.description}</Table.Cell>
-                        <Table.Cell textAlign="right">
-                          {tarif(contentJO.montant)}
-                        </Table.Cell>
-                        <Table.Cell />
-                      </Table.Row>
-                    );
-                  })} */}
                 </React.Fragment>
               );
             })}
@@ -393,7 +386,7 @@ class Pagination extends React.Component {
     let pageSize = this.props.informations.pageSize;
     let limit = 10;
     let q = query;
-    q.offset = 0; // recommencer au début pour l'affichage
+    q.offset = 0;
     if (_.isUndefined(q.limit)) {
       q.limit = pageSize;
     }
