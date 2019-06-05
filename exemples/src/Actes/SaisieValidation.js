@@ -88,6 +88,7 @@ export default class ActesSaisieValidation extends React.Component {
       montant: acte.montant,
       idPatient: idPatient,
       idDocument: idDocument,
+      modificateurs: acte.modificateurs, // ce champ n'est pas créé ! PROBLEME
       etat: 0
     };
     client.Actes.create(
@@ -171,6 +172,7 @@ export default class ActesSaisieValidation extends React.Component {
               <Actes.Saisie
                 client={client}
                 idActe={this.state.fse.id}
+                codGrille={13}
                 onError={this.onError}
                 lignes={10}
               />
