@@ -7,9 +7,10 @@ const tarif = number => {
   return number.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
-const spacedLocalisation = localisationISO => {
+const spacedLocalisation = localisationStr => {
+  let l = _.replace(localisationStr, /\s/g, "");
   let s = "";
-  _.forEach(localisationISO, (value, i) => {
+  _.forEach(l, (value, i) => {
     if (i % 2 === 0) {
       s += value;
     } else {
