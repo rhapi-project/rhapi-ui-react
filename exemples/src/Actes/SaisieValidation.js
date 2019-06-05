@@ -11,7 +11,6 @@ const client = new Client("https://demo.rhapi.net/demo01");
 
 const patients = [
   { text: "Aucun patient", value: null },
-  { text: "0", value: 0 },
   { text: "1", value: 1 },
   { text: "2", value: 2 },
   { text: "3", value: 3 },
@@ -49,7 +48,7 @@ export default class ActesSaisieValidation extends React.Component {
 
   onPatientChange = id => {
     this.setState({ idPatient: id });
-    if (id || id === 0) {
+    if (id && id !== 0) {
       let params = {
         _code: "#FSE",
         _etat: 1,
@@ -89,12 +88,13 @@ export default class ActesSaisieValidation extends React.Component {
       montant: acte.montant,
       idPatient: idPatient,
       idDocument: idDocument,
+      modificateurs: acte.modificateurs, // ce champ n'est pas créé ! PROBLEME
       etat: 0
     };
     client.Actes.create(
       params,
       result => {
-        console.log("création avec succès d'un acte");
+        //console.log("création avec succès d'un acte");
       },
       error => {
         console.log(error);
@@ -114,9 +114,10 @@ export default class ActesSaisieValidation extends React.Component {
         });
         client.Actes.update(
           result.id,
-          { etat: 0 },
+          { etat: 0, doneAt: moment().toISOString() },
           result => {
-            this.setState({ msgSaveFSE: "Cette FSE a été bien enregistrée !", fse: {} });
+            this.setState({ msgSaveFSE: "Cette FSE a été bien enregistrée !" });
+            this.onPatientChange(result.idPatient);
           },
           error => {
             this.setState({ msgSaveFSE: "Erreur de sauvegarde de la FSE !" });
@@ -133,7 +134,8 @@ export default class ActesSaisieValidation extends React.Component {
     client.Actes.destroy(
       this.state.fse.id,
       result => {
-        this.setState({ idPatient: null, fse: {} });
+        //this.setState({ fse: {} });
+        this.onPatientChange(this.state.fse.id);
       },
       error => {
         console.log(error);
@@ -170,6 +172,7 @@ export default class ActesSaisieValidation extends React.Component {
               <Actes.Saisie
                 client={client}
                 idActe={this.state.fse.id}
+                codGrille={13}
                 onError={this.onError}
                 lignes={10}
               />
@@ -193,7 +196,7 @@ export default class ActesSaisieValidation extends React.Component {
             <Message>{this.state.msgSaveFSE}</Message>
           </Modal.Content>
           <Modal.Actions>
-            <Button content="OK" onClick={() => this.setState({ idPatient: null, msgSaveFSE: "" })}/>
+            <Button content="OK" onClick={() => this.setState({ msgSaveFSE: "" })}/>
           </Modal.Actions>
         </Modal>
       </React.Fragment>
