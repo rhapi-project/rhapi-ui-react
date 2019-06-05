@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from 'react-dom';
 import { Client } from "rhapi-client";
 import { Actes } from "rhapi-ui-react";
-import { Confirm, Divider, Form } from "semantic-ui-react";
+import { Divider, Form } from "semantic-ui-react";
 import _ from "lodash";
 
 // Instanciation du client RHAPI sans authentification
@@ -22,8 +22,7 @@ const patients = [
 export default class ActesHistorique extends React.Component {
   componentWillMount() {
     this.setState({
-      idPatient : 0,
-      showModal: false,
+      idPatient : -1,
       actesSelected: []
     });
   }
@@ -82,15 +81,19 @@ export default class ActesHistorique extends React.Component {
     console.log("onAction : " + id);
     if (_.isEqual(action,"Supprimer")) {
       console.log("action : " + action);
+
+      client.Actes.destroy(
+        id,
+        result => {
+          console.log(result);
+        },
+        error => {
+          console.log(error);
+        }
+      );
     } else if (_.isEqual(action,"Editer")) {
       console.log("action : " + action);
     }
-  }
-
-  remove = () => {
-    this.setState({
-      showModal: false
-    });
   }
 
   render() {
@@ -113,6 +116,8 @@ export default class ActesHistorique extends React.Component {
           </Form.Group>
         </Form>
         <Divider hidden={true} />
+        <Filtre />
+        <Divider hidden={true} />
         <Actes.Historique 
           client={client}
           idPatient={this.state.idPatient}
@@ -121,13 +126,51 @@ export default class ActesHistorique extends React.Component {
           onActeDoubleClick={this.onActeDoubleClick}
           onAction={this.onAction}
         />
-        <Confirm
-          open={this.state.showModal}
-          header="Supression"
-          content="Etes-vous sûr de vouloir supprimer ?"
-          onCancel={this.remove}
-          onConfirm={this.remove}
-        />
+      </React.Fragment>
+    );
+  }
+}
+
+const dates = [
+  { key:"0", text: "Aujourd'hui", value: 0 },
+  { key:"1", text: "Hier", value: 1 },
+  ( <Divider key="divider1"/> ),
+  { key:"2", text: "Du .../.../... au .../.../...", value: 2 },
+  ( <Divider key="divider2" /> ),
+  { key:"3", text: "Cette semaine", value: 3 },
+  { key:"4", text: "La semaine précédente", value: 4 },
+  ( <Divider key="divider3" /> ),
+  { key:"5", text: "Année civile (bilan) 2019", value: 5 },
+  { key:"6", text: "Année flottante au ...", value: 6 }
+]
+
+class Filtre extends React.Component {
+  componentWillMount() {
+    this.setState({
+      date: ""
+    })
+  }
+
+  onDateChange = (date) => {
+    this.setState({
+      date: date
+    })
+  }
+
+  render() {
+    return(
+      <React.Fragment>
+        <Form>
+          <Form.Group inline={true}>
+            <Form.Dropdown
+              placeholder="Sélectionner une date"
+              selection={true}
+              options={dates}
+              onChange={(e, d) => this.onDateChange(d.value)}
+              value={this.state.date}
+            />
+          </Form.Group>
+        </Form>
       </React.Fragment>
     );
   }
