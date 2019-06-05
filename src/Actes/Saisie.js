@@ -12,12 +12,20 @@ const propDefs = {
   propDocs: {
     idActe: "Identifiant de l'acte principal",
     lignes: "Nombre de lignes à afficher pour ce tableau. Par défaut 5",
+    codActivite: 'Code de l\'activité, par défaut "1"',
+    codDom: "Code du DOM, par défaut c'est la métropole. Code 0",
+    codGrille: "Code grille, par défaut 0",
+    codPhase: "Code phase, par défaut 0",
     onError: "Callback en cas d'erreur"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
     idActe: PropTypes.any.isRequired,
     lignes: PropTypes.number,
+    codActivite: PropTypes.string,
+    codDom: PropTypes.number,
+    codGrille: PropTypes.number,
+    codPhase: PropTypes.number,
     onError: PropTypes.func
   }
 };
@@ -25,14 +33,28 @@ const propDefs = {
 export default class Saisie extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
+    codActivite: "1",
+    codDom: 0,
+    codGrille: 0,
+    codPhase: 0,
     lignes: 5
   };
 
   state = {
-    fse: {}
+    fse: {},
+    allModificateurs: []
   };
 
   componentWillMount() {
+    this.props.client.CCAM.contextes(
+      result => {
+        this.setState({ allModificateurs: result.tb11 });
+      },
+      error => {
+        console.log(error);
+        this.setState({ allModificateurs: [] });
+      }
+    );
     if (this.props.idActe) {
       this.reload(this.props.idActe);
     }
@@ -67,7 +89,16 @@ export default class Saisie extends React.Component {
     return !_.isUndefined(this.state.actes[index]);
   };
 
-  onSelectionActe = (rowKey, acte, date, localisation, cotation, tarif) => {
+  onSelectionActe = (
+    rowKey,
+    code,
+    description,
+    date,
+    localisation,
+    cotation,
+    modificateurs,
+    montant
+  ) => {
     this.props.client.Actes.read(
       this.props.idActe,
       {},
@@ -78,22 +109,26 @@ export default class Saisie extends React.Component {
         }
         if (result.lockRevision === this.state.fse.lockRevision) {
           let obj = {};
-          obj.code = acte.codActe;
+          obj.code = code;
+          obj.description = description;
           obj.date = date;
           obj.localisation = localisation;
           obj.cotation = cotation;
-          obj.description = acte.nomLong;
-          obj.montant = tarif.pu;
+          //obj.description = acte.nomLong;
+          obj.modificateurs = modificateurs;
+          obj.montant = montant;
           let actes = this.state.actes;
           if (rowKey === this.state.activeRow) {
             actes.push(obj);
             this.update(actes);
           } else {
             if (
-              _.isEqual(acte.codActe, actes[rowKey].code) &&
+              _.isEqual(code, actes[rowKey].code) &&
+              _.isEqual(description, actes[rowKey].description) &&
               _.isEqual(date, actes[rowKey].date) &&
               _.isEqual(localisation, actes[rowKey].localisation) &&
-              _.isEqual(tarif.pu, actes[rowKey].montant)
+              _.isEqual(modificateurs, actes[rowKey].modificateurs) &&
+              _.isEqual(montant, actes[rowKey].montant)
             ) {
               return;
             }
@@ -155,6 +190,10 @@ export default class Saisie extends React.Component {
                   index={i}
                   client={this.props.client}
                   code={this.existActe(i) ? this.state.actes[i].code : ""}
+                  codActivite={this.props.codActivite}
+                  codDom={this.props.codDom}
+                  codGrille={this.props.codGrille}
+                  codPhase={this.props.codPhase}
                   cotation={
                     this.existActe(i) ? this.state.actes[i].cotation : 1
                   }
@@ -169,6 +208,10 @@ export default class Saisie extends React.Component {
                   localisation={
                     this.existActe(i) ? this.state.actes[i].localisation : ""
                   }
+                  modificateurs={
+                    this.existActe(i) ? this.state.actes[i].modificateurs : ""
+                  }
+                  allModificateurs={this.state.allModificateurs} // new
                   montant={this.existActe(i) ? this.state.actes[i].montant : 0}
                   disabled={this.state.activeRow < i}
                   onSelectionActe={this.onSelectionActe}
