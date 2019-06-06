@@ -85,7 +85,7 @@ export default class ActesHistorique extends React.Component {
       client.Actes.destroy(
         id,
         result => {
-          console.log(result);
+          console.log(result); //Faire un retour utilisateur
         },
         error => {
           console.log(error);
