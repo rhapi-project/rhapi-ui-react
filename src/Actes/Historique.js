@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { Button, Dropdown, Icon, Table } from "semantic-ui-react";
 import _ from "lodash";
 import { tarif } from "../lib/Helpers";
+import Actions from "../Shared/Actions";
 import moment from "moment";
 
 const propDefs = {
@@ -75,19 +76,6 @@ const propDefs = {
     mode: PropTypes.string
   }
 };
-
-const actions = [
-  {
-    icon: "edit",
-    text: "Editer",
-    value: "Editer"
-  },
-  {
-    icon: "trash",
-    text: "Supprimer",
-    value: "Supprimer"
-  }
-];
 
 export default class Historique extends React.Component {
   static propTypes = propDefs.propTypes;
@@ -242,18 +230,28 @@ export default class Historique extends React.Component {
     }
   };
 
+  onSelectionChange = (e, id) => {
+    if (e.ctrlKey) {
+      let multiActes = this.props.actesSelected;
+
+      if (_.includes(multiActes,id)) {
+        multiActes.splice(_.indexOf(multiActes,id),1);
+      } else {
+        multiActes.push(id);
+      }
+
+      this.props.onSelectionChange(multiActes);
+    } else {
+      this.props.onActeClick(id);
+    }
+  };
+
   onActeDoubleClick = id => {
-    console.log("DoubleClick");
     this.props.onActeDoubleClick(id);
   };
 
-  onSelectionChange = (e, id) => {
-    console.log("click " + id);
-    this.props.onSelectionChange(e, id);
-  };
-
-  onAction = (id, action) => {
-    this.props.onAction(id, action);
+  onAction = (action) => {
+    this.props.onAction(action);
   };
 
   render() {
@@ -276,6 +274,18 @@ export default class Historique extends React.Component {
       btnMore: this.props.btnMore,
       mode: this.props.mode
     };
+    let actions = [
+      {
+        icon: "edit",
+        text: "Editer",
+        action: () => this.onAction("editer")
+      },
+      {
+        icon: "trash",
+        text: "Supprimer",
+        action: () => this.onAction("supprimer")
+      }
+    ];
 
     return (
       <React.Fragment>
@@ -308,7 +318,7 @@ export default class Historique extends React.Component {
                 <React.Fragment key={acte.id}>
                   <Table.Row
                     key={acte.id}
-                    onClick={(e, d) => this.onSelectionChange(e, acte.id)}
+                    onClick={(e) => this.onSelectionChange(e, acte.id)}
                     onDoubleClick={() => this.onActeDoubleClick(acte.id)}
                     style={{
                       backgroundColor: rowSelected ? "#E88615" : deco.color,
@@ -329,19 +339,7 @@ export default class Historique extends React.Component {
                       {tarif(acte.montant)}
                     </Table.Cell>
                     <Table.Cell>
-                      <Dropdown>
-                        <Dropdown.Menu>
-                          {_.map(actions, action => (
-                            <Dropdown.Item
-                              key={action.value}
-                              {...action}
-                              onClick={(e, d) =>
-                                this.onAction(acte.id, d.value)
-                              }
-                            />
-                          ))}
-                        </Dropdown.Menu>
-                      </Dropdown>
+                      <Actions actions={actions}/>
                     </Table.Cell>
                   </Table.Row>
                 </React.Fragment>

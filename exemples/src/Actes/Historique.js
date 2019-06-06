@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from 'react-dom';
 import { Client } from "rhapi-client";
 import { Actes } from "rhapi-ui-react";
-import { Divider, Form } from "semantic-ui-react";
+import { Button, Confirm, Divider, Form, Icon } from "semantic-ui-react";
 import _ from "lodash";
 
 // Instanciation du client RHAPI sans authentification
@@ -22,8 +22,9 @@ const patients = [
 export default class ActesHistorique extends React.Component {
   componentWillMount() {
     this.setState({
-      idPatient : -1,
-      actesSelected: []
+      idPatient : 0,
+      actesSelected: [],
+      showConfirm: false
     });
   }
 
@@ -36,10 +37,10 @@ export default class ActesHistorique extends React.Component {
   }
 
   onClickOutside = (event) => {
-    const domNode = ReactDOM.findDOMNode(this);
+    const domNode = ReactDOM.findDOMNode(this.refs.ok);
 
     if (!event.ctrlKey) {
-      if (!domNode || !domNode.contains(event.target)) {
+      if (!domNode.contains(event.target)) {
         this.setState({
           actesSelected: []
         });
@@ -51,52 +52,55 @@ export default class ActesHistorique extends React.Component {
     this.setState({ idPatient: id });
   };
 
-  onActeDoubleClick = (id) => {
-    let single_acte = [];
-    single_acte.push(id);
-    this.setState({ actesSelected: single_acte })
+  onSelectionChange = ids => {
+    console.log("onSelectionChange");
+    console.log(ids);
+    this.setState({ actesSelected: ids });
   }
 
-  onSelectionChange = (e, id) => {
-    if (e.ctrlKey) {
-      let multi_actes = this.state.actesSelected;
+  onActeClick = id => {
+    console.log("onActeClick");
+    console.log(id);
+    let singleActe = [];
+    singleActe.push(id);
+    this.setState({ actesSelected: singleActe });
+  }
 
-      // Possibilité d'améliorer avec lodash
-      if (_.includes(multi_actes,id)) {
-        const index = multi_actes.indexOf(id);
-        multi_actes.splice(index,1);
-        this.setState({ actesSelected: multi_actes });
-      } else {
-        multi_actes.push(id);
-        this.setState({ actesSelected: multi_actes });
-      }
-    } else {
-      let single_acte = [];
-      single_acte.push(id);
-      this.setState({ actesSelected: single_acte });
+  onActeDoubleClick = id => {
+    console.log("onActeDoubleClick");
+    console.log(id);
+    let singleActe = [];
+    singleActe.push(id);
+    this.setState({ actesSelected: singleActe });
+  }
+
+  onAction = (action) => {
+    if (_.isEqual(action,"supprimer")) {
+      console.log("action : " + action);
+      this.setState({ showConfirm: true });
+    } else if (_.isEqual(action,"editer")) {
+      console.log("action : " + action);
     }
   }
 
-  onAction = (id, action) => {
-    console.log("onAction : " + id);
-    if (_.isEqual(action,"Supprimer")) {
-      console.log("action : " + action);
+  onHandleCancel = () => {
+    this.setState({ showConfirm: false });
+  }
 
-      client.Actes.destroy(
-        id,
-        result => {
-          console.log(result); //Faire un retour utilisateur
-        },
-        error => {
-          console.log(error);
-        }
-      );
-    } else if (_.isEqual(action,"Editer")) {
-      console.log("action : " + action);
-    }
+  onHandleConfirm = () => {
+    this.setState({ showConfirm: false });
   }
 
   render() {
+    console.log(this.state);
+    
+    let message = "";
+    if (_.size(this.state.actesSelected)===1) {
+      message = "Vous confirmez la suppression de la ligne sélectionnée ?"
+    } else {
+      message = "Vous confirmez la suppression des " + _.size(this.state.actesSelected) + " lignes sélectionnées ?"
+    }
+
     return (
       <React.Fragment>
         <p>
@@ -118,13 +122,32 @@ export default class ActesHistorique extends React.Component {
         <Divider hidden={true} />
         <Filtre />
         <Divider hidden={true} />
-        <Actes.Historique 
+        <Actes.Historique
+          ref='ok'
           client={client}
           idPatient={this.state.idPatient}
           actesSelected={this.state.actesSelected}
           onSelectionChange={this.onSelectionChange}
+          onActeClick={this.onActeClick}
           onActeDoubleClick={this.onActeDoubleClick}
           onAction={this.onAction}
+        />
+        <Confirm
+          open={this.state.showConfirm}
+          content={message}
+          cancelButton={ 
+            <Button>
+              <Icon name='ban' color='red' />Non
+            </Button> 
+          }
+          confirmButton={
+            <Button>
+              <Icon name='check' color='green' />Oui
+            </Button>
+          }
+          onCancel={this.onHandleCancel}
+          onConfirm={this.onHandleConfirm}
+          size='tiny'
         />
       </React.Fragment>
     );
