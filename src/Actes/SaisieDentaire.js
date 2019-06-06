@@ -1,7 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Table } from "semantic-ui-react";
+import { Dropdown, Table } from "semantic-ui-react";
 import ModalSearch from "./ModalSearch";
+import Actions from "../Shared/Actions";
 
 import _ from "lodash";
 import moment from "moment";
@@ -94,7 +95,29 @@ export default class SaisieDentaire extends React.Component {
     this.setState({ modalSearchOpen: false });
   };
 
+  action = (code) => {
+    console.log("vous avez cliqué ");
+    console.log(code);
+  }
+
+  editer = (code) => {
+    console.log("editer");
+    console.log(code);
+  }
+
   render() {
+    let actions = [
+      {
+        icon: "edit",
+        text: "Editer",
+        action: () => this.editer(this.state.code)
+      },
+      {
+        icon: "trash",
+        text: "Supprimer",
+        action: () => this.action(this.state.code)
+      }
+    ];
     return (
       <React.Fragment>
         <Table.Row
@@ -121,6 +144,9 @@ export default class SaisieDentaire extends React.Component {
           </Table.Cell>
           <Table.Cell collapsing={true} textAlign="right">
             {_.isEmpty(this.state.code) ? "" : tarif(this.state.montant)}
+          </Table.Cell>
+          <Table.Cell>
+            <Actions actions={actions}/>
           </Table.Cell>
         </Table.Row>
         <ModalSearch
