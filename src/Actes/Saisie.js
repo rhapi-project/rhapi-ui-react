@@ -181,6 +181,7 @@ export default class Saisie extends React.Component {
                 <Table.HeaderCell>Libellé</Table.HeaderCell>
                 <Table.HeaderCell>Modificateurs</Table.HeaderCell>
                 <Table.HeaderCell>Montant</Table.HeaderCell>
+                <Table.HeaderCell>Action</Table.HeaderCell>
               </Table.Row>
             </Table.Header>
             <Table.Body>
