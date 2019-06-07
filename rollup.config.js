@@ -25,13 +25,17 @@ export default {
   plugins: [
     external(),
     postcss({
-      modules: true
+      //modules: true,
+      //plugins: [],
+      //extract: true
     }),
     url(),
     svgr(),
     babel({
       exclude: 'node_modules/**',
       plugins: [ 'external-helpers' ]
+      //runtimeHelpers: true,
+      //externalHelpers: true
     }),
     resolve(),
     commonjs()
