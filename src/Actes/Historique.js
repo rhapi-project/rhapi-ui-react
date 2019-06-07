@@ -1,8 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, Dropdown, Icon, Table } from "semantic-ui-react";
+import { Button, Confirm, Icon, Table } from "semantic-ui-react";
 import _ from "lodash";
 import { tarif } from "../lib/Helpers";
+import Actions from "../Shared/Actions";
 import moment from "moment";
 
 const propDefs = {
@@ -76,19 +77,6 @@ const propDefs = {
   }
 };
 
-const actions = [
-  {
-    icon: "edit",
-    text: "Editer",
-    value: "Editer"
-  },
-  {
-    icon: "trash",
-    text: "Supprimer",
-    value: "Supprimer"
-  }
-];
-
 export default class Historique extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
@@ -127,7 +115,8 @@ export default class Historique extends React.Component {
       sort: this.props.sort,
       order: this.props.order,
       sorted: _.isEqual(this.props.order, "DESC") ? "descending" : "ascending",
-      lockRevision: ""
+      lockRevision: "",
+      showConfirm: false
     });
 
     this.loadActe(this.props.idPatient, 0, this.props.sort, this.props.order);
@@ -242,22 +231,69 @@ export default class Historique extends React.Component {
     }
   };
 
+  onSelectionChange = (e, id) => {
+    if (e.ctrlKey) {
+      let multiActes = this.props.actesSelected;
+
+      if (_.includes(multiActes, id)) {
+        multiActes.splice(_.indexOf(multiActes, id), 1);
+      } else {
+        multiActes.push(id);
+      }
+
+      this.props.onSelectionChange(multiActes);
+    } else {
+      this.props.onActeClick(id);
+    }
+  };
+
   onActeDoubleClick = id => {
-    console.log("DoubleClick");
     this.props.onActeDoubleClick(id);
   };
 
-  onSelectionChange = (e, id) => {
-    console.log("click " + id);
-    this.props.onSelectionChange(e, id);
+  onAction = action => {
+    if (_.isEqual(action, "supprimer")) {
+      this.setState({ showConfirm: true });
+    } else if (_.isEqual(action, "editer")) {
+      // this.setState({ showConfirm: true });
+    }
   };
 
-  onAction = (id, action) => {
-    this.props.onAction(id, action);
+  onHandleCancel = () => {
+    this.setState({ showConfirm: false });
+  };
+
+  onHandleConfirm = () => {
+    _.map(this.props.actesSelected, id => {
+      this.props.client.Actes.destroy(
+        id,
+        result => {
+          this.setState({ showConfirm: false });
+          this.loadActe(
+            this.state.idPatient,
+            this.state.offset,
+            this.state.sort,
+            this.state.order
+          );
+        },
+        error => {
+          console.log(error);
+        }
+      );
+    });
+  };
+
+  onClickDropdown = id => {
+    if (_.size(this.props.actesSelected) <= 1) {
+      this.props.onActeClick(id);
+    } else {
+      this.props.onSelectionChange(this.props.actesSelected);
+    }
   };
 
   render() {
     let showPagination = this.props.showPagination;
+
     let pagination = {
       btnFirstContent: this.props.btnFirstContent,
       btnLastContent: this.props.btnLastContent,
@@ -276,6 +312,29 @@ export default class Historique extends React.Component {
       btnMore: this.props.btnMore,
       mode: this.props.mode
     };
+
+    let actions = [
+      {
+        icon: "edit",
+        text: "Editer",
+        action: () => this.onAction("editer")
+      },
+      {
+        icon: "trash",
+        text: "Supprimer",
+        action: () => this.onAction("supprimer")
+      }
+    ];
+
+    let message = "";
+    if (_.size(this.props.actesSelected) === 1) {
+      message = "Vous confirmez la suppression de la ligne sélectionnée ?";
+    } else {
+      message =
+        "Vous confirmez la suppression des " +
+        _.size(this.props.actesSelected) +
+        " lignes sélectionnées ?";
+    }
 
     return (
       <React.Fragment>
@@ -308,7 +367,7 @@ export default class Historique extends React.Component {
                 <React.Fragment key={acte.id}>
                   <Table.Row
                     key={acte.id}
-                    onClick={(e, d) => this.onSelectionChange(e, acte.id)}
+                    onClick={e => this.onSelectionChange(e, acte.id)}
                     onDoubleClick={() => this.onActeDoubleClick(acte.id)}
                     style={{
                       backgroundColor: rowSelected ? "#E88615" : deco.color,
@@ -329,19 +388,10 @@ export default class Historique extends React.Component {
                       {tarif(acte.montant)}
                     </Table.Cell>
                     <Table.Cell>
-                      <Dropdown>
-                        <Dropdown.Menu>
-                          {_.map(actions, action => (
-                            <Dropdown.Item
-                              key={action.value}
-                              {...action}
-                              onClick={(e, d) =>
-                                this.onAction(acte.id, d.value)
-                              }
-                            />
-                          ))}
-                        </Dropdown.Menu>
-                      </Dropdown>
+                      <Actions
+                        actions={actions}
+                        onClick={() => this.onClickDropdown(acte.id)}
+                      />
                     </Table.Cell>
                   </Table.Row>
                 </React.Fragment>
@@ -360,6 +410,25 @@ export default class Historique extends React.Component {
             ""
           )}
         </div>
+        <Confirm
+          open={this.state.showConfirm}
+          content={message}
+          cancelButton={
+            <Button>
+              <Icon name="ban" color="red" />
+              Non
+            </Button>
+          }
+          confirmButton={
+            <Button>
+              <Icon name="check" color="green" />
+              Oui
+            </Button>
+          }
+          onCancel={this.onHandleCancel}
+          onConfirm={this.onHandleConfirm}
+          size="tiny"
+        />
       </React.Fragment>
     );
   }
