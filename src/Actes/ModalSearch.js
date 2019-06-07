@@ -18,8 +18,9 @@ import {
 import Search2 from "../CCAM/Search";
 import Table2 from "../CCAM/Table";
 import Localisations from "../Shared/Localisations";
-import DayPickerInput from "react-day-picker/DayPickerInput";
-import "react-day-picker/lib/style.css";
+
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 import moment from "moment";
 
@@ -54,7 +55,7 @@ const propDefs = {
       "Tous les modificateurs (obtenus avec une requête CCAM contextes)",
     modificateurs:
       'Modificateurs appliqués à l\'acte sélectionné. Par défaut ""',
-    onSelectionActe: "Callback à la validation"
+    onValidation: "Callback à la validation"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
@@ -73,7 +74,7 @@ const propDefs = {
     rowIndex: PropTypes.number,
     allModificateurs: PropTypes.array,
     modificateurs: PropTypes.string,
-    onSelectionActe: PropTypes.func
+    onValidation: PropTypes.func
   }
 };
 
@@ -173,7 +174,8 @@ export default class ModalSearch extends React.Component {
       actes: obj.results,
       acte: {},
       informations: obj.informations,
-      modificateurs: ""
+      modificateurs: "",
+      openModificateurs: false
     });
   };
 
@@ -276,7 +278,7 @@ export default class ModalSearch extends React.Component {
     if (_.isEmpty(this.state.acte)) {
       return;
     }
-    this.props.onSelectionActe(
+    this.props.onValidation(
       this.props.rowIndex,
       this.state.acte.codActe,
       this.state.description,
@@ -369,124 +371,99 @@ export default class ModalSearch extends React.Component {
     return (
       <Modal open={this.props.open} onClose={this.onClose} size="large">
         <Modal.Content>
-          <Table basic="very" style={{ marginBottom: "0px" }}>
-            <Table.Body>
-              <Table.Row>
-                <Table.Cell collapsing={true}>
-                  <Form>
-                    <Form.Input label="Recherche d'un acte">
-                      <Search2
-                        client={this.props.client}
-                        date={this.state.date}
-                        executant={this.props.executant}
-                        limit={8}
-                        localisation={this.state.localisation}
-                        onLoadActes={this.onLoadActes}
-                      />
-                    </Form.Input>
-                  </Form>
-                </Table.Cell>
-                <Table.Cell collapsing={true}>
-                  <Form>
-                    <Form.Input label="Date">
-                      {/* <DayPickerInput /> */}
-                    </Form.Input>
-                  </Form>
-                </Table.Cell>
-                <Table.Cell collapsing={true}>
-                  <Form>
-                    <Form.Input
-                      error={
-                        toISOLocalisation(this.state.localisation).length %
-                          2 !==
-                        0
-                      }
-                      label="Localisation"
-                      value={this.state.localisation}
-                      onChange={(e, d) =>
-                        this.setState({ localisation: d.value })
-                      }
-                    />
-                  </Form>
-                </Table.Cell>
-                <Table.Cell collapsing={true}>
-                  <Form>
-                    <Form.Input
-                      label="Modificateurs"
-                      placeholder="Modificateurs"
-                      value={
-                        this.state.modificateurs ? this.state.modificateurs : ""
-                      }
-                      onChange={(e, d) => {
-                        this.setState({ modificateurs: d.value });
-                        this.tarification(
-                          this.state.code,
-                          this.props.codActiv,
-                          this.props.codPhase,
-                          this.props.codGrille,
-                          this.state.date,
-                          this.props.codDom,
-                          d.value
-                        );
-                      }}
-                    />
-                  </Form>
-                </Table.Cell>
-                <Table.Cell collapsing={true}>
-                  <Form>
-                    <Form.Input
-                      label="Montant"
-                      value={tarif(this.state.montant)}
-                      onChange={(e, d) => {
-                        //this.setState({ tmpMontant: d.value });
-                        /*console.log(d.value);
-                        //if (parseFloat(d.value)) {
-                        if (_.isEmpty(d.value)) {
-                          console.log("ici");
-                          this.setState({ montant: "" });
-                          return;
-                        } else {
-                          console.log("là");
-                          this.setState({ montant: parseFloat(d.value) });
-                        }*/
-                        //}
-                        //this.setState({ montant: parseFloat(d.value) })
-                        //this.setState({ montant: d.value })
-                      }}
-                    />
-                  </Form>
-                </Table.Cell>
-              </Table.Row>
-
-              <Table.Row>
-                <Table.Cell colSpan={4}>
-                  <Input
-                    disabled={_.isEmpty(this.state.acte)}
-                    fluid={true}
-                    placeholder="Description de l'acte sélectionné"
-                    onChange={(e, d) =>
-                      this.setState({
-                        description: d.value,
-                        descriptionType: 2
-                      })
-                    }
-                    value={this.state.description}
-                  />
-                </Table.Cell>
-                <Table.Cell>
-                  <Dropdown
-                    fluid={true}
-                    disabled={_.isEmpty(this.state.acte)}
-                    placeholder="Type de libellé de l'acte"
-                    selection={true}
-                    options={descriptionType}
-                    onChange={(e, d) => this.descriptionTypeChange(d.value)}
-                    value={this.state.descriptionType}
-                  />
-                </Table.Cell>
-              </Table.Row>
-            </Table.Body>
-          </Table>
+          <Form>
+            <Form.Group widths="equal">
+              <Form.Input
+                label="Code"
+                value={this.state.code}
+                placeholder="Code de l'acte"
+              />
+              <Form.Input label="Date">
+                <DatePicker selected={moment(this.state.date).toDate()} />
+              </Form.Input>
+              <Form.Input
+                label="Localisation"
+                placeholder="Localisation des dents"
+                error={
+                  toISOLocalisation(this.state.localisation).length % 2 !== 0
+                }
+                value={this.state.localisation}
+                onChange={(e, d) => this.setState({ localisation: d.value })}
+              />
+              <Form.Input
+                label="Modificateurs"
+                placeholder="Modificateurs"
+                value={this.state.modificateurs ? this.state.modificateurs : ""}
+                onChange={(e, d) => {
+                  this.setState({ modificateurs: d.value });
+                  this.tarification(
+                    this.state.code,
+                    this.props.codActiv,
+                    this.props.codPhase,
+                    this.props.codGrille,
+                    this.state.date,
+                    this.props.codDom,
+                    d.value
+                  );
+                }}
+              />
+              <Form.Input
+                label="Montant"
+                value={tarif(this.state.montant)}
+                onChange={(e, d) => {
+                  //this.setState({ tmpMontant: d.value });
+                  /*console.log(d.value);
+                  //if (parseFloat(d.value)) {
+                  if (_.isEmpty(d.value)) {
+                    console.log("ici");
+                    this.setState({ montant: "" });
+                    return;
+                  } else {
+                    console.log("là");
+                    this.setState({ montant: parseFloat(d.value) });
+                  }*/
+                  //}
+                  //this.setState({ montant: parseFloat(d.value) })
+                  //this.setState({ montant: d.value })
+                }}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Input fluid={true}>
+                <Search2
+                  client={this.props.client}
+                  date={this.state.date}
+                  executant={this.props.executant}
+                  limit={8}
+                  localisation={this.state.localisation}
+                  onLoadActes={this.onLoadActes}
+                />
+              </Form.Input>
+              <Form.Input
+                width={10}
+                disabled={_.isEmpty(this.state.acte)}
+                fluid={true}
+                placeholder="Description de l'acte sélectionné"
+                onChange={(e, d) =>
+                  this.setState({
+                    description: d.value,
+                    descriptionType: 2
+                  })
+                }
+                value={this.state.description}
+              />
+              <Form.Dropdown
+                width={3}
+                fluid={true}
+                disabled={_.isEmpty(this.state.acte)}
+                placeholder="Type de libellé de l'acte"
+                selection={true}
+                options={descriptionType}
+                onChange={(e, d) => this.descriptionTypeChange(d.value)}
+                value={this.state.descriptionType}
+              />
+            </Form.Group>
+          </Form>
 
           <div style={{ height: "450px", overflow: "auto" }}>
             {accordion}
