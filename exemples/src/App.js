@@ -20,6 +20,9 @@ import SharedLocalisations from "./Shared/Localisations";
 import ActesHistorique from "./Actes/Historique";
 import ActesSaisieValidation from "./Actes/SaisieValidation";
 
+// CSS
+//import "rhapi-ui-react/dist/index.css";
+
 const ghBaseUrl =
   "https://github.com/rhapi-project/rhapi-ui-react/blob/master/exemples/src";
 
