@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Button, Message, Modal, Table } from "semantic-ui-react";
 import SaisieDentaire from "./SaisieDentaire";
+import ModalSearch from "./ModalSearch";
 import _ from "lodash";
 
 import moment from "moment";
@@ -16,6 +17,9 @@ const propDefs = {
     codDom: "Code du DOM, par défaut c'est la métropole. Code 0",
     codGrille: "Code grille, par défaut 0",
     codPhase: "Code phase, par défaut 0",
+    defaultClickAction:
+      "Action à effectuer au clic sur une ligne d'acte. Par défaut CCAM (Recherche en CCAM) " +
+      "",
     onError: "Callback en cas d'erreur"
   },
   propTypes: {
@@ -26,6 +30,7 @@ const propDefs = {
     codDom: PropTypes.number,
     codGrille: PropTypes.number,
     codPhase: PropTypes.number,
+    defaultClickAction: PropTypes.string,
     onError: PropTypes.func
   }
 };
@@ -37,12 +42,14 @@ export default class Saisie extends React.Component {
     codDom: 0,
     codGrille: 0,
     codPhase: 0,
+    defaultClickAction: "CCAM",
     lignes: 5
   };
 
   state = {
     fse: {},
-    allModificateurs: []
+    allModificateurs: [],
+    selectedIndex: null
   };
 
   componentWillMount() {
@@ -89,7 +96,7 @@ export default class Saisie extends React.Component {
     return !_.isUndefined(this.state.actes[index]);
   };
 
-  onSelectionActe = (
+  onValidation = (
     rowKey,
     code,
     description,
@@ -167,8 +174,48 @@ export default class Saisie extends React.Component {
     );
   };
 
+  onClickRow = index => {
+    if (this.props.defaultClickAction === "CCAM") {
+      this.setState({ selectedIndex: index });
+    }
+  };
+
   render() {
     if (!_.isEmpty(this.state.fse)) {
+      let selectedIndex = this.state.selectedIndex;
+      let selectedActe = _.isNull(this.state.selectedIndex)
+        ? {}
+        : this.existActe(this.state.selectedIndex)
+        ? this.state.actes[selectedIndex]
+        : {};
+
+      let actions = [
+        {
+          icon: "search",
+          text: "Recherche CCAM",
+          action: () => {}
+        },
+        {
+          icon: "search",
+          text: "Recherche par favoris",
+          action: () => {}
+        },
+        {
+          icon: "edit",
+          text: "Editer",
+          action: () => {} //this.editer(this.state.code)
+        },
+        {
+          icon: "copy",
+          text: "Dupliquer",
+          action: () => {}
+        },
+        {
+          icon: "trash",
+          text: "Supprimer",
+          action: () => {} //this.action(this.state.code)
+        }
+      ];
       return (
         <React.Fragment>
           <Table celled={true} striped={true} selectable={true}>
@@ -181,6 +228,7 @@ export default class Saisie extends React.Component {
                 <Table.HeaderCell>Libellé</Table.HeaderCell>
                 <Table.HeaderCell>Modificateurs</Table.HeaderCell>
                 <Table.HeaderCell>Montant</Table.HeaderCell>
+                <Table.HeaderCell>Action</Table.HeaderCell>
               </Table.Row>
             </Table.Header>
             <Table.Body>
@@ -188,12 +236,9 @@ export default class Saisie extends React.Component {
                 <SaisieDentaire
                   key={i}
                   index={i}
+                  actions={actions}
                   client={this.props.client}
                   code={this.existActe(i) ? this.state.actes[i].code : ""}
-                  codActivite={this.props.codActivite}
-                  codDom={this.props.codDom}
-                  codGrille={this.props.codGrille}
-                  codPhase={this.props.codPhase}
                   cotation={
                     this.existActe(i) ? this.state.actes[i].cotation : 1
                   }
@@ -211,14 +256,54 @@ export default class Saisie extends React.Component {
                   modificateurs={
                     this.existActe(i) ? this.state.actes[i].modificateurs : ""
                   }
-                  allModificateurs={this.state.allModificateurs} // new
                   montant={this.existActe(i) ? this.state.actes[i].montant : 0}
                   disabled={this.state.activeRow < i}
-                  onSelectionActe={this.onSelectionActe}
+                  onClick={index => this.onClickRow(index)}
                 />
               ))}
             </Table.Body>
           </Table>
+
+          <ModalSearch
+            client={this.props.client}
+            code={
+              _.isEmpty(selectedActe)
+                ? ""
+                : this.state.actes[selectedIndex].code
+            }
+            codActivite={this.props.codActivite}
+            codDom={this.props.codDom}
+            codGrille={this.props.codGrille}
+            codPhase={this.props.codPhase}
+            executant="D1"
+            open={!_.isNull(selectedIndex)}
+            cotation={
+              _.isEmpty(selectedActe)
+                ? 1
+                : this.state.actes[selectedIndex].cotation
+            }
+            date={
+              _.isEmpty(selectedActe)
+                ? moment().toISOString()
+                : this.state.actes[selectedIndex].date
+            }
+            localisation={
+              _.isEmpty(selectedActe)
+                ? ""
+                : this.state.actes[selectedIndex].localisation
+            }
+            localisationPicker={true}
+            allModificateurs={this.state.allModificateurs}
+            modificateurs={
+              _.isEmpty(selectedActe)
+                ? ""
+                : this.state.actes[selectedIndex].modificateurs
+            }
+            onClose={() => this.setState({ selectedIndex: null })}
+            onValidation={this.onValidation}
+            rowIndex={selectedIndex}
+          />
+
           <Modal size="mini" open={this.state.error !== 0}>
             <Modal.Header>Mise à jour de l'acte</Modal.Header>
             <Modal.Content>

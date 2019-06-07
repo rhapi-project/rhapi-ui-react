@@ -1,7 +1,7 @@
 import React from "react";
 import { Client } from "rhapi-client";
 import { Actes } from "rhapi-ui-react";
-import { Button, Divider, Form, Message, Modal } from "semantic-ui-react";
+import { Button, Checkbox, Divider, Form, Message, Modal } from "semantic-ui-react";
 
 import moment from "moment";
 import _ from "lodash";
@@ -16,11 +16,13 @@ const patients = [
   { text: "3", value: 3 },
   { text: "4", value: 4 },
   { text: "8", value: 8}
-]
+];
+
 export default class ActesSaisieValidation extends React.Component {
   componentWillMount() {
     this.setState({
       idPatient: null,
+      defaultClickAction: "CCAM",
       fse: {},
       msgSaveFSE: ""
     });
@@ -155,7 +157,7 @@ export default class ActesSaisieValidation extends React.Component {
         </p>
         <Divider hidden={true} />
         <Form>
-          <Form.Group inline={true}>
+          <Form.Group inline={true} widths="equal">
             <Form.Dropdown
               label="ID du patient"
               placeholder="Sélectionner un patient"
@@ -164,6 +166,16 @@ export default class ActesSaisieValidation extends React.Component {
               onChange={(e, d) => this.onPatientChange(d.value)}
               value={this.state.idPatient}
             />
+            <Form.Input label="Recherche en CCAM par défaut">
+              <Checkbox 
+                toggle={true}
+                checked={this.state.defaultClickAction === "CCAM"}
+                onChange={() => {
+                  let ccam = this.state.defaultClickAction === "CCAM";
+                  this.setState({ defaultClickAction: ccam ? "" : "CCAM" });
+                }}
+              />
+            </Form.Input>
           </Form.Group>
         </Form>
         <Divider hidden={true} />
@@ -173,6 +185,7 @@ export default class ActesSaisieValidation extends React.Component {
                 client={client}
                 idActe={this.state.fse.id}
                 codGrille={13}
+                defaultClickAction={this.state.defaultClickAction}
                 onError={this.onError}
                 lignes={10}
               />
