@@ -95,15 +95,15 @@ export default class SaisieDentaire extends React.Component {
     this.setState({ modalSearchOpen: false });
   };
 
-  action = (code) => {
+  action = code => {
     console.log("vous avez cliqué ");
     console.log(code);
-  }
+  };
 
-  editer = (code) => {
+  editer = code => {
     console.log("editer");
     console.log(code);
-  }
+  };
 
   render() {
     let actions = [
@@ -146,7 +146,7 @@ export default class SaisieDentaire extends React.Component {
             {_.isEmpty(this.state.code) ? "" : tarif(this.state.montant)}
           </Table.Cell>
           <Table.Cell>
-            <Actions actions={actions}/>
+            <Actions actions={actions} />
           </Table.Cell>
         </Table.Row>
         <ModalSearch

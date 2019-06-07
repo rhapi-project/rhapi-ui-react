@@ -2,8 +2,7 @@ import React from "react";
 import ReactDOM from 'react-dom';
 import { Client } from "rhapi-client";
 import { Actes } from "rhapi-ui-react";
-import { Button, Confirm, Divider, Form, Icon } from "semantic-ui-react";
-import _ from "lodash";
+import { Divider, Form } from "semantic-ui-react";
 
 // Instanciation du client RHAPI sans authentification
 const client = new Client("https://demo.rhapi.net/demo01");
@@ -22,9 +21,8 @@ const patients = [
 export default class ActesHistorique extends React.Component {
   componentWillMount() {
     this.setState({
-      idPatient : 0,
-      actesSelected: [],
-      showConfirm: false
+      idPatient : -1,
+      actesSelected: []
     });
   }
 
@@ -37,13 +35,13 @@ export default class ActesHistorique extends React.Component {
   }
 
   onClickOutside = (event) => {
-    const domNode = ReactDOM.findDOMNode(this.refs.ok);
+    const domNode = ReactDOM.findDOMNode(this.refs.componentHistorique);
 
     if (!event.ctrlKey) {
       if (!domNode.contains(event.target)) {
-        this.setState({
-          actesSelected: []
-        });
+        // this.setState({
+        //   actesSelected: []
+        // });
       }
     }
   }
@@ -74,32 +72,8 @@ export default class ActesHistorique extends React.Component {
     this.setState({ actesSelected: singleActe });
   }
 
-  onAction = (action) => {
-    if (_.isEqual(action,"supprimer")) {
-      console.log("action : " + action);
-      this.setState({ showConfirm: true });
-    } else if (_.isEqual(action,"editer")) {
-      console.log("action : " + action);
-    }
-  }
-
-  onHandleCancel = () => {
-    this.setState({ showConfirm: false });
-  }
-
-  onHandleConfirm = () => {
-    this.setState({ showConfirm: false });
-  }
-
   render() {
     console.log(this.state);
-    
-    let message = "";
-    if (_.size(this.state.actesSelected)===1) {
-      message = "Vous confirmez la suppression de la ligne sélectionnée ?"
-    } else {
-      message = "Vous confirmez la suppression des " + _.size(this.state.actesSelected) + " lignes sélectionnées ?"
-    }
 
     return (
       <React.Fragment>
@@ -123,31 +97,13 @@ export default class ActesHistorique extends React.Component {
         <Filtre />
         <Divider hidden={true} />
         <Actes.Historique
-          ref='ok'
+          ref='componentHistorique'
           client={client}
           idPatient={this.state.idPatient}
           actesSelected={this.state.actesSelected}
           onSelectionChange={this.onSelectionChange}
           onActeClick={this.onActeClick}
           onActeDoubleClick={this.onActeDoubleClick}
-          onAction={this.onAction}
-        />
-        <Confirm
-          open={this.state.showConfirm}
-          content={message}
-          cancelButton={ 
-            <Button>
-              <Icon name='ban' color='red' />Non
-            </Button> 
-          }
-          confirmButton={
-            <Button>
-              <Icon name='check' color='green' />Oui
-            </Button>
-          }
-          onCancel={this.onHandleCancel}
-          onConfirm={this.onHandleConfirm}
-          size='tiny'
         />
       </React.Fragment>
     );
