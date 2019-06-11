@@ -1,14 +1,13 @@
 import React from "react";
-import ReactDOM from 'react-dom';
 import { Client } from "rhapi-client";
 import { Actes } from "rhapi-ui-react";
-import { Divider, Form } from "semantic-ui-react";
+import { Button, Confirm, Divider, Form, Icon } from "semantic-ui-react";
+import _ from "lodash";
 
 // Instanciation du client RHAPI sans authentification
 const client = new Client("https://demo.rhapi.net/demo01");
 const patients = [
-  { text: "Aucun patient", value: -1 },
-  { text: "0", value: 0 },
+  { text: "Aucun patient", value: 0 },
   { text: "1", value: 1 },
   { text: "2", value: 2 },
   { text: "3", value: 3 },
@@ -21,59 +20,76 @@ const patients = [
 export default class ActesHistorique extends React.Component {
   componentWillMount() {
     this.setState({
-      idPatient : -1,
-      actesSelected: []
+      idPatient : 1,
+      showConfirm: false
     });
-  }
-
-  componentDidMount() {
-    document.addEventListener('click',this.onClickOutside, true);
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('click',this.onClickOutside, true);
-  }
-
-  onClickOutside = (event) => {
-    const domNode = ReactDOM.findDOMNode(this.refs.componentHistorique);
-
-    if (!event.ctrlKey) {
-      if (!domNode.contains(event.target)) {
-        // this.setState({
-        //   actesSelected: []
-        // });
-      }
-    }
   }
 
   onPatientChange = id => {
     this.setState({ idPatient: id });
   };
 
-  onSelectionChange = ids => {
-    console.log("onSelectionChange");
-    console.log(ids);
-    this.setState({ actesSelected: ids });
-  }
-
   onActeClick = id => {
-    console.log("onActeClick");
-    console.log(id);
-    let singleActe = [];
-    singleActe.push(id);
-    this.setState({ actesSelected: singleActe });
+    // l'id de l'acte en paramètre
+    console.log(`onActeClick ${id}`);
   }
 
   onActeDoubleClick = id => {
-    console.log("onActeDoubleClick");
-    console.log(id);
-    let singleActe = [];
-    singleActe.push(id);
-    this.setState({ actesSelected: singleActe });
+    // l'id de l'acte en paramètre
+    console.log(`onActeDoubleClick ${id}`);
   }
 
+  onSelectionChange = ids => {
+    // array des id des actes en paramètre
+    let actes = ids.join(",");
+    console.log(`onSelectionChange ${actes}`);
+  }
+
+  onAction = action => {
+    if (_.isEqual(action, "supprimer")) {
+      this.setState({ showConfirm: true });
+    } else if (_.isEqual(action, "editer")) {
+      this.setState({ showConfirm: true });
+    }
+  };
+
+  onHandleCancel = () => {
+    console.log('onHandleCancel');
+    this.setState({ showConfirm: false });
+  };
+
+  onHandleConfirm = () => {
+    console.log('onHandleConfirm');
+    this.setState({ showConfirm: false });
+    // _.map(this.state.actesSelected, id => {
+    //   this.props.client.Actes.destroy(
+    //     id,
+    //     result => {
+    //       this.setState({ showConfirm: false });
+    //       this.loadActe(
+    //         this.state.idPatient,
+    //         this.state.offset,
+    //         this.state.sort,
+    //         this.state.order
+    //       );
+    //     },
+    //     error => {
+    //       console.log(error);
+    //     }
+    //   );
+    // });
+  };
+
   render() {
-    console.log(this.state);
+    let message = "";
+    // if (_.size(this.state.actesSelected) === 1) {
+    //   message = "Vous confirmez la suppression de la ligne sélectionnée ?";
+    // } else {
+    //   message =
+    //     "Vous confirmez la suppression des " +
+    //     _.size(this.state.actesSelected) +
+    //     " lignes sélectionnées ?";
+    // }
 
     return (
       <React.Fragment>
@@ -97,13 +113,42 @@ export default class ActesHistorique extends React.Component {
         <Filtre />
         <Divider hidden={true} />
         <Actes.Historique
-          ref='componentHistorique'
           client={client}
           idPatient={this.state.idPatient}
-          actesSelected={this.state.actesSelected}
-          onSelectionChange={this.onSelectionChange}
           onActeClick={this.onActeClick}
           onActeDoubleClick={this.onActeDoubleClick}
+          onSelectionChange={this.onSelectionChange}
+          actions={[
+            {
+              icon: "edit",
+              text: "Editer",
+              action: () => this.onAction("editer")
+            },
+            {
+              icon: "trash",
+              text: "Supprimer",
+              action: () => this.onAction("supprimer")
+            }
+          ]}
+        />
+        <Confirm
+          open={this.state.showConfirm}
+          content={message}
+          cancelButton={
+            <Button>
+              <Icon name="ban" color="red" />
+              Non
+            </Button>
+          }
+          confirmButton={
+            <Button>
+              <Icon name="check" color="green" />
+              Oui
+            </Button>
+          }
+          onCancel={this.onHandleCancel}
+          onConfirm={this.onHandleConfirm}
+          size="tiny"
         />
       </React.Fragment>
     );

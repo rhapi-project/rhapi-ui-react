@@ -1,23 +1,31 @@
 import React from "react";
+import ReactDOM from 'react-dom';
 import PropTypes from "prop-types";
-import { Button, Confirm, Icon, Table } from "semantic-ui-react";
+import { Button, Icon, Table } from "semantic-ui-react";
 import _ from "lodash";
 import { tarif } from "../lib/Helpers";
 import Actions from "../Shared/Actions";
 import moment from "moment";
 
 const propDefs = {
-  description: "Historique des actes d'un patient",
-  example: "Tableau",
+  description: 'Historique des actes d\'un patient',
+  example: 'Tableau',
   propDocs: {
-    idPatient: "Id du patient",
-    showPagination: 'Afficher les options de paginations, par défaut "false"',
-    table: "semantic.collections",
-    limit: "Valeur de pagination",
+    idPatient: 'ID du patient, par défaut 0 (Aucun patient)',
+    onActeClick: 
+      'Callback pour retourner l\'acte sélectionné sur un click',
+    onActeDoubleClick: 
+      'Callback pour retourner l\'acte sélectionné sur un double click',
+    onSelectionChange: 
+      'Callback pour retourner la liste des actes sélectionnés sur une multi-sélection (CTRL+click)',
+    table: 'semantic.collections',
+    limit: 'Valeur de pagination, par défaut 5',
     sort:
-      "Le champs sur lequel le tri va être effectué. Par défaut, le tri se fait sur id",
+      'Le champs sur lequel le tri va être effectué. Par défaut, le tri se fait sur la date (doneAt)',
     order:
-      "Un tri ascendant ou descendant [ASC,DESC]. Par défaut, le tri est ascendant (ASC)",
+      'Un tri ascendant ou descendant [ASC,DESC]. Par défaut, le tri est descendant (DESC)',
+    showPagination: 
+      'Afficher les options de paginations, par défaut "true"',
     btnFirstContent:
       'Texte du bouton pour aller à la première page, par défaut ""',
     btnLastContent:
@@ -48,16 +56,19 @@ const propDefs = {
       'Props semantic du bouton pour aller à la page précédente, par défaut un objet vide "{}"',
     btnMore:
       'Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}"',
-    mode: "mode de pagination 'pages' ou 'more', par défaut \"pages\""
+    mode: 'Mode de pagination \'pages\' ou \'more\', par défaut "pages"'
   },
   propTypes: {
     client: PropTypes.any.isRequired,
     idPatient: PropTypes.number,
-    showPagination: PropTypes.bool,
+    onActeClick: PropTypes.func,
+    onActeDoubleClick: PropTypes.func,
+    onSelectionChange: PropTypes.func,
     table: PropTypes.object,
     limit: PropTypes.number,
     sort: PropTypes.string,
     order: PropTypes.string,
+    showPagination: PropTypes.bool,
     btnFirstContent: PropTypes.string,
     btnLastContent: PropTypes.string,
     btnMoreContent: PropTypes.string,
@@ -80,13 +91,13 @@ const propDefs = {
 export default class Historique extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
-    idPatient: -1,
-    showPagination: true,
+    idPatient: 0,
     table: {},
     limit: 5,
     sort: "doneAt",
     order: "DESC",
     // props pour le composant de pagination
+    showPagination: true,
     btnFirstContent: "",
     btnLastContent: "",
     btnMoreContent: "Plus de résultats",
@@ -107,16 +118,17 @@ export default class Historique extends React.Component {
   };
 
   componentWillMount() {
+    document.addEventListener('click',this.onClickOutside, true);
     this.setState({
       idPatient: this.props.idPatient,
       actes: [],
+      actesSelected: [],
       informations: {},
       offset: 0,
       sort: this.props.sort,
       order: this.props.order,
       sorted: _.isEqual(this.props.order, "DESC") ? "descending" : "ascending",
-      lockRevision: "",
-      showConfirm: false
+      lockRevision: ""
     });
 
     this.loadActe(this.props.idPatient, 0, this.props.sort, this.props.order);
@@ -147,7 +159,20 @@ export default class Historique extends React.Component {
   }
 
   componentWillUnmount() {
+    document.removeEventListener('click',this.onClickOutside, true);
     clearInterval(this.interval);
+  }
+
+  onClickOutside = (event) => {
+    const domNode = ReactDOM.findDOMNode(this);
+
+    if (!event.ctrlKey) {
+      if (!domNode.contains(event.target)) {
+        this.setState({
+          actesSelected: []
+        });
+      }
+    }
   }
 
   loadActe = (idPatient, offset, sort, order) => {
@@ -231,67 +256,34 @@ export default class Historique extends React.Component {
     }
   };
 
-  onSelectionChange = (e, id) => {
+  onActeClick = (e, id) => {
     if (e.ctrlKey) {
-      let multiActes = this.props.actesSelected;
+      let multiActes = _.isEmpty(this.state.actesSelected)?[]:this.state.actesSelected;
 
       if (_.includes(multiActes, id)) {
         multiActes.splice(_.indexOf(multiActes, id), 1);
       } else {
         multiActes.push(id);
       }
-
+      this.setState({ actesSelected: multiActes });
       this.props.onSelectionChange(multiActes);
     } else {
+      let actesSelected = [];
+      actesSelected.push(id);
+      this.setState({ actesSelected: actesSelected });
       this.props.onActeClick(id);
     }
   };
 
   onActeDoubleClick = id => {
+    let actesSelected = [];
+    actesSelected.push(id);
+    this.setState({ actesSelected: actesSelected });
     this.props.onActeDoubleClick(id);
   };
 
-  onAction = action => {
-    if (_.isEqual(action, "supprimer")) {
-      this.setState({ showConfirm: true });
-    } else if (_.isEqual(action, "editer")) {
-      // this.setState({ showConfirm: true });
-    }
-  };
-
-  onHandleCancel = () => {
-    this.setState({ showConfirm: false });
-  };
-
-  onHandleConfirm = () => {
-    _.map(this.props.actesSelected, id => {
-      this.props.client.Actes.destroy(
-        id,
-        result => {
-          this.setState({ showConfirm: false });
-          this.loadActe(
-            this.state.idPatient,
-            this.state.offset,
-            this.state.sort,
-            this.state.order
-          );
-        },
-        error => {
-          console.log(error);
-        }
-      );
-    });
-  };
-
-  onClickDropdown = id => {
-    if (_.size(this.props.actesSelected) <= 1) {
-      this.props.onActeClick(id);
-    } else {
-      this.props.onSelectionChange(this.props.actesSelected);
-    }
-  };
-
   render() {
+    console.log(this.state);
     let showPagination = this.props.showPagination;
 
     let pagination = {
@@ -312,29 +304,6 @@ export default class Historique extends React.Component {
       btnMore: this.props.btnMore,
       mode: this.props.mode
     };
-
-    let actions = [
-      {
-        icon: "edit",
-        text: "Editer",
-        action: () => this.onAction("editer")
-      },
-      {
-        icon: "trash",
-        text: "Supprimer",
-        action: () => this.onAction("supprimer")
-      }
-    ];
-
-    let message = "";
-    if (_.size(this.props.actesSelected) === 1) {
-      message = "Vous confirmez la suppression de la ligne sélectionnée ?";
-    } else {
-      message =
-        "Vous confirmez la suppression des " +
-        _.size(this.props.actesSelected) +
-        " lignes sélectionnées ?";
-    }
 
     return (
       <React.Fragment>
@@ -361,14 +330,22 @@ export default class Historique extends React.Component {
           <Table.Body>
             {_.map(this.state.actes, acte => {
               let deco = this.decoration(acte.code);
-              let rowSelected = _.includes(this.props.actesSelected, acte.id);
+              let rowSelected = _.includes(this.state.actesSelected, acte.id);
 
               return (
                 <React.Fragment key={acte.id}>
                   <Table.Row
                     key={acte.id}
-                    onClick={e => this.onSelectionChange(e, acte.id)}
-                    onDoubleClick={() => this.onActeDoubleClick(acte.id)}
+                    onClick={e => {
+                      if (!_.isUndefined(this.props.onActeClick) && !_.isUndefined(this.props.onSelectionChange)) {
+                        this.onActeClick(e, acte.id);
+                      }
+                    }}
+                    onDoubleClick={() => {
+                      if (!_.isUndefined(this.props.onActeDoubleClick)) {
+                        this.onActeDoubleClick(acte.id);
+                      }
+                    }}
                     style={{
                       backgroundColor: rowSelected ? "#E88615" : deco.color,
                       color: rowSelected ? "white" : "black"
@@ -389,8 +366,7 @@ export default class Historique extends React.Component {
                     </Table.Cell>
                     <Table.Cell>
                       <Actions
-                        actions={actions}
-                        onClick={() => this.onClickDropdown(acte.id)}
+                        actions={this.props.actions}
                       />
                     </Table.Cell>
                   </Table.Row>
@@ -410,25 +386,6 @@ export default class Historique extends React.Component {
             ""
           )}
         </div>
-        <Confirm
-          open={this.state.showConfirm}
-          content={message}
-          cancelButton={
-            <Button>
-              <Icon name="ban" color="red" />
-              Non
-            </Button>
-          }
-          confirmButton={
-            <Button>
-              <Icon name="check" color="green" />
-              Oui
-            </Button>
-          }
-          onCancel={this.onHandleCancel}
-          onConfirm={this.onHandleConfirm}
-          size="tiny"
-        />
       </React.Fragment>
     );
   }

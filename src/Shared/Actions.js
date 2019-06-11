@@ -24,7 +24,7 @@ export default class Actions extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <Dropdown onClick={this.props.onClick}>
+        <Dropdown>
           <Dropdown.Menu>
             {_.map(this.props.actions, action => (
               <Dropdown.Item
