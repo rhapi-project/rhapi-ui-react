@@ -83,6 +83,7 @@ export default class SaisieDentaire extends React.Component {
           <Table.Cell textAlign="center" collapsing={true}>
             {this.props.modificateurs}
           </Table.Cell>
+          <Table.Cell collapsing={true}/>
           <Table.Cell collapsing={true} textAlign="right">
             {_.isEmpty(this.props.code) ? "" : tarif(this.props.montant)}
           </Table.Cell>

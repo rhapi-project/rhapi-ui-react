@@ -226,7 +226,8 @@ export default class Saisie extends React.Component {
                 <Table.HeaderCell>Code</Table.HeaderCell>
                 <Table.HeaderCell>Cotation</Table.HeaderCell>
                 <Table.HeaderCell>Libellé</Table.HeaderCell>
-                <Table.HeaderCell>Modificateurs</Table.HeaderCell>
+                <Table.HeaderCell>Modif.</Table.HeaderCell>
+                <Table.HeaderCell>Qualif.</Table.HeaderCell>
                 <Table.HeaderCell>Montant</Table.HeaderCell>
                 <Table.HeaderCell>Action</Table.HeaderCell>
               </Table.Row>
