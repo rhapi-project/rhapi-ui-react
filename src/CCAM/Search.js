@@ -157,7 +157,9 @@ export default class Search2 extends React.Component {
         onSearchChange={(e, d) =>
           this.search(d.value, this.props.date, this.props.localisation)
         }
-        onResultSelect={(e, d) => this.search(d.result.title, this.props.date, this.props.localisation)}
+        onResultSelect={(e, d) =>
+          this.search(d.result.title, this.props.date, this.props.localisation)
+        }
         results={this.state.results}
         value={this.state.value}
         {...this.state.search}
