@@ -14,7 +14,8 @@ const propDefs = {
     "Composant correspondant à une ligne du tableau de saisie des actes pour les dentistes",
   example: "Tableau",
   propDocs: {
-    actions: "Liste d'actions à effectuer",
+    index: "Indice de la ligne",
+    actions: "Liste d'actions à effectuer (en plus des actions par défaut)",
     code: "Code de l'Acte sélectionné",
     cotation:
       "Cotation/coefficient applicable au code (significatif uniquement en NGAP, 0 si non significatif)",
@@ -24,11 +25,17 @@ const propDefs = {
       'Liste des dents sélectionnées, séparées par des espaces. Par défaut ""',
     modificateurs:
       'Modificateurs appliqués à l\'acte sélectionné. Par défaut ""',
+    qualificatifs: "Les qualificatifs",
     disabled: "Désactivation de la ligne",
-    montant: "Le moment pour cet acte"
+    montant: "Le moment pour cet acte",
+    onClick: "Callback au clic sur une ligne",
+    onDelete: "Callback à la suppression de la ligne",
+    onDuplicate: "Callback à la duplication de la ligne",
+    onSearchCCAM: "Callback action de recherche en CCAM"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
+    index: PropTypes.number,
     actions: PropTypes.array,
     code: PropTypes.string,
     cotation: PropTypes.number,
@@ -36,8 +43,13 @@ const propDefs = {
     date: PropTypes.string,
     localisation: PropTypes.string,
     modificateurs: PropTypes.string,
+    qualificatifs: PropTypes.string,
     disabled: PropTypes.bool,
-    montant: PropTypes.number
+    montant: PropTypes.number,
+    onClick: PropTypes.func,
+    onDelete: PropTypes.func,
+    onDuplicate: PropTypes.func,
+    onSearchCCAM: PropTypes.func
   }
 };
 
@@ -54,11 +66,55 @@ export default class SaisieDentaire extends React.Component {
     montant: 0
   };
 
-  onCloseModalSearch = () => {
-    this.setState({ modalSearchOpen: false });
-  };
-
   render() {
+    let actions = [
+      {
+        icon: "search",
+        text: "Recherche CCAM",
+        action: () => {
+          if (!_.isUndefined(this.props.onSearchCCAM)) {
+            this.props.onSearchCCAM(this.props.index);
+          }
+        }
+      },
+      {
+        icon: "search",
+        text: "Recherche par favoris",
+        action: () => {}
+      },
+      {
+        icon: "edit",
+        text: "Editer",
+        action: () => {} //this.editer(this.state.code)
+      },
+      {
+        icon: "copy",
+        text: "Dupliquer",
+        action: () => {
+          if (!_.isUndefined(this.props.onDuplicate)) {
+            this.props.onDuplicate(this.props.index);
+          }
+        }
+      },
+      {
+        icon: "trash",
+        text: "Supprimer",
+        action: () => {
+          if (!_.isUndefined(this.props.onDelete)) {
+            this.props.onDelete(this.props.index);
+          }
+        }
+      }
+    ];
+
+    if (!_.isUndefined(this.props.actions)) {
+      // TODO : tester que les actions sont bien formatées
+      _.forEach(this.props.actions, a => {
+        //let callback = () => a.action(this.props.index);
+        //a.action = () => callback();
+        actions.push(a);
+      });
+    }
     return (
       <React.Fragment>
         <Table.Row
@@ -83,14 +139,14 @@ export default class SaisieDentaire extends React.Component {
           <Table.Cell textAlign="center" collapsing={true}>
             {this.props.modificateurs}
           </Table.Cell>
-          <Table.Cell collapsing={true}/>
+          <Table.Cell collapsing={true}>
+            {_.isEmpty(this.props.code) ? "" : this.props.qualificatifs}
+          </Table.Cell>
           <Table.Cell collapsing={true} textAlign="right">
             {_.isEmpty(this.props.code) ? "" : tarif(this.props.montant)}
           </Table.Cell>
           <Table.Cell>
-            {_.isEmpty(this.props.code) ? null : (
-              <Actions actions={this.props.actions} />
-            )}
+            {_.isEmpty(this.props.code) ? null : <Actions actions={actions} />}
           </Table.Cell>
         </Table.Row>
       </React.Fragment>

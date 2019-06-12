@@ -11,19 +11,24 @@ import {
   Loader,
   Modal,
   Ref,
-  Segment,
+  Segment
 } from "semantic-ui-react";
 import Search2 from "../CCAM/Search";
 import Table2 from "../CCAM/Table";
 import Localisations from "../Shared/Localisations";
 
 import DatePicker from "react-datepicker";
-import fr from 'date-fns/locale/fr';
+import fr from "date-fns/locale/fr";
 import "react-datepicker/dist/react-datepicker.css";
 
 import moment from "moment";
 
-import { spacedLocalisation, tarif, toISOLocalisation } from "../lib/Helpers";
+import {
+  spacedLocalisation,
+  tarif,
+  tarifDotNotation,
+  toISOLocalisation
+} from "../lib/Helpers";
 
 const propDefs = {
   description:
@@ -54,6 +59,7 @@ const propDefs = {
       "Tous les modificateurs (obtenus avec une requête CCAM contextes)",
     modificateurs:
       'Modificateurs appliqués à l\'acte sélectionné. Par défaut ""',
+    qualificatifs: "Qualificatifs",
     onValidation: "Callback à la validation"
   },
   propTypes: {
@@ -73,6 +79,7 @@ const propDefs = {
     rowIndex: PropTypes.number,
     allModificateurs: PropTypes.array,
     modificateurs: PropTypes.string,
+    qualificatifs: PropTypes.string,
     onValidation: PropTypes.func
   }
 };
@@ -81,6 +88,12 @@ const descriptionType = [
   { text: "Nom court", value: 0 },
   { text: "Nom long", value: 1 },
   { text: "Nom personnalisé", value: 2 }
+];
+
+const qualificatifs = [
+  { text: "OP", value: "OP" },
+  { text: "ED", value: "ED" },
+  { text: "NPC", value: "NPC" }
 ];
 
 export default class ModalSearch extends React.Component {
@@ -107,6 +120,7 @@ export default class ModalSearch extends React.Component {
       date: this.props.date,
       localisation: this.props.localisation,
       modificateurs: this.props.modificateurs,
+      qualificatifs: this.props.qualificatifs,
       description: "",
       montant: 0,
       openLocalisation: false,
@@ -115,7 +129,7 @@ export default class ModalSearch extends React.Component {
       descriptionType: 1,
       loading: false
     });
-  };
+  }
 
   componentWillReceiveProps(next) {
     this.setState({
@@ -125,6 +139,7 @@ export default class ModalSearch extends React.Component {
       date: next.date,
       localisation: next.localisation,
       modificateurs: next.modificateurs,
+      qualificatifs: next.qualificatifs,
       description: "",
       montant: 0,
       openLocalisation: false,
@@ -135,14 +150,14 @@ export default class ModalSearch extends React.Component {
     if (next.code) {
       this.readActe(next.code, next.date);
     }
-  };
+  }
 
   componentDidMount() {
-    document.addEventListener('mousedown', this.convertMontant);
+    document.addEventListener("mousedown", this.inputContentFormating);
   }
 
   componentWillUnmount() {
-    document.removeEventListener('mousedown', this.convertMontant);
+    document.removeEventListener("mousedown", this.inputContentFormating);
   }
 
   readActe = (code, date) => {
@@ -244,11 +259,17 @@ export default class ModalSearch extends React.Component {
     }
   };
 
-  convertMontant = () => {
+  inputContentFormating = () => {
     let montant = this.state.montant;
-    if (parseFloat(montant)) {
-      this.setState({ montant: tarif(parseFloat(montant)) });
+    if (_.isEmpty(montant)) {
+      this.setState({ montant: tarif(0) });
     }
+    if (parseFloat(tarifDotNotation(montant))) {
+      this.setState({ montant: tarif(parseFloat(tarifDotNotation(montant))) });
+    }
+    this.setState({
+      localisation: spacedLocalisation(this.state.localisation)
+    });
   };
 
   tarification = (
@@ -290,7 +311,11 @@ export default class ModalSearch extends React.Component {
   };
 
   valider = () => {
-    if (_.isEmpty(this.state.acte) || !parseFloat(this.state.montant)) {
+    if (
+      _.isEmpty(this.state.acte) ||
+      _.isNaN(parseFloat(tarifDotNotation(this.state.montant))) ||
+      toISOLocalisation(this.state.localisation).length % 2 !== 0
+    ) {
       return;
     }
     this.props.onValidation(
@@ -301,7 +326,8 @@ export default class ModalSearch extends React.Component {
       spacedLocalisation(this.state.localisation),
       this.props.cotation,
       this.state.modificateurs,
-      parseFloat(this.state.montant)
+      this.state.qualificatifs,
+      parseFloat(tarifDotNotation(this.state.montant))
     );
     this.onClose();
   };
@@ -434,28 +460,39 @@ export default class ModalSearch extends React.Component {
                   );
                 }}
               />
-              <Form.Input
+              <Form.Dropdown
                 label="Qualificatifs"
                 fluid={true}
                 placeholder="Qualificatifs"
+                options={qualificatifs}
+                selection={true}
+                value={this.state.qualificatifs}
+                onChange={(e, d) => this.setState({ qualificatifs: d.value })}
               />
               <Ref
                 innerRef={node => {
-                node.childNodes[1].firstChild.style.textAlign = "right";
-              }}>
+                  node.childNodes[1].firstChild.style.textAlign = "right";
+                }}
+              >
                 <Form.Input
                   label="Montant"
                   fluid={true}
-                  value={this.state.montant ? this.state.montant : 0}
+                  value={this.state.montant}
                   onChange={(e, d) => {
-                    this.setState({ montant: d.value });
+                    if (this.state.qualificatifs !== "OP") {
+                      this.setState({ montant: d.value });
+                    }
                   }}
                 />
               </Ref>
             </Form.Group>
             <Form.Group>
               <Form.Input fluid={true}>
-                <Ref innerRef={node => { node.firstChild.firstChild.focus(); }}>
+                <Ref
+                  innerRef={node => {
+                    node.firstChild.firstChild.focus();
+                  }}
+                >
                   <Search2
                     client={this.props.client}
                     date={this.state.date}
