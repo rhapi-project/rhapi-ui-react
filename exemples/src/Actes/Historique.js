@@ -1,7 +1,7 @@
 import React from "react";
 import { Client } from "rhapi-client";
 import { Actes } from "rhapi-ui-react";
-import { Button, Confirm, Divider, Form, Icon } from "semantic-ui-react";
+import { Divider, Form } from "semantic-ui-react";
 import _ from "lodash";
 
 // Instanciation du client RHAPI sans authentification
@@ -14,14 +14,14 @@ const patients = [
   { text: "4", value: 4 },
   { text: "5", value: 5 },
   { text: "6", value: 6 },
+  { text: "7", value: 7 },
   { text: "8", value: 8 },
 ]
 
 export default class ActesHistorique extends React.Component {
   componentWillMount() {
     this.setState({
-      idPatient : 1,
-      showConfirm: false
+      idPatient : 1
     });
   }
 
@@ -45,52 +45,18 @@ export default class ActesHistorique extends React.Component {
     console.log(`onSelectionChange ${actes}`);
   }
 
-  onAction = action => {
-    if (_.isEqual(action, "supprimer")) {
-      this.setState({ showConfirm: true });
-    } else if (_.isEqual(action, "editer")) {
-      this.setState({ showConfirm: true });
+  onAction = (action,d) => {
+    // l'action passé en paramètre
+    if (_.isEqual(action, "ajouter")) {
+      console.log(d);
+      console.log(`${d.id} - Action : ${action}`);
+    } else if (_.isEqual(action, "tache")) {
+      console.log(d);
+      console.log(`${d.id} - Action : ${action}`);
     }
   };
 
-  onHandleCancel = () => {
-    console.log('onHandleCancel');
-    this.setState({ showConfirm: false });
-  };
-
-  onHandleConfirm = () => {
-    console.log('onHandleConfirm');
-    this.setState({ showConfirm: false });
-    // _.map(this.state.actesSelected, id => {
-    //   this.props.client.Actes.destroy(
-    //     id,
-    //     result => {
-    //       this.setState({ showConfirm: false });
-    //       this.loadActe(
-    //         this.state.idPatient,
-    //         this.state.offset,
-    //         this.state.sort,
-    //         this.state.order
-    //       );
-    //     },
-    //     error => {
-    //       console.log(error);
-    //     }
-    //   );
-    // });
-  };
-
   render() {
-    let message = "";
-    // if (_.size(this.state.actesSelected) === 1) {
-    //   message = "Vous confirmez la suppression de la ligne sélectionnée ?";
-    // } else {
-    //   message =
-    //     "Vous confirmez la suppression des " +
-    //     _.size(this.state.actesSelected) +
-    //     " lignes sélectionnées ?";
-    // }
-
     return (
       <React.Fragment>
         <p>
@@ -120,35 +86,16 @@ export default class ActesHistorique extends React.Component {
           onSelectionChange={this.onSelectionChange}
           actions={[
             {
-              icon: "edit",
-              text: "Editer",
-              action: () => this.onAction("editer")
+              icon: "add",
+              text: "Ajouter",
+              action: (e,d) => this.onAction("ajouter",d)
             },
             {
-              icon: "trash",
-              text: "Supprimer",
-              action: () => this.onAction("supprimer")
+              icon: "tasks",
+              text: "Tache",
+              action: (e,d) => this.onAction("tache",d)
             }
           ]}
-        />
-        <Confirm
-          open={this.state.showConfirm}
-          content={message}
-          cancelButton={
-            <Button>
-              <Icon name="ban" color="red" />
-              Non
-            </Button>
-          }
-          confirmButton={
-            <Button>
-              <Icon name="check" color="green" />
-              Oui
-            </Button>
-          }
-          onCancel={this.onHandleCancel}
-          onConfirm={this.onHandleConfirm}
-          size="tiny"
         />
       </React.Fragment>
     );

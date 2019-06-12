@@ -6,12 +6,10 @@ const propDefs = {
   description: "Menu d'actions à effectuer",
   example: "Dropdown",
   propDocs: {
-    actions: "Tableau d'actions à afficher",
-    onClick: "Action clic"
+    actions: 'Tableau contenant une liste d\'actions'
   },
   propTypes: {
-    actions: PropTypes.array,
-    onClick: PropTypes.func
+    actions: PropTypes.array
   }
 };
 
@@ -28,6 +26,7 @@ export default class Actions extends React.Component {
           <Dropdown.Menu>
             {_.map(this.props.actions, action => (
               <Dropdown.Item
+                id={action.id}
                 key={action.text}
                 icon={action.icon}
                 text={action.text}

@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from 'react-dom';
 import PropTypes from "prop-types";
-import { Button, Icon, Table } from "semantic-ui-react";
+import { Button, Confirm, Icon, Table } from "semantic-ui-react";
 import _ from "lodash";
 import { tarif } from "../lib/Helpers";
 import Actions from "../Shared/Actions";
@@ -18,13 +18,15 @@ const propDefs = {
       'Callback pour retourner l\'acte sélectionné sur un double click',
     onSelectionChange: 
       'Callback pour retourner la liste des actes sélectionnés sur une multi-sélection (CTRL+click)',
+    actions:
+      'Tableau contenant une liste d\'actions. Par défaut, []',
     table: 'semantic.collections',
     limit: 'Valeur de pagination, par défaut 5',
     sort:
       'Le champs sur lequel le tri va être effectué. Par défaut, le tri se fait sur la date (doneAt)',
     order:
       'Un tri ascendant ou descendant [ASC,DESC]. Par défaut, le tri est descendant (DESC)',
-    showPagination: 
+    showPagination:
       'Afficher les options de paginations, par défaut "true"',
     btnFirstContent:
       'Texte du bouton pour aller à la première page, par défaut ""',
@@ -64,6 +66,7 @@ const propDefs = {
     onActeClick: PropTypes.func,
     onActeDoubleClick: PropTypes.func,
     onSelectionChange: PropTypes.func,
+    actions: PropTypes.array,
     table: PropTypes.object,
     limit: PropTypes.number,
     sort: PropTypes.string,
@@ -96,6 +99,7 @@ export default class Historique extends React.Component {
     limit: 5,
     sort: "doneAt",
     order: "DESC",
+    actions: [],
     // props pour le composant de pagination
     showPagination: true,
     btnFirstContent: "",
@@ -118,17 +122,18 @@ export default class Historique extends React.Component {
   };
 
   componentWillMount() {
-    document.addEventListener('click',this.onClickOutside, true);
     this.setState({
       idPatient: this.props.idPatient,
       actes: [],
       actesSelected: [],
+      idActeSupprime: 0,
       informations: {},
       offset: 0,
       sort: this.props.sort,
       order: this.props.order,
       sorted: _.isEqual(this.props.order, "DESC") ? "descending" : "ascending",
-      lockRevision: ""
+      lockRevision: "",
+      showConfirm: false,
     });
 
     this.loadActe(this.props.idPatient, 0, this.props.sort, this.props.order);
@@ -148,7 +153,8 @@ export default class Historique extends React.Component {
   }
 
   componentDidMount() {
-    this.interval = setInterval(() => {
+    document.addEventListener('click',this.onClickOutside, true); // Outside click du composant
+    this.interval = setInterval(() => { // Reload des données toutes les 15 secondes
       this.loadActe(
         this.state.idPatient,
         this.state.offset,
@@ -204,16 +210,18 @@ export default class Historique extends React.Component {
         }
       },
       error => {
-        console.log(error);
+        console.log(`Erreur readAll : ${error}`);
       }
     );
   };
 
   onPageSelect = query => {
+    // Callbacks de la pagination
     this.loadActe(query._idPatient, query.offset, query.sort, query.order);
   };
 
   onHandleSort = () => {
+    // trier l'historique
     if (_.isEqual(this.state.order, "DESC")) {
       this.loadActe(
         this.state.idPatient,
@@ -232,6 +240,7 @@ export default class Historique extends React.Component {
   };
 
   decoration = code => {
+    // code de l'acte passé en paramètre
     let deco = {};
     deco.color = "";
     deco.icon = "";
@@ -280,6 +289,42 @@ export default class Historique extends React.Component {
     actesSelected.push(id);
     this.setState({ actesSelected: actesSelected });
     this.props.onActeDoubleClick(id);
+  };
+
+  onAction = (id, action) => {
+    // l'id de l'acte et l'action passés en paramètres
+    if (_.isEqual(action, "editer")) {
+      console.log(`${id} - Action : ${action}`);
+    } else if (_.isEqual(action, "supprimer")) {
+      this.setState({ showConfirm: true, idActeSupprime: id });
+      console.log(`${id} - Action : ${action}`);
+    }
+  };
+
+  onHandleCancel = () => {
+    // Annulation de la supression d'un acte
+    this.setState({ showConfirm: false });
+  };
+
+  onHandleConfirm = () => {
+    // Suppression d'un acte dont l'id est dans le state
+    if (!_.isEqual(this.state.idActeSupprime,0)) {
+      this.props.client.Actes.destroy(
+        this.state.idActeSupprime,
+        result => {
+          this.setState({ showConfirm: false, idActeSupprime: 0 });
+          this.loadActe(
+            this.state.idPatient,
+            this.state.offset,
+            this.state.sort,
+            this.state.order
+          );
+        },
+        error => {
+          console.log(`Erreur destroy : ${error}`);
+        }
+      );
+    }
   };
 
   render() {
@@ -331,6 +376,29 @@ export default class Historique extends React.Component {
             {_.map(this.state.actes, acte => {
               let deco = this.decoration(acte.code);
               let rowSelected = _.includes(this.state.actesSelected, acte.id);
+              // actions du composant par défaut ["Editer","Supprimer"]
+              let actions = [
+                {
+                  icon: "edit",
+                  text: "Editer",
+                  action: () => this.onAction(acte.id, "editer")
+                },
+                {
+                  icon: "trash",
+                  text: "Supprimer",
+                  action: () => this.onAction(acte.id, "supprimer")
+                }
+              ];
+
+              if (!_.isEmpty(this.props.actions)) {
+                _.forEach(this.props.actions, action => {
+                  if (!_.isUndefined(action.icon) && !_.isUndefined(action.text) && !_.isUndefined(action.action)) {
+                    action.id = acte.id;
+                    actions.push(action);
+                  }
+                });
+                // actions = _.concat(actions,this.props.actions); // J'ajoute les actions (props) de l'utilisateur
+              }
 
               return (
                 <React.Fragment key={acte.id}>
@@ -366,7 +434,7 @@ export default class Historique extends React.Component {
                     </Table.Cell>
                     <Table.Cell>
                       <Actions
-                        actions={this.props.actions}
+                        actions={actions}
                       />
                     </Table.Cell>
                   </Table.Row>
@@ -386,6 +454,25 @@ export default class Historique extends React.Component {
             ""
           )}
         </div>
+        <Confirm
+          open={this.state.showConfirm}
+          content="Vous confirmez vouloir supprimer cette ligne ?"
+          cancelButton={
+            <Button>
+              <Icon name="ban" color="red" />
+              Non
+            </Button>
+          }
+          confirmButton={
+            <Button>
+              <Icon name="check" color="green" />
+              Oui
+            </Button>
+          }
+          onCancel={this.onHandleCancel}
+          onConfirm={this.onHandleConfirm}
+          size="tiny"
+        />
       </React.Fragment>
     );
   }
@@ -412,7 +499,7 @@ class Pagination extends React.Component {
     let pageSize = this.props.informations.pageSize;
     let limit = 10;
     let q = query;
-    q.offset = 0;
+    q.offset = 0; // recommencer au début pour l'affichage
     if (_.isUndefined(q.limit)) {
       q.limit = pageSize;
     }
