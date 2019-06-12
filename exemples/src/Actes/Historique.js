@@ -1,80 +1,62 @@
 import React from "react";
-import ReactDOM from 'react-dom';
 import { Client } from "rhapi-client";
 import { Actes } from "rhapi-ui-react";
 import { Divider, Form } from "semantic-ui-react";
+import _ from "lodash";
 
 // Instanciation du client RHAPI sans authentification
 const client = new Client("https://demo.rhapi.net/demo01");
 const patients = [
-  { text: "Aucun patient", value: -1 },
-  { text: "0", value: 0 },
+  { text: "Aucun patient", value: 0 },
   { text: "1", value: 1 },
   { text: "2", value: 2 },
   { text: "3", value: 3 },
   { text: "4", value: 4 },
   { text: "5", value: 5 },
   { text: "6", value: 6 },
+  { text: "7", value: 7 },
   { text: "8", value: 8 },
 ]
 
 export default class ActesHistorique extends React.Component {
   componentWillMount() {
     this.setState({
-      idPatient : -1,
-      actesSelected: []
+      idPatient : 1
     });
-  }
-
-  componentDidMount() {
-    document.addEventListener('click',this.onClickOutside, true);
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('click',this.onClickOutside, true);
-  }
-
-  onClickOutside = (event) => {
-    const domNode = ReactDOM.findDOMNode(this.refs.componentHistorique);
-
-    if (!event.ctrlKey) {
-      if (!domNode.contains(event.target)) {
-        // this.setState({
-        //   actesSelected: []
-        // });
-      }
-    }
   }
 
   onPatientChange = id => {
     this.setState({ idPatient: id });
   };
 
-  onSelectionChange = ids => {
-    console.log("onSelectionChange");
-    console.log(ids);
-    this.setState({ actesSelected: ids });
-  }
-
   onActeClick = id => {
-    console.log("onActeClick");
-    console.log(id);
-    let singleActe = [];
-    singleActe.push(id);
-    this.setState({ actesSelected: singleActe });
+    // l'id de l'acte en paramètre
+    console.log(`onActeClick ${id}`);
   }
 
   onActeDoubleClick = id => {
-    console.log("onActeDoubleClick");
-    console.log(id);
-    let singleActe = [];
-    singleActe.push(id);
-    this.setState({ actesSelected: singleActe });
+    // l'id de l'acte en paramètre
+    console.log(`onActeDoubleClick ${id}`);
   }
 
-  render() {
-    console.log(this.state);
+  onSelectionChange = ids => {
+    // array des id des actes en paramètre
+    let actes = ids.join(",");
+    console.log(`onSelectionChange ${actes}`);
+  }
 
+  onAction = (action,d) => {
+    // l'action passé en paramètre
+    if (_.isEqual(action, "ajouter")) {
+      console.log(d);
+      console.log(`${d.id} - Action : ${action}`);
+    } else if (_.isEqual(action, "tache")) {
+      console.log(d);
+      console.log(`${d.id} - Action : ${action}`);
+    }
+  };
+
+  render() {
     return (
       <React.Fragment>
         <p>
@@ -97,13 +79,23 @@ export default class ActesHistorique extends React.Component {
         <Filtre />
         <Divider hidden={true} />
         <Actes.Historique
-          ref='componentHistorique'
           client={client}
           idPatient={this.state.idPatient}
-          actesSelected={this.state.actesSelected}
-          onSelectionChange={this.onSelectionChange}
           onActeClick={this.onActeClick}
           onActeDoubleClick={this.onActeDoubleClick}
+          onSelectionChange={this.onSelectionChange}
+          actions={[
+            {
+              icon: "add",
+              text: "Ajouter",
+              action: (e,d) => this.onAction("ajouter",d)
+            },
+            {
+              icon: "tasks",
+              text: "Tache",
+              action: (e,d) => this.onAction("tache",d)
+            }
+          ]}
         />
       </React.Fragment>
     );

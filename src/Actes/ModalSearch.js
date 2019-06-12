@@ -5,26 +5,30 @@ import {
   Button,
   Checkbox,
   Dimmer,
-  Dropdown,
   Form,
   Header,
   Icon,
-  Input,
   Loader,
   Modal,
-  Segment,
-  Table
+  Ref,
+  Segment
 } from "semantic-ui-react";
 import Search2 from "../CCAM/Search";
 import Table2 from "../CCAM/Table";
 import Localisations from "../Shared/Localisations";
 
 import DatePicker from "react-datepicker";
+import fr from "date-fns/locale/fr";
 import "react-datepicker/dist/react-datepicker.css";
 
 import moment from "moment";
 
-import { spacedLocalisation, tarif, toISOLocalisation } from "../lib/Helpers";
+import {
+  spacedLocalisation,
+  tarif,
+  tarifDotNotation,
+  toISOLocalisation
+} from "../lib/Helpers";
 
 const propDefs = {
   description:
@@ -55,6 +59,7 @@ const propDefs = {
       "Tous les modificateurs (obtenus avec une requête CCAM contextes)",
     modificateurs:
       'Modificateurs appliqués à l\'acte sélectionné. Par défaut ""',
+    qualificatifs: "Qualificatifs",
     onValidation: "Callback à la validation"
   },
   propTypes: {
@@ -74,6 +79,7 @@ const propDefs = {
     rowIndex: PropTypes.number,
     allModificateurs: PropTypes.array,
     modificateurs: PropTypes.string,
+    qualificatifs: PropTypes.string,
     onValidation: PropTypes.func
   }
 };
@@ -82,6 +88,12 @@ const descriptionType = [
   { text: "Nom court", value: 0 },
   { text: "Nom long", value: 1 },
   { text: "Nom personnalisé", value: 2 }
+];
+
+const qualificatifs = [
+  { text: "OP", value: "OP" },
+  { text: "ED", value: "ED" },
+  { text: "NPC", value: "NPC" }
 ];
 
 export default class ModalSearch extends React.Component {
@@ -108,6 +120,7 @@ export default class ModalSearch extends React.Component {
       date: this.props.date,
       localisation: this.props.localisation,
       modificateurs: this.props.modificateurs,
+      qualificatifs: this.props.qualificatifs,
       description: "",
       montant: 0,
       openLocalisation: false,
@@ -121,10 +134,12 @@ export default class ModalSearch extends React.Component {
   componentWillReceiveProps(next) {
     this.setState({
       acte: {},
+      actes: [],
       code: next.code,
       date: next.date,
       localisation: next.localisation,
       modificateurs: next.modificateurs,
+      qualificatifs: next.qualificatifs,
       description: "",
       montant: 0,
       openLocalisation: false,
@@ -135,6 +150,14 @@ export default class ModalSearch extends React.Component {
     if (next.code) {
       this.readActe(next.code, next.date);
     }
+  }
+
+  componentDidMount() {
+    document.addEventListener("mousedown", this.inputContentFormating);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("mousedown", this.inputContentFormating);
   }
 
   readActe = (code, date) => {
@@ -236,6 +259,19 @@ export default class ModalSearch extends React.Component {
     }
   };
 
+  inputContentFormating = () => {
+    let montant = this.state.montant;
+    if (_.isEmpty(montant)) {
+      this.setState({ montant: tarif(0) });
+    }
+    if (parseFloat(tarifDotNotation(montant))) {
+      this.setState({ montant: tarif(parseFloat(tarifDotNotation(montant))) });
+    }
+    this.setState({
+      localisation: spacedLocalisation(this.state.localisation)
+    });
+  };
+
   tarification = (
     codActe,
     codActiv,
@@ -265,7 +301,7 @@ export default class ModalSearch extends React.Component {
       params,
       result => {
         //console.log(result);
-        this.setState({ montant: result.pu, loading: false });
+        this.setState({ montant: tarif(result.pu), loading: false });
       },
       error => {
         console.log(error);
@@ -275,7 +311,11 @@ export default class ModalSearch extends React.Component {
   };
 
   valider = () => {
-    if (_.isEmpty(this.state.acte)) {
+    if (
+      _.isEmpty(this.state.acte) ||
+      _.isNaN(parseFloat(tarifDotNotation(this.state.montant))) ||
+      toISOLocalisation(this.state.localisation).length % 2 !== 0
+    ) {
       return;
     }
     this.props.onValidation(
@@ -286,7 +326,8 @@ export default class ModalSearch extends React.Component {
       spacedLocalisation(this.state.localisation),
       this.props.cotation,
       this.state.modificateurs,
-      this.state.montant
+      this.state.qualificatifs,
+      parseFloat(tarifDotNotation(this.state.montant))
     );
     this.onClose();
   };
@@ -374,16 +415,27 @@ export default class ModalSearch extends React.Component {
           <Form>
             <Form.Group widths="equal">
               <Form.Input
+                fluid={true}
                 label="Code"
                 value={this.state.code}
                 placeholder="Code de l'acte"
               />
-              <Form.Input label="Date">
-                <DatePicker selected={moment(this.state.date).toDate()} />
+              <Form.Input label="Date" fluid={true}>
+                <DatePicker
+                  dateFormat="dd/MM/yyyy"
+                  selected={moment(this.state.date).toDate()}
+                  onChange={date => {
+                    if (date) {
+                      this.setState({ date: date.toISOString() });
+                    }
+                  }}
+                  locale={fr}
+                />
               </Form.Input>
               <Form.Input
+                fluid={true}
                 label="Localisation"
-                placeholder="Localisation des dents"
+                placeholder="Num. des dents"
                 error={
                   toISOLocalisation(this.state.localisation).length % 2 !== 0
                 }
@@ -391,6 +443,7 @@ export default class ModalSearch extends React.Component {
                 onChange={(e, d) => this.setState({ localisation: d.value })}
               />
               <Form.Input
+                fluid={true}
                 label="Modificateurs"
                 placeholder="Modificateurs"
                 value={this.state.modificateurs ? this.state.modificateurs : ""}
@@ -407,37 +460,48 @@ export default class ModalSearch extends React.Component {
                   );
                 }}
               />
-              <Form.Input
-                label="Montant"
-                value={tarif(this.state.montant)}
-                onChange={(e, d) => {
-                  //this.setState({ tmpMontant: d.value });
-                  /*console.log(d.value);
-                  //if (parseFloat(d.value)) {
-                  if (_.isEmpty(d.value)) {
-                    console.log("ici");
-                    this.setState({ montant: "" });
-                    return;
-                  } else {
-                    console.log("là");
-                    this.setState({ montant: parseFloat(d.value) });
-                  }*/
-                  //}
-                  //this.setState({ montant: parseFloat(d.value) })
-                  //this.setState({ montant: d.value })
-                }}
+              <Form.Dropdown
+                label="Qualificatifs"
+                fluid={true}
+                placeholder="Qualificatifs"
+                options={qualificatifs}
+                selection={true}
+                value={this.state.qualificatifs}
+                onChange={(e, d) => this.setState({ qualificatifs: d.value })}
               />
+              <Ref
+                innerRef={node => {
+                  node.childNodes[1].firstChild.style.textAlign = "right";
+                }}
+              >
+                <Form.Input
+                  label="Montant"
+                  fluid={true}
+                  value={this.state.montant}
+                  onChange={(e, d) => {
+                    if (this.state.qualificatifs !== "OP") {
+                      this.setState({ montant: d.value });
+                    }
+                  }}
+                />
+              </Ref>
             </Form.Group>
             <Form.Group>
               <Form.Input fluid={true}>
-                <Search2
-                  client={this.props.client}
-                  date={this.state.date}
-                  executant={this.props.executant}
-                  limit={8}
-                  localisation={this.state.localisation}
-                  onLoadActes={this.onLoadActes}
-                />
+                <Ref
+                  innerRef={node => {
+                    node.firstChild.firstChild.focus();
+                  }}
+                >
+                  <Search2
+                    client={this.props.client}
+                    date={this.state.date}
+                    executant={this.props.executant}
+                    limit={8}
+                    localisation={this.state.localisation}
+                    onLoadActes={this.onLoadActes}
+                  />
+                </Ref>
               </Form.Input>
               <Form.Input
                 width={10}

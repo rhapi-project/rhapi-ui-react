@@ -20,7 +20,8 @@ const propDefs = {
     defaultClickAction:
       "Action à effectuer au clic sur une ligne d'acte. Par défaut CCAM (Recherche en CCAM) " +
       "",
-    onError: "Callback en cas d'erreur"
+    onError: "Callback en cas d'erreur",
+    actions: "Liste d'actions à effectuer (en plus des actions par défaut)"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
@@ -31,13 +32,15 @@ const propDefs = {
     codGrille: PropTypes.number,
     codPhase: PropTypes.number,
     defaultClickAction: PropTypes.string,
-    onError: PropTypes.func
+    onError: PropTypes.func,
+    actions: PropTypes.array
   }
 };
 
 export default class Saisie extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
+    actions: [],
     codActivite: "1",
     codDom: 0,
     codGrille: 0,
@@ -104,6 +107,7 @@ export default class Saisie extends React.Component {
     localisation,
     cotation,
     modificateurs,
+    qualificatifs, // new
     montant
   ) => {
     this.props.client.Actes.read(
@@ -121,8 +125,8 @@ export default class Saisie extends React.Component {
           obj.date = date;
           obj.localisation = localisation;
           obj.cotation = cotation;
-          //obj.description = acte.nomLong;
           obj.modificateurs = modificateurs;
+          obj.qualificatifs = qualificatifs; // new
           obj.montant = montant;
           let actes = this.state.actes;
           if (rowKey === this.state.activeRow) {
@@ -135,6 +139,7 @@ export default class Saisie extends React.Component {
               _.isEqual(date, actes[rowKey].date) &&
               _.isEqual(localisation, actes[rowKey].localisation) &&
               _.isEqual(modificateurs, actes[rowKey].modificateurs) &&
+              _.isEqual(qualificatifs, actes[rowKey].qualificatifs) &&
               _.isEqual(montant, actes[rowKey].montant)
             ) {
               return;
@@ -176,8 +181,62 @@ export default class Saisie extends React.Component {
 
   onClickRow = index => {
     if (this.props.defaultClickAction === "CCAM") {
-      this.setState({ selectedIndex: index });
+      this.openSearchCCAM(index);
     }
+  };
+
+  openSearchCCAM = index => {
+    this.setState({ selectedIndex: index });
+  };
+
+  onDelete = index => {
+    this.props.client.Actes.read(
+      this.props.idActe,
+      {},
+      result => {
+        if (result.etat === 0) {
+          this.setState({ error: 1 });
+          return;
+        }
+        if (result.lockRevision === this.state.fse.lockRevision) {
+          let actes = this.state.actes;
+          actes.splice(index, 1);
+          this.update(actes);
+        } else {
+          this.setState({ error: 2 });
+        }
+      },
+      error => {
+        // peut-être que l'acte a été déjà supprimé
+        console.log(error);
+        this.setState({ error: 3 });
+      }
+    );
+  };
+
+  onDuplicate = index => {
+    this.props.client.Actes.read(
+      this.props.idActe,
+      {},
+      result => {
+        if (result.etat === 0) {
+          this.setState({ error: 1 });
+          return;
+        }
+        if (result.lockRevision === this.state.fse.lockRevision) {
+          let actes = this.state.actes;
+          let currentActe = actes[index];
+          actes.splice(index + 1, 0, currentActe);
+          this.update(actes);
+        } else {
+          this.setState({ error: 2 });
+        }
+      },
+      error => {
+        console.log(error);
+        this.setState({ error: 3 });
+      }
+    );
   };
 
   render() {
@@ -188,34 +247,6 @@ export default class Saisie extends React.Component {
         : this.existActe(this.state.selectedIndex)
         ? this.state.actes[selectedIndex]
         : {};
-
-      let actions = [
-        {
-          icon: "search",
-          text: "Recherche CCAM",
-          action: () => {}
-        },
-        {
-          icon: "search",
-          text: "Recherche par favoris",
-          action: () => {}
-        },
-        {
-          icon: "edit",
-          text: "Editer",
-          action: () => {} //this.editer(this.state.code)
-        },
-        {
-          icon: "copy",
-          text: "Dupliquer",
-          action: () => {}
-        },
-        {
-          icon: "trash",
-          text: "Supprimer",
-          action: () => {} //this.action(this.state.code)
-        }
-      ];
       return (
         <React.Fragment>
           <Table celled={true} striped={true} selectable={true}>
@@ -226,7 +257,8 @@ export default class Saisie extends React.Component {
                 <Table.HeaderCell>Code</Table.HeaderCell>
                 <Table.HeaderCell>Cotation</Table.HeaderCell>
                 <Table.HeaderCell>Libellé</Table.HeaderCell>
-                <Table.HeaderCell>Modificateurs</Table.HeaderCell>
+                <Table.HeaderCell>Modif.</Table.HeaderCell>
+                <Table.HeaderCell>Qualif.</Table.HeaderCell>
                 <Table.HeaderCell>Montant</Table.HeaderCell>
                 <Table.HeaderCell>Action</Table.HeaderCell>
               </Table.Row>
@@ -236,7 +268,7 @@ export default class Saisie extends React.Component {
                 <SaisieDentaire
                   key={i}
                   index={i}
-                  actions={actions}
+                  actions={this.props.actions}
                   client={this.props.client}
                   code={this.existActe(i) ? this.state.actes[i].code : ""}
                   cotation={
@@ -256,9 +288,15 @@ export default class Saisie extends React.Component {
                   modificateurs={
                     this.existActe(i) ? this.state.actes[i].modificateurs : ""
                   }
+                  qualificatifs={
+                    this.existActe(i) ? this.state.actes[i].qualificatifs : "OP"
+                  }
                   montant={this.existActe(i) ? this.state.actes[i].montant : 0}
                   disabled={this.state.activeRow < i}
                   onClick={index => this.onClickRow(index)}
+                  onDelete={index => this.onDelete(index)}
+                  onDuplicate={index => this.onDuplicate(index)}
+                  onSearchCCAM={index => this.openSearchCCAM(index)}
                 />
               ))}
             </Table.Body>
@@ -298,6 +336,11 @@ export default class Saisie extends React.Component {
               _.isEmpty(selectedActe)
                 ? ""
                 : this.state.actes[selectedIndex].modificateurs
+            }
+            qualificatifs={
+              _.isEmpty(selectedActe)
+                ? "OP"
+                : this.state.actes[selectedIndex].qualificatifs
             }
             onClose={() => this.setState({ selectedIndex: null })}
             onValidation={this.onValidation}
