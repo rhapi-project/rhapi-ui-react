@@ -7,6 +7,11 @@ const tarif = number => {
   return number.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
+const tarifDotNotation = tarifStr => {
+  let t = _.replace(tarifStr, /,/, ".");
+  return t;
+};
+
 const spacedLocalisation = localisationStr => {
   let l = _.replace(localisationStr, /\s/g, "");
   let s = "";
@@ -24,4 +29,4 @@ const toISOLocalisation = localisation => {
   return _.replace(localisation, /\s/g, "");
 };
 
-export { spacedLocalisation, tarif, toISOLocalisation };
+export { spacedLocalisation, tarif, tarifDotNotation, toISOLocalisation };
