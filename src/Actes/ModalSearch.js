@@ -44,6 +44,7 @@ const propDefs = {
     cotation:
       "Cotation/coefficient applicable au code (significatif uniquement en NGAP, 0 si non significatif)",
     date: "Date effective de l'acte au format ISO. Par défaut date du jour",
+    description: 'Description de l\'acte sélectionné. Par défaut ""',
     localisation:
       'Liste des dents sélectionnées, séparées par des espaces. Par défaut ""',
     executant:
@@ -59,6 +60,7 @@ const propDefs = {
       "Tous les modificateurs (obtenus avec une requête CCAM contextes)",
     modificateurs:
       'Modificateurs appliqués à l\'acte sélectionné. Par défaut ""',
+    montant: "Montant de l'acte sélectionné",
     qualificatifs: "Qualificatifs",
     onValidation: "Callback à la validation"
   },
@@ -71,6 +73,7 @@ const propDefs = {
     codPhase: PropTypes.number,
     cotation: PropTypes.number,
     date: PropTypes.string,
+    description: PropTypes.string,
     localisation: PropTypes.string,
     executant: PropTypes.string,
     localisationPicker: PropTypes.bool,
@@ -106,49 +109,56 @@ export default class ModalSearch extends React.Component {
     codPhase: 0,
     cotation: 1,
     date: moment().toISOString(),
+    description: "",
     localisation: "",
     cotation: 0,
     executant: "",
-    localisationPicker: false
+    localisationPicker: false,
+    montant: 0
   };
 
   componentWillMount() {
     this.setState({
-      acte: {},
-      actes: [],
+      acte: {}, //
       code: this.props.code,
       date: this.props.date,
       localisation: this.props.localisation,
       modificateurs: this.props.modificateurs,
       qualificatifs: this.props.qualificatifs,
-      description: "",
-      montant: 0,
+      description: this.props.description,
+      montant: tarif(0),
       openLocalisation: false,
       openModificateurs: false,
-      informations: {},
-      descriptionType: 1,
-      loading: false
+      descriptionType: 1
     });
   }
 
   componentWillReceiveProps(next) {
-    this.setState({
-      acte: {},
-      actes: [],
-      code: next.code,
-      date: next.date,
-      localisation: next.localisation,
-      modificateurs: next.modificateurs,
-      qualificatifs: next.qualificatifs,
-      description: "",
-      montant: 0,
-      openLocalisation: false,
-      openModificateurs: false,
-      informations: {},
-      descriptionType: 1
-    });
     if (next.code) {
+      this.setState({
+        code: next.code,
+        localisation: next.localisation,
+        modificateurs: next.modificateurs,
+        qualificatifs: next.qualificatifs,
+        montant: tarif(next.montant),
+        description: next.description
+      });
       this.readActe(next.code, next.date);
+    } else {
+      this.setState({
+        acte: {},
+        actes: [],
+        date: this.props.date,
+        localisation: "",
+        modificateurs: "",
+        qualificatifs: "OP",
+        description: "",
+        montant: tarif(0),
+        openLocalisation: false,
+        openModificateurs: false,
+        informations: {},
+        descriptionType: 1
+      });
     }
   }
 
@@ -161,27 +171,25 @@ export default class ModalSearch extends React.Component {
   }
 
   readActe = (code, date) => {
-    this.setState({ loading: true });
     this.props.client.CCAM.read(
       code,
       { date: date },
       result => {
-        let description =
-          this.state.descriptionType === 0 ? result.nomCourt : result.nomLong;
-        this.setState({ acte: result, description: description });
-        this.tarification(
-          result.codActe,
-          this.props.codActiv,
-          this.props.codPhase,
-          this.props.codGrille,
-          date,
-          this.props.codDom,
-          this.props.modificateurs
-        );
+        let descrType =
+          this.state.description === result.nomCourt
+            ? 0
+            : this.state.description === result.nomLong
+            ? 1
+            : 2;
+        this.setState({
+          acte: result,
+          loading: false,
+          descriptionType: descrType
+        });
       },
       error => {
         console.log(error);
-        this.setState({ loading: false });
+        this.setState({ acte: {}, loading: false });
       }
     );
   };
@@ -371,6 +379,7 @@ export default class ModalSearch extends React.Component {
             allModificateurs={this.props.allModificateurs}
             codGrille={this.props.codGrille}
             date={this.state.date}
+            executant={this.props.executant}
             modificateurs={this.state.modificateurs}
             onChange={modifStr => {
               this.setState({ modificateurs: modifStr });
@@ -467,7 +476,20 @@ export default class ModalSearch extends React.Component {
                 options={qualificatifs}
                 selection={true}
                 value={this.state.qualificatifs}
-                onChange={(e, d) => this.setState({ qualificatifs: d.value })}
+                onChange={(e, d) => {
+                  this.setState({ qualificatifs: d.value });
+                  if (d.value === "OP") {
+                    this.tarification(
+                      this.state.code,
+                      this.props.codActiv,
+                      this.props.codPhase,
+                      this.props.codGrille,
+                      this.state.date,
+                      this.props.codDom,
+                      this.state.modificateurs
+                    );
+                  }
+                }}
               />
               <Ref
                 innerRef={node => {
@@ -564,6 +586,9 @@ export default class ModalSearch extends React.Component {
 }
 
 class Modificateurs extends React.Component {
+  static defaultProps = {
+    executant: ""
+  };
   state = {
     listModificateurs: [],
     selectedModif: []
@@ -621,6 +646,12 @@ class Modificateurs extends React.Component {
         return false;
       }
 
+      if (this.props.executant === "D1") {
+        if (!_.includes(["N", "F", "J", "U"], m.codModifi)) {
+          return false;
+        }
+      }
+
       if (_.isNull(m.dtDebut) && _.isNull(m.dtFin)) {
         return true;
       }
@@ -638,7 +669,7 @@ class Modificateurs extends React.Component {
   };
   render() {
     return (
-      <div style={{ overflow: "auto", height: "200px" }}>
+      <div style={{ overflow: "auto", height: "100px" }}>
         {_.map(this.state.listModificateurs, modif => (
           <div key={modif.libelle + "" + modif.coef}>
             <Checkbox
