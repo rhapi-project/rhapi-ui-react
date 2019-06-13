@@ -13,7 +13,7 @@ const tarifDotNotation = tarifStr => {
 };
 
 const spacedLocalisation = localisationStr => {
-  let l = _.replace(localisationStr, /\s/g, "");
+  let l = toISOLocalisation(localisationStr);
   let s = "";
   _.forEach(l, (value, i) => {
     if (i % 2 === 0) {
@@ -22,11 +22,11 @@ const spacedLocalisation = localisationStr => {
       s += value + " ";
     }
   });
-  return s;
+  return _.trim(s);
 };
 
 const toISOLocalisation = localisation => {
-  return _.replace(localisation, /\s/g, "");
+  return _.replace(localisation, /[\s,\?.;\/:-]/g, "");
 };
 
 export { spacedLocalisation, tarif, tarifDotNotation, toISOLocalisation };
