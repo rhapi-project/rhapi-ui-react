@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from 'react-dom';
+import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import { Button, Confirm, Icon, Table } from "semantic-ui-react";
 import _ from "lodash";
@@ -8,26 +8,25 @@ import Actions from "../Shared/Actions";
 import moment from "moment";
 
 const propDefs = {
-  description: 'Historique des actes d\'un patient',
-  example: 'Tableau',
+  description: "Historique des actes d'un patient",
+  example: "Tableau",
   propDocs: {
-    idPatient: 'ID du patient, par défaut 0 (Aucun patient)',
-    onActeClick: 
-      'Callback pour retourner l\'acte sélectionné sur un click',
-    onActeDoubleClick: 
-      'Callback pour retourner l\'acte sélectionné sur un double click',
-    onSelectionChange: 
-      'Callback pour retourner la liste des actes sélectionnés sur une multi-sélection (CTRL+click)',
+    idPatient: "Id du patient, par défaut 0 (Aucun patient)",
+    onActeClick:
+      "Retourne en paramètre l'id de l'acte sélectionné sur un click",
+    onActeDoubleClick:
+      "Retourne en paramètre l'id l'acte sélectionné sur un double click",
+    onSelectionChange:
+      "Retourne en paramètre la liste des id des actes sélectionnés (multi-sélection possible par CTRL+click)",
     actions:
-      'Tableau contenant une liste d\'actions. Par défaut, []',
-    table: 'semantic.collections',
-    limit: 'Valeur de pagination, par défaut 5',
+      'Tableau d\'objet contenant des actions à effectuer (en plus des actions par défaut). Exemple [{icon:"add",text:"Ajouter",action:fonction de l\'action ajouter}]',
+    table: "semantic.collections",
+    limit: "Valeur de pagination, par défaut 5",
     sort:
-      'Le champs sur lequel le tri va être effectué. Par défaut, le tri se fait sur la date (doneAt)',
+      "Le champs sur lequel le tri va être effectué. Par défaut, le tri se fait sur la date (doneAt)",
     order:
-      'Un tri ascendant ou descendant [ASC,DESC]. Par défaut, le tri est descendant (DESC)',
-    showPagination:
-      'Afficher les options de paginations, par défaut "true"',
+      "Le tri est ascendant (ASC) ou descendant (DESC). Par défaut, le tri est descendant (DESC)",
+    showPagination: 'Affiche les options de paginations, par défaut "true"',
     btnFirstContent:
       'Texte du bouton pour aller à la première page, par défaut ""',
     btnLastContent:
@@ -58,7 +57,7 @@ const propDefs = {
       'Props semantic du bouton pour aller à la page précédente, par défaut un objet vide "{}"',
     btnMore:
       'Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}"',
-    mode: 'Mode de pagination \'pages\' ou \'more\', par défaut "pages"'
+    mode: 'Mode de pagination "pages" ou "more", par défaut "pages"'
   },
   propTypes: {
     client: PropTypes.any.isRequired,
@@ -133,7 +132,7 @@ export default class Historique extends React.Component {
       order: this.props.order,
       sorted: _.isEqual(this.props.order, "DESC") ? "descending" : "ascending",
       lockRevision: "",
-      showConfirm: false,
+      showConfirm: false
     });
 
     this.loadActe(this.props.idPatient, 0, this.props.sort, this.props.order);
@@ -153,8 +152,9 @@ export default class Historique extends React.Component {
   }
 
   componentDidMount() {
-    document.addEventListener('click',this.onClickOutside, true); // Outside click du composant
-    this.interval = setInterval(() => { // Reload des données toutes les 15 secondes
+    document.addEventListener("click", this.onClickOutside, true); // Outside click du composant
+    this.interval = setInterval(() => {
+      // Reload des données toutes les 15 secondes
       this.loadActe(
         this.state.idPatient,
         this.state.offset,
@@ -165,11 +165,11 @@ export default class Historique extends React.Component {
   }
 
   componentWillUnmount() {
-    document.removeEventListener('click',this.onClickOutside, true);
+    document.removeEventListener("click", this.onClickOutside, true);
     clearInterval(this.interval);
   }
 
-  onClickOutside = (event) => {
+  onClickOutside = event => {
     const domNode = ReactDOM.findDOMNode(this);
 
     if (!event.ctrlKey) {
@@ -179,7 +179,7 @@ export default class Historique extends React.Component {
         });
       }
     }
-  }
+  };
 
   loadActe = (idPatient, offset, sort, order) => {
     let params = {
@@ -266,22 +266,56 @@ export default class Historique extends React.Component {
   };
 
   onActeClick = (e, id) => {
-    if (e.ctrlKey) {
-      let multiActes = _.isEmpty(this.state.actesSelected)?[]:this.state.actesSelected;
+    let actesSelected = this.state.actesSelected;
 
-      if (_.includes(multiActes, id)) {
-        multiActes.splice(_.indexOf(multiActes, id), 1);
-      } else {
-        multiActes.push(id);
+    if (e.ctrlKey || e.metaKey) {
+      if (_.includes(actesSelected, id)) {
+        actesSelected.splice(_.indexOf(actesSelected, id), 1);
+      } 
+      else {
+        actesSelected.push(id);
       }
-      this.setState({ actesSelected: multiActes });
-      this.props.onSelectionChange(multiActes);
+    } 
+    else if (e.shiftKey) {
+      console.log(`${id} - ${e.shiftKey}`);
+      // if (!_.includes(actesSelected, id)) {
+        actesSelected.push(id);
+      // }
+
+      let first = 0;
+      let last = this.state.actes.length - 1;
+
+      _.forEach(this.state.actes, acte => {
+        if (_.includes(actesSelected, acte.id)) {
+          return false;
+        }
+        first++;
+      });
+
+      _.forEachRight(this.state.actes, acte => {
+        if (_.includes(actesSelected, acte.id)) {
+          return false;
+        }
+        last--;
+      });
+
+      for(let i = first; i <= last; i++) {
+        let id = this.state.actes[i].id;
+
+        if (!_.includes(actesSelected, id)) {
+          actesSelected.push(id);
+        }
+      }
+
+      console.log(`first : ${first} - last : ${last}`);
     } else {
-      let actesSelected = [];
+      actesSelected = [];
       actesSelected.push(id);
-      this.setState({ actesSelected: actesSelected });
       this.props.onActeClick(id);
     }
+
+    this.setState({ actesSelected: actesSelected });
+    this.props.onSelectionChange(actesSelected);
   };
 
   onActeDoubleClick = id => {
@@ -289,6 +323,7 @@ export default class Historique extends React.Component {
     actesSelected.push(id);
     this.setState({ actesSelected: actesSelected });
     this.props.onActeDoubleClick(id);
+    this.props.onSelectionChange(actesSelected);
   };
 
   onAction = (id, action) => {
@@ -308,7 +343,7 @@ export default class Historique extends React.Component {
 
   onHandleConfirm = () => {
     // Suppression d'un acte dont l'id est dans le state
-    if (!_.isEqual(this.state.idActeSupprime,0)) {
+    if (!_.isEqual(this.state.idActeSupprime, 0)) {
       this.props.client.Actes.destroy(
         this.state.idActeSupprime,
         result => {
@@ -352,6 +387,7 @@ export default class Historique extends React.Component {
 
     return (
       <React.Fragment>
+        {/* la maj de l'affichage de la sélection ne sera pas gérée par semantic */}
         <Table celled={true} striped={false} selectable={false} sortable={true}>
           <Table.Header>
             <Table.Row textAlign="center">
@@ -381,23 +417,17 @@ export default class Historique extends React.Component {
                 {
                   icon: "edit",
                   text: "Editer",
-                  action: () => this.onAction(acte.id, "editer")
+                  action: id => this.onAction(id, "editer")
                 },
                 {
                   icon: "trash",
                   text: "Supprimer",
-                  action: () => this.onAction(acte.id, "supprimer")
+                  action: id => this.onAction(id, "supprimer")
                 }
               ];
 
               if (!_.isEmpty(this.props.actions)) {
-                _.forEach(this.props.actions, action => {
-                  if (!_.isUndefined(action.icon) && !_.isUndefined(action.text) && !_.isUndefined(action.action)) {
-                    action.id = acte.id;
-                    actions.push(action);
-                  }
-                });
-                // actions = _.concat(actions,this.props.actions); // J'ajoute les actions (props) de l'utilisateur
+                actions = _.concat(actions, this.props.actions); // J'ajoute les actions (props) de l'utilisateur
               }
 
               return (
@@ -405,12 +435,15 @@ export default class Historique extends React.Component {
                   <Table.Row
                     key={acte.id}
                     onClick={e => {
-                      if (!_.isUndefined(this.props.onActeClick) && !_.isUndefined(this.props.onSelectionChange)) {
+                      if (
+                        this.props.onActeClick &&
+                        this.props.onSelectionChange
+                      ) {
                         this.onActeClick(e, acte.id);
                       }
                     }}
                     onDoubleClick={() => {
-                      if (!_.isUndefined(this.props.onActeDoubleClick)) {
+                      if (this.props.onActeDoubleClick) {
                         this.onActeDoubleClick(acte.id);
                       }
                     }}
@@ -433,9 +466,7 @@ export default class Historique extends React.Component {
                       {tarif(acte.montant)}
                     </Table.Cell>
                     <Table.Cell>
-                      <Actions
-                        actions={actions}
-                      />
+                      <Actions actions={actions} id={acte.id} />
                     </Table.Cell>
                   </Table.Row>
                 </React.Fragment>
