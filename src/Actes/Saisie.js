@@ -20,6 +20,8 @@ const propDefs = {
     defaultClickAction:
       "Action à effectuer au clic sur une ligne d'acte. Par défaut CCAM (Recherche en CCAM) " +
       "",
+    executant:
+      "Code d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes)",
     onError: "Callback en cas d'erreur",
     actions: "Liste d'actions à effectuer (en plus des actions par défaut)"
   },
@@ -32,6 +34,7 @@ const propDefs = {
     codGrille: PropTypes.number,
     codPhase: PropTypes.number,
     defaultClickAction: PropTypes.string,
+    executant: PropTypes.string,
     onError: PropTypes.func,
     actions: PropTypes.array
   }
@@ -46,6 +49,7 @@ export default class Saisie extends React.Component {
     codGrille: 0,
     codPhase: 0,
     defaultClickAction: "CCAM",
+    executant: "",
     lignes: 5
   };
 
@@ -296,7 +300,7 @@ export default class Saisie extends React.Component {
                   onClick={index => this.onClickRow(index)}
                   onDelete={index => this.onDelete(index)}
                   onDuplicate={index => this.onDuplicate(index)}
-                  onSearchCCAM={index => this.openSearchCCAM(index)}
+                  onEdit={index => this.openSearchCCAM(index)}
                 />
               ))}
             </Table.Body>
@@ -313,7 +317,7 @@ export default class Saisie extends React.Component {
             codDom={this.props.codDom}
             codGrille={this.props.codGrille}
             codPhase={this.props.codPhase}
-            executant="D1"
+            executant={this.props.executant}
             open={!_.isNull(selectedIndex)}
             cotation={
               _.isEmpty(selectedActe)
@@ -332,6 +336,11 @@ export default class Saisie extends React.Component {
             }
             localisationPicker={true}
             allModificateurs={this.state.allModificateurs}
+            description={
+              _.isEmpty(selectedActe)
+                ? ""
+                : this.state.actes[selectedIndex].description
+            }
             modificateurs={
               _.isEmpty(selectedActe)
                 ? ""
@@ -341,6 +350,11 @@ export default class Saisie extends React.Component {
               _.isEmpty(selectedActe)
                 ? "OP"
                 : this.state.actes[selectedIndex].qualificatifs
+            }
+            montant={
+              _.isEmpty(selectedActe)
+                ? 0
+                : this.state.actes[selectedIndex].montant
             }
             onClose={() => this.setState({ selectedIndex: null })}
             onValidation={this.onValidation}

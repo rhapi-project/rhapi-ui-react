@@ -151,7 +151,7 @@ export default class ActesSaisieValidation extends React.Component {
 
   render() {
     let actions = [
-      { text: "Exemple action", icon: "check", action: i => console.log(i)}
+      { text: "Exemple action", icon: "check", action: il => console.log(il)}
     ];
     return (
       <React.Fragment>
@@ -189,6 +189,7 @@ export default class ActesSaisieValidation extends React.Component {
                 idActe={this.state.fse.id}
                 codGrille={13}
                 defaultClickAction={this.state.defaultClickAction}
+                executant="D1"
                 onError={this.onError}
                 lignes={10}
                 actions={actions}
