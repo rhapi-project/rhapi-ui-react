@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from 'react-dom';
+import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import { Button, Confirm, Icon, Table } from "semantic-ui-react";
 import _ from "lodash";
@@ -8,26 +8,23 @@ import Actions from "../Shared/Actions";
 import moment from "moment";
 
 const propDefs = {
-  description: 'Historique des actes d\'un patient',
-  example: 'Tableau',
+  description: "Historique des actes d'un patient",
+  example: "Tableau",
   propDocs: {
-    idPatient: 'ID du patient, par défaut 0 (Aucun patient)',
-    onActeClick: 
-      'Callback pour retourner l\'acte sélectionné sur un click',
-    onActeDoubleClick: 
-      'Callback pour retourner l\'acte sélectionné sur un double click',
-    onSelectionChange: 
-      'Callback pour retourner la liste des actes sélectionnés sur une multi-sélection (CTRL+click)',
-    actions:
-      'Tableau contenant une liste d\'actions. Par défaut, []',
-    table: 'semantic.collections',
-    limit: 'Valeur de pagination, par défaut 5',
+    idPatient: "ID du patient, par défaut 0 (Aucun patient)",
+    onActeClick: "Callback pour retourner l'acte sélectionné sur un click",
+    onActeDoubleClick:
+      "Callback pour retourner l'acte sélectionné sur un double click",
+    onSelectionChange:
+      "Callback pour retourner la liste des actes sélectionnés sur une multi-sélection (CTRL+click)",
+    actions: "Tableau contenant une liste d'actions. Par défaut, []",
+    table: "semantic.collections",
+    limit: "Valeur de pagination, par défaut 5",
     sort:
-      'Le champs sur lequel le tri va être effectué. Par défaut, le tri se fait sur la date (doneAt)',
+      "Le champs sur lequel le tri va être effectué. Par défaut, le tri se fait sur la date (doneAt)",
     order:
-      'Un tri ascendant ou descendant [ASC,DESC]. Par défaut, le tri est descendant (DESC)',
-    showPagination:
-      'Afficher les options de paginations, par défaut "true"',
+      "Un tri ascendant ou descendant [ASC,DESC]. Par défaut, le tri est descendant (DESC)",
+    showPagination: 'Afficher les options de paginations, par défaut "true"',
     btnFirstContent:
       'Texte du bouton pour aller à la première page, par défaut ""',
     btnLastContent:
@@ -58,7 +55,7 @@ const propDefs = {
       'Props semantic du bouton pour aller à la page précédente, par défaut un objet vide "{}"',
     btnMore:
       'Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}"',
-    mode: 'Mode de pagination \'pages\' ou \'more\', par défaut "pages"'
+    mode: "Mode de pagination 'pages' ou 'more', par défaut \"pages\""
   },
   propTypes: {
     client: PropTypes.any.isRequired,
@@ -133,7 +130,7 @@ export default class Historique extends React.Component {
       order: this.props.order,
       sorted: _.isEqual(this.props.order, "DESC") ? "descending" : "ascending",
       lockRevision: "",
-      showConfirm: false,
+      showConfirm: false
     });
 
     this.loadActe(this.props.idPatient, 0, this.props.sort, this.props.order);
@@ -153,8 +150,9 @@ export default class Historique extends React.Component {
   }
 
   componentDidMount() {
-    document.addEventListener('click',this.onClickOutside, true); // Outside click du composant
-    this.interval = setInterval(() => { // Reload des données toutes les 15 secondes
+    document.addEventListener("click", this.onClickOutside, true); // Outside click du composant
+    this.interval = setInterval(() => {
+      // Reload des données toutes les 15 secondes
       this.loadActe(
         this.state.idPatient,
         this.state.offset,
@@ -165,11 +163,11 @@ export default class Historique extends React.Component {
   }
 
   componentWillUnmount() {
-    document.removeEventListener('click',this.onClickOutside, true);
+    document.removeEventListener("click", this.onClickOutside, true);
     clearInterval(this.interval);
   }
 
-  onClickOutside = (event) => {
+  onClickOutside = event => {
     const domNode = ReactDOM.findDOMNode(this);
 
     if (!event.ctrlKey) {
@@ -179,7 +177,7 @@ export default class Historique extends React.Component {
         });
       }
     }
-  }
+  };
 
   loadActe = (idPatient, offset, sort, order) => {
     let params = {
@@ -266,8 +264,10 @@ export default class Historique extends React.Component {
   };
 
   onActeClick = (e, id) => {
-    if (e.ctrlKey) {
-      let multiActes = _.isEmpty(this.state.actesSelected)?[]:this.state.actesSelected;
+    if (e.ctrlKey || e.metaKey) {
+      let multiActes = _.isEmpty(this.state.actesSelected)
+        ? []
+        : this.state.actesSelected;
 
       if (_.includes(multiActes, id)) {
         multiActes.splice(_.indexOf(multiActes, id), 1);
@@ -308,7 +308,7 @@ export default class Historique extends React.Component {
 
   onHandleConfirm = () => {
     // Suppression d'un acte dont l'id est dans le state
-    if (!_.isEqual(this.state.idActeSupprime,0)) {
+    if (!_.isEqual(this.state.idActeSupprime, 0)) {
       this.props.client.Actes.destroy(
         this.state.idActeSupprime,
         result => {
@@ -392,7 +392,11 @@ export default class Historique extends React.Component {
 
               if (!_.isEmpty(this.props.actions)) {
                 _.forEach(this.props.actions, action => {
-                  if (!_.isUndefined(action.icon) && !_.isUndefined(action.text) && !_.isUndefined(action.action)) {
+                  if (
+                    !_.isUndefined(action.icon) &&
+                    !_.isUndefined(action.text) &&
+                    !_.isUndefined(action.action)
+                  ) {
                     action.id = acte.id;
                     actions.push(action);
                   }
@@ -405,7 +409,10 @@ export default class Historique extends React.Component {
                   <Table.Row
                     key={acte.id}
                     onClick={e => {
-                      if (!_.isUndefined(this.props.onActeClick) && !_.isUndefined(this.props.onSelectionChange)) {
+                      if (
+                        !_.isUndefined(this.props.onActeClick) &&
+                        !_.isUndefined(this.props.onSelectionChange)
+                      ) {
                         this.onActeClick(e, acte.id);
                       }
                     }}
@@ -433,9 +440,7 @@ export default class Historique extends React.Component {
                       {tarif(acte.montant)}
                     </Table.Cell>
                     <Table.Cell>
-                      <Actions
-                        actions={actions}
-                      />
+                      <Actions actions={actions} />
                     </Table.Cell>
                   </Table.Row>
                 </React.Fragment>

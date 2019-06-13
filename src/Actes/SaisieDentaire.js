@@ -31,7 +31,7 @@ const propDefs = {
     onClick: "Callback au clic sur une ligne",
     onDelete: "Callback à la suppression de la ligne",
     onDuplicate: "Callback à la duplication de la ligne",
-    onSearchCCAM: "Callback action de recherche en CCAM"
+    onEdit: "Callback action de recherche en CCAM"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
@@ -49,7 +49,7 @@ const propDefs = {
     onClick: PropTypes.func,
     onDelete: PropTypes.func,
     onDuplicate: PropTypes.func,
-    onSearchCCAM: PropTypes.func
+    onEdit: PropTypes.func
   }
 };
 
@@ -69,52 +69,45 @@ export default class SaisieDentaire extends React.Component {
   render() {
     let actions = [
       {
-        icon: "search",
-        text: "Recherche CCAM",
-        action: () => {
-          if (!_.isUndefined(this.props.onSearchCCAM)) {
-            this.props.onSearchCCAM(this.props.index);
+        icon: "edit",
+        text: "Editer",
+        action: index => {
+          if (this.props.onEdit) {
+            this.props.onEdit(index);
           }
         }
       },
       {
         icon: "search",
         text: "Recherche par favoris",
-        action: () => {}
-      },
-      {
-        icon: "edit",
-        text: "Editer",
-        action: () => {} //this.editer(this.state.code)
+        action: index => {}
       },
       {
         icon: "copy",
         text: "Dupliquer",
-        action: () => {
-          if (!_.isUndefined(this.props.onDuplicate)) {
-            this.props.onDuplicate(this.props.index);
+        action: index => {
+          if (this.props.onDuplicate) {
+            this.props.onDuplicate(index);
           }
         }
       },
       {
         icon: "trash",
         text: "Supprimer",
-        action: () => {
-          if (!_.isUndefined(this.props.onDelete)) {
-            this.props.onDelete(this.props.index);
+        action: index => {
+          if (this.props.onDelete) {
+            this.props.onDelete(index);
           }
         }
       }
     ];
 
-    if (!_.isUndefined(this.props.actions)) {
-      // TODO : tester que les actions sont bien formatées
+    if (this.props.actions) {
       _.forEach(this.props.actions, a => {
-        //let callback = () => a.action(this.props.index);
-        //a.action = () => callback();
         actions.push(a);
       });
     }
+
     return (
       <React.Fragment>
         <Table.Row
@@ -146,7 +139,9 @@ export default class SaisieDentaire extends React.Component {
             {_.isEmpty(this.props.code) ? "" : tarif(this.props.montant)}
           </Table.Cell>
           <Table.Cell>
-            {_.isEmpty(this.props.code) ? null : <Actions actions={actions} />}
+            {_.isEmpty(this.props.code) ? null : (
+              <Actions actions={actions} id={this.props.index} />
+            )}
           </Table.Cell>
         </Table.Row>
       </React.Fragment>
