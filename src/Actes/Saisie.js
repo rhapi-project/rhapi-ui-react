@@ -294,7 +294,6 @@ export default class Saisie extends React.Component {
         : this.existActe(this.state.selectedIndex)
         ? this.state.actes[selectedIndex]
         : {};
-      console.log(this.state.fse);
       return (
         <React.Fragment>
           <Table celled={true} striped={true} selectable={true}>
