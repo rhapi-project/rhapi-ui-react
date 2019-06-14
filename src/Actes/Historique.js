@@ -91,6 +91,8 @@ const propDefs = {
 };
 
 export default class Historique extends React.Component {
+  currentClick = "";
+  previousClick = "";
   static propTypes = propDefs.propTypes;
   static defaultProps = {
     idPatient: 0,
@@ -266,38 +268,30 @@ export default class Historique extends React.Component {
   };
 
   onActeClick = (e, id) => {
-    let actesSelected = this.state.actesSelected;
+    let actesSelected = [];
 
     if (e.ctrlKey || e.metaKey) {
+      actesSelected = this.state.actesSelected;
       if (_.includes(actesSelected, id)) {
         actesSelected.splice(_.indexOf(actesSelected, id), 1);
       } else {
         actesSelected.push(id);
       }
     } else if (e.shiftKey) {
-      let first = 0;
-      let last = this.state.actes.length - 1;
-      let odlActesSelected = actesSelected;
-      actesSelected = [];
-      actesSelected.push(odlActesSelected[0]);
+      this.previousClick = id; // Deuxième click
+      let first = _.findIndex(this.state.actes, acte =>
+        _.isEqual(acte.id, this.currentClick)
+      );
+      let last = _.findIndex(this.state.actes, acte =>
+        _.isEqual(acte.id, this.previousClick)
+      );
 
-      if (!_.includes(actesSelected, id)) {
-        actesSelected.push(id);
+      // Si le deuxième clic est situé au-dessus du premier clic
+      if (first > last) {
+        let tmp = first;
+        first = last;
+        last = tmp;
       }
-
-      _.forEach(this.state.actes, acte => {
-        if (_.includes(actesSelected, acte.id)) {
-          return false;
-        }
-        first++;
-      });
-
-      _.forEachRight(this.state.actes, acte => {
-        if (_.includes(actesSelected, acte.id)) {
-          return false;
-        }
-        last--;
-      });
 
       for (let i = first; i <= last; i++) {
         let id = this.state.actes[i].id;
@@ -307,8 +301,9 @@ export default class Historique extends React.Component {
         }
       }
     } else {
-      actesSelected = [];
       actesSelected.push(id);
+      this.currentClick = id; // Premier click
+      this.previousClick = ""; // Deuxième click
       this.props.onActeClick(id);
     }
 
@@ -361,7 +356,6 @@ export default class Historique extends React.Component {
   };
 
   render() {
-    console.log(this.state);
     let showPagination = this.props.showPagination;
 
     let pagination = {
@@ -404,6 +398,7 @@ export default class Historique extends React.Component {
               <Table.HeaderCell>Description</Table.HeaderCell>
               <Table.HeaderCell collapsing={true}>Montant</Table.HeaderCell>
               <Table.HeaderCell collapsing={true}>Action</Table.HeaderCell>
+              <Table.HeaderCell collapsing={true}>ID</Table.HeaderCell>
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -466,6 +461,7 @@ export default class Historique extends React.Component {
                     <Table.Cell>
                       <Actions actions={actions} id={acte.id} />
                     </Table.Cell>
+                    <Table.Cell>{acte.id}</Table.Cell>
                   </Table.Row>
                 </React.Fragment>
               );
