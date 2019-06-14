@@ -271,19 +271,19 @@ export default class Historique extends React.Component {
     if (e.ctrlKey || e.metaKey) {
       if (_.includes(actesSelected, id)) {
         actesSelected.splice(_.indexOf(actesSelected, id), 1);
-      } 
-      else {
+      } else {
         actesSelected.push(id);
       }
-    } 
-    else if (e.shiftKey) {
-      console.log(`${id} - ${e.shiftKey}`);
-      // if (!_.includes(actesSelected, id)) {
-        actesSelected.push(id);
-      // }
-
+    } else if (e.shiftKey) {
       let first = 0;
       let last = this.state.actes.length - 1;
+      let odlActesSelected = actesSelected;
+      actesSelected = [];
+      actesSelected.push(odlActesSelected[0]);
+
+      if (!_.includes(actesSelected, id)) {
+        actesSelected.push(id);
+      }
 
       _.forEach(this.state.actes, acte => {
         if (_.includes(actesSelected, acte.id)) {
@@ -299,15 +299,13 @@ export default class Historique extends React.Component {
         last--;
       });
 
-      for(let i = first; i <= last; i++) {
+      for (let i = first; i <= last; i++) {
         let id = this.state.actes[i].id;
 
         if (!_.includes(actesSelected, id)) {
           actesSelected.push(id);
         }
       }
-
-      console.log(`first : ${first} - last : ${last}`);
     } else {
       actesSelected = [];
       actesSelected.push(id);
