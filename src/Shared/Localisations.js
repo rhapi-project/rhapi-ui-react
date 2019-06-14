@@ -30,7 +30,7 @@ export default class Localisations extends React.Component {
 
   componentWillMount() {
     this.setState({
-      multSelection: false,
+      multSelection: this.props.modal ? false : true,
       selected: _.split(this.props.dents, " ")
     });
   }
@@ -59,7 +59,13 @@ export default class Localisations extends React.Component {
       }
       s.push(val);
       if (this.state.multSelection) {
-        this.setState({ selected: s });
+        if (this.props.modal) {
+          this.setState({ selected: s });
+        } else {
+          //console.log(s);
+          this.finish(s);
+          return;
+        }
       } else {
         this.finish(s);
       }
@@ -69,7 +75,7 @@ export default class Localisations extends React.Component {
   finish = dents => {
     let res = dents.join(" ");
     if (!_.isUndefined(this.props.onSelection)) {
-      this.setState({ multSelection: false });
+      this.setState({ multSelection: this.props.modal ? false : true });
       this.props.onSelection(res);
     }
     if (!_.isUndefined(_.get(this.props, "modal.onClose"))) {
@@ -85,11 +91,15 @@ export default class Localisations extends React.Component {
           icon={true}
           onClick={(e, d) => {
             if (_.isEmpty(this.state.selected)) {
-              console.log("finish");
+              //console.log("finish");
               this.finish(this.state.selected);
             } else {
-              console.log("clean");
-              this.setState({ selected: [] });
+              //console.log("clean");
+              if (this.props.modal) {
+                this.setState({ selected: [] });
+              } else {
+                this.finish([]);
+              }
             }
           }}
           size="tiny"
@@ -167,8 +177,8 @@ export default class Localisations extends React.Component {
             }}
           >
             {clean}
-            {check}
-            {_.isUndefined(this.props.modal) ? null : close}
+            {this.props.modal ? check : null}
+            {this.props.modal ? close : null}
           </span>
           {_.map(["10", "01", "20"], num => (
             <Grid.Column key={num} textAlign="center" width={2}>

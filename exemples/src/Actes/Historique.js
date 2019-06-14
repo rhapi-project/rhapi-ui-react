@@ -21,7 +21,7 @@ const patients = [
 export default class ActesHistorique extends React.Component {
   componentWillMount() {
     this.setState({
-      idPatient : 1
+      idPatient : 0
     });
   }
 
@@ -45,14 +45,12 @@ export default class ActesHistorique extends React.Component {
     console.log(`onSelectionChange ${actes}`);
   }
 
-  onAction = (action,d) => {
-    // l'action passé en paramètre
+  onAction = (id, action) => {
+    // l'id de l'acte et l'action passés en paramètres
     if (_.isEqual(action, "ajouter")) {
-      console.log(d);
-      console.log(`${d.id} - Action : ${action}`);
+      console.log(`${id} - Action : ${action}`);
     } else if (_.isEqual(action, "tache")) {
-      console.log(d);
-      console.log(`${d.id} - Action : ${action}`);
+      console.log(`${id} - Action : ${action}`);
     }
   };
 
@@ -88,12 +86,12 @@ export default class ActesHistorique extends React.Component {
             {
               icon: "add",
               text: "Ajouter",
-              action: (e,d) => this.onAction("ajouter",d)
+              action: (id) => this.onAction(id,"ajouter")
             },
             {
               icon: "tasks",
               text: "Tache",
-              action: (e,d) => this.onAction("tache",d)
+              action: (id) => this.onAction(id,"tache")
             }
           ]}
         />

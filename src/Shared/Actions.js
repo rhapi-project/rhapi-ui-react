@@ -2,14 +2,18 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Dropdown } from "semantic-ui-react";
 
+import _ from "lodash";
+
 const propDefs = {
   description: "Menu d'actions à effectuer",
   example: "Dropdown",
   propDocs: {
-    actions: 'Tableau contenant une liste d\'actions'
+    actions: "Tableau contenant une liste d'actions",
+    id: "Identifiant de la ligne sur laquelle une action est effectuée"
   },
   propTypes: {
-    actions: PropTypes.array
+    actions: PropTypes.array,
+    id: PropTypes.any
   }
 };
 
@@ -26,11 +30,14 @@ export default class Actions extends React.Component {
           <Dropdown.Menu>
             {_.map(this.props.actions, action => (
               <Dropdown.Item
-                id={action.id}
                 key={action.text}
                 icon={action.icon}
                 text={action.text}
-                onClick={action.action}
+                onClick={() => {
+                  if (!_.isUndefined(this.props.id)) {
+                    action.action(this.props.id);
+                  }
+                }}
               />
             ))}
           </Dropdown.Menu>
