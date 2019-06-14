@@ -31,7 +31,8 @@ const propDefs = {
     onClick: "Callback au clic sur une ligne",
     onDelete: "Callback à la suppression de la ligne",
     onDuplicate: "Callback à la duplication de la ligne",
-    onEdit: "Callback action de recherche en CCAM"
+    onEdit: "Callback action de recherche en CCAM",
+    onInsertion: "Callback à l'insertion d'un nouvel acte"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
@@ -49,7 +50,8 @@ const propDefs = {
     onClick: PropTypes.func,
     onDelete: PropTypes.func,
     onDuplicate: PropTypes.func,
-    onEdit: PropTypes.func
+    onEdit: PropTypes.func,
+    onInsertion: PropTypes.func
   }
 };
 
@@ -81,6 +83,15 @@ export default class SaisieDentaire extends React.Component {
         icon: "search",
         text: "Recherche par favoris",
         action: index => {}
+      },
+      {
+        icon: "add",
+        text: "Insérer",
+        action: index => {
+          if (this.props.onInsertion) {
+            this.props.onInsertion(index);
+          }
+        }
       },
       {
         icon: "copy",
@@ -138,8 +149,8 @@ export default class SaisieDentaire extends React.Component {
           <Table.Cell collapsing={true} textAlign="right">
             {_.isEmpty(this.props.code) ? "" : tarif(this.props.montant)}
           </Table.Cell>
-          <Table.Cell>
-            {_.isEmpty(this.props.code) ? null : (
+          <Table.Cell collapsing={true}>
+            {this.props.disabled ? null : (
               <Actions actions={actions} id={this.props.index} />
             )}
           </Table.Cell>

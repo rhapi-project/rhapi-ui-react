@@ -90,7 +90,7 @@ const propDefs = {
 const descriptionType = [
   { text: "Nom court", value: 0 },
   { text: "Nom long", value: 1 },
-  { text: "Nom personnalisé", value: 2 }
+  { text: "Saisie libre", value: 2 }
 ];
 
 const qualificatifs = [
@@ -119,7 +119,7 @@ export default class ModalSearch extends React.Component {
 
   componentWillMount() {
     this.setState({
-      acte: {}, //
+      acte: {},
       code: this.props.code,
       date: this.props.date,
       localisation: this.props.localisation,
@@ -148,6 +148,7 @@ export default class ModalSearch extends React.Component {
       this.setState({
         acte: {},
         actes: [],
+        code: "",
         date: this.props.date,
         localisation: "",
         modificateurs: "",
@@ -157,7 +158,14 @@ export default class ModalSearch extends React.Component {
         openLocalisation: false,
         openModificateurs: false,
         informations: {},
-        descriptionType: 1
+        descriptionType:
+          _.get(
+            JSON.parse(localStorage.getItem("localPreferences")),
+            "defaultDescriptionType",
+            "long"
+          ) === "court"
+            ? 0
+            : 1
       });
     }
   }
@@ -184,7 +192,8 @@ export default class ModalSearch extends React.Component {
         this.setState({
           acte: result,
           loading: false,
-          descriptionType: descrType
+          descriptionType: descrType,
+          saisieLibre: descrType === 2 ? this.state.description : ""
         });
       },
       error => {
@@ -257,6 +266,11 @@ export default class ModalSearch extends React.Component {
     if (value === 0) {
       this.setState({
         description: this.state.acte.nomCourt,
+        descriptionType: value
+      });
+    } else if (value === 2 && !_.isEmpty(this.state.saisieLibre)) {
+      this.setState({
+        description: this.state.saisieLibre,
         descriptionType: value
       });
     } else {
@@ -520,7 +534,7 @@ export default class ModalSearch extends React.Component {
                     date={this.state.date}
                     executant={this.props.executant}
                     limit={8}
-                    localisation={this.state.localisation}
+                    localisation={spacedLocalisation(this.state.localisation)}
                     onLoadActes={this.onLoadActes}
                   />
                 </Ref>
@@ -533,7 +547,8 @@ export default class ModalSearch extends React.Component {
                 onChange={(e, d) =>
                   this.setState({
                     description: d.value,
-                    descriptionType: 2
+                    descriptionType: 2,
+                    saisieLibre: d.value
                   })
                 }
                 value={this.state.description}

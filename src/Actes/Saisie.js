@@ -17,9 +17,6 @@ const propDefs = {
     codDom: "Code du DOM, par défaut c'est la métropole. Code 0",
     codGrille: "Code grille, par défaut 0",
     codPhase: "Code phase, par défaut 0",
-    defaultClickAction:
-      "Action à effectuer au clic sur une ligne d'acte. Par défaut CCAM (Recherche en CCAM) " +
-      "",
     executant:
       "Code d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes)",
     onError: "Callback en cas d'erreur",
@@ -33,7 +30,6 @@ const propDefs = {
     codDom: PropTypes.number,
     codGrille: PropTypes.number,
     codPhase: PropTypes.number,
-    defaultClickAction: PropTypes.string,
     executant: PropTypes.string,
     onError: PropTypes.func,
     actions: PropTypes.array
@@ -48,7 +44,6 @@ export default class Saisie extends React.Component {
     codDom: 0,
     codGrille: 0,
     codPhase: 0,
-    defaultClickAction: "CCAM",
     executant: "",
     lignes: 5
   };
@@ -184,7 +179,12 @@ export default class Saisie extends React.Component {
   };
 
   onClickRow = index => {
-    if (this.props.defaultClickAction === "CCAM") {
+    let preference = _.get(
+      JSON.parse(localStorage.getItem("localPreferences")),
+      "defaultSearchType",
+      "CCAM"
+    );
+    if (preference === "CCAM") {
       this.openSearchCCAM(index);
     }
   };
@@ -194,6 +194,9 @@ export default class Saisie extends React.Component {
   };
 
   onDelete = index => {
+    if (!this.existActe(index)) {
+      return;
+    }
     this.props.client.Actes.read(
       this.props.idActe,
       {},
@@ -219,6 +222,9 @@ export default class Saisie extends React.Component {
   };
 
   onDuplicate = index => {
+    if (!this.existActe(index)) {
+      return;
+    }
     this.props.client.Actes.read(
       this.props.idActe,
       {},
@@ -243,6 +249,43 @@ export default class Saisie extends React.Component {
     );
   };
 
+  onInsertion = index => {
+    if (!this.existActe(index)) {
+      return;
+    }
+    this.props.client.Actes.read(
+      this.props.idActe,
+      {},
+      result => {
+        if (result.etat === 0) {
+          this.setState({ error: 1 });
+          return;
+        }
+        if (result.lockRevision === this.state.fse.lockRevision) {
+          let actes = this.state.actes;
+          let obj = {
+            code: "",
+            cotation: 1,
+            date: moment().toISOString(),
+            description: "",
+            localisation: "",
+            modificateurs: "",
+            montant: 0,
+            qualificatifs: "OP"
+          };
+          actes.splice(index, 0, obj);
+          this.update(actes);
+        } else {
+          this.setState({ error: 2 });
+        }
+      },
+      error => {
+        console.log(error);
+        this.setState({ error: 3 });
+      }
+    );
+  };
+
   render() {
     if (!_.isEmpty(this.state.fse)) {
       let selectedIndex = this.state.selectedIndex;
@@ -251,6 +294,7 @@ export default class Saisie extends React.Component {
         : this.existActe(this.state.selectedIndex)
         ? this.state.actes[selectedIndex]
         : {};
+      console.log(this.state.fse);
       return (
         <React.Fragment>
           <Table celled={true} striped={true} selectable={true}>
@@ -301,6 +345,7 @@ export default class Saisie extends React.Component {
                   onDelete={index => this.onDelete(index)}
                   onDuplicate={index => this.onDuplicate(index)}
                   onEdit={index => this.openSearchCCAM(index)}
+                  onInsertion={index => this.onInsertion(index)}
                 />
               ))}
             </Table.Body>
