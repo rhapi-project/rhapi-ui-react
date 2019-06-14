@@ -1,7 +1,7 @@
 import React from "react";
 import { Client } from "rhapi-client";
 import { Actes } from "rhapi-ui-react";
-import { Button, Checkbox, Divider, Form, Message, Modal } from "semantic-ui-react";
+import { Button, Divider, Form, Message, Modal } from "semantic-ui-react";
 
 import moment from "moment";
 import _ from "lodash";
@@ -18,14 +18,51 @@ const patients = [
   { text: "8", value: 8}
 ];
 
+const searchType = [
+  { text: "Recherche en CCAM", value: "CCAM" },
+  { text: "Recherche par favoris", value: "favoris" }
+];
+
+const descriptionType = [
+  { text: "Nom court", value: "court" },
+  { text: "Nom long", value: "long" }
+]
+
 export default class ActesSaisieValidation extends React.Component {
   componentWillMount() {
     this.setState({
       idPatient: null,
-      defaultClickAction: "CCAM",
       fse: {},
       msgSaveFSE: ""
     });
+    this.getPreferences();
+  };
+
+  getPreferences = () => {
+    let pref = JSON.parse(localStorage.getItem("localPreferences"));
+    if (pref) {
+      if (_.isUndefined(pref.defaultSearchType)) {
+        pref.defaultSearchType = "CCAM";
+      }
+      if (_.isUndefined(pref.defaultDescriptionType)) {
+        pref.defaultDescriptionType = "long";
+      }
+      localStorage.setItem("localPreferences", JSON.stringify(pref));
+      this.setState({
+        defaultDescriptionType: pref.defaultDescriptionType,
+        defaultSearchType: pref.defaultSearchType
+      });
+    } else {
+      let obj = {
+        defaultSearchType: "CCAM",
+        defaultDescriptionType: "long"
+      };
+      localStorage.setItem("localPreferences", JSON.stringify(obj));
+      this.setState({
+        defaultDescriptionType: obj.defaultDescriptionType,
+        defaultSearchType: obj.defaultSearchType
+      });
+    } 
   };
 
   createFSE = idPatient => {
@@ -91,12 +128,13 @@ export default class ActesSaisieValidation extends React.Component {
       idPatient: idPatient,
       idDocument: idDocument,
       modificateurs: acte.modificateurs, // ce champ n'est pas créé ! PROBLEME
+      qualificatifs: acte.qualificatifs, // ce champ n'est pas crée ! PROBLEME
       etat: 0
     };
     client.Actes.create(
       params,
       result => {
-        //console.log("création avec succès d'un acte");
+        //console.log(result);
       },
       error => {
         console.log(error);
@@ -110,7 +148,8 @@ export default class ActesSaisieValidation extends React.Component {
       this.state.fse.id,
       {},
       result => {
-        let actes = _.get(result, "contentJO.actes", []);
+        // les actes vides ne sont pas sauvegardés
+        let actes = _.filter(_.get(result, "contentJO.actes", []), a => !_.isEmpty(a.code));
         _.forEach(actes, acte => {
           this.createActe(acte, result.id, result.idPatient);
         });
@@ -160,7 +199,7 @@ export default class ActesSaisieValidation extends React.Component {
         </p>
         <Divider hidden={true} />
         <Form>
-          <Form.Group inline={true} widths="equal">
+          <Form.Group widths="equal">
             <Form.Dropdown
               label="ID du patient"
               placeholder="Sélectionner un patient"
@@ -169,16 +208,40 @@ export default class ActesSaisieValidation extends React.Component {
               onChange={(e, d) => this.onPatientChange(d.value)}
               value={this.state.idPatient}
             />
-            <Form.Input label="Recherche en CCAM par défaut">
-              <Checkbox 
-                toggle={true}
-                checked={this.state.defaultClickAction === "CCAM"}
-                onChange={() => {
-                  let ccam = this.state.defaultClickAction === "CCAM";
-                  this.setState({ defaultClickAction: ccam ? "" : "CCAM" });
-                }}
-              />
-            </Form.Input>
+            <Form.Dropdown 
+              label="Type de recherche par défaut"
+              placeholder="Sélectionner le type"
+              selection={true}
+              options={searchType}
+              value={this.state.defaultSearchType}
+              onChange={(e, d) => {
+                let pref = JSON.parse(localStorage.getItem("localPreferences"));
+                if (pref) {
+                  pref.defaultSearchType = d.value;
+                } else {
+                  pref = { defaultSearchType: d.value };
+                }
+                localStorage.setItem("localPreferences", JSON.stringify(pref));
+                this.setState({ defaultSearchType: d.value });
+              }}
+            />
+            <Form.Dropdown 
+              label="Type de description par défaut (nouveaux actes)"
+              placeholder="Sélectionner le type"
+              selection={true}
+              options={descriptionType}
+              value={this.state.defaultDescriptionType}
+              onChange={(e, d) => {
+                let pref = JSON.parse(localStorage.getItem("localPreferences"));
+                if (pref) {
+                  pref.defaultDescriptionType = d.value;
+                } else {
+                  pref = { defaultDescriptionType: d.value };
+                }
+                localStorage.setItem("localPreferences", JSON.stringify(pref));
+                this.setState({ defaultDescriptionType: d.value });
+              }}
+            />
           </Form.Group>
         </Form>
         <Divider hidden={true} />
@@ -188,7 +251,6 @@ export default class ActesSaisieValidation extends React.Component {
                 client={client}
                 idActe={this.state.fse.id}
                 codGrille={13}
-                defaultClickAction={this.state.defaultClickAction}
                 executant="D1"
                 onError={this.onError}
                 lignes={10}
