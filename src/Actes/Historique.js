@@ -270,6 +270,9 @@ export default class Historique extends React.Component {
   onActeClick = (e, id) => {
     let actesSelected = [];
 
+    this.previousClick = this.currentClick ? this.currentClick : id;
+    this.currentClick = id;
+
     if (e.ctrlKey || e.metaKey) {
       actesSelected = this.state.actesSelected;
       if (_.includes(actesSelected, id)) {
@@ -278,15 +281,15 @@ export default class Historique extends React.Component {
         actesSelected.push(id);
       }
     } else if (e.shiftKey) {
-      this.previousClick = id; // Deuxième click
-      let first = _.findIndex(this.state.actes, acte =>
-        _.isEqual(acte.id, this.currentClick)
+      let first = _.findIndex(
+        this.state.actes,
+        acte => acte.id === this.currentClick
       );
-      let last = _.findIndex(this.state.actes, acte =>
-        _.isEqual(acte.id, this.previousClick)
+      let last = _.findIndex(
+        this.state.actes,
+        acte => acte.id === this.previousClick
       );
 
-      // Si le deuxième clic est situé au-dessus du premier clic
       if (first > last) {
         let tmp = first;
         first = last;
@@ -294,17 +297,10 @@ export default class Historique extends React.Component {
       }
 
       for (let i = first; i <= last; i++) {
-        let id = this.state.actes[i].id;
-
-        if (!_.includes(actesSelected, id)) {
-          actesSelected.push(id);
-        }
+        actesSelected.push(this.state.actes[i].id);
       }
     } else {
       actesSelected.push(id);
-      this.currentClick = id; // Premier click
-      this.previousClick = ""; // Deuxième click
-      this.props.onActeClick(id);
     }
 
     this.setState({ actesSelected: actesSelected });
