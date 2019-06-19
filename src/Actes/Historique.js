@@ -91,8 +91,10 @@ const propDefs = {
 };
 
 export default class Historique extends React.Component {
-  currentClick = "";
-  previousClick = "";
+  firstClick = "";
+  secondClick = "";
+  idActeSupprime = "";
+  isFSE = false;
   static propTypes = propDefs.propTypes;
   static defaultProps = {
     idPatient: 0,
@@ -127,14 +129,14 @@ export default class Historique extends React.Component {
       idPatient: this.props.idPatient,
       actes: [],
       actesSelected: [],
-      idActeSupprime: 0,
       informations: {},
       offset: 0,
       sort: this.props.sort,
       order: this.props.order,
       sorted: _.isEqual(this.props.order, "DESC") ? "descending" : "ascending",
       lockRevision: "",
-      showConfirm: false
+      showConfirm: false,
+      message: ""
     });
 
     this.loadActe(this.props.idPatient, 0, this.props.sort, this.props.order);
@@ -243,35 +245,35 @@ export default class Historique extends React.Component {
 
   decoration = code => {
     // code de l'acte passé en paramètre
-    let deco = {};
-    deco.color = "";
-    deco.icon = "";
-    deco.code = "";
+    let deco = {
+      color: "",
+      icon: "",
+      code: ""
+    };
 
-    if (_.startsWith(code, "#")) {
-      if (_.isEqual(code, "#NOTE")) {
-        deco.color = "yellow";
-        deco.icon = "sticky note outline";
-      } else if (_.isEqual(code, "#TODO")) {
-        deco.color = "lightgrey";
-        deco.icon = "check";
-      } else if (_.isEqual(code, "#FSE")) {
-        deco.color = "lightgreen";
-        deco.icon = "list";
-      }
-
-      return deco;
-    } else {
+    // Un acte CCAM ou NGAP : fond par défaut sans icône, le code est affiché
+    if (!_.startsWith(code, "#")) {
       deco.code = code;
       return deco;
     }
+
+    // Une ligne autre qu'un acte : fond coloré et icône, le code n'est pas affiché
+    if (code === "#NOTE") {
+      deco.color = "yellow";
+      deco.icon = "sticky note outline";
+    } else if (code === "#TODO") {
+      deco.color = "lightgrey";
+      deco.icon = "check";
+    } else if (code === "#FSE") {
+      deco.color = "lightgreen";
+      deco.icon = "list";
+    }
+
+    return deco;
   };
 
   onActeClick = (e, id) => {
     let actesSelected = [];
-
-    this.previousClick = this.currentClick ? this.currentClick : id;
-    this.currentClick = id;
 
     if (e.ctrlKey || e.metaKey) {
       actesSelected = this.state.actesSelected;
@@ -281,15 +283,17 @@ export default class Historique extends React.Component {
         actesSelected.push(id);
       }
     } else if (e.shiftKey) {
+      this.secondClick = id;
       let first = _.findIndex(
         this.state.actes,
-        acte => acte.id === this.currentClick
+        acte => acte.id === this.firstClick
       );
       let last = _.findIndex(
         this.state.actes,
-        acte => acte.id === this.previousClick
+        acte => acte.id === this.secondClick
       );
 
+      // Permutation entre first et last si le "secondClick" est situé au-dessus du "firstClick"
       if (first > last) {
         let tmp = first;
         first = last;
@@ -301,9 +305,11 @@ export default class Historique extends React.Component {
       }
     } else {
       actesSelected.push(id);
+      this.firstClick = id;
     }
 
     this.setState({ actesSelected: actesSelected });
+    this.props.onActeClick(id);
     this.props.onSelectionChange(actesSelected);
   };
 
@@ -315,39 +321,78 @@ export default class Historique extends React.Component {
     this.props.onSelectionChange(actesSelected);
   };
 
-  onAction = (id, action) => {
-    // l'id de l'acte et l'action passés en paramètres
-    if (_.isEqual(action, "editer")) {
-      console.log(`${id} - Action : ${action}`);
-    } else if (_.isEqual(action, "supprimer")) {
-      this.setState({ showConfirm: true, idActeSupprime: id });
-      console.log(`${id} - Action : ${action}`);
+  onEdit = id => {
+    // l'id de l'acte passé en paramètre
+    console.log(`${id} - Action : onEdit`);
+  };
+
+  onDelete = (id, code) => {
+    // l'id et le code de l'acte passés en paramètres
+    this.idActeSupprime = id;
+    console.log(`${id} - ${code} - Action : onDelete`);
+
+    // Un acte CCAM ou NGAP : suppression avec confirmation (pop-up) pour l'utilisateur
+    if (!_.startsWith(code, "#")) {
+      this.isFSE = false;
+      this.setState({
+        showConfirm: true,
+        message: "Vous confirmez vouloir supprimer cette ligne ?"
+      });
+    } else {
+      if (code === "#FSE") {
+        this.isFSE = true;
+        this.setState({
+          showConfirm: true,
+          message:
+            "Vous confirmez vouloir supprimer la FSE sélectionnée ainsi que tous ses actes ?"
+        });
+      } else {
+        this.handleDeleting(this.idActeSupprime);
+      }
     }
   };
 
+  handleDeleting = id => {
+    // Suppression d'un acte dont l'id est enregistré dans le state
+    this.props.client.Actes.destroy(
+      id,
+      result => {
+        this.loadActe(
+          this.state.idPatient,
+          this.state.offset,
+          this.state.sort,
+          this.state.order
+        );
+      },
+      error => {
+        console.log(`Erreur destroy : ${error}`);
+      }
+    );
+  };
+
   onHandleCancel = () => {
-    // Annulation de la supression d'un acte
-    this.setState({ showConfirm: false });
+    this.setState({
+      showConfirm: false,
+      message: ""
+    });
   };
 
   onHandleConfirm = () => {
-    // Suppression d'un acte dont l'id est dans le state
-    if (!_.isEqual(this.state.idActeSupprime, 0)) {
-      this.props.client.Actes.destroy(
-        this.state.idActeSupprime,
-        result => {
-          this.setState({ showConfirm: false, idActeSupprime: 0 });
-          this.loadActe(
-            this.state.idPatient,
-            this.state.offset,
-            this.state.sort,
-            this.state.order
-          );
-        },
-        error => {
-          console.log(`Erreur destroy : ${error}`);
+    this.setState({
+      showConfirm: false,
+      message: ""
+    });
+
+    if (!this.isFSE) {
+      this.handleDeleting(this.idActeSupprime);
+    } else {
+      _.map(this.state.actes, acte => {
+        if (this.idActeSupprime === acte.idDocument) {
+          this.handleDeleting(acte.id);
         }
-      );
+      });
+
+      this.handleDeleting(this.idActeSupprime);
     }
   };
 
@@ -394,7 +439,6 @@ export default class Historique extends React.Component {
               <Table.HeaderCell>Description</Table.HeaderCell>
               <Table.HeaderCell collapsing={true}>Montant</Table.HeaderCell>
               <Table.HeaderCell collapsing={true}>Action</Table.HeaderCell>
-              <Table.HeaderCell collapsing={true}>ID</Table.HeaderCell>
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -406,12 +450,12 @@ export default class Historique extends React.Component {
                 {
                   icon: "edit",
                   text: "Editer",
-                  action: id => this.onAction(id, "editer")
+                  action: id => this.onEdit(id)
                 },
                 {
                   icon: "trash",
                   text: "Supprimer",
-                  action: id => this.onAction(id, "supprimer")
+                  action: id => this.onDelete(id, acte.code)
                 }
               ];
 
@@ -457,7 +501,6 @@ export default class Historique extends React.Component {
                     <Table.Cell>
                       <Actions actions={actions} id={acte.id} />
                     </Table.Cell>
-                    <Table.Cell>{acte.id}</Table.Cell>
                   </Table.Row>
                 </React.Fragment>
               );
@@ -477,7 +520,7 @@ export default class Historique extends React.Component {
         </div>
         <Confirm
           open={this.state.showConfirm}
-          content="Vous confirmez vouloir supprimer cette ligne ?"
+          content={this.state.message}
           cancelButton={
             <Button>
               <Icon name="ban" color="red" />

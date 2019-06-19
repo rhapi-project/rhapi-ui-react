@@ -21,7 +21,7 @@ const patients = [
 export default class ActesHistorique extends React.Component {
   componentWillMount() {
     this.setState({
-      idPatient : 0
+      idPatient : 1
     });
   }
 
