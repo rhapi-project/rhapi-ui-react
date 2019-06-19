@@ -127,8 +127,8 @@ export default class ActesSaisieValidation extends React.Component {
       montant: acte.montant,
       idPatient: idPatient,
       idDocument: idDocument,
-      modificateurs: acte.modificateurs, // ce champ n'est pas créé ! PROBLEME
-      qualificatifs: acte.qualificatifs, // ce champ n'est pas crée ! PROBLEME
+      //modificateurs: acte.modificateurs, // ce champ n'est pas créé ! PROBLEME
+      //qualificatifs: acte.qualificatifs, // ce champ n'est pas crée ! PROBLEME
       etat: 0
     };
     client.Actes.create(
