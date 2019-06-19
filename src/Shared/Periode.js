@@ -26,7 +26,7 @@ const propDefs = {
     onPeriodeChange: PropTypes.func,
     onClose: PropTypes.func
   }
-}
+};
 
 export default class Periode extends React.Component {
   static propTypes = propDefs.propTypes;
