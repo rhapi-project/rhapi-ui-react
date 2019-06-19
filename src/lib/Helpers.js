@@ -22,7 +22,10 @@ const spacedLocalisation = localisationStr => {
       s += value + " ";
     }
   });
-  return _.trim(s);
+  let arrayLocalisation = _.split(_.trim(s), " ");
+  let rmDuplicates = _.filter(arrayLocalisation, (localisation, index) => 
+    _.indexOf(arrayLocalisation, localisation) === index);
+  return rmDuplicates.join(" ");
 };
 
 const toISOLocalisation = localisation => {
