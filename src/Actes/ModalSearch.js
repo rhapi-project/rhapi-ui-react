@@ -16,6 +16,7 @@ import {
 import Search2 from "../CCAM/Search";
 import Table2 from "../CCAM/Table";
 import Localisations from "../Shared/Localisations";
+import Montant from "../Shared/Montant";
 
 import DatePicker from "react-datepicker";
 import fr from "date-fns/locale/fr";
@@ -25,8 +26,8 @@ import moment from "moment";
 
 import {
   spacedLocalisation,
-  tarif,
-  tarifDotNotation,
+  //tarif,
+  //tarifDotNotation,
   toISOLocalisation
 } from "../lib/Helpers";
 
@@ -83,6 +84,7 @@ const propDefs = {
     allModificateurs: PropTypes.array,
     modificateurs: PropTypes.string,
     qualificatifs: PropTypes.string,
+    montant: PropTypes.number,
     onValidation: PropTypes.func
   }
 };
@@ -126,7 +128,7 @@ export default class ModalSearch extends React.Component {
       modificateurs: this.props.modificateurs,
       qualificatifs: this.props.qualificatifs,
       description: this.props.description,
-      montant: tarif(0),
+      montant: 0,
       openLocalisation: false,
       openModificateurs: false,
       descriptionType: 1
@@ -140,7 +142,7 @@ export default class ModalSearch extends React.Component {
         localisation: next.localisation,
         modificateurs: next.modificateurs,
         qualificatifs: next.qualificatifs,
-        montant: tarif(next.montant),
+        montant: next.montant,
         description: next.description
       });
       this.readActe(next.code, next.date);
@@ -154,7 +156,7 @@ export default class ModalSearch extends React.Component {
         modificateurs: "",
         qualificatifs: "OP",
         description: "",
-        montant: tarif(0),
+        montant: 0,
         openLocalisation: false,
         openModificateurs: false,
         informations: {},
@@ -233,10 +235,10 @@ export default class ModalSearch extends React.Component {
       this.state.descriptionType === 0 ? acte.nomCourt : acte.nomLong;
     this.setState({
       acte: acte,
-      code: acte.codActe, // new
+      code: acte.codActe,
       description: description,
-      actes: [], // new
-      informations: {}, // new
+      actes: [],
+      informations: {},
       modificateurs: ""
     });
     this.tarification(
@@ -282,13 +284,6 @@ export default class ModalSearch extends React.Component {
   };
 
   inputContentFormating = () => {
-    let montant = this.state.montant;
-    if (_.isEmpty(montant)) {
-      this.setState({ montant: tarif(0) });
-    }
-    if (parseFloat(tarifDotNotation(montant))) {
-      this.setState({ montant: tarif(parseFloat(tarifDotNotation(montant))) });
-    }
     this.setState({
       localisation: spacedLocalisation(this.state.localisation)
     });
@@ -323,7 +318,7 @@ export default class ModalSearch extends React.Component {
       params,
       result => {
         //console.log(result);
-        this.setState({ montant: tarif(result.pu), loading: false });
+        this.setState({ montant: result.pu, loading: false });
       },
       error => {
         console.log(error);
@@ -335,7 +330,6 @@ export default class ModalSearch extends React.Component {
   valider = () => {
     if (
       _.isEmpty(this.state.acte) ||
-      _.isNaN(parseFloat(tarifDotNotation(this.state.montant))) ||
       toISOLocalisation(this.state.localisation).length % 2 !== 0
     ) {
       return;
@@ -349,7 +343,7 @@ export default class ModalSearch extends React.Component {
       this.props.cotation,
       this.state.modificateurs,
       this.state.qualificatifs,
-      parseFloat(tarifDotNotation(this.state.montant))
+      this.state.montant
     );
     this.onClose();
   };
@@ -442,7 +436,25 @@ export default class ModalSearch extends React.Component {
                 label="Code"
                 value={this.state.code}
                 placeholder="Code de l'acte"
+                onChange={() => {
+                  alert(
+                    "TODO : Implémenter la recherche en NGAP au cas où la taille de la saisie est différente de 7 !"
+                  );
+                }}
               />
+              <Ref
+                innerRef={node => {
+                  node.childNodes[1].firstChild.style.textAlign = "right";
+                }}
+              >
+                <Form.Input
+                  label="Cotation"
+                  disabled={true}
+                  fluid={true}
+                  value={this.props.cotation}
+                  placeholder="Cotation"
+                />
+              </Ref>
               <Form.Input label="Date" fluid={true}>
                 <DatePicker
                   dateFormat="dd/MM/yyyy"
@@ -505,22 +517,17 @@ export default class ModalSearch extends React.Component {
                   }
                 }}
               />
-              <Ref
-                innerRef={node => {
-                  node.childNodes[1].firstChild.style.textAlign = "right";
-                }}
-              >
-                <Form.Input
-                  label="Montant"
-                  fluid={true}
-                  value={this.state.montant}
-                  onChange={(e, d) => {
+              <Form.Input label="Montant">
+                <Montant
+                  montant={this.state.montant}
+                  onChange={montant => {
                     if (this.state.qualificatifs !== "OP") {
-                      this.setState({ montant: d.value });
+                      this.setState({ montant: montant });
                     }
                   }}
+                  input={{ fluid: true }}
                 />
-              </Ref>
+              </Form.Input>
             </Form.Group>
             <Form.Group>
               <Form.Input fluid={true}>

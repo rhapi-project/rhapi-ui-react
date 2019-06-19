@@ -1,10 +1,12 @@
 import React from "react";
 import Actions from "./Actions";
 import Localisations from "./Localisations";
+import Montant from "./Montant";
 
 export default class Shared extends React.Component {
   static Actions = Actions;
   static Localisations = Localisations;
+  static Montant = Montant;
   render() {
     const { children } = this.props;
     return (
