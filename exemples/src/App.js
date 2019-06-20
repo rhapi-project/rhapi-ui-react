@@ -16,6 +16,7 @@ import CCAMTarificationStatique from "./CCAM/TarificationActeStatique";
 // Exemples Shared
 import SharedLocalisations from "./Shared/Localisations";
 import SharedMontant from "./Shared/Montant";
+import SharedDateRange from "./Shared/DateRange";
 import SharedPeriode from "./Shared/Periode";
 
 // Exemples Actes
@@ -206,6 +207,14 @@ export default class App extends React.Component {
             onClick={(e, d) => this.handleClickItem("Shared", d.name)}
           />
           <Menu.Item
+            name="DateRange"
+            active={
+              this.state.group === "Shared" &&
+              this.state.name === "DateRange"
+            }
+            onClick={(e, d) => this.handleClickItem("Shared", d.name)}
+          />
+          <Menu.Item
             name="Periode"
             active={
               this.state.group === "Shared" &&
@@ -299,6 +308,8 @@ class ViewExample extends React.Component {
         return <SharedMontant />
       } else if (name === "Periode") {
         return <SharedPeriode />
+      } else if (name === "DateRange") {
+        return <SharedDateRange />
       } else {
         return "";
       }
