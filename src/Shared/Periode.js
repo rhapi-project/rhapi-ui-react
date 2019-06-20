@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Button, Form, Modal, Ref } from "semantic-ui-react";
 
-
 import DatePicker from "react-datepicker";
 import fr from "date-fns/locale/fr";
 import "react-datepicker/dist/react-datepicker.css";
@@ -15,7 +14,8 @@ const propDefs = {
   propDocs: {
     open: "Ouverture de la modal",
     startAt: "Date de début de la période. Par défaut la date du jour.",
-    endAt: "Date de fin de la période. Par défaut une semaine après la date du jour.",
+    endAt:
+      "Date de fin de la période. Par défaut une semaine après la date du jour.",
     onPeriodeChange: "Callback au changement de la période",
     onClose: "Callback à la fermeture de la modal"
   },
@@ -33,15 +33,17 @@ export default class Periode extends React.Component {
   static defaultProps = {
     open: false,
     startAt: moment().toISOString(),
-    endAt: moment().add(1, "week").toISOString()
-  }
+    endAt: moment()
+      .add(1, "week")
+      .toISOString()
+  };
 
   componentWillMount() {
     this.setState({
       startAt: this.props.startAt,
       endAt: this.props.endAt
     });
-  };
+  }
 
   componentWillReceiveProps(next) {
     if (next.open) {
@@ -50,7 +52,7 @@ export default class Periode extends React.Component {
         endAt: next.endAt
       });
     }
-  };
+  }
 
   handleChangeStart = date => {
     if (date) {
@@ -94,9 +96,11 @@ export default class Periode extends React.Component {
             <Form>
               <Form.Group widths="equal">
                 <Form.Input label="Du" fluid={true}>
-                  <Ref innerRef={node => {
+                  <Ref
+                    innerRef={node => {
                       node.firstChild.firstChild.style.width = "100%";
-                    }}>
+                    }}
+                  >
                     <DatePicker
                       dateFormat="dd/MM/yyyy"
                       selected={moment(this.state.startAt).toDate()}
@@ -109,7 +113,11 @@ export default class Periode extends React.Component {
                   </Ref>
                 </Form.Input>
                 <Form.Input label="Au" fluid={true}>
-                  <Ref innerRef={node => { node.firstChild.firstChild.style.width = "100%" }}>
+                  <Ref
+                    innerRef={node => {
+                      node.firstChild.firstChild.style.width = "100%";
+                    }}
+                  >
                     <DatePicker
                       dateFormat="dd/MM/yyyy"
                       selected={moment(this.state.endAt).toDate()}
@@ -126,14 +134,8 @@ export default class Periode extends React.Component {
             </Form>
           </Modal.Content>
           <Modal.Actions>
-            <Button
-              content="Annuler"
-              onClick={this.close}
-            />
-            <Button
-              content="OK"
-              onClick={this.validation}
-            />
+            <Button content="Annuler" onClick={this.close} />
+            <Button content="OK" onClick={this.validation} />
           </Modal.Actions>
         </Modal>
       </React.Fragment>

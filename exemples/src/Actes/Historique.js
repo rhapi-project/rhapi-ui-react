@@ -1,7 +1,7 @@
 import React from "react";
 import { Client } from "rhapi-client";
-import { Actes } from "rhapi-ui-react";
-import { Divider, Form } from "semantic-ui-react";
+import { Actes, Shared} from "rhapi-ui-react";
+import { Divider, Form, Grid, Input } from "semantic-ui-react";
 import _ from "lodash";
 
 // Instanciation du client RHAPI sans authentification
@@ -21,7 +21,9 @@ const patients = [
 export default class ActesHistorique extends React.Component {
   componentWillMount() {
     this.setState({
-      idPatient : 1
+      idPatient : 1,
+      dents: "",
+      openLocalisations: false
     });
   }
 
@@ -54,6 +56,10 @@ export default class ActesHistorique extends React.Component {
     }
   };
 
+  close = () => {
+    this.setState({ openLocalisations: false });
+  };
+
   render() {
     return (
       <React.Fragment>
@@ -74,7 +80,31 @@ export default class ActesHistorique extends React.Component {
           </Form.Group>
         </Form>
         <Divider hidden={true} />
-        <Filtre />
+        <Grid columns={2}>
+          <Grid.Row>
+            <Grid.Column>
+              <Filtre />
+            </Grid.Column>
+            <Grid.Column>
+            <Input
+              placeholder="Localisation"
+              onClick={() => this.setState({ openLocalisations: true })}
+              value={this.state.dents}
+            />
+            <Shared.Localisations 
+              dents={this.state.dents}
+              onSelection={dents => {
+                this.setState({ dents: dents });
+              }}
+              modal={{
+                size: "large",
+                open: this.state.openLocalisations,
+                onClose: this.close
+              }}
+            />
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
         <Divider hidden={true} />
         <Actes.Historique
           client={client}
@@ -82,6 +112,7 @@ export default class ActesHistorique extends React.Component {
           onActeClick={this.onActeClick}
           onActeDoubleClick={this.onActeDoubleClick}
           onSelectionChange={this.onSelectionChange}
+          limit={10}
           actions={[
             {
               icon: "add",
@@ -94,6 +125,7 @@ export default class ActesHistorique extends React.Component {
               action: (id) => this.onAction(id,"tache")
             }
           ]}
+          dents={this.state.dents}
         />
       </React.Fragment>
     );
