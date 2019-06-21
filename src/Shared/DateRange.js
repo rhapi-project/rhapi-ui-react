@@ -33,13 +33,8 @@ export default class DateRange extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
     open: false,
-    startAt: moment()
-      .startOf("day")
-      .toISOString(),
-    endAt: moment()
-      .add(1, "week")
-      .endOf("day")
-      .toISOString()
+    startAt: moment().startOf("day").toISOString(),
+    endAt: moment().add(1, "week").endOf("day").toISOString()
   };
 
   componentWillMount() {
