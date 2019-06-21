@@ -1,17 +1,12 @@
 import React from "react";
 import { Shared } from "rhapi-ui-react";
-import { Button, Divider } from "semantic-ui-react";
+import { Divider } from "semantic-ui-react";
 
 import moment from "moment";
+import "moment/locale/fr";
 
 export default class SharedPeriode extends React.Component {
-  componentWillMount() {
-    this.setState({
-      startAt: undefined,
-      endAt: undefined,
-      periode: false
-    });
-  };
+  
   render() {
     let datepickerlink = (
       <a
@@ -31,31 +26,17 @@ export default class SharedPeriode extends React.Component {
           Le <b>react-datepicker</b> est utilisé ici à la manière de cet {datepickerlink}
         </p>
         <Divider hidden={true} />
-        <Button 
-          content="Changer la période"
-          onClick={() => this.setState({ periode: true })}
-        />
         <Shared.Periode
-          open={this.state.periode}
-          startAt={this.state.startAt}
-          endAt={this.state.endAt}
+          startYear={2015}
           onPeriodeChange={(startAt, endAt) => {
-            this.setState({
-              startAt: startAt,
-              endAt: endAt
-            });
+            if (startAt && endAt) {
+              console.log("Du : " + moment(startAt).format("LLL"));
+              console.log("Au : " + moment(endAt).format("LLL"));
+            } else {
+              console.log("Durée indéterminée");
+            }
           }}
-          onClose={() => this.setState({ periode: false })}
         />
-        <Divider hidden={true} />
-        {!this.state.startAt || !this.state.endAt
-          ? <p>
-              Du &nbsp;. . / . . / . . . .&nbsp; au &nbsp;. . / . . / . . . .
-            </p>
-          : <p>
-              Du {moment(this.state.startAt).format("DD/MM/YYYY")} au {moment(this.state.endAt).format("DD/MM/YYYY")}
-            </p>
-        }
       </React.Fragment>
     );
   }

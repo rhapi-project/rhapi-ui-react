@@ -429,11 +429,39 @@ export default class ModalSearch extends React.Component {
     return (
       <Modal open={this.props.open} onClose={this.onClose} size="large">
         <Modal.Content>
-          <Form>
+          <Form unstackable>
             <Form.Group widths="equal">
+              <Form.Input label="Date" width={9}>
+                <Ref
+                  innerRef={node => {
+                    let input = node.firstChild.firstChild;
+                    input.style.width = "100%";
+                  }}
+                >
+                  <DatePicker
+                    dateFormat="dd/MM/yyyy"
+                    selected={moment(this.state.date).toDate()}
+                    onChange={date => {
+                      if (date) {
+                        this.setState({ date: date.toISOString() });
+                      }
+                    }}
+                    locale={fr}
+                  />
+                </Ref>
+              </Form.Input>
               <Form.Input
-                fluid={true}
+                label="Localisation"
+                placeholder="Num. des dents"
+                error={
+                  toISOLocalisation(this.state.localisation).length % 2 !== 0
+                }
+                value={this.state.localisation}
+                onChange={(e, d) => this.setState({ localisation: d.value })}
+              />
+              <Form.Input
                 label="Code"
+                fluid={true}
                 value={this.state.code}
                 placeholder="Code de l'acte"
                 onChange={() => {
@@ -450,33 +478,12 @@ export default class ModalSearch extends React.Component {
                 <Form.Input
                   label="Cotation"
                   disabled={true}
-                  fluid={true}
+                  width={1}
                   value={this.props.cotation}
                   placeholder="Cotation"
                 />
               </Ref>
-              <Form.Input label="Date" fluid={true}>
-                <DatePicker
-                  dateFormat="dd/MM/yyyy"
-                  selected={moment(this.state.date).toDate()}
-                  onChange={date => {
-                    if (date) {
-                      this.setState({ date: date.toISOString() });
-                    }
-                  }}
-                  locale={fr}
-                />
-              </Form.Input>
-              <Form.Input
-                fluid={true}
-                label="Localisation"
-                placeholder="Num. des dents"
-                error={
-                  toISOLocalisation(this.state.localisation).length % 2 !== 0
-                }
-                value={this.state.localisation}
-                onChange={(e, d) => this.setState({ localisation: d.value })}
-              />
+
               <Form.Input
                 fluid={true}
                 label="Modificateurs"
@@ -498,6 +505,7 @@ export default class ModalSearch extends React.Component {
               <Form.Dropdown
                 label="Qualificatifs"
                 fluid={true}
+                width={3}
                 placeholder="Qualificatifs"
                 options={qualificatifs}
                 selection={true}
@@ -517,7 +525,7 @@ export default class ModalSearch extends React.Component {
                   }
                 }}
               />
-              <Form.Input label="Montant">
+              <Form.Input label="Montant" width={10}>
                 <Montant
                   montant={this.state.montant}
                   onChange={montant => {
@@ -525,7 +533,6 @@ export default class ModalSearch extends React.Component {
                       this.setState({ montant: montant });
                     }
                   }}
-                  input={{ fluid: true }}
                 />
               </Form.Input>
             </Form.Group>
