@@ -53,10 +53,7 @@ export default class Periode extends React.Component {
   months = year => {
     let array = [];
     let m = moment()._locale._months;
-    let limit =
-      year === moment().year()
-        ? moment().month()
-        : m.length - 1;
+    let limit = year === moment().year() ? moment().month() : m.length - 1;
     for (let i = 0; i <= limit; i++) {
       let obj = {
         text: _.upperFirst(m[i] + " " + year),
@@ -148,7 +145,9 @@ export default class Periode extends React.Component {
   };
 
   render() {
-    let printedYear = this.state.currentYear ? this.state.currentYear : moment().year();
+    let printedYear = this.state.currentYear
+      ? this.state.currentYear
+      : moment().year();
     let years = this.allYears(this.props.startYear);
     let opt1 = [{ text: "Toujours", value: null }];
     let opt2 = [
@@ -188,9 +187,7 @@ export default class Periode extends React.Component {
               selection={true}
               options={periodeOptions.concat(this.months(printedYear))}
               value={this.state.currentOption}
-              onChange={(e, d) =>
-                this.onPeriodeChange(d.value, printedYear)
-              }
+              onChange={(e, d) => this.onPeriodeChange(d.value, printedYear)}
             />
             <Form.Dropdown
               width={1}
