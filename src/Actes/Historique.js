@@ -94,11 +94,16 @@ const propDefs = {
 };
 
 export default class Historique extends React.Component {
+  // variables utilisées pour la multi-sélection avec la touche 'shift'
   firstClick = "";
   secondClick = "";
-  idActeSupprime = "";
-  idDocumentActeSupprime = "";
+  // variables utilisées pour la suppresion des actes
+  id = ""; // id de l'acte sélectionné
+  idDocument = ""; // idDocument de l'acte sélectionné
+  reponseCancel = false;
+  reponseConfirm = false;
   isFSE = false;
+  // Props
   static propTypes = propDefs.propTypes;
   static defaultProps = {
     idPatient: 0,
@@ -107,6 +112,7 @@ export default class Historique extends React.Component {
     sort: "doneAt",
     order: "DESC",
     actions: [],
+    dents: "",
     // props pour le composant de pagination
     showPagination: true,
     btnFirstContent: "",
@@ -139,15 +145,18 @@ export default class Historique extends React.Component {
       order: this.props.order,
       sorted: _.isEqual(this.props.order, "DESC") ? "descending" : "ascending",
       lockRevision: "",
-      showConfirm1: false,
-      showConfirm2: false,
-      showConfirm3: false,
-      message1: "",
-      message2: "",
-      message3: ""
+      dents: this.props.dents,
+      showConfirm: false,
+      message: ""
     });
 
-    this.reload(this.props.idPatient, 0, this.props.sort, this.props.order);
+    this.reload(
+      this.props.idPatient,
+      0,
+      this.props.sort,
+      this.props.order,
+      this.props.dents
+    );
   }
 
   componentWillReceiveProps(next) {
@@ -156,28 +165,36 @@ export default class Historique extends React.Component {
         next.idPatient,
         this.state.offset,
         this.state.sort,
-        this.state.order
+        this.state.order,
+        next.dents.trim()
       );
     } else {
-      this.reload(next.idPatient, 0, this.state.sort, this.state.order);
+      this.reload(
+        next.idPatient,
+        0,
+        this.state.sort,
+        this.state.order,
+        this.state.dents
+      );
     }
   }
 
   componentDidMount() {
-    document.addEventListener("click", this.onClickOutside, true); // Outside click du composant
+    document.addEventListener("click", this.onClickOutside); // Outside click du composant
     this.interval = setInterval(() => {
       // Reload des données toutes les 15 secondes
       this.reload(
         this.state.idPatient,
         this.state.offset,
         this.state.sort,
-        this.state.order
+        this.state.order,
+        this.state.dents
       );
     }, 15000);
   }
 
   componentWillUnmount() {
-    document.removeEventListener("click", this.onClickOutside, true);
+    document.removeEventListener("click", this.onClickOutside);
     clearInterval(this.interval);
   }
 
@@ -193,7 +210,7 @@ export default class Historique extends React.Component {
     }
   };
 
-  reload = (idPatient, offset, sort, order) => {
+  reload = (idPatient, offset, sort, order, dents) => {
     let params = {
       _idPatient: idPatient,
       _etat: 0,
@@ -202,6 +219,14 @@ export default class Historique extends React.Component {
       sort: sort,
       order: order
     };
+
+    if (!_.isEmpty(dents)) {
+      let localisation = {
+        _localisation: dents
+      };
+
+      _.assign(params, localisation);
+    }
 
     this.props.client.Actes.readAll(
       params,
@@ -217,7 +242,8 @@ export default class Historique extends React.Component {
             sort: sort,
             order: order,
             sorted: _.isEqual(order, "DESC") ? "descending" : "ascending",
-            lockRevision: result.informations.lockRevision
+            lockRevision: result.informations.lockRevision,
+            dents: dents
           });
         }
       },
@@ -229,7 +255,13 @@ export default class Historique extends React.Component {
 
   onPageSelect = query => {
     // Callbacks de la pagination
-    this.reload(query._idPatient, query.offset, query.sort, query.order);
+    this.reload(
+      query._idPatient,
+      query.offset,
+      query.sort,
+      query.order,
+      this.state.dents
+    );
   };
 
   onSort = () => {
@@ -239,14 +271,16 @@ export default class Historique extends React.Component {
         this.state.idPatient,
         this.state.offset,
         this.state.sort,
-        "ASC"
+        "ASC",
+        this.state.dents
       );
     } else {
       this.reload(
         this.state.idPatient,
         this.state.offset,
         this.state.sort,
-        "DESC"
+        "DESC",
+        this.state.dents
       );
     }
   };
@@ -336,20 +370,22 @@ export default class Historique extends React.Component {
 
   onDelete = (id, code) => {
     // l'id et le code de l'acte sélectionné passés en paramètres
-    // 'idActeSupprime' et 'idDocumentActeSupprime' sont respectivement l'id et l'idDocument de l'acte sélectionné
-    this.idActeSupprime = id;
+    this.reponseCancel = false;
+    this.reponseConfirm = true;
+    this.id = id;
     _.map(this.state.actes, acte => {
-      if (this.idActeSupprime === acte.id) {
-        this.idDocumentActeSupprime = acte.idDocument;
+      if (this.id === acte.id) {
+        this.idDocument = acte.idDocument;
         return false;
       }
     });
+    this.isFSE = false;
 
     // Suppression des actes sans #
     if (!_.startsWith(code, "#")) {
       this.setState({
-        showConfirm1: true,
-        message1:
+        showConfirm: true,
+        message:
           "Souhaitez-vous également supprimer l'ensemble des actes associés ainsi que la FSE correspondante ?"
       });
       return false;
@@ -359,17 +395,17 @@ export default class Historique extends React.Component {
     if (code === "#FSE") {
       this.isFSE = true;
       this.setState({
-        showConfirm1: true,
-        message1:
+        showConfirm: true,
+        message:
           "Souhaitez-vous également supprimer les actes associés à cette FSE ?"
       });
     } else {
-      this.destroy(this.idActeSupprime);
+      this.destroy(this.id);
     }
   };
 
   destroy = id => {
-    // Suppression d'un acte dont l'id est enregistré dans le state
+    // Suppression d'un acte dont l'id de l'acte est passé en paramètre
     this.props.client.Actes.destroy(
       id,
       result => {
@@ -377,7 +413,8 @@ export default class Historique extends React.Component {
           this.state.idPatient,
           this.state.offset,
           this.state.sort,
-          this.state.order
+          this.state.order,
+          this.state.dents
         );
       },
       error => {
@@ -386,71 +423,58 @@ export default class Historique extends React.Component {
     );
   };
 
-  onCancel1 = () => {
-    this.setState({
-      showConfirm1: false,
-      showConfirm3: true,
-      message3: this.isFSE
-        ? "Souhaitez-vous supprimer uniquement la FSE sélectionnée ?"
-        : "Souhaitez-vous supprimer uniquement l'acte sélectionnée ?"
-    });
-    this.isFSE = false;
-  };
-
-  onConfirm1 = () => {
-    this.setState({
-      showConfirm1: false,
-      showConfirm2: true,
-      message2: this.isFSE
-        ? "Vous confirmez la suppression de cette FSE ainsi que les actes associés ?"
-        : "Vous confirmez la suppression des actes associés ainsi que la FSE correspondante ?"
-    });
-  };
-
-  onCancel2 = () => {
-    this.setState({
-      showConfirm2: false
-    });
-  };
-
-  onConfirm2 = () => {
-    this.setState({
-      showConfirm2: false
-    });
-
-    if (!this.isFSE) {
-      _.map(this.state.actes, acte => {
-        if (this.idDocumentActeSupprime === acte.idDocument) {
-          this.destroy(acte.id);
-        }
-
-        if (this.idDocumentActeSupprime === acte.id) {
-          this.destroy(acte.id);
-        }
+  onCancel = () => {
+    if (!this.reponseCancel && this.reponseConfirm) {
+      this.setState({
+        message: this.isFSE
+          ? "Souhaitez-vous supprimer uniquement la FSE sélectionnée ?"
+          : "Souhaitez-vous supprimer uniquement l'acte sélectionnée ?"
       });
     } else {
-      _.map(this.state.actes, acte => {
-        if (this.idActeSupprime === acte.idDocument) {
-          this.destroy(acte.id);
-        }
-      });
-      this.destroy(this.idActeSupprime);
-      this.isFSE = false;
+      this.setState({ showConfirm: false });
     }
+
+    this.reponseCancel = true;
+    this.reponseConfirm = false;
   };
 
-  onCancel3 = () => {
-    this.setState({
-      showConfirm3: false
-    });
-  };
+  onConfirm = () => {
+    if (this.reponseCancel && !this.reponseConfirm) {
+      this.setState({ showConfirm: false, message: "" });
+      this.destroy(this.id);
+    } else if (!this.reponseCancel && this.reponseConfirm) {
+      this.setState({
+        message: this.isFSE
+          ? "Vous confirmez la suppression de cette FSE ainsi que les actes associés ?"
+          : "Vous confirmez la suppression des actes associés ainsi que la FSE correspondante ?"
+      });
 
-  onConfirm3 = () => {
-    this.setState({
-      showConfirm3: false
-    });
+      this.reponseConfirm = true;
+    } else {
+      this.setState({ showConfirm: false });
 
-    this.destroy(this.idActeSupprime);
+      if (!this.isFSE) {
+        _.map(this.state.actes, acte => {
+          if (this.idDocument === acte.idDocument) {
+            this.destroy(acte.id);
+          }
+
+          if (this.idDocument === acte.id) {
+            this.destroy(acte.id);
+          }
+        });
+      } else {
+        _.map(this.state.actes, acte => {
+          if (this.id === acte.idDocument) {
+            this.destroy(acte.id);
+          }
+        });
+        this.destroy(this.id);
+        this.isFSE = false;
+      }
+    }
+
+    this.reponseCancel = true;
   };
 
   render() {
@@ -576,8 +600,8 @@ export default class Historique extends React.Component {
           )}
         </div>
         <Confirm
-          open={this.state.showConfirm1}
-          content={this.state.message1}
+          open={this.state.showConfirm}
+          content={this.state.message}
           cancelButton={
             <Button>
               <Icon name="ban" color="red" />
@@ -590,46 +614,8 @@ export default class Historique extends React.Component {
               Oui
             </Button>
           }
-          onCancel={this.onCancel1}
-          onConfirm={this.onConfirm1}
-          size="tiny"
-        />
-        <Confirm
-          open={this.state.showConfirm2}
-          content={this.state.message2}
-          cancelButton={
-            <Button>
-              <Icon name="ban" color="red" />
-              Non
-            </Button>
-          }
-          confirmButton={
-            <Button>
-              <Icon name="check" color="green" />
-              Oui
-            </Button>
-          }
-          onCancel={this.onCancel2}
-          onConfirm={this.onConfirm2}
-          size="tiny"
-        />
-        <Confirm
-          open={this.state.showConfirm3}
-          content={this.state.message3}
-          cancelButton={
-            <Button>
-              <Icon name="ban" color="red" />
-              Non
-            </Button>
-          }
-          confirmButton={
-            <Button>
-              <Icon name="check" color="green" />
-              Oui
-            </Button>
-          }
-          onCancel={this.onCancel3}
-          onConfirm={this.onConfirm3}
+          onCancel={this.onCancel}
+          onConfirm={this.onConfirm}
           size="tiny"
         />
       </React.Fragment>

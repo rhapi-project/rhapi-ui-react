@@ -168,8 +168,7 @@ export default class App extends React.Component {
           <Menu.Item
             name="Historique"
             active={
-              this.state.group === "Actes" &&
-              this.state.name === "Historique"
+              this.state.group === "Actes" && this.state.name === "Historique"
             }
             onClick={(e, d) => this.handleClickItem("Actes", d.name)}
           />
@@ -200,16 +199,14 @@ export default class App extends React.Component {
           <Menu.Item
             name="Montant"
             active={
-              this.state.group === "Shared" &&
-              this.state.name === "Montant"
+              this.state.group === "Shared" && this.state.name === "Montant"
             }
             onClick={(e, d) => this.handleClickItem("Shared", d.name)}
           />
           <Menu.Item
             name="Periode"
             active={
-              this.state.group === "Shared" &&
-              this.state.name === "Periode"
+              this.state.group === "Shared" && this.state.name === "Periode"
             }
             onClick={(e, d) => this.handleClickItem("Shared", d.name)}
           />
@@ -296,9 +293,9 @@ class ViewExample extends React.Component {
       if (name === "Localisations") {
         return <SharedLocalisations />;
       } else if (name === "Montant") {
-        return <SharedMontant />
+        return <SharedMontant />;
       } else if (name === "Periode") {
-        return <SharedPeriode />
+        return <SharedPeriode />;
       } else {
         return "";
       }
