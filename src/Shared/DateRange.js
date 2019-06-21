@@ -7,7 +7,7 @@ import fr from "date-fns/locale/fr";
 import "react-datepicker/dist/react-datepicker.css";
 
 import moment from "moment";
-//import "moment/locale/fr";
+import "moment/locale/fr";
 
 const propDefs = {
   description: "Période, début et fin d'une période",
@@ -33,15 +33,11 @@ export default class DateRange extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
     open: false,
-    startAt: moment().toISOString(),
-    endAt: moment()
-      .add(1, "week")
-      .toISOString()
+    startAt: moment().startOf("day").toISOString(),
+    endAt: moment().add(1, "week").endOf("day").toISOString()
   };
 
   componentWillMount() {
-    //console.log(this.props.startAt);
-    //console.log(this.props.endAt);
     this.setState({
       startAt: this.props.startAt,
       endAt: this.props.endAt
@@ -59,7 +55,7 @@ export default class DateRange extends React.Component {
 
   handleChangeStart = date => {
     if (date) {
-      let d = moment(date); /*.startOf("day")*/
+      let d = moment(date).startOf("day");
       if (!d.isAfter(moment(this.state.endAt))) {
         this.setState({ startAt: d.toISOString() });
       }
@@ -68,7 +64,7 @@ export default class DateRange extends React.Component {
 
   handleChangeEnd = date => {
     if (date) {
-      let d = moment(date); /*.endOf("day")*/
+      let d = moment(date).endOf("day");
       if (!d.isBefore(moment(this.state.startAt))) {
         this.setState({ endAt: d.toISOString() });
       }
@@ -88,8 +84,6 @@ export default class DateRange extends React.Component {
     this.close();
   };
   render() {
-    //console.log(this.state.startAt);
-    //console.log(this.state.endAt);
     return (
       <React.Fragment>
         <Modal open={this.props.open} size="mini">

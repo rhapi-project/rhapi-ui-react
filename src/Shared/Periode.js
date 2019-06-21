@@ -14,7 +14,7 @@ const propDefs = {
       "La première année qui sera affichée. Par défaut l'année en cours",
     onPeriodeChange:
       "Callback au changement de la période. C'est une fonction qui prend 2 paramètres, " +
-      "début et fin de la période (inclus)."
+      "début et fin de la période (inclus).\nLes valeurs de ces paramètres sont NULL si la durée est indéterminée."
   },
   propTypes: {
     startYear: PropTypes.number,
@@ -50,16 +50,16 @@ export default class Periode extends React.Component {
     return array.reverse();
   };
 
-  months = () => {
+  months = year => {
     let array = [];
     let m = moment()._locale._months;
     let limit =
-      this.state.currentYear === moment().year()
+      year === moment().year()
         ? moment().month()
         : m.length - 1;
     for (let i = 0; i <= limit; i++) {
       let obj = {
-        text: _.upperFirst(m[i] + " " + this.state.currentYear),
+        text: _.upperFirst(m[i] + " " + year),
         value: i
       };
       array.push(obj);
@@ -82,6 +82,8 @@ export default class Periode extends React.Component {
         .endOf("month");
     } else {
       switch (option) {
+        case null:
+          break;
         case "today":
           startAt = moment().startOf("day");
           endAt = moment().endOf("day");
@@ -132,16 +134,21 @@ export default class Periode extends React.Component {
           break;
       }
     }
-
-    if (startAt && endAt) {
-      this.setState({ currentYear: endAt.year() });
-    }
-    if (this.props.onPeriodeChange && startAt && endAt) {
-      this.props.onPeriodeChange(startAt.toISOString(), endAt.toISOString());
+    this.setState({
+      currentYear: endAt ? endAt.year() : null,
+      rangeStart: undefined,
+      rangeEnd: undefined
+    });
+    if (this.props.onPeriodeChange) {
+      this.props.onPeriodeChange(
+        startAt ? startAt.toISOString() : null,
+        endAt ? endAt.toISOString() : null
+      );
     }
   };
 
   render() {
+    let printedYear = this.state.currentYear ? this.state.currentYear : moment().year();
     let years = this.allYears(this.props.startYear);
     let opt1 = [{ text: "Toujours", value: null }];
     let opt2 = [
@@ -161,7 +168,7 @@ export default class Periode extends React.Component {
               moment(this.state.rangeEnd).format("DD/MM/YYYY"),
         value: "range"
       },
-      { text: "Année " + this.state.currentYear, value: "civilYear" },
+      { text: "Année " + printedYear, value: "civilYear" },
       {
         text: "Année glissante au " + moment().format("DD/MM"),
         value: "glissanteYear"
@@ -169,22 +176,24 @@ export default class Periode extends React.Component {
     ];
 
     let periodeOptions =
-      this.state.currentYear === moment().year()
-        ? opt1.concat(opt2).concat(opt3)
-        : opt1.concat(opt3);
+      this.state.currentYear && this.state.currentYear !== moment().year()
+        ? opt1.concat(opt3)
+        : opt1.concat(opt2).concat(opt3);
     return (
       <React.Fragment>
         <Form>
           <Form.Group>
             <Form.Dropdown
+              width={6}
               selection={true}
-              options={periodeOptions.concat(this.months())}
+              options={periodeOptions.concat(this.months(printedYear))}
               value={this.state.currentOption}
               onChange={(e, d) =>
-                this.onPeriodeChange(d.value, this.state.currentYear)
+                this.onPeriodeChange(d.value, printedYear)
               }
             />
             <Form.Dropdown
+              width={1}
               selection={true}
               options={years}
               value={this.state.currentYear}
@@ -194,7 +203,6 @@ export default class Periode extends React.Component {
                   d.value === moment().year() ? "today" : "civilYear";
                 this.onPeriodeChange(option, d.value);
               }}
-              compact={true}
             />
           </Form.Group>
         </Form>

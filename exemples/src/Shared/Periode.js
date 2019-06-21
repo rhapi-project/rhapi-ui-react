@@ -29,8 +29,12 @@ export default class SharedPeriode extends React.Component {
         <Shared.Periode
           startYear={2015}
           onPeriodeChange={(startAt, endAt) => {
-            console.log("Du : " + moment(startAt).format("LLL"));
-            console.log("Au : " + moment(endAt).format("LLL"));
+            if (startAt && endAt) {
+              console.log("Du : " + moment(startAt).format("LLL"));
+              console.log("Au : " + moment(endAt).format("LLL"));
+            } else {
+              console.log("Durée indéterminée");
+            }
           }}
         />
       </React.Fragment>
