@@ -121,6 +121,7 @@ export default class Periode extends React.Component {
         case "glissanteYear":
           startAt = moment()
             .add(-1, "years")
+            .add(1, "days")
             .startOf("day");
           endAt = moment().endOf("day");
           break;
@@ -167,7 +168,17 @@ export default class Periode extends React.Component {
               moment(this.state.rangeEnd).format("DD/MM/YYYY"),
         value: "range"
       },
-      { text: "Année " + printedYear, value: "civilYear" },
+      {
+        text: "Année " + printedYear,
+        value: "civilYear"
+      } /*,
+      {
+        text: "Année glissante au " + moment().format("DD/MM"),
+        value: "glissanteYear"
+      }*/
+    ];
+
+    let opt4 = [
       {
         text: "Année glissante au " + moment().format("DD/MM"),
         value: "glissanteYear"
@@ -177,7 +188,10 @@ export default class Periode extends React.Component {
     let periodeOptions =
       this.state.currentYear && this.state.currentYear !== moment().year()
         ? opt1.concat(opt3)
-        : opt1.concat(opt2).concat(opt3);
+        : opt1
+            .concat(opt2)
+            .concat(opt3)
+            .concat(opt4);
     return (
       <React.Fragment>
         <Form>
