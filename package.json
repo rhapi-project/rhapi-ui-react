@@ -23,7 +23,7 @@
     "start": "rollup -c -w",
     "prepare": "npm run build",
     "predeploy": "cd examples && npm install && npm run build",
-    "prettier": "prettier --write src/CCAM/* src/Shared/* src/Actes/* src/index.js scripts/*.js examples/src/*.js examples/src/CCAM/*.js",
+    "prettier": "prettier --write src/CCAM/* src/Shared/* src/Actes/* src/lib/* src/index.js scripts/*.js examples/src/*.js examples/src/CCAM/*.js",
     "deploy": "gh-pages -d examples/build",
     "docs": "node scripts/makedocs.js"
   },

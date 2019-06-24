@@ -50,30 +50,25 @@ export default class Localisations extends React.Component {
     if (this.isSelected(val)) {
       let i = _.indexOf(s, val);
       s.splice(i, 1);
-      this.setState({
-        selected: s
-      });
     } else {
       if (!this.state.multSelection) {
         s = [];
       }
       s.push(val);
-      if (this.state.multSelection) {
-        if (this.props.modal) {
-          this.setState({ selected: s });
-        } else {
-          //console.log(s);
-          this.finish(s);
-          return;
-        }
+    }
+    if (this.state.multSelection) {
+      if (this.props.modal) {
+        this.setState({ selected: s });
       } else {
         this.finish(s);
       }
+    } else {
+      this.finish(s);
     }
   };
 
   finish = dents => {
-    let res = dents.join(" ");
+    let res = _.sortBy(dents, str => parseInt(str)).join(" ");
     if (!_.isUndefined(this.props.onSelection)) {
       this.setState({ multSelection: this.props.modal ? false : true });
       this.props.onSelection(res);
