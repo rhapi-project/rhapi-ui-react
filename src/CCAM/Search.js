@@ -7,7 +7,7 @@ import moment from "moment";
 const propDefs = {
   description:
     "Composant pour la recherche des actes en CCAM (par code CCAM ou mot-clé). Retourne la liste des actes sous forme d'un tableau " +
-    "d'objets JSON.",
+    "d'objets JSON. \nLa recherche n'est pas effectuée si la date ou la localisation sont NULL.",
   example: "SearchBasic",
   propDocs: {
     date: "Date effective de l'acte au format ISO. Par défaut date du jour",
@@ -70,7 +70,9 @@ export default class Search2 extends React.Component {
       next.limit !== this.props.limit ||
       next.localisation !== this.props.localisation
     ) {
-      this.search(this.state.value, next.date, next.localisation);
+      if (!_.isNull(next.date) && !_.isNull(next.localisation)) {
+        this.search(this.state.value, next.date, next.localisation);
+      }
     }
   }
 
@@ -85,6 +87,8 @@ export default class Search2 extends React.Component {
   // fonction this.props.getActesObject est faite (si elle est définie)
   // Cette fonction est sensée renvoyer le résultat de la recherche au composant parent.
   loadActes = (inputVal, dateStr, localisation) => {
+    //console.log("Recherche");
+    //console.log(dateStr);
     let params = {
       texte: inputVal,
       date: dateStr,

@@ -139,6 +139,7 @@ export default class ModalSearch extends React.Component {
     if (next.code) {
       this.setState({
         code: next.code,
+        date: next.date,
         localisation: next.localisation,
         modificateurs: next.modificateurs,
         qualificatifs: next.qualificatifs,
@@ -160,14 +161,7 @@ export default class ModalSearch extends React.Component {
         openLocalisation: false,
         openModificateurs: false,
         informations: {},
-        descriptionType:
-          _.get(
-            JSON.parse(localStorage.getItem("localPreferences")),
-            "defaultDescriptionType",
-            "long"
-          ) === "court"
-            ? 0
-            : 1
+        descriptionType: this.getDescriptionType()
       });
     }
   }
@@ -179,6 +173,16 @@ export default class ModalSearch extends React.Component {
   componentWillUnmount() {
     document.removeEventListener("mousedown", this.inputContentFormating);
   }
+
+  getDescriptionType = () => {
+    return _.get(
+      JSON.parse(localStorage.getItem("localPreferences")),
+      "defaultDescriptionType",
+      "long"
+    ) === "court"
+      ? 0
+      : 1;
+  };
 
   readActe = (code, date) => {
     this.props.client.CCAM.read(
@@ -215,8 +219,12 @@ export default class ModalSearch extends React.Component {
     this.setState({
       actes: obj.results,
       acte: {},
+      code: "",
+      description: "",
+      descriptionType: this.getDescriptionType(),
       informations: obj.informations,
       modificateurs: "",
+      montant: 0,
       openModificateurs: false
     });
   };
@@ -238,6 +246,8 @@ export default class ModalSearch extends React.Component {
       code: acte.codActe,
       description: description,
       actes: [],
+      //date: "", // new
+      //localisation: ""
       informations: {},
       modificateurs: ""
     });
@@ -545,10 +555,14 @@ export default class ModalSearch extends React.Component {
                 >
                   <Search2
                     client={this.props.client}
-                    date={this.state.date}
+                    date={_.isEmpty(this.state.acte) ? this.state.date : null}
                     executant={this.props.executant}
                     limit={8}
-                    localisation={spacedLocalisation(this.state.localisation)}
+                    localisation={
+                      _.isEmpty(this.state.acte)
+                        ? spacedLocalisation(this.state.localisation)
+                        : null
+                    }
                     onLoadActes={this.onLoadActes}
                   />
                 </Ref>
