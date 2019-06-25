@@ -20,8 +20,10 @@ const propDefs = {
       "Retourne en paramètre la liste des id des actes sélectionnés (multi-sélection possible par CTRL+click)",
     actions:
       'Tableau d\'objet contenant des actions à effectuer (en plus des actions par défaut). Exemple [{icon:"add",text:"Ajouter",action:fonction de l\'action ajouter}]',
-    dents:
-      'Liste des dents sélectionnées, séparées par des espaces. Par défaut ""',
+    startAt: 'Filtre sur le début d\'une période (incluse). Par défaut ""',
+    endAt: 'Filtre sur la fin d\'une période (incluse). Par défaut ""',
+    localisation:
+      'Filtre sur une liste de dents sélectionnées, séparées par des espaces. Par défaut ""',
     table: "semantic.collections",
     limit: "Valeur de pagination, par défaut 5",
     sort:
@@ -68,7 +70,9 @@ const propDefs = {
     onActeDoubleClick: PropTypes.func,
     onSelectionChange: PropTypes.func,
     actions: PropTypes.array,
-    dents: PropTypes.string,
+    startAt: PropTypes.string,
+    endAt: PropTypes.string,
+    localisation: PropTypes.string,
     table: PropTypes.object,
     limit: PropTypes.number,
     sort: PropTypes.string,
@@ -112,7 +116,9 @@ export default class Historique extends React.Component {
     sort: "doneAt",
     order: "DESC",
     actions: [],
-    dents: "",
+    startAt: "",
+    endAt: "",
+    localisation: "",
     // props pour le composant de pagination
     showPagination: true,
     btnFirstContent: "",
@@ -145,7 +151,9 @@ export default class Historique extends React.Component {
       order: this.props.order,
       sorted: _.isEqual(this.props.order, "DESC") ? "descending" : "ascending",
       lockRevision: "",
-      dents: this.props.dents,
+      startAt: this.props.startAt,
+      endAt: this.props.endAt,
+      localisation: this.props.localisation,
       showConfirm: false,
       message: ""
     });
@@ -155,7 +163,9 @@ export default class Historique extends React.Component {
       0,
       this.props.sort,
       this.props.order,
-      this.props.dents
+      this.props.startAt,
+      this.props.endAt,
+      this.props.localisation
     );
   }
 
@@ -166,7 +176,9 @@ export default class Historique extends React.Component {
         this.state.offset,
         this.state.sort,
         this.state.order,
-        next.dents.trim()
+        next.startAt,
+        next.endAt,
+        next.localisation.trim()
       );
     } else {
       this.reload(
@@ -174,7 +186,9 @@ export default class Historique extends React.Component {
         0,
         this.state.sort,
         this.state.order,
-        this.state.dents
+        this.state.startAt,
+        this.state.endAt,
+        this.state.localisation
       );
     }
   }
@@ -188,7 +202,9 @@ export default class Historique extends React.Component {
         this.state.offset,
         this.state.sort,
         this.state.order,
-        this.state.dents
+        this.state.startAt,
+        this.state.endAt,
+        this.state.localisation
       );
     }, 15000);
   }
@@ -210,7 +226,7 @@ export default class Historique extends React.Component {
     }
   };
 
-  reload = (idPatient, offset, sort, order, dents) => {
+  reload = (idPatient, offset, sort, order, startAt, endAt, localisation) => {
     let params = {
       _idPatient: idPatient,
       _etat: 0,
@@ -220,12 +236,20 @@ export default class Historique extends React.Component {
       order: order
     };
 
-    if (!_.isEmpty(dents)) {
-      let localisation = {
-        _localisation: dents
+    if (startAt && endAt) {
+      let doneAt = {
+        q1: "AND,doneAt,Between," + startAt + "," + endAt
       };
 
-      _.assign(params, localisation);
+      _.assign(params, doneAt);
+    }
+
+    if (localisation) {
+      let localisations = {
+        _localisation: localisation
+      };
+
+      _.assign(params, localisations);
     }
 
     this.props.client.Actes.readAll(
@@ -243,7 +267,9 @@ export default class Historique extends React.Component {
             order: order,
             sorted: _.isEqual(order, "DESC") ? "descending" : "ascending",
             lockRevision: result.informations.lockRevision,
-            dents: dents
+            startAt: startAt,
+            endAt: endAt,
+            localisation: localisation
           });
         }
       },
@@ -260,7 +286,9 @@ export default class Historique extends React.Component {
       query.offset,
       query.sort,
       query.order,
-      this.state.dents
+      this.state.startAt,
+      this.state.endAt,
+      this.state.localisation
     );
   };
 
@@ -272,7 +300,9 @@ export default class Historique extends React.Component {
         this.state.offset,
         this.state.sort,
         "ASC",
-        this.state.dents
+        this.state.startAt,
+        this.state.endAt,
+        this.state.localisation
       );
     } else {
       this.reload(
@@ -280,7 +310,9 @@ export default class Historique extends React.Component {
         this.state.offset,
         this.state.sort,
         "DESC",
-        this.state.dents
+        this.state.startAt,
+        this.state.endAt,
+        this.state.localisation
       );
     }
   };
@@ -414,7 +446,9 @@ export default class Historique extends React.Component {
           this.state.offset,
           this.state.sort,
           this.state.order,
-          this.state.dents
+          this.state.startAt,
+          this.state.endAt,
+          this.state.localisation
         );
       },
       error => {

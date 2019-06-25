@@ -2,6 +2,8 @@ import React from "react";
 import { Client } from "rhapi-client";
 import { Actes, Shared} from "rhapi-ui-react";
 import { Divider, Form, Grid, Input } from "semantic-ui-react";
+
+import moment from "moment";
 import _ from "lodash";
 
 // Instanciation du client RHAPI sans authentification
@@ -22,8 +24,10 @@ export default class ActesHistorique extends React.Component {
   componentWillMount() {
     this.setState({
       idPatient : 1,
-      dents: "",
-      openLocalisations: false
+      localisation: "",
+      openLocalisations: false,
+      startAt: "",
+      endAt: ""
     });
   }
 
@@ -83,25 +87,43 @@ export default class ActesHistorique extends React.Component {
         <Grid columns={2}>
           <Grid.Row>
             <Grid.Column>
-              <Filtre />
+              <Shared.Periode
+                startYear={2015}
+                onPeriodeChange={(startAt, endAt) => {
+                  if (startAt && endAt) {
+                    console.log("Du : " + moment(startAt).format("LLL"));
+                    console.log("Au : " + moment(endAt).format("LLL"));
+                    this.setState({
+                      startAt: startAt,
+                      endAt: endAt
+                    });
+                  } else {
+                    console.log("Durée indéterminée");
+                    this.setState({
+                      startAt: "",
+                      endAt: ""
+                    });
+                  }
+                }}
+              />
             </Grid.Column>
             <Grid.Column>
-            <Input
-              placeholder="Localisation"
-              onClick={() => this.setState({ openLocalisations: true })}
-              value={this.state.dents}
-            />
-            <Shared.Localisations 
-              dents={this.state.dents}
-              onSelection={dents => {
-                this.setState({ dents: dents });
-              }}
-              modal={{
-                size: "large",
-                open: this.state.openLocalisations,
-                onClose: this.close
-              }}
-            />
+              <Input
+                placeholder="Localisation"
+                onClick={() => this.setState({ openLocalisations: true })}
+                value={this.state.localisation}
+              />
+              <Shared.Localisations 
+                localisation={this.state.localisation}
+                onSelection={localisation => {
+                  this.setState({ localisation: localisation });
+                }}
+                modal={{
+                  size: "large",
+                  open: this.state.openLocalisations,
+                  onClose: this.close
+                }}
+              />
             </Grid.Column>
           </Grid.Row>
         </Grid>
@@ -125,53 +147,10 @@ export default class ActesHistorique extends React.Component {
               action: (id) => this.onAction(id,"tache")
             }
           ]}
-          dents={this.state.dents}
+          localisation={this.state.localisation}
+          startAt={this.state.startAt}
+          endAt={this.state.endAt}
         />
-      </React.Fragment>
-    );
-  }
-}
-
-const dates = [
-  { key:"0", text: "Aujourd'hui", value: 0 },
-  { key:"1", text: "Hier", value: 1 },
-  ( <Divider key="divider1"/> ),
-  { key:"2", text: "Du .../.../... au .../.../...", value: 2 },
-  ( <Divider key="divider2" /> ),
-  { key:"3", text: "Cette semaine", value: 3 },
-  { key:"4", text: "La semaine précédente", value: 4 },
-  ( <Divider key="divider3" /> ),
-  { key:"5", text: "Année civile (bilan) 2019", value: 5 },
-  { key:"6", text: "Année flottante au ...", value: 6 }
-]
-
-class Filtre extends React.Component {
-  componentWillMount() {
-    this.setState({
-      date: ""
-    })
-  }
-
-  onDateChange = (date) => {
-    this.setState({
-      date: date
-    })
-  }
-
-  render() {
-    return(
-      <React.Fragment>
-        <Form>
-          <Form.Group inline={true}>
-            <Form.Dropdown
-              placeholder="Sélectionner une date"
-              selection={true}
-              options={dates}
-              onChange={(e, d) => this.onDateChange(d.value)}
-              value={this.state.date}
-            />
-          </Form.Group>
-        </Form>
       </React.Fragment>
     );
   }
