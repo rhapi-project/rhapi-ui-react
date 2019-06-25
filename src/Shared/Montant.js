@@ -25,6 +25,9 @@ export default class Montant extends React.Component {
   static defaultProps = {
     montant: 0
   };
+
+  input = null;
+
   componentWillMount() {
     this.setState({
       montant: tarif(this.props.montant)
@@ -38,20 +41,19 @@ export default class Montant extends React.Component {
   }
 
   componentDidMount() {
-    let input = document.getElementById("inputMontant");
+    let input = this.input.firstChild;
+    input.style.textAlign = "right";
     input.addEventListener("keypress", this.validation);
-    //document.addEventListener("mousedown", this.validation);
   }
 
   componentWillUnmount() {
-    let input = document.getElementById("inputMontant");
+    let input = this.input.firstChild;
     input.removeEventListener("keypress", this.validation);
-    //document.removeEventListener("mousedown", this.validation);
   }
 
-  handleChange = () => {
+  handleChange = montant => {
     if (this.props.onChange) {
-      let montantFloat = parseFloat(tarifDotNotation(this.state.montant));
+      let montantFloat = parseFloat(tarifDotNotation(montant));
       if (_.isNaN(montantFloat)) {
         return;
       }
@@ -60,7 +62,7 @@ export default class Montant extends React.Component {
   };
   validation = event => {
     if (event.key === "Enter") {
-      this.handleChange();
+      this.handleChange(this.state.montant);
     }
   };
 
@@ -69,21 +71,17 @@ export default class Montant extends React.Component {
     _.unset(propsInput, "id");
     _.unset(propsInput, "value");
     _.unset(propsInput, "onChange");
+    let montant = this.state.montant;
     return (
-      <Ref
-        innerRef={node => {
-          node.firstChild.style.textAlign = "right";
-        }}
-      >
+      <Ref innerRef={node => (this.input = node)}>
         <Input
-          id="inputMontant"
           {...propsInput}
           value={this.state.montant}
           onFocus={() => {
-            let input = document.getElementById("inputMontant");
+            let input = this.input.firstChild;
             input.select();
           }}
-          onBlur={() => this.handleChange()}
+          onBlur={() => this.handleChange(montant)}
           onChange={(e, d) => {
             this.setState({ montant: d.value });
           }}

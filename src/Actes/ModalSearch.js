@@ -166,14 +166,6 @@ export default class ModalSearch extends React.Component {
     }
   }
 
-  componentDidMount() {
-    document.addEventListener("mousedown", this.inputContentFormating);
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener("mousedown", this.inputContentFormating);
-  }
-
   getDescriptionType = () => {
     return _.get(
       JSON.parse(localStorage.getItem("localPreferences")),
@@ -468,6 +460,7 @@ export default class ModalSearch extends React.Component {
                 }
                 value={this.state.localisation}
                 onChange={(e, d) => this.setState({ localisation: d.value })}
+                onBlur={() => this.inputContentFormating()}
               />
               <Form.Input
                 label="Code"
