@@ -19,6 +19,7 @@ const propDefs = {
     codPhase: "Code phase, par défaut 0",
     executant:
       "Code d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes)",
+    specialite: "Code spécialité du praticien", // new
     onError: "Callback en cas d'erreur",
     actions: "Liste d'actions à effectuer (en plus des actions par défaut)"
   },
@@ -31,6 +32,7 @@ const propDefs = {
     codGrille: PropTypes.number,
     codPhase: PropTypes.number,
     executant: PropTypes.string,
+    specialite: PropTypes.number,
     onError: PropTypes.func,
     actions: PropTypes.array
   }
@@ -57,11 +59,13 @@ export default class Saisie extends React.Component {
   componentWillMount() {
     this.props.client.CCAM.contextes(
       result => {
-        this.setState({ allModificateurs: result.tb11 });
+        //console.log(result.ngap);
+        //console.log(result.specialites);
+        this.setState({ allModificateurs: result.tb11, ngap: result.ngap });
       },
       error => {
         console.log(error);
-        this.setState({ allModificateurs: [] });
+        this.setState({ allModificateurs: [], ngap: [] });
       }
     );
     if (this.props.idActe) {
@@ -362,6 +366,7 @@ export default class Saisie extends React.Component {
             codGrille={this.props.codGrille}
             codPhase={this.props.codPhase}
             executant={this.props.executant}
+            specialite={this.props.specialite}
             open={!_.isNull(selectedIndex)}
             cotation={
               _.isEmpty(selectedActe)
@@ -380,6 +385,7 @@ export default class Saisie extends React.Component {
             }
             localisationPicker={true}
             allModificateurs={this.state.allModificateurs}
+            ngap={this.state.ngap}
             description={
               _.isEmpty(selectedActe)
                 ? ""

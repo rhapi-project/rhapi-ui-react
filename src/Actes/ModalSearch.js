@@ -8,6 +8,7 @@ import {
   Form,
   Header,
   Icon,
+  Label,
   Loader,
   Modal,
   Ref,
@@ -24,12 +25,7 @@ import "react-datepicker/dist/react-datepicker.css";
 
 import moment from "moment";
 
-import {
-  spacedLocalisation,
-  //tarif,
-  //tarifDotNotation,
-  toISOLocalisation
-} from "../lib/Helpers";
+import { spacedLocalisation, toISOLocalisation } from "../lib/Helpers";
 
 const propDefs = {
   description:
@@ -51,12 +47,14 @@ const propDefs = {
     executant:
       "Limiter la recherche aux seuls actes d'une profession de santé. " +
       "Exemple : D1(dentistes), SF(sages-femmes)",
+    specialite: "Code spécialité du praticien", // new
     localisationPicker:
       "Affichage de la grille de saisie des localisations dentaires",
     open: "Ouverture de la modal",
     onClose: "Callback à la fermeture de la modal",
     rowIndex:
       "Indice de la ligne sur laquelle on a cliqué dans le tableau de saisie des actes",
+    ngap: "Liste des codes NGAP", // new
     allModificateurs:
       "Tous les modificateurs (obtenus avec une requête CCAM contextes)",
     modificateurs:
@@ -77,10 +75,12 @@ const propDefs = {
     description: PropTypes.string,
     localisation: PropTypes.string,
     executant: PropTypes.string,
+    specialite: PropTypes.number, // new
     localisationPicker: PropTypes.bool,
     open: PropTypes.bool,
     onClose: PropTypes.func,
     rowIndex: PropTypes.number,
+    ngap: PropTypes.array, // new
     allModificateurs: PropTypes.array,
     modificateurs: PropTypes.string,
     qualificatifs: PropTypes.string,
@@ -123,6 +123,7 @@ export default class ModalSearch extends React.Component {
     this.setState({
       acte: {},
       code: this.props.code,
+      cotation: this.props.cotation,
       date: this.props.date,
       localisation: this.props.localisation,
       modificateurs: this.props.modificateurs,
@@ -139,6 +140,7 @@ export default class ModalSearch extends React.Component {
     if (next.code) {
       this.setState({
         code: next.code,
+        cotation: next.cotation,
         date: next.date,
         localisation: next.localisation,
         modificateurs: next.modificateurs,
@@ -152,6 +154,7 @@ export default class ModalSearch extends React.Component {
         acte: {},
         actes: [],
         code: "",
+        cotation: this.props.cotation,
         date: this.props.date,
         localisation: "",
         modificateurs: "",
@@ -177,6 +180,9 @@ export default class ModalSearch extends React.Component {
   };
 
   readActe = (code, date) => {
+    if (code.length !== 7) {
+      return;
+    }
     this.props.client.CCAM.read(
       code,
       { date: date },
@@ -236,6 +242,7 @@ export default class ModalSearch extends React.Component {
     this.setState({
       acte: acte,
       code: acte.codActe,
+      cotation: 1, //new
       description: description,
       actes: [],
       //date: "", // new
@@ -245,9 +252,11 @@ export default class ModalSearch extends React.Component {
     });
     this.tarification(
       acte.codActe,
+      this.state.cotation,
       this.props.codActiv,
       this.props.codPhase,
       this.props.codGrille,
+      this.props.specialite, // new
       this.state.date,
       this.props.codDom,
       ""
@@ -293,9 +302,11 @@ export default class ModalSearch extends React.Component {
 
   tarification = (
     codActe,
+    cotation,
     codActiv,
     codPhase,
     codGrille,
+    specialite, // new
     date,
     codDom,
     modificateurs
@@ -305,6 +316,7 @@ export default class ModalSearch extends React.Component {
       activite: codActiv,
       phase: codPhase,
       grille: codGrille,
+      specialite: specialite,
       date: date,
       dom: codDom,
       modificateurs: modificateurs
@@ -315,12 +327,22 @@ export default class ModalSearch extends React.Component {
     if (codDom === 0) {
       _.unset(params, "dom");
     }
+    if (!specialite) {
+      _.unset(params, "specialite");
+    }
     this.props.client.CCAM.tarif(
       codActe,
       params,
       result => {
-        //console.log(result);
-        this.setState({ montant: result.pu, loading: false });
+        this.setState({
+          montant:
+            codActe.length === 7
+              ? result.pu
+              : _.isNaN(parseInt(cotation))
+              ? result.tarif
+              : result.tarif * parseInt(cotation),
+          loading: false
+        });
       },
       error => {
         console.log(error);
@@ -331,18 +353,22 @@ export default class ModalSearch extends React.Component {
 
   valider = () => {
     if (
-      _.isEmpty(this.state.acte) ||
+      (_.isEmpty(this.state.acte) && _.isEmpty(this.state.code)) ||
       toISOLocalisation(this.state.localisation).length % 2 !== 0
     ) {
       return;
     }
     this.props.onValidation(
       this.props.rowIndex,
-      this.state.acte.codActe,
+      //this.state.acte.codActe,
+      this.state.code,
       this.state.description,
       this.state.date,
       spacedLocalisation(this.state.localisation),
-      this.props.cotation,
+      //this.props.cotation,
+      _.isNaN(parseInt(this.state.cotation))
+        ? 1
+        : parseInt(this.state.cotation),
       this.state.modificateurs,
       this.state.qualificatifs,
       this.state.montant
@@ -390,14 +416,17 @@ export default class ModalSearch extends React.Component {
             codGrille={this.props.codGrille}
             date={this.state.date}
             executant={this.props.executant}
+            specialite={this.props.specialite}
             modificateurs={this.state.modificateurs}
             onChange={modifStr => {
               this.setState({ modificateurs: modifStr });
               this.tarification(
                 this.state.code,
+                this.state.cotation,
                 this.props.codActiv,
                 this.props.codPhase,
                 this.props.codGrille,
+                this.props.specialite,
                 this.state.date,
                 this.props.codDom,
                 modifStr
@@ -407,9 +436,11 @@ export default class ModalSearch extends React.Component {
               this.setState({ modificateurs: "" });
               this.tarification(
                 this.state.code,
+                this.state.cotation,
                 this.props.codActiv,
                 this.props.codPhase,
                 this.props.codGrille,
+                this.props.specialite,
                 this.state.date,
                 this.props.codDom,
                 ""
@@ -428,6 +459,19 @@ export default class ModalSearch extends React.Component {
         </Dimmer>
       </Segment>
     );
+    let optionsNGAP = [];
+
+    if (this.state.code.length === 7) {
+      optionsNGAP.push({
+        key: this.state.code,
+        text: this.state.code,
+        value: this.state.code
+      });
+    }
+    _.forEach(this.props.ngap, code => {
+      let obj = { key: code, text: code, value: code };
+      optionsNGAP.push(obj);
+    });
     return (
       <Modal open={this.props.open} onClose={this.onClose} size="large">
         <Modal.Content>
@@ -462,14 +506,34 @@ export default class ModalSearch extends React.Component {
                 onChange={(e, d) => this.setState({ localisation: d.value })}
                 onBlur={() => this.inputContentFormating()}
               />
-              <Form.Input
+              <Form.Dropdown
                 label="Code"
-                fluid={true}
-                value={this.state.code}
                 placeholder="Code de l'acte"
-                onChange={() => {
-                  alert(
-                    "TODO : Implémenter la recherche en NGAP au cas où la taille de la saisie est différente de 7 !"
+                search={true}
+                selection={true}
+                value={this.state.code}
+                options={optionsNGAP}
+                noResultsMessage="Aucun acte trouvé"
+                onChange={(e, d) => {
+                  this.setState({
+                    code: d.value,
+                    modificateurs: "",
+                    description: "",
+                    acte: {},
+                    actes: [],
+                    cotation: 1,
+                    informations: {}
+                  });
+                  this.tarification(
+                    d.value,
+                    this.state.cotation,
+                    this.props.codActiv,
+                    this.props.codPhase,
+                    this.props.codGrille,
+                    this.props.specialite,
+                    this.state.date,
+                    this.props.codDom,
+                    ""
                   );
                 }}
               />
@@ -480,9 +544,25 @@ export default class ModalSearch extends React.Component {
               >
                 <Form.Input
                   label="Cotation"
-                  disabled={true}
+                  disabled={
+                    _.isEmpty(this.state.code) || this.state.code.length === 7
+                  }
                   width={1}
-                  value={this.props.cotation}
+                  value={this.state.cotation}
+                  onChange={(e, d) => {
+                    this.setState({ cotation: d.value });
+                    this.tarification(
+                      this.state.code,
+                      d.value,
+                      this.props.codActiv,
+                      this.props.codPhase,
+                      this.props.codGrille,
+                      this.props.specialite,
+                      this.state.date,
+                      this.props.codDom,
+                      this.state.modificateurs
+                    );
+                  }}
                   placeholder="Cotation"
                 />
               </Ref>
@@ -496,9 +576,11 @@ export default class ModalSearch extends React.Component {
                   this.setState({ modificateurs: d.value });
                   this.tarification(
                     this.state.code,
+                    this.state.cotation,
                     this.props.codActiv,
                     this.props.codPhase,
                     this.props.codGrille,
+                    this.props.specialite,
                     this.state.date,
                     this.props.codDom,
                     d.value
@@ -518,9 +600,11 @@ export default class ModalSearch extends React.Component {
                   if (d.value === "OP") {
                     this.tarification(
                       this.state.code,
+                      this.state.cotation,
                       this.props.codActiv,
                       this.props.codPhase,
                       this.props.codGrille,
+                      this.props.specialite,
                       this.state.date,
                       this.props.codDom,
                       this.state.modificateurs
@@ -562,7 +646,7 @@ export default class ModalSearch extends React.Component {
               </Form.Input>
               <Form.Input
                 width={10}
-                disabled={_.isEmpty(this.state.acte)}
+                disabled={_.isEmpty(this.state.code)}
                 fluid={true}
                 placeholder="Description de l'acte sélectionné"
                 onChange={(e, d) =>

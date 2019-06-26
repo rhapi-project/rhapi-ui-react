@@ -252,6 +252,7 @@ export default class ActesSaisieValidation extends React.Component {
                 idActe={this.state.fse.id}
                 codGrille={13}
                 executant="D1"
+                specialite={19} // new
                 onError={this.onError}
                 lignes={10}
                 actions={actions}
