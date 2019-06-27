@@ -1,7 +1,7 @@
 import React from "react";
 import { Client } from "rhapi-client";
 import { Actes, Shared} from "rhapi-ui-react";
-import { Divider, Form, Grid, Input } from "semantic-ui-react";
+import { Divider, Form } from "semantic-ui-react";
 
 import moment from "moment";
 import _ from "lodash";
@@ -72,61 +72,55 @@ export default class ActesHistorique extends React.Component {
         </p>
         <Divider hidden={true} />
         <Form>
-          <Form.Group inline={true}>
-            <Form.Dropdown
-              label="ID du patient"
-              placeholder="Sélectionner un patient"
-              selection={true}
-              options={patients}
-              onChange={(e, d) => this.onPatientChange(d.value)}
-              value={this.state.idPatient}
+          <Form.Dropdown
+            width={2}
+            label="ID du patient"
+            placeholder="Sélectionner un patient"
+            selection={true}
+            options={patients}
+            onChange={(e, d) => this.onPatientChange(d.value)}
+            value={this.state.idPatient}
+          />
+          <Form.Group>
+            <Shared.Periode
+              startYear={2015}
+              onPeriodeChange={(startAt, endAt) => {
+                if (startAt && endAt) {
+                  console.log("Du : " + moment(startAt).format("LLL"));
+                  console.log("Au : " + moment(endAt).format("LLL"));
+                  this.setState({
+                    startAt: startAt,
+                    endAt: endAt
+                  });
+                } else {
+                  console.log("Durée indéterminée");
+                  this.setState({
+                    startAt: "",
+                    endAt: ""
+                  });
+                }
+              }}
+            />
+            <Form.Input
+              width={5}
+              placeholder="Localisation"
+              onClick={() => this.setState({ openLocalisations: true })}
+              value={this.state.localisation}
             />
           </Form.Group>
         </Form>
         <Divider hidden={true} />
-        <Grid columns={2}>
-          <Grid.Row>
-            <Grid.Column>
-              <Shared.Periode
-                startYear={2015}
-                onPeriodeChange={(startAt, endAt) => {
-                  if (startAt && endAt) {
-                    console.log("Du : " + moment(startAt).format("LLL"));
-                    console.log("Au : " + moment(endAt).format("LLL"));
-                    this.setState({
-                      startAt: startAt,
-                      endAt: endAt
-                    });
-                  } else {
-                    console.log("Durée indéterminée");
-                    this.setState({
-                      startAt: "",
-                      endAt: ""
-                    });
-                  }
-                }}
-              />
-            </Grid.Column>
-            <Grid.Column>
-              <Input
-                placeholder="Localisation"
-                onClick={() => this.setState({ openLocalisations: true })}
-                value={this.state.localisation}
-              />
-              <Shared.Localisations 
-                localisation={this.state.localisation}
-                onSelection={localisation => {
-                  this.setState({ localisation: localisation });
-                }}
-                modal={{
-                  size: "large",
-                  open: this.state.openLocalisations,
-                  onClose: this.close
-                }}
-              />
-            </Grid.Column>
-          </Grid.Row>
-        </Grid>
+        <Shared.Localisations 
+          localisation={this.state.localisation}
+          onSelection={localisation => {
+            this.setState({ localisation: localisation });
+          }}
+          modal={{
+            size: "large",
+            open: this.state.openLocalisations,
+            onClose: this.close
+          }}
+        />
         <Divider hidden={true} />
         <Actes.Historique
           client={client}

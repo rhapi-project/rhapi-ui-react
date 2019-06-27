@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
-import { Button, Confirm, Icon, Table } from "semantic-ui-react";
+import { Button, Icon, Modal, Ref, Table } from "semantic-ui-react";
 import _ from "lodash";
 import { tarif } from "../lib/Helpers";
 import Actions from "../Shared/Actions";
@@ -462,7 +462,7 @@ export default class Historique extends React.Component {
       this.setState({
         message: this.isFSE
           ? "Souhaitez-vous supprimer uniquement la FSE sélectionnée ?"
-          : "Souhaitez-vous supprimer uniquement l'acte sélectionnée ?"
+          : "Souhaitez-vous supprimer uniquement l'acte sélectionné ?"
       });
     } else {
       this.setState({ showConfirm: false });
@@ -633,25 +633,29 @@ export default class Historique extends React.Component {
             ""
           )}
         </div>
-        <Confirm
-          open={this.state.showConfirm}
-          content={this.state.message}
-          cancelButton={
-            <Button>
+        <Modal size="tiny" open={this.state.showConfirm}>
+          <Modal.Content>
+            <p>{this.state.message}</p>
+          </Modal.Content>
+          <Modal.Actions>
+            <Button onClick={this.onCancel}>
               <Icon name="ban" color="red" />
               Non
             </Button>
-          }
-          confirmButton={
-            <Button>
-              <Icon name="check" color="green" />
-              Oui
-            </Button>
-          }
-          onCancel={this.onCancel}
-          onConfirm={this.onConfirm}
-          size="tiny"
-        />
+            <Ref
+              innerRef={node => {
+                if (this.state.showConfirm) {
+                  node.focus();
+                }
+              }}
+            >
+              <Button color="blue" onClick={this.onConfirm}>
+                <Icon name="check" color="green" />
+                Oui
+              </Button>
+            </Ref>
+          </Modal.Actions>
+        </Modal>
       </React.Fragment>
     );
   }

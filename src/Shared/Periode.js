@@ -194,29 +194,24 @@ export default class Periode extends React.Component {
             .concat(opt4);
     return (
       <React.Fragment>
-        <Form>
-          <Form.Group>
-            <Form.Dropdown
-              width={6}
-              selection={true}
-              options={periodeOptions.concat(this.months(printedYear))}
-              value={this.state.currentOption}
-              onChange={(e, d) => this.onPeriodeChange(d.value, printedYear)}
-            />
-            <Form.Dropdown
-              width={1}
-              selection={true}
-              options={years}
-              value={this.state.currentYear}
-              onChange={(e, d) => {
-                this.setState({ currentYear: d.value });
-                let option =
-                  d.value === moment().year() ? "today" : "civilYear";
-                this.onPeriodeChange(option, d.value);
-              }}
-            />
-          </Form.Group>
-        </Form>
+        <Form.Dropdown
+          width={6}
+          selection={true}
+          options={periodeOptions.concat(this.months(printedYear))}
+          value={this.state.currentOption}
+          onChange={(e, d) => this.onPeriodeChange(d.value, printedYear)}
+        />
+        <Form.Dropdown
+          width={5}
+          selection={true}
+          options={years}
+          value={this.state.currentYear}
+          onChange={(e, d) => {
+            this.setState({ currentYear: d.value });
+            let option = d.value === moment().year() ? "today" : "civilYear";
+            this.onPeriodeChange(option, d.value);
+          }}
+        />
         <DateRange
           open={this.state.rangeOpen}
           startAt={this.state.rangeStart}
