@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { Button, Message, Modal, Table } from "semantic-ui-react";
 import SaisieDentaire from "./SaisieDentaire";
 import ModalSearch from "./ModalSearch";
+import Localisations from "../Shared/Localisations";
 import _ from "lodash";
 
 import moment from "moment";
@@ -183,19 +184,19 @@ export default class Saisie extends React.Component {
   };
 
   onClickRow = index => {
-    let preference = _.get(
-      JSON.parse(localStorage.getItem("localPreferences")),
-      "defaultSearchType",
-      "CCAM"
-    );
-    if (preference === "CCAM") {
-      this.openSearchCCAM(index);
-    }
-  };
-
-  openSearchCCAM = index => {
     this.setState({ selectedIndex: index });
   };
+
+  /*openLocalisation = index => {
+    if (!this.existeActe(index)) {
+      return;
+    }
+    //let localisation = _.get(this.state.actes[index], "localisation", "");
+  };*/
+
+  /*openSearchCCAM = index => {
+    this.setState({ selectedIndex: index });
+  };*/
 
   onDelete = index => {
     if (!this.existActe(index)) {
@@ -319,6 +320,7 @@ export default class Saisie extends React.Component {
                 <SaisieDentaire
                   key={i}
                   index={i}
+                  acte={this.existActe(i) ? this.state.actes[i] : {}} // new
                   actions={this.props.actions}
                   client={this.props.client}
                   code={this.existActe(i) ? this.state.actes[i].code : ""}
@@ -345,10 +347,12 @@ export default class Saisie extends React.Component {
                   montant={this.existActe(i) ? this.state.actes[i].montant : 0}
                   disabled={this.state.activeRow < i}
                   onClick={index => this.onClickRow(index)}
+                  onClickLocalisation={index => console.log(index)}
                   onDelete={index => this.onDelete(index)}
                   onDuplicate={index => this.onDuplicate(index)}
-                  onEdit={index => this.openSearchCCAM(index)}
+                  onEdit={index => this.onClickRow(index)}
                   onInsertion={index => this.onInsertion(index)}
+                  onSearchFavoris={() => {}}
                 />
               ))}
             </Table.Body>
@@ -410,6 +414,10 @@ export default class Saisie extends React.Component {
             onValidation={this.onValidation}
             rowIndex={selectedIndex}
           />
+
+          {/*<Localisations 
+
+          />*/}
 
           <Modal size="mini" open={this.state.error !== 0}>
             <Modal.Header>Mise à jour de l'acte</Modal.Header>

@@ -8,7 +8,6 @@ import {
   Form,
   Header,
   Icon,
-  Label,
   Loader,
   Modal,
   Ref,
@@ -242,11 +241,9 @@ export default class ModalSearch extends React.Component {
     this.setState({
       acte: acte,
       code: acte.codActe,
-      cotation: 1, //new
+      cotation: 1,
       description: description,
       actes: [],
-      //date: "", // new
-      //localisation: ""
       informations: {},
       modificateurs: ""
     });
@@ -256,7 +253,7 @@ export default class ModalSearch extends React.Component {
       this.props.codActiv,
       this.props.codPhase,
       this.props.codGrille,
-      this.props.specialite, // new
+      this.props.specialite,
       this.state.date,
       this.props.codDom,
       ""
@@ -306,7 +303,7 @@ export default class ModalSearch extends React.Component {
     codActiv,
     codPhase,
     codGrille,
-    specialite, // new
+    specialite,
     date,
     codDom,
     modificateurs
@@ -329,6 +326,11 @@ export default class ModalSearch extends React.Component {
     }
     if (!specialite) {
       _.unset(params, "specialite");
+    }
+    if (codActe !== 7) {
+      _.unset(params, "activite");
+      _.unset(params, "phase");
+      _.unset(params, "grille");
     }
     this.props.client.CCAM.tarif(
       codActe,
@@ -360,12 +362,10 @@ export default class ModalSearch extends React.Component {
     }
     this.props.onValidation(
       this.props.rowIndex,
-      //this.state.acte.codActe,
       this.state.code,
       this.state.description,
       this.state.date,
       spacedLocalisation(this.state.localisation),
-      //this.props.cotation,
       _.isNaN(parseInt(this.state.cotation))
         ? 1
         : parseInt(this.state.cotation),
@@ -413,10 +413,10 @@ export default class ModalSearch extends React.Component {
         <Accordion.Content active={this.state.openModificateurs}>
           <Modificateurs
             allModificateurs={this.props.allModificateurs}
+            codActe={this.state.code}
             codGrille={this.props.codGrille}
             date={this.state.date}
             executant={this.props.executant}
-            specialite={this.props.specialite}
             modificateurs={this.state.modificateurs}
             onChange={modifStr => {
               this.setState({ modificateurs: modifStr });
@@ -473,7 +473,7 @@ export default class ModalSearch extends React.Component {
       optionsNGAP.push(obj);
     });
     return (
-      <Modal open={this.props.open} onClose={this.onClose} size="large">
+      <Modal open={this.props.open} size="large">
         <Modal.Content>
           <Form unstackable>
             <Form.Group widths="equal">
@@ -632,11 +632,15 @@ export default class ModalSearch extends React.Component {
                 >
                   <Search2
                     client={this.props.client}
-                    date={_.isEmpty(this.state.acte) ? this.state.date : null}
+                    date={
+                      _.isEmpty(this.state.acte) && _.isEmpty(this.state.code)
+                        ? this.state.date
+                        : null
+                    }
                     executant={this.props.executant}
                     limit={8}
                     localisation={
-                      _.isEmpty(this.state.acte)
+                      _.isEmpty(this.state.acte) && _.isEmpty(this.state.code)
                         ? spacedLocalisation(this.state.localisation)
                         : null
                     }
@@ -713,20 +717,24 @@ class Modificateurs extends React.Component {
     listModificateurs: [],
     selectedModif: []
   };
+
   componentWillMount() {
+    let listModificateurs = this.listModificateurs(
+      this.props.allModificateurs,
+      this.props.codGrille,
+      this.props.date
+    );
     this.setState({
-      listModificateurs: this.listModificateurs(
-        this.props.allModificateurs,
-        this.props.codGrille,
-        this.props.date
-      )
+      listModificateurs: listModificateurs,
+      selectables: this.getSelectables(listModificateurs, this.props.codActe)
     });
   }
 
   componentWillReceiveProps(next) {
+    let selectables = this.getSelectables(this.state.listModificateurs, next.codActe);
     let s = _.map(next.modificateurs, m => {
       let modif = _.find(
-        this.state.listModificateurs,
+        selectables,
         mod => mod.codModifi === m
       );
       if (modif) {
@@ -736,7 +744,7 @@ class Modificateurs extends React.Component {
         return;
       }
     });
-    this.setState({ selectedModif: s });
+    this.setState({ selectedModif: s, selectables: selectables });
   }
 
   checkedModif = m => {
@@ -787,10 +795,25 @@ class Modificateurs extends React.Component {
       return d.isBetween(m.dtDebut, m.dtFin, null, "[]");
     });
   };
+
+  getSelectables = (listModificateurs, codActe) => {
+    if (codActe && codActe.length !== 7) {
+      return _.filter(listModificateurs, m => {
+        if (_.includes(["F", "U"], m.codModifi)) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+    } else {
+      return listModificateurs;
+    }
+  };
+
   render() {
     return (
       <div style={{ overflow: "auto", height: "100px" }}>
-        {_.map(this.state.listModificateurs, modif => (
+        {_.map(this.state.selectables, modif => (
           <div key={modif.libelle + "" + modif.coef}>
             <Checkbox
               label={modif.libelle}

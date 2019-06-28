@@ -18,11 +18,6 @@ const patients = [
   { text: "8", value: 8}
 ];
 
-const searchType = [
-  { text: "Recherche en CCAM", value: "CCAM" },
-  { text: "Recherche par favoris", value: "favoris" }
-];
-
 const descriptionType = [
   { text: "Nom court", value: "court" },
   { text: "Nom long", value: "long" }
@@ -41,26 +36,20 @@ export default class ActesSaisieValidation extends React.Component {
   getPreferences = () => {
     let pref = JSON.parse(localStorage.getItem("localPreferences"));
     if (pref) {
-      if (_.isUndefined(pref.defaultSearchType)) {
-        pref.defaultSearchType = "CCAM";
-      }
       if (_.isUndefined(pref.defaultDescriptionType)) {
         pref.defaultDescriptionType = "long";
       }
       localStorage.setItem("localPreferences", JSON.stringify(pref));
       this.setState({
-        defaultDescriptionType: pref.defaultDescriptionType,
-        defaultSearchType: pref.defaultSearchType
+        defaultDescriptionType: pref.defaultDescriptionType
       });
     } else {
       let obj = {
-        defaultSearchType: "CCAM",
         defaultDescriptionType: "long"
       };
       localStorage.setItem("localPreferences", JSON.stringify(obj));
       this.setState({
-        defaultDescriptionType: obj.defaultDescriptionType,
-        defaultSearchType: obj.defaultSearchType
+        defaultDescriptionType: obj.defaultDescriptionType
       });
     } 
   };
@@ -127,8 +116,6 @@ export default class ActesSaisieValidation extends React.Component {
       montant: acte.montant,
       idPatient: idPatient,
       idDocument: idDocument,
-      //modificateurs: acte.modificateurs, // ce champ n'est pas créé ! PROBLEME
-      //qualificatifs: acte.qualificatifs, // ce champ n'est pas crée ! PROBLEME
       etat: 0
     };
     client.Actes.create(
@@ -199,7 +186,7 @@ export default class ActesSaisieValidation extends React.Component {
         </p>
         <Divider hidden={true} />
         <Form>
-          <Form.Group widths="equal">
+          <Form.Group>
             <Form.Dropdown
               label="ID du patient"
               placeholder="Sélectionner un patient"
@@ -209,24 +196,7 @@ export default class ActesSaisieValidation extends React.Component {
               value={this.state.idPatient}
             />
             <Form.Dropdown 
-              label="Type de recherche par défaut"
-              placeholder="Sélectionner le type"
-              selection={true}
-              options={searchType}
-              value={this.state.defaultSearchType}
-              onChange={(e, d) => {
-                let pref = JSON.parse(localStorage.getItem("localPreferences"));
-                if (pref) {
-                  pref.defaultSearchType = d.value;
-                } else {
-                  pref = { defaultSearchType: d.value };
-                }
-                localStorage.setItem("localPreferences", JSON.stringify(pref));
-                this.setState({ defaultSearchType: d.value });
-              }}
-            />
-            <Form.Dropdown 
-              label="Type de description par défaut (nouveaux actes)"
+              label="Type de description par défaut"
               placeholder="Sélectionner le type"
               selection={true}
               options={descriptionType}
