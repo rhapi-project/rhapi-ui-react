@@ -274,7 +274,7 @@ export default class Historique extends React.Component {
         }
       },
       error => {
-        console.log(`Erreur readAll : ${error}`);
+        console.log(`Erreur readAll`);
       }
     );
   };
@@ -452,7 +452,7 @@ export default class Historique extends React.Component {
         );
       },
       error => {
-        console.log(`Erreur destroy : ${error}`);
+        console.log(`Erreur destroy`);
       }
     );
   };
@@ -531,6 +531,10 @@ export default class Historique extends React.Component {
       btnPrev: this.props.btnPrev,
       btnMore: this.props.btnMore,
       mode: this.props.mode
+    };
+
+    let dropdown = {
+      direction: "left"
     };
 
     return (
@@ -614,7 +618,11 @@ export default class Historique extends React.Component {
                       {tarif(acte.montant)}
                     </Table.Cell>
                     <Table.Cell>
-                      <Actions actions={actions} id={acte.id} />
+                      <Actions
+                        actions={actions}
+                        id={acte.id}
+                        dropdown={dropdown}
+                      />
                     </Table.Cell>
                   </Table.Row>
                 </React.Fragment>

@@ -40,6 +40,38 @@ La recherche n'est pas effectuée si la date ou la localisation sont NULL.
 | search | object | Documentation semantic-ui-react [Search](https://react.semantic-ui.com/modules/search) |
 | searchInputLength | number | Nombre minimum de caractères pour déclencher la recherche d'actes |
 
+## SaisieDentaire
+Composant correspondant à une ligne du tableau de saisie des actes pour les dentistes
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| index | number | Indice de la ligne |
+| actions | array | Liste d'actions à effectuer (en plus des actions par défaut) |
+| code | string | Code de l'Acte sélectionné |
+| cotation | number | Cotation/coefficient applicable au code (significatif uniquement en NGAP, 0 si non significatif) |
+| description | string | Description de l'acte |
+| date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
+| localisation | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
+| modificateurs | string | Modificateurs appliqués à l'acte sélectionné. Par défaut "" |
+| qualificatifs | string | Les qualificatifs |
+| disabled | bool | Désactivation de la ligne |
+| montant | number | Le moment pour cet acte |
+| onClick | func | Callback au clic sur une ligne |
+| onDelete | func | Callback à la suppression de la ligne |
+| onDuplicate | func | Callback à la duplication de la ligne |
+| onEdit | func | Callback action de recherche en CCAM |
+| onInsertion | func | Callback à l'insertion d'un nouvel acte |
+
+## Actions
+Menu d'actions à effectuer
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| actions | array | Tableau contenant une liste d'actions |
+| dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
+| id | any | Identifiant de la ligne sur laquelle une action est effectuée |
+
 ## DateRange
 Période, début et fin d'une période
 #### Props du composant
@@ -50,14 +82,6 @@ Période, début et fin d'une période
 | endAt | string | Date de fin de la période. Par défaut une semaine après la date du jour. |
 | onRangeChange | func | Callback au changement de la période |
 | onClose | func | Callback à la fermeture de la modal |
-
-## Actions
-Menu d'actions à effectuer
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| actions | array | Tableau contenant une liste d'actions |
-| id | any | Identifiant de la ligne sur laquelle une action est effectuée |
 
 ## Montant
 Input de saisie d'un montant au format français
@@ -76,15 +100,6 @@ Période, début et fin d'une période
 | startYear | number | La première année qui sera affichée. Par défaut l'année en cours |
 | onPeriodeChange | func | Callback au changement de la période. C'est une fonction qui prend 2 paramètres, début et fin de la période (inclus).
 Les valeurs de ces paramètres sont NULL si la durée est indéterminée. |
-
-## Localisations
-Grille de saisie des localisations dentaires
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| dents | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
-| modal | object | Documentation semantic-ui-react [Modal](https://react.semantic-ui.com/modules/modal) |
-| onSelection | func | Callback à la selection d'une liste de dents |
 
 ## Tarification
 Composant de facturation d'un acte CCAM
@@ -134,29 +149,6 @@ Composant montrant sous forme d'un tableau les actes obtenus après une recherch
 | btnMore | object | Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}" |
 | mode | string | mode de pagination 'pages' ou 'more', par défaut "pages" |
 
-## SaisieDentaire
-Composant correspondant à une ligne du tableau de saisie des actes pour les dentistes
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| index | number | Indice de la ligne |
-| actions | array | Liste d'actions à effectuer (en plus des actions par défaut) |
-| code | string | Code de l'Acte sélectionné |
-| cotation | number | Cotation/coefficient applicable au code (significatif uniquement en NGAP, 0 si non significatif) |
-| description | string | Description de l'acte |
-| date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
-| localisation | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
-| modificateurs | string | Modificateurs appliqués à l'acte sélectionné. Par défaut "" |
-| qualificatifs | string | Les qualificatifs |
-| disabled | bool | Désactivation de la ligne |
-| montant | number | Le moment pour cet acte |
-| onClick | func | Callback au clic sur une ligne |
-| onDelete | func | Callback à la suppression de la ligne |
-| onDuplicate | func | Callback à la duplication de la ligne |
-| onEdit | func | Callback action de recherche en CCAM |
-| onInsertion | func | Callback à l'insertion d'un nouvel acte |
-
 ## Saisie
 Tableau de saisie des actes pour les dentistes
 #### Props du composant
@@ -173,6 +165,15 @@ Tableau de saisie des actes pour les dentistes
 | specialite | number | Code spécialité du praticien |
 | onError | func | Callback en cas d'erreur |
 | actions | array | Liste d'actions à effectuer (en plus des actions par défaut) |
+
+## Localisations
+Grille de saisie des localisations dentaires
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| dents | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
+| modal | object | Documentation semantic-ui-react [Modal](https://react.semantic-ui.com/modules/modal) |
+| onSelection | func | Callback à la selection d'une liste de dents |
 
 ## ModalSearch
 Ce composant est une modal Semantic de recherche d'un acte. Il intègre un date picker, les composants CCAM.Search, CCAM.Table et Shared.Localisations
