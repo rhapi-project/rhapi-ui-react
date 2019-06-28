@@ -128,7 +128,6 @@ export default class ActesHistorique extends React.Component {
           onActeClick={this.onActeClick}
           onActeDoubleClick={this.onActeDoubleClick}
           onSelectionChange={this.onSelectionChange}
-          limit={10}
           actions={[
             {
               icon: "add",

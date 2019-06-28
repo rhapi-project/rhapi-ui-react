@@ -143,6 +143,7 @@ export default class Historique extends React.Component {
   componentWillMount() {
     this.setState({
       idPatient: this.props.idPatient,
+      limit: this.props.limit,
       actes: [],
       actesSelected: [],
       informations: {},
@@ -160,6 +161,7 @@ export default class Historique extends React.Component {
 
     this.reload(
       this.props.idPatient,
+      this.props.limit,
       0,
       this.props.sort,
       this.props.order,
@@ -173,6 +175,7 @@ export default class Historique extends React.Component {
     if (_.isEqual(this.state.idPatient, next.idPatient)) {
       this.reload(
         next.idPatient,
+        this.state.limit,
         this.state.offset,
         this.state.sort,
         this.state.order,
@@ -183,6 +186,7 @@ export default class Historique extends React.Component {
     } else {
       this.reload(
         next.idPatient,
+        this.state.limit,
         0,
         this.state.sort,
         this.state.order,
@@ -199,6 +203,7 @@ export default class Historique extends React.Component {
       // Reload des données toutes les 15 secondes
       this.reload(
         this.state.idPatient,
+        this.state.limit,
         this.state.offset,
         this.state.sort,
         this.state.order,
@@ -226,11 +231,20 @@ export default class Historique extends React.Component {
     }
   };
 
-  reload = (idPatient, offset, sort, order, startAt, endAt, localisation) => {
+  reload = (
+    idPatient,
+    limit,
+    offset,
+    sort,
+    order,
+    startAt,
+    endAt,
+    localisation
+  ) => {
     let params = {
       _idPatient: idPatient,
       _etat: 0,
-      limit: this.props.limit,
+      limit: limit,
       offset: offset,
       sort: sort,
       order: order
@@ -283,6 +297,7 @@ export default class Historique extends React.Component {
     // Callbacks de la pagination
     this.reload(
       query._idPatient,
+      query.limit,
       query.offset,
       query.sort,
       query.order,
@@ -297,6 +312,7 @@ export default class Historique extends React.Component {
     if (_.isEqual(this.state.order, "DESC")) {
       this.reload(
         this.state.idPatient,
+        this.state.limit,
         this.state.offset,
         this.state.sort,
         "ASC",
@@ -307,6 +323,7 @@ export default class Historique extends React.Component {
     } else {
       this.reload(
         this.state.idPatient,
+        this.state.limit,
         this.state.offset,
         this.state.sort,
         "DESC",
@@ -443,6 +460,7 @@ export default class Historique extends React.Component {
       result => {
         this.reload(
           this.state.idPatient,
+          this.state.limit,
           this.state.offset,
           this.state.sort,
           this.state.order,
