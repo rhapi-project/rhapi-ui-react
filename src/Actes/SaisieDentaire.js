@@ -34,6 +34,7 @@ const propDefs = {
     disabled: "Désactivation de la ligne",
     montant: "Le moment pour cet acte",
     onClick: "Callback au clic sur une ligne",
+    onClickDate: "Callback au clic sur la colonne de la date",
     onClickLocalisation: "Callback au clic sur la colonne Localisation",
     onDelete: "Callback à la suppression de la ligne",
     onDuplicate: "Callback à la duplication de la ligne",
@@ -56,6 +57,7 @@ const propDefs = {
     disabled: PropTypes.bool,
     montant: PropTypes.number,
     onClick: PropTypes.func,
+    onClickDate: PropTypes.func,
     onClickLocalisation: PropTypes.func,
     onDelete: PropTypes.func,
     onDuplicate: PropTypes.func,
@@ -138,27 +140,21 @@ export default class SaisieDentaire extends React.Component {
       });
     }
 
-    /*let date = (
-      <span>
-        {_.isEmpty(this.props.code)
-          ? ""
-          : moment(this.props.date).format("L")
-        }
-      </span>
-    );*/
-
     return (
       <React.Fragment>
         <Table.Row
           disabled={this.props.disabled}
           textAlign="center"
           style={{ height: "35px" }}
-          //onClick={() => this.props.onClick(this.props.index)}
         >
           <Table.Cell
             collapsing={true} style={{ minWidth: "100px" }}
-            //onClick={this.onClickCell}
             //onClick={() => this.setState({ openDatePicker: true })}
+            onClick={() => {
+              if (this.props.onClickDate) {
+                this.props.onClickDate(this.props.index)
+              }
+            }}
           >
             {_.isEmpty(this.props.acte)
               ? ""

@@ -3,10 +3,14 @@ import PropTypes from "prop-types";
 import { Button, Message, Modal, Table } from "semantic-ui-react";
 import SaisieDentaire from "./SaisieDentaire";
 import ModalSearch from "./ModalSearch";
-import Localisations from "../Shared/Localisations";
+//import Localisations from "../Shared/Localisations";
 import _ from "lodash";
 
 import moment from "moment";
+
+import DatePicker from "react-datepicker"; // new
+import fr from "date-fns/locale/fr"; // new
+import "react-datepicker/dist/react-datepicker.css"; // new
 
 const propDefs = {
   description: "Tableau de saisie des actes pour les dentistes",
@@ -54,7 +58,9 @@ export default class Saisie extends React.Component {
   state = {
     fse: {},
     allModificateurs: [],
-    selectedIndex: null
+    selectedDate: null, // new
+    selectedIndex: null,
+    selectedLocalisation: null // new
   };
 
   componentWillMount() {
@@ -101,6 +107,29 @@ export default class Saisie extends React.Component {
 
   existActe = index => {
     return !_.isUndefined(this.state.actes[index]);
+  };
+
+  checkLockRevision = (onValidatedEtat, onModifiable, onNotModifiable, onReadError) => {
+    this.props.client.Actes.read(
+      this.props.idActe,
+      {},
+      result => {
+        if (result.etat === 0) {
+          onValidatedEtat();
+          return;
+        }
+        if (result.lockRevision === this.state.fse.lockRevision) {
+          onModifiable();
+        } else {
+          onNotModifiable();
+        }
+      },
+      error => {
+        // peut-être que l'acte a été déjà supprimé
+        console.log(error);
+        onReadError();
+      }
+    );
   };
 
   onValidation = (
@@ -187,42 +216,66 @@ export default class Saisie extends React.Component {
     this.setState({ selectedIndex: index });
   };
 
-  /*openLocalisation = index => {
-    if (!this.existeActe(index)) {
-      return;
+  onClickDate = index => {
+    if (index <= this.state.activeRow) {
+      this.setState({ selectedDate: index });
     }
-    //let localisation = _.get(this.state.actes[index], "localisation", "");
-  };*/
+  };
 
-  /*openSearchCCAM = index => {
-    this.setState({ selectedIndex: index });
-  };*/
-
-  onDelete = index => {
-    if (!this.existActe(index)) {
-      return;
+  handleChangeDate = (date, index) => {
+    let actes = this.state.actes;
+    if (this.existActe(index)) {
+      actes[index].date = moment(date).toISOString();
+    } else {
+      let obj = {
+        code: "",
+        cotation: 1,
+        date: moment(date).toISOString(),
+        description: "",
+        localisation: "",
+        modificateurs: "",
+        montant: 0,
+        qualificatifs: "OP"
+      };
+      actes.push(obj);
     }
+    //console.log(actes);
+    this.setState({ selectedDate: null });
     this.props.client.Actes.read(
       this.props.idActe,
       {},
       result => {
         if (result.etat === 0) {
-          this.setState({ error: 1 });
+          this.setState({ error: 1, selectedDate: null });
           return;
         }
         if (result.lockRevision === this.state.fse.lockRevision) {
-          let actes = this.state.actes;
-          actes.splice(index, 1);
           this.update(actes);
+          this.setState({ selectedDate: null });
         } else {
-          this.setState({ error: 2 });
+          this.setState({ error: 2, selectedDate: null });
         }
       },
       error => {
-        // peut-être que l'acte a été déjà supprimé
         console.log(error);
-        this.setState({ error: 3 });
+        this.setState({ error: 3, selectedDate: null });
       }
+    );
+  };
+
+  onDelete = index => {
+    if (!this.existActe(index)) {
+      return;
+    }
+    this.checkLockRevision(
+      () => this.setState({ error: 1 }),
+      () => {
+        let actes = this.state.actes;
+        actes.splice(index, 1);
+        this.update(actes);
+      },
+      () => this.setState({ error: 2 }),
+      () => this.setState({ error: 3 })
     );
   };
 
@@ -230,27 +283,16 @@ export default class Saisie extends React.Component {
     if (!this.existActe(index)) {
       return;
     }
-    this.props.client.Actes.read(
-      this.props.idActe,
-      {},
-      result => {
-        if (result.etat === 0) {
-          this.setState({ error: 1 });
-          return;
-        }
-        if (result.lockRevision === this.state.fse.lockRevision) {
-          let actes = this.state.actes;
-          let currentActe = actes[index];
-          actes.splice(index + 1, 0, currentActe);
-          this.update(actes);
-        } else {
-          this.setState({ error: 2 });
-        }
+    this.checkLockRevision(
+      () => this.setState({ error: 1 }),
+      () => {
+        let actes = this.state.actes;
+        let currentActe = actes[index];
+        actes.splice(index + 1, 0, currentActe);
+        this.update(actes);
       },
-      error => {
-        console.log(error);
-        this.setState({ error: 3 });
-      }
+      () => this.setState({ error: 2 }),
+      () => this.setState({ error: 3 })
     );
   };
 
@@ -258,36 +300,25 @@ export default class Saisie extends React.Component {
     if (!this.existActe(index)) {
       return;
     }
-    this.props.client.Actes.read(
-      this.props.idActe,
-      {},
-      result => {
-        if (result.etat === 0) {
-          this.setState({ error: 1 });
-          return;
-        }
-        if (result.lockRevision === this.state.fse.lockRevision) {
-          let actes = this.state.actes;
-          let obj = {
-            code: "",
-            cotation: 1,
-            date: moment().toISOString(),
-            description: "",
-            localisation: "",
-            modificateurs: "",
-            montant: 0,
-            qualificatifs: "OP"
-          };
-          actes.splice(index, 0, obj);
-          this.update(actes);
-        } else {
-          this.setState({ error: 2 });
-        }
+    this.checkLockRevision(
+      () => this.setState({ error: 1 }),
+      () => {
+        let actes = this.state.actes;
+        let obj = {
+          code: "",
+          cotation: 1,
+          date: moment().toISOString(),
+          description: "",
+          localisation: "",
+          modificateurs: "",
+          montant: 0,
+          qualificatifs: "OP"
+        };
+        actes.splice(index, 0, obj);
+        this.update(actes);
       },
-      error => {
-        console.log(error);
-        this.setState({ error: 3 });
-      }
+      () => this.setState({ error: 2 }),
+      () => this.setState({ error: 3 })
     );
   };
 
@@ -347,6 +378,7 @@ export default class Saisie extends React.Component {
                   montant={this.existActe(i) ? this.state.actes[i].montant : 0}
                   disabled={this.state.activeRow < i}
                   onClick={index => this.onClickRow(index)}
+                  onClickDate={index => this.onClickDate(index)}
                   onClickLocalisation={index => console.log(index)}
                   onDelete={index => this.onDelete(index)}
                   onDuplicate={index => this.onDuplicate(index)}
@@ -415,9 +447,36 @@ export default class Saisie extends React.Component {
             rowIndex={selectedIndex}
           />
 
-          {/*<Localisations 
+          {/* DatePicker */}
+          {!_.isNull(this.state.selectedDate)
+            ? <DatePicker
+                fixedHeight={true}
+                selected={
+                  this.existActe(this.state.selectedDate)
+                  ? moment(_.get(this.state.actes[this.state.selectedDate], "date", null)).toDate()
+                  : moment().toDate()
+                }
+                withPortal={true}
+                inline={true}
+                /*onChange={date => {
+                  //console.log(date);
+                  let index = this.state.selectedDate;
+                  if (this.existActe(index)) {
+                    let actes = this.state.actes;
+                    actes[index].date = moment(date).toISOString();
+                  }
+                  this.setState({ selectedDate: null });
+                }}*/
+                onChange={date => this.handleChangeDate(date, this.state.selectedDate)}
+                onOutsideClick={() => {
+                  console.log("onClick outside");
+                  this.setState({ selectedDate: null });
+                }}
+                locale={fr}
+              />
+            : null
 
-          />*/}
+          }
 
           <Modal size="mini" open={this.state.error !== 0}>
             <Modal.Header>Mise à jour de l'acte</Modal.Header>
