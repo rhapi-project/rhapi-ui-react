@@ -231,6 +231,50 @@ export default class Historique extends React.Component {
     }
   };
 
+  querie = (
+    idPatient,
+    limit,
+    offset,
+    sort,
+    order,
+    startAt,
+    endAt,
+    localisation
+  ) => {
+    let i = 0; // pour incrémenter les champs q1,q2,...
+    let params = {};
+
+    // Si localisation n'est pas vide
+    if (localisation) {
+      let dents = localisation.split(" ");
+
+      for (let dent = 0; dent < dents.length; dent++) {
+        if (dents[dent] === "10") {
+          _.set(params, "q" + ++i, "OR,localisation,Like,1*");
+          _.set(params, "q" + ++i, "OR,localisation,Like,%201*");
+          _.set(params, "q" + ++i, "OR,localisation,Like,5*");
+          _.set(params, "q" + ++i, "OR,localisation,Like,%205*");
+        }
+
+        _.set(params, "q" + ++i, "OR,localisation,Like,*" + dents[dent] + "*");
+      }
+    }
+
+    // Si startAt et endAt ne sont pas null
+    if (startAt && endAt) {
+      _.set(params, "q" + ++i, "AND,doneAt,Between," + startAt + "," + endAt);
+    }
+
+    _.set(params, "q" + ++i, "AND,idPatient,Equal," + idPatient);
+    _.set(params, "q" + ++i, "AND,etat,Equal,0");
+    _.set(params, "limit", limit);
+    _.set(params, "offset", offset);
+    _.set(params, "sort", sort);
+    _.set(params, "order", order);
+
+    return params;
+  };
+
   reload = (
     idPatient,
     limit,
@@ -241,30 +285,16 @@ export default class Historique extends React.Component {
     endAt,
     localisation
   ) => {
-    let params = {
-      _idPatient: idPatient,
-      _etat: 0,
-      limit: limit,
-      offset: offset,
-      sort: sort,
-      order: order
-    };
-
-    if (startAt && endAt) {
-      let doneAt = {
-        q1: "AND,doneAt,Between," + startAt + "," + endAt
-      };
-
-      _.assign(params, doneAt);
-    }
-
-    if (localisation) {
-      let localisations = {
-        _localisation: localisation
-      };
-
-      _.assign(params, localisations);
-    }
+    let params = this.querie(
+      idPatient,
+      limit,
+      offset,
+      sort,
+      order,
+      startAt,
+      endAt,
+      localisation
+    );
 
     this.props.client.Actes.readAll(
       params,
@@ -293,10 +323,11 @@ export default class Historique extends React.Component {
     );
   };
 
+  // Callbacks de la pagination
   onPageSelect = query => {
-    // Callbacks de la pagination
+    let idPatient = query.q1.split(",")[3];
     this.reload(
-      query._idPatient,
+      idPatient,
       query.limit,
       query.offset,
       query.sort,
@@ -530,6 +561,16 @@ export default class Historique extends React.Component {
   };
 
   render() {
+    this.querie(
+      this.state.idPatient,
+      this.state.limit,
+      this.state.offset,
+      this.state.sort,
+      this.state.order,
+      this.state.startAt,
+      this.state.endAt,
+      this.state.localisation
+    );
     let showPagination = this.props.showPagination;
 
     let pagination = {
