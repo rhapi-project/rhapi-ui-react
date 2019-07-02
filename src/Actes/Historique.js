@@ -231,7 +231,7 @@ export default class Historique extends React.Component {
     }
   };
 
-  querie = (
+  query = (
     idPatient,
     limit,
     offset,
@@ -241,32 +241,45 @@ export default class Historique extends React.Component {
     endAt,
     localisation
   ) => {
-    let i = 0; // pour incrémenter les champs q1,q2,...
+    let n = 0; // pour incrémenter les champs q1,q2,...
     let params = {};
 
-    // Si localisation n'est pas vide
     if (localisation) {
       let dents = localisation.split(" ");
 
-      for (let dent = 0; dent < dents.length; dent++) {
-        if (dents[dent] === "10") {
-          _.set(params, "q" + ++i, "OR,localisation,Like,1*");
-          _.set(params, "q" + ++i, "OR,localisation,Like,%201*");
-          _.set(params, "q" + ++i, "OR,localisation,Like,5*");
-          _.set(params, "q" + ++i, "OR,localisation,Like,%205*");
+      _.forEach(dents, dent => {
+        _.set(params, "q" + ++n, "AND,localisation,Like,*" + dent + "*");
+
+        if (dent === "10") {
+          _.set(params, "q" + ++n, "OR,localisation,Like,1*");
+          _.set(params, "q" + ++n, "OR,localisation,Like, 1*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,5*");
+          _.set(params, "q" + ++n, "OR,localisation,Like, 5*");
+        } else if (dent === "20") {
+          _.set(params, "q" + ++n, "OR,localisation,Like,2*");
+          _.set(params, "q" + ++n, "OR,localisation,Like, 2*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,6*");
+          _.set(params, "q" + ++n, "OR,localisation,Like, 6*");
+        } else if (dent === "30") {
+          _.set(params, "q" + ++n, "OR,localisation,Like,3*");
+          _.set(params, "q" + ++n, "OR,localisation,Like, 3*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,7*");
+          _.set(params, "q" + ++n, "OR,localisation,Like, 7*");
+        } else if (dent === "40") {
+          _.set(params, "q" + ++n, "OR,localisation,Like,4*");
+          _.set(params, "q" + ++n, "OR,localisation,Like, 4*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,8*");
+          _.set(params, "q" + ++n, "OR,localisation,Like, 8*");
         }
-
-        _.set(params, "q" + ++i, "OR,localisation,Like,*" + dents[dent] + "*");
-      }
+      });
     }
 
-    // Si startAt et endAt ne sont pas null
     if (startAt && endAt) {
-      _.set(params, "q" + ++i, "AND,doneAt,Between," + startAt + "," + endAt);
+      _.set(params, "q" + ++n, "AND,doneAt,Between," + startAt + "," + endAt);
     }
 
-    _.set(params, "q" + ++i, "AND,idPatient,Equal," + idPatient);
-    _.set(params, "q" + ++i, "AND,etat,Equal,0");
+    _.set(params, "q" + ++n, "AND,idPatient,Equal," + idPatient);
+    _.set(params, "q" + ++n, "AND,etat,Equal,0");
     _.set(params, "limit", limit);
     _.set(params, "offset", offset);
     _.set(params, "sort", sort);
@@ -285,7 +298,7 @@ export default class Historique extends React.Component {
     endAt,
     localisation
   ) => {
-    let params = this.querie(
+    let params = this.query(
       idPatient,
       limit,
       offset,
@@ -304,6 +317,7 @@ export default class Historique extends React.Component {
         ) {
           this.setState({
             idPatient: Number(idPatient),
+            limit: limit,
             actes: result.results,
             informations: result.informations,
             offset: offset,
@@ -325,9 +339,8 @@ export default class Historique extends React.Component {
 
   // Callbacks de la pagination
   onPageSelect = query => {
-    let idPatient = query.q1.split(",")[3];
     this.reload(
-      idPatient,
+      this.state.idPatient,
       query.limit,
       query.offset,
       query.sort,
@@ -561,16 +574,6 @@ export default class Historique extends React.Component {
   };
 
   render() {
-    this.querie(
-      this.state.idPatient,
-      this.state.limit,
-      this.state.offset,
-      this.state.sort,
-      this.state.order,
-      this.state.startAt,
-      this.state.endAt,
-      this.state.localisation
-    );
     let showPagination = this.props.showPagination;
 
     let pagination = {
