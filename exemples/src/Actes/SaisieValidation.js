@@ -182,7 +182,7 @@ export default class ActesSaisieValidation extends React.Component {
     return (
       <React.Fragment>
         <p>
-          Saisie et validation d'un acte pour un patient donné.
+          Saisie et validation d'un acte FSE pour un patient donné.
         </p>
         <Divider hidden={true} />
         <Form>

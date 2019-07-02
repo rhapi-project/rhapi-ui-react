@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Button, Message, Modal, Table } from "semantic-ui-react";
 import SaisieDentaire from "./SaisieDentaire";
 import ModalSearch from "./ModalSearch";
-//import Localisations from "../Shared/Localisations";
+import Localisations from "../Shared/Localisations";
 import _ from "lodash";
 
 import moment from "moment";
@@ -11,6 +11,8 @@ import moment from "moment";
 import DatePicker from "react-datepicker"; // new
 import fr from "date-fns/locale/fr"; // new
 import "react-datepicker/dist/react-datepicker.css"; // new
+
+import { spacedLocalisation } from "../lib/Helpers";
 
 const propDefs = {
   description: "Tableau de saisie des actes pour les dentistes",
@@ -132,66 +134,6 @@ export default class Saisie extends React.Component {
     );
   };
 
-  onValidation = (
-    rowKey,
-    code,
-    description,
-    date,
-    localisation,
-    cotation,
-    modificateurs,
-    qualificatifs, // new
-    montant
-  ) => {
-    this.props.client.Actes.read(
-      this.props.idActe,
-      {},
-      result => {
-        if (result.etat === 0) {
-          this.setState({ error: 1 });
-          return;
-        }
-        if (result.lockRevision === this.state.fse.lockRevision) {
-          let obj = {};
-          obj.code = code;
-          obj.description = description;
-          obj.date = date;
-          obj.localisation = localisation;
-          obj.cotation = cotation;
-          obj.modificateurs = modificateurs;
-          obj.qualificatifs = qualificatifs; // new
-          obj.montant = montant;
-          let actes = this.state.actes;
-          if (rowKey === this.state.activeRow) {
-            actes.push(obj);
-            this.update(actes);
-          } else {
-            if (
-              _.isEqual(code, actes[rowKey].code) &&
-              _.isEqual(description, actes[rowKey].description) &&
-              _.isEqual(date, actes[rowKey].date) &&
-              _.isEqual(localisation, actes[rowKey].localisation) &&
-              _.isEqual(modificateurs, actes[rowKey].modificateurs) &&
-              _.isEqual(qualificatifs, actes[rowKey].qualificatifs) &&
-              _.isEqual(montant, actes[rowKey].montant)
-            ) {
-              return;
-            }
-            actes[rowKey] = obj;
-            this.update(actes);
-          }
-        } else {
-          this.setState({ error: 2 });
-        }
-      },
-      error => {
-        // peut-être que l'acte a été déjà supprimé
-        console.log(error);
-        this.setState({ error: 3 });
-      }
-    );
-  };
-
   update = actes => {
     let obj = {};
     obj.actes = actes;
@@ -212,54 +154,83 @@ export default class Saisie extends React.Component {
     );
   };
 
-  onClickRow = index => {
-    this.setState({ selectedIndex: index });
+  onValidation = (
+    rowKey,
+    code,
+    description,
+    date,
+    localisation,
+    cotation,
+    modificateurs,
+    qualificatifs,
+    montant
+  ) => {
+    this.checkLockRevision(
+      () => this.setState({ error: 1 }),
+      () => {
+        let obj = {};
+        obj.code = code;
+        obj.description = description;
+        obj.date = date;
+        obj.localisation = localisation;
+        obj.cotation = cotation;
+        obj.modificateurs = modificateurs;
+        obj.qualificatifs = qualificatifs; // new
+        obj.montant = montant;
+        let actes = this.state.actes;
+        if (rowKey === this.state.activeRow) {
+          actes.push(obj);
+          this.update(actes);
+        } else {
+          if (
+            _.isEqual(code, actes[rowKey].code) &&
+            _.isEqual(description, actes[rowKey].description) &&
+            _.isEqual(date, actes[rowKey].date) &&
+            _.isEqual(localisation, actes[rowKey].localisation) &&
+            _.isEqual(modificateurs, actes[rowKey].modificateurs) &&
+            _.isEqual(qualificatifs, actes[rowKey].qualificatifs) &&
+            _.isEqual(montant, actes[rowKey].montant)
+          ) {
+            return;
+          }
+          actes[rowKey] = obj;
+          this.update(actes);
+        }
+      },
+      () => this.setState({ error: 2 }),
+      () => this.setState({ error: 3 })
+    );
   };
 
-  onClickDate = index => {
-    if (index <= this.state.activeRow) {
-      this.setState({ selectedDate: index });
-    }
-  };
-
-  handleChangeDate = (date, index) => {
+  changeFieldValue = (field, value, index) => {
     let actes = this.state.actes;
     if (this.existActe(index)) {
-      actes[index].date = moment(date).toISOString();
+      if (field === "date") {
+        actes[index].date = moment(value).toISOString();
+      } else { // localisation
+        actes[index].localisation = spacedLocalisation(value);
+      }
     } else {
       let obj = {
         code: "",
         cotation: 1,
-        date: moment(date).toISOString(),
+        date: field === "date" ? moment(value).toISOString() : moment().toISOString(),
         description: "",
-        localisation: "",
+        localisation: field === "localisation" ? spacedLocalisation(value) : "",
         modificateurs: "",
         montant: 0,
         qualificatifs: "OP"
       };
       actes.push(obj);
     }
-    //console.log(actes);
-    this.setState({ selectedDate: null });
-    this.props.client.Actes.read(
-      this.props.idActe,
-      {},
-      result => {
-        if (result.etat === 0) {
-          this.setState({ error: 1, selectedDate: null });
-          return;
-        }
-        if (result.lockRevision === this.state.fse.lockRevision) {
-          this.update(actes);
-          this.setState({ selectedDate: null });
-        } else {
-          this.setState({ error: 2, selectedDate: null });
-        }
+    this.checkLockRevision(
+      () => this.setState({ error: 1, selectedDate: null, selectedLocalisation: null }),
+      () => {
+        this.update(actes);
+        this.setState({ selectedDate: null, selectedLocalisation: null });
       },
-      error => {
-        console.log(error);
-        this.setState({ error: 3, selectedDate: null });
-      }
+      () => this.setState({ error: 2, selectedDate: null, selectedLocalisation: null }),
+      () => this.setState({ error: 3, selectedDate: null, selectedLocalisation: null })
     );
   };
 
@@ -377,9 +348,17 @@ export default class Saisie extends React.Component {
                   }
                   montant={this.existActe(i) ? this.state.actes[i].montant : 0}
                   disabled={this.state.activeRow < i}
-                  onClick={index => this.onClickRow(index)}
-                  onClickDate={index => this.onClickDate(index)}
-                  onClickLocalisation={index => console.log(index)}
+                  onClick={index => this.setState({ selectedIndex: index })}
+                  onClickDate={index => {
+                    if (index <= this.state.activeRow) {
+                      this.setState({ selectedDate: index });
+                    }
+                  }}
+                  onClickLocalisation={index => {
+                    if (index <= this.state.activeRow) {
+                      this.setState({ selectedLocalisation: index });
+                    }
+                  }}
                   onDelete={index => this.onDelete(index)}
                   onDuplicate={index => this.onDuplicate(index)}
                   onEdit={index => this.onClickRow(index)}
@@ -458,24 +437,28 @@ export default class Saisie extends React.Component {
                 }
                 withPortal={true}
                 inline={true}
-                /*onChange={date => {
-                  //console.log(date);
-                  let index = this.state.selectedDate;
-                  if (this.existActe(index)) {
-                    let actes = this.state.actes;
-                    actes[index].date = moment(date).toISOString();
-                  }
-                  this.setState({ selectedDate: null });
-                }}*/
-                onChange={date => this.handleChangeDate(date, this.state.selectedDate)}
-                onOutsideClick={() => {
-                  console.log("onClick outside");
-                  this.setState({ selectedDate: null });
-                }}
+                onChange={date => this.changeFieldValue("date", date, this.state.selectedDate)}
                 locale={fr}
               />
             : null
+          }
 
+          {/* Localisation */}
+          {!_.isNull(this.state.selectedLocalisation)
+            ? <Localisations
+                dents={
+                  this.existActe(this.state.selectedLocalisation)
+                  ? spacedLocalisation(this.state.actes[this.state.selectedLocalisation].localisation)
+                  : ""
+                }
+                onSelection={dents => this.changeFieldValue("localisation", dents, this.state.selectedLocalisation)}
+                modal={{
+                  size: "large",
+                  open: true,
+                  onClose: () => this.setState({ selectedLocalisation: null })
+                }}
+              />
+            : null
           }
 
           <Modal size="mini" open={this.state.error !== 0}>

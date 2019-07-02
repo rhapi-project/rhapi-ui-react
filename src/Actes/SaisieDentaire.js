@@ -149,7 +149,6 @@ export default class SaisieDentaire extends React.Component {
         >
           <Table.Cell
             collapsing={true} style={{ minWidth: "100px" }}
-            //onClick={() => this.setState({ openDatePicker: true })}
             onClick={() => {
               if (this.props.onClickDate) {
                 this.props.onClickDate(this.props.index)
@@ -159,22 +158,7 @@ export default class SaisieDentaire extends React.Component {
             {_.isEmpty(this.props.acte)
               ? ""
               : moment(this.props.date).format("L")
-            }
-            {/*_.isEmpty(this.props.code)
-              ? ""
-            : moment(this.props.date).format("L")*/}
-            {/*this.state.openDatePicker
-              ? <DatePicker
-                  customInput={date}
-                  fixedHeight={true}
-                  selected={null}
-                  locale={fr}
-                  onBlur={() => this.setState({ openDatePicker: false })}
-                />
-              : _.isEmpty(this.props.code)
-                ? ""
-                : moment(this.props.date).format("L")
-            */}            
+            }            
           </Table.Cell>
           <Table.Cell
             collapsing={true}
