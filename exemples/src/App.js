@@ -21,6 +21,7 @@ import SharedPeriode from "./Shared/Periode";
 
 // Exemples Actes
 import ActesHistorique from "./Actes/Historique";
+import ActesFavoris from "./Actes/Favoris";
 import ActesSaisieValidation from "./Actes/SaisieValidation";
 
 // CSS
@@ -174,6 +175,14 @@ export default class App extends React.Component {
             onClick={(e, d) => this.handleClickItem("Actes", d.name)}
           />
           <Menu.Item
+            name="Favoris"
+            active={
+              this.state.group === "Actes" &&
+              this.state.name === "Favoris"
+            }
+            onClick={(e, d) => this.handleClickItem("Actes", d.name)}
+          />
+          <Menu.Item
             name="SaisieValidation"
             active={
               this.state.group === "Actes" &&
@@ -317,6 +326,8 @@ class ViewExample extends React.Component {
         return <ActesHistorique />;
       } else if (name === "SaisieValidation") {
         return <ActesSaisieValidation />;
+      } else if (name === "Favoris") {
+        return <ActesFavoris />;
       } else {
         return "";
       }
