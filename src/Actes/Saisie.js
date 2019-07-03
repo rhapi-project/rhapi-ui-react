@@ -111,7 +111,12 @@ export default class Saisie extends React.Component {
     return !_.isUndefined(this.state.actes[index]);
   };
 
-  checkLockRevision = (onValidatedEtat, onModifiable, onNotModifiable, onReadError) => {
+  checkLockRevision = (
+    onValidatedEtat,
+    onModifiable,
+    onNotModifiable,
+    onReadError
+  ) => {
     this.props.client.Actes.read(
       this.props.idActe,
       {},
@@ -207,14 +212,18 @@ export default class Saisie extends React.Component {
     if (this.existActe(index)) {
       if (field === "date") {
         actes[index].date = moment(value).toISOString();
-      } else { // localisation
+      } else {
+        // localisation
         actes[index].localisation = spacedLocalisation(value);
       }
     } else {
       let obj = {
         code: "",
         cotation: 1,
-        date: field === "date" ? moment(value).toISOString() : moment().toISOString(),
+        date:
+          field === "date"
+            ? moment(value).toISOString()
+            : moment().toISOString(),
         description: "",
         localisation: field === "localisation" ? spacedLocalisation(value) : "",
         modificateurs: "",
@@ -224,13 +233,28 @@ export default class Saisie extends React.Component {
       actes.push(obj);
     }
     this.checkLockRevision(
-      () => this.setState({ error: 1, selectedDate: null, selectedLocalisation: null }),
+      () =>
+        this.setState({
+          error: 1,
+          selectedDate: null,
+          selectedLocalisation: null
+        }),
       () => {
         this.update(actes);
         this.setState({ selectedDate: null, selectedLocalisation: null });
       },
-      () => this.setState({ error: 2, selectedDate: null, selectedLocalisation: null }),
-      () => this.setState({ error: 3, selectedDate: null, selectedLocalisation: null })
+      () =>
+        this.setState({
+          error: 2,
+          selectedDate: null,
+          selectedLocalisation: null
+        }),
+      () =>
+        this.setState({
+          error: 3,
+          selectedDate: null,
+          selectedLocalisation: null
+        })
     );
   };
 
@@ -427,39 +451,54 @@ export default class Saisie extends React.Component {
           />
 
           {/* DatePicker */}
-          {!_.isNull(this.state.selectedDate)
-            ? <DatePicker
-                fixedHeight={true}
-                selected={
-                  this.existActe(this.state.selectedDate)
-                  ? moment(_.get(this.state.actes[this.state.selectedDate], "date", null)).toDate()
+          {!_.isNull(this.state.selectedDate) ? (
+            <DatePicker
+              fixedHeight={true}
+              selected={
+                this.existActe(this.state.selectedDate)
+                  ? moment(
+                      _.get(
+                        this.state.actes[this.state.selectedDate],
+                        "date",
+                        null
+                      )
+                    ).toDate()
                   : moment().toDate()
-                }
-                withPortal={true}
-                inline={true}
-                onChange={date => this.changeFieldValue("date", date, this.state.selectedDate)}
-                locale={fr}
-              />
-            : null
-          }
+              }
+              withPortal={true}
+              inline={true}
+              onChange={date =>
+                this.changeFieldValue("date", date, this.state.selectedDate)
+              }
+              locale={fr}
+            />
+          ) : null}
 
           {/* Localisation */}
-          {!_.isNull(this.state.selectedLocalisation)
-            ? <Localisations
-                dents={
-                  this.existActe(this.state.selectedLocalisation)
-                  ? spacedLocalisation(this.state.actes[this.state.selectedLocalisation].localisation)
+          {!_.isNull(this.state.selectedLocalisation) ? (
+            <Localisations
+              dents={
+                this.existActe(this.state.selectedLocalisation)
+                  ? spacedLocalisation(
+                      this.state.actes[this.state.selectedLocalisation]
+                        .localisation
+                    )
                   : ""
-                }
-                onSelection={dents => this.changeFieldValue("localisation", dents, this.state.selectedLocalisation)}
-                modal={{
-                  size: "large",
-                  open: true,
-                  onClose: () => this.setState({ selectedLocalisation: null })
-                }}
-              />
-            : null
-          }
+              }
+              onSelection={dents =>
+                this.changeFieldValue(
+                  "localisation",
+                  dents,
+                  this.state.selectedLocalisation
+                )
+              }
+              modal={{
+                size: "large",
+                open: true,
+                onClose: () => this.setState({ selectedLocalisation: null })
+              }}
+            />
+          ) : null}
 
           <Modal size="mini" open={this.state.error !== 0}>
             <Modal.Header>Mise à jour de l'acte</Modal.Header>

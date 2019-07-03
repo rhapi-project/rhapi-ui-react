@@ -40,7 +40,8 @@ const propDefs = {
     onDuplicate: "Callback à la duplication de la ligne",
     onEdit: "Callback action de recherche en CCAM",
     onInsertion: "Callback à l'insertion d'un nouvel acte",
-    onSearchFavoris: "Callback au clic sur la colonne libellé (Recherche d'un acte dans les favoris)"
+    onSearchFavoris:
+      "Callback au clic sur la colonne libellé (Recherche d'un acte dans les favoris)"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
@@ -86,7 +87,7 @@ export default class SaisieDentaire extends React.Component {
       openDatePicker: false,
       openLocalisation: false
     });
-  };
+  }
 
   onClickCell = () => {
     if (this.props.onClick) {
@@ -148,23 +149,23 @@ export default class SaisieDentaire extends React.Component {
           style={{ height: "35px" }}
         >
           <Table.Cell
-            collapsing={true} style={{ minWidth: "100px" }}
+            collapsing={true}
+            style={{ minWidth: "100px" }}
             onClick={() => {
               if (this.props.onClickDate) {
-                this.props.onClickDate(this.props.index)
+                this.props.onClickDate(this.props.index);
               }
             }}
           >
             {_.isEmpty(this.props.acte)
               ? ""
-              : moment(this.props.date).format("L")
-            }            
+              : moment(this.props.date).format("L")}
           </Table.Cell>
           <Table.Cell
             collapsing={true}
             onClick={() => {
               if (this.props.onClickLocalisation) {
-                this.props.onClickLocalisation(this.props.index)
+                this.props.onClickLocalisation(this.props.index);
               }
             }}
           >
@@ -186,7 +187,9 @@ export default class SaisieDentaire extends React.Component {
           </Table.Cell>
           <Table.Cell
             textAlign="left"
-            onClick={() => alert("Ouvrir la recherche d'un acte dans les favoris")}
+            onClick={() =>
+              alert("Ouvrir la recherche d'un acte dans les favoris")
+            }
           >
             {this.props.description}
           </Table.Cell>
@@ -197,10 +200,7 @@ export default class SaisieDentaire extends React.Component {
           >
             {this.props.modificateurs}
           </Table.Cell>
-          <Table.Cell
-            collapsing={true}
-            onClick={this.onClickCell}
-          >
+          <Table.Cell collapsing={true} onClick={this.onClickCell}>
             {_.isEmpty(this.props.code) ? "" : this.props.qualificatifs}
           </Table.Cell>
           <Table.Cell

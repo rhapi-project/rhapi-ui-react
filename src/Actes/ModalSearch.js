@@ -475,7 +475,7 @@ export default class ModalSearch extends React.Component {
     return (
       <Modal open={this.props.open} size="large">
         <Modal.Content>
-          <Form unstackable>
+          <Form unstackable={true}>
             <Form.Group widths="equal">
               <Form.Input label="Date" width={9}>
                 <Ref
@@ -731,12 +731,12 @@ class Modificateurs extends React.Component {
   }
 
   componentWillReceiveProps(next) {
-    let selectables = this.getSelectables(this.state.listModificateurs, next.codActe);
+    let selectables = this.getSelectables(
+      this.state.listModificateurs,
+      next.codActe
+    );
     let s = _.map(next.modificateurs, m => {
-      let modif = _.find(
-        selectables,
-        mod => mod.codModifi === m
-      );
+      let modif = _.find(selectables, mod => mod.codModifi === m);
       if (modif) {
         return modif;
       } else {
