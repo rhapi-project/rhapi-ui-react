@@ -22,6 +22,7 @@ import SharedPeriode from "./Shared/Periode";
 // Exemples Actes
 import ActesHistorique from "./Actes/Historique";
 import ActesSaisieValidation from "./Actes/SaisieValidation";
+import ActesEdition from "./Actes/Edition";
 
 // CSS
 //import "rhapi-ui-react/dist/index.css";
@@ -181,6 +182,14 @@ export default class App extends React.Component {
             }
             onClick={(e, d) => this.handleClickItem("Actes", d.name)}
           />
+          <Menu.Item
+            name="Edition"
+            active={
+              this.state.group === "Actes" &&
+              this.state.name === "Edition"
+            }
+            onClick={(e, d) => this.handleClickItem("Actes", d.name)}
+          />
         </Menu.Menu>
       </Menu.Item>
     );
@@ -317,6 +326,8 @@ class ViewExample extends React.Component {
         return <ActesHistorique />;
       } else if (name === "SaisieValidation") {
         return <ActesSaisieValidation />;
+      } else if (name === "Edition") {
+        return <ActesEdition />;
       } else {
         return "";
       }

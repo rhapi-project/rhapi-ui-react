@@ -2,13 +2,6 @@
 # Actes
 # Shared
 
-## Detail
-Détail d'un acte tarifé
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| detail | object | Objet contenant le détail d'un acte. Toutes les informations sur un acte tarifé, la date, l'activité, la grille de tarification, les modificateurs appliqués, la phase et le tarif. |
-
 ## Fiche
 Composant de présentation d'une fiche d'un acte. Celui-ci utilise le composant de Tarification
 #### Props du composant
@@ -22,6 +15,13 @@ Composant de présentation d'une fiche d'un acte. Celui-ci utilise le composant 
 | codPhase | number | Code phase, par défaut 0 |
 | date | string | Date de la tarification de l'acte, au format ISO. Par défaut la date du jour |
 | modificateurs | string | Modificateurs appliqués à l'acte, par défaut une chaîne de caractères vide |
+
+## Detail
+Détail d'un acte tarifé
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| detail | object | Objet contenant le détail d'un acte. Toutes les informations sur un acte tarifé, la date, l'activité, la grille de tarification, les modificateurs appliqués, la phase et le tarif. |
 
 ## Search
 Composant pour la recherche des actes en CCAM (par code CCAM ou mot-clé). Retourne la liste des actes sous forme d'un tableau d'objets JSON. 
@@ -72,6 +72,15 @@ Menu d'actions à effectuer
 | dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
 | id | any | Identifiant de la ligne sur laquelle une action est effectuée |
 
+## Edition
+Edition d'un acte validé pour un patient
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| id | number | Id de l'acte à éditer. Par défaut id = 0 |
+| open | bool | La modal s'ouvre si open est true. Par défaut, open = false |
+
 ## DateRange
 Période, début et fin d'une période
 #### Props du composant
@@ -91,15 +100,6 @@ Input de saisie d'un montant au format français
 | input | object | Documentation semantic-ui-react [Input](https://react.semantic-ui.com/elements/input) |
 | montant | number | Montant affiché |
 | onChange | func | Callback au changement du montant |
-
-## Periode
-Période, début et fin d'une période
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| startYear | number | La première année qui sera affichée. Par défaut l'année en cours |
-| onPeriodeChange | func | Callback au changement de la période. C'est une fonction qui prend 2 paramètres, début et fin de la période (inclus).
-Les valeurs de ces paramètres sont NULL si la durée est indéterminée. |
 
 ## Table
 Composant montrant sous forme d'un tableau les actes obtenus après une recherche par mot clé.
@@ -166,14 +166,14 @@ Tableau de saisie des actes pour les dentistes
 | onError | func | Callback en cas d'erreur |
 | actions | array | Liste d'actions à effectuer (en plus des actions par défaut) |
 
-## Localisations
-Grille de saisie des localisations dentaires
+## Periode
+Période, début et fin d'une période
 #### Props du composant
 | Props | Type | Description |
 | ---- | ----- | ------ |
-| dents | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
-| modal | object | Documentation semantic-ui-react [Modal](https://react.semantic-ui.com/modules/modal) |
-| onSelection | func | Callback à la selection d'une liste de dents |
+| startYear | number | La première année qui sera affichée. Par défaut l'année en cours |
+| onPeriodeChange | func | Callback au changement de la période. C'est une fonction qui prend 2 paramètres, début et fin de la période (inclus).
+Les valeurs de ces paramètres sont NULL si la durée est indéterminée. |
 
 ## ModalSearch
 Ce composant est une modal Semantic de recherche d'un acte. Il intègre un date picker, les composants CCAM.Search, CCAM.Table et Shared.Localisations
@@ -238,3 +238,12 @@ Historique des actes d'un patient
 | btnPrev | object | Props semantic du bouton pour aller à la page précédente, par défaut un objet vide "{}" |
 | btnMore | object | Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}" |
 | mode | string | Mode de pagination "pages" ou "more", par défaut "pages" |
+
+## Localisations
+Grille de saisie des localisations dentaires
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| dents | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
+| modal | object | Documentation semantic-ui-react [Modal](https://react.semantic-ui.com/modules/modal) |
+| onSelection | func | Callback à la selection d'une liste de dents |
