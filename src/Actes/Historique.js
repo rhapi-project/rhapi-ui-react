@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
-import { Button, Confirm, Icon, Table } from "semantic-ui-react";
+import { Button, Icon, Modal, Ref, Table } from "semantic-ui-react";
 import _ from "lodash";
 import { tarif } from "../lib/Helpers";
 import Actions from "../Shared/Actions";
@@ -143,6 +143,7 @@ export default class Historique extends React.Component {
   componentWillMount() {
     this.setState({
       idPatient: this.props.idPatient,
+      limit: this.props.limit,
       actes: [],
       actesSelected: [],
       informations: {},
@@ -160,6 +161,7 @@ export default class Historique extends React.Component {
 
     this.reload(
       this.props.idPatient,
+      this.props.limit,
       0,
       this.props.sort,
       this.props.order,
@@ -173,6 +175,7 @@ export default class Historique extends React.Component {
     if (_.isEqual(this.state.idPatient, next.idPatient)) {
       this.reload(
         next.idPatient,
+        this.state.limit,
         this.state.offset,
         this.state.sort,
         this.state.order,
@@ -183,6 +186,7 @@ export default class Historique extends React.Component {
     } else {
       this.reload(
         next.idPatient,
+        this.state.limit,
         0,
         this.state.sort,
         this.state.order,
@@ -199,6 +203,7 @@ export default class Historique extends React.Component {
       // Reload des données toutes les 15 secondes
       this.reload(
         this.state.idPatient,
+        this.state.limit,
         this.state.offset,
         this.state.sort,
         this.state.order,
@@ -226,31 +231,83 @@ export default class Historique extends React.Component {
     }
   };
 
-  reload = (idPatient, offset, sort, order, startAt, endAt, localisation) => {
-    let params = {
-      _idPatient: idPatient,
-      _etat: 0,
-      limit: this.props.limit,
-      offset: offset,
-      sort: sort,
-      order: order
-    };
-
-    if (startAt && endAt) {
-      let doneAt = {
-        q1: "AND,doneAt,Between," + startAt + "," + endAt
-      };
-
-      _.assign(params, doneAt);
-    }
+  query = (
+    idPatient,
+    limit,
+    offset,
+    sort,
+    order,
+    startAt,
+    endAt,
+    localisation
+  ) => {
+    let n = 0; // pour incrémenter les champs q1,q2,...
+    let params = {};
 
     if (localisation) {
-      let localisations = {
-        _localisation: localisation
-      };
+      let dents = localisation.split(" ");
 
-      _.assign(params, localisations);
+      _.forEach(dents, dent => {
+        _.set(params, "q" + ++n, "AND,localisation,Like,*" + dent + "*");
+
+        if (dent === "10") {
+          _.set(params, "q" + ++n, "OR,localisation,Like,1*");
+          _.set(params, "q" + ++n, "OR,localisation,Like, 1*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,5*");
+          _.set(params, "q" + ++n, "OR,localisation,Like, 5*");
+        } else if (dent === "20") {
+          _.set(params, "q" + ++n, "OR,localisation,Like,2*");
+          _.set(params, "q" + ++n, "OR,localisation,Like, 2*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,6*");
+          _.set(params, "q" + ++n, "OR,localisation,Like, 6*");
+        } else if (dent === "30") {
+          _.set(params, "q" + ++n, "OR,localisation,Like,3*");
+          _.set(params, "q" + ++n, "OR,localisation,Like, 3*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,7*");
+          _.set(params, "q" + ++n, "OR,localisation,Like, 7*");
+        } else if (dent === "40") {
+          _.set(params, "q" + ++n, "OR,localisation,Like,4*");
+          _.set(params, "q" + ++n, "OR,localisation,Like, 4*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,8*");
+          _.set(params, "q" + ++n, "OR,localisation,Like, 8*");
+        }
+      });
     }
+
+    if (startAt && endAt) {
+      _.set(params, "q" + ++n, "AND,doneAt,Between," + startAt + "," + endAt);
+    }
+
+    _.set(params, "q" + ++n, "AND,idPatient,Equal," + idPatient);
+    _.set(params, "q" + ++n, "AND,etat,Equal,0");
+    _.set(params, "limit", limit);
+    _.set(params, "offset", offset);
+    _.set(params, "sort", sort);
+    _.set(params, "order", order);
+
+    return params;
+  };
+
+  reload = (
+    idPatient,
+    limit,
+    offset,
+    sort,
+    order,
+    startAt,
+    endAt,
+    localisation
+  ) => {
+    let params = this.query(
+      idPatient,
+      limit,
+      offset,
+      sort,
+      order,
+      startAt,
+      endAt,
+      localisation
+    );
 
     this.props.client.Actes.readAll(
       params,
@@ -260,6 +317,7 @@ export default class Historique extends React.Component {
         ) {
           this.setState({
             idPatient: Number(idPatient),
+            limit: limit,
             actes: result.results,
             informations: result.informations,
             offset: offset,
@@ -274,15 +332,16 @@ export default class Historique extends React.Component {
         }
       },
       error => {
-        console.log(`Erreur readAll : ${error}`);
+        console.log(`Erreur readAll`);
       }
     );
   };
 
+  // Callbacks de la pagination
   onPageSelect = query => {
-    // Callbacks de la pagination
     this.reload(
-      query._idPatient,
+      this.state.idPatient,
+      query.limit,
       query.offset,
       query.sort,
       query.order,
@@ -297,6 +356,7 @@ export default class Historique extends React.Component {
     if (_.isEqual(this.state.order, "DESC")) {
       this.reload(
         this.state.idPatient,
+        this.state.limit,
         this.state.offset,
         this.state.sort,
         "ASC",
@@ -307,6 +367,7 @@ export default class Historique extends React.Component {
     } else {
       this.reload(
         this.state.idPatient,
+        this.state.limit,
         this.state.offset,
         this.state.sort,
         "DESC",
@@ -443,6 +504,7 @@ export default class Historique extends React.Component {
       result => {
         this.reload(
           this.state.idPatient,
+          this.state.limit,
           this.state.offset,
           this.state.sort,
           this.state.order,
@@ -452,7 +514,7 @@ export default class Historique extends React.Component {
         );
       },
       error => {
-        console.log(`Erreur destroy : ${error}`);
+        console.log(`Erreur destroy`);
       }
     );
   };
@@ -462,7 +524,7 @@ export default class Historique extends React.Component {
       this.setState({
         message: this.isFSE
           ? "Souhaitez-vous supprimer uniquement la FSE sélectionnée ?"
-          : "Souhaitez-vous supprimer uniquement l'acte sélectionnée ?"
+          : "Souhaitez-vous supprimer uniquement l'acte sélectionné ?"
       });
     } else {
       this.setState({ showConfirm: false });
@@ -531,6 +593,10 @@ export default class Historique extends React.Component {
       btnPrev: this.props.btnPrev,
       btnMore: this.props.btnMore,
       mode: this.props.mode
+    };
+
+    let dropdown = {
+      direction: "left"
     };
 
     return (
@@ -614,7 +680,11 @@ export default class Historique extends React.Component {
                       {tarif(acte.montant)}
                     </Table.Cell>
                     <Table.Cell>
-                      <Actions actions={actions} id={acte.id} />
+                      <Actions
+                        actions={actions}
+                        id={acte.id}
+                        dropdown={dropdown}
+                      />
                     </Table.Cell>
                   </Table.Row>
                 </React.Fragment>
@@ -633,25 +703,29 @@ export default class Historique extends React.Component {
             ""
           )}
         </div>
-        <Confirm
-          open={this.state.showConfirm}
-          content={this.state.message}
-          cancelButton={
-            <Button>
+        <Modal size="tiny" open={this.state.showConfirm}>
+          <Modal.Content>
+            <p>{this.state.message}</p>
+          </Modal.Content>
+          <Modal.Actions>
+            <Button onClick={this.onCancel}>
               <Icon name="ban" color="red" />
               Non
             </Button>
-          }
-          confirmButton={
-            <Button>
-              <Icon name="check" color="green" />
-              Oui
-            </Button>
-          }
-          onCancel={this.onCancel}
-          onConfirm={this.onConfirm}
-          size="tiny"
-        />
+            <Ref
+              innerRef={node => {
+                if (this.state.showConfirm) {
+                  node.focus();
+                }
+              }}
+            >
+              <Button color="blue" onClick={this.onConfirm}>
+                <Icon name="check" color="green" />
+                Oui
+              </Button>
+            </Ref>
+          </Modal.Actions>
+        </Modal>
       </React.Fragment>
     );
   }

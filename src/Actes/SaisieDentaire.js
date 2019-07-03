@@ -212,7 +212,7 @@ export default class SaisieDentaire extends React.Component {
           </Table.Cell>
           <Table.Cell collapsing={true}>
             {this.props.disabled ? null : (
-              <Actions actions={actions} id={this.props.index} />
+              <Actions actions={actions} id={this.props.index} dropdown={{ direction: "left" }}/>
             )}
           </Table.Cell>
         </Table.Row>

@@ -9,10 +9,12 @@ const propDefs = {
   example: "Dropdown",
   propDocs: {
     actions: "Tableau contenant une liste d'actions",
+    dropdown: "semantic.modules",
     id: "Identifiant de la ligne sur laquelle une action est effectuée"
   },
   propTypes: {
     actions: PropTypes.array,
+    dropdown: PropTypes.object,
     id: PropTypes.any
   }
 };
@@ -20,13 +22,15 @@ const propDefs = {
 export default class Actions extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
-    actions: []
+    actions: [],
+    dropdown: {},
+    id: 0
   };
 
   render() {
     return (
       <React.Fragment>
-        <Dropdown>
+        <Dropdown {...this.props.dropdown}>
           <Dropdown.Menu>
             {_.map(this.props.actions, action => (
               <Dropdown.Item
