@@ -243,33 +243,128 @@ export default class Historique extends React.Component {
   ) => {
     let n = 0; // pour incrémenter les champs q1,q2,...
     let params = {};
+    let secteur04 = [
+      "11",
+      "12",
+      "13",
+      "21",
+      "22",
+      "23",
+      "51",
+      "52",
+      "53",
+      "61",
+      "62",
+      "63"
+    ];
+
+    let secteur03 = ["14", "15", "16", "17", "18", "54", "55"];
+
+    let secteur05 = ["24", "25", "26", "27", "28", "64", "65"];
+
+    let secteur07 = [
+      "31",
+      "32",
+      "33",
+      "41",
+      "42",
+      "43",
+      "71",
+      "72",
+      "73",
+      "81",
+      "82",
+      "83"
+    ];
+
+    let secteur06 = ["34", "35", "36", "37", "38", "74", "75"];
+
+    let secteur08 = ["44", "45", "46", "47", "48", "84", "85"];
 
     if (localisation) {
       let dents = localisation.split(" ");
 
       _.forEach(dents, dent => {
-        _.set(params, "q" + ++n, "AND,localisation,Like,*" + dent + "*");
-
-        if (dent === "10") {
+        if (dent === "01") {
           _.set(params, "q" + ++n, "OR,localisation,Like,1*");
-          _.set(params, "q" + ++n, "OR,localisation,Like, 1*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,* 1*");
           _.set(params, "q" + ++n, "OR,localisation,Like,5*");
-          _.set(params, "q" + ++n, "OR,localisation,Like, 5*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,* 5*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,2*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,* 2*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,6*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,* 6*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,*03*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,*04*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,*05*");
+        } else if (dent === "02") {
+          _.set(params, "q" + ++n, "OR,localisation,Like,3*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,* 3*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,7*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,* 7*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,4*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,* 4*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,8*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,* 8*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,*06*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,*07*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,*08*");
+        } else if (dent === "03") {
+          _.forEach(secteur03, dent03 => {
+            _.set(params, "q" + ++n, "OR,localisation,Like,*" + dent03 + "*");
+          });
+          _.set(params, "q" + ++n, "OR,localisation,Like,*03*");
+        } else if (dent === "04") {
+          _.forEach(secteur04, dent04 => {
+            _.set(params, "q" + ++n, "OR,localisation,Like,*" + dent04 + "*");
+          });
+          _.set(params, "q" + ++n, "OR,localisation,Like,*04*");
+        } else if (dent === "05") {
+          _.forEach(secteur05, dent05 => {
+            _.set(params, "q" + ++n, "OR,localisation,Like,*" + dent05 + "*");
+          });
+          _.set(params, "q" + ++n, "OR,localisation,Like,*05*");
+        } else if (dent === "06") {
+          _.forEach(secteur06, dent06 => {
+            _.set(params, "q" + ++n, "OR,localisation,Like,*" + dent06 + "*");
+          });
+          _.set(params, "q" + ++n, "OR,localisation,Like,*06*");
+        } else if (dent === "07") {
+          _.forEach(secteur07, dent07 => {
+            _.set(params, "q" + ++n, "OR,localisation,Like,*" + dent07 + "*");
+          });
+          _.set(params, "q" + ++n, "OR,localisation,Like,*07*");
+        } else if (dent === "08") {
+          _.forEach(secteur08, dent08 => {
+            _.set(params, "q" + ++n, "OR,localisation,Like,*" + dent08 + "*");
+          });
+          _.set(params, "q" + ++n, "OR,localisation,Like,*08*");
+        } else if (dent === "10") {
+          _.set(params, "q" + ++n, "OR,localisation,Like,1*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,* 1*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,5*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,* 5*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,*03*");
         } else if (dent === "20") {
           _.set(params, "q" + ++n, "OR,localisation,Like,2*");
-          _.set(params, "q" + ++n, "OR,localisation,Like, 2*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,* 2*");
           _.set(params, "q" + ++n, "OR,localisation,Like,6*");
-          _.set(params, "q" + ++n, "OR,localisation,Like, 6*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,* 6*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,*05*");
         } else if (dent === "30") {
           _.set(params, "q" + ++n, "OR,localisation,Like,3*");
-          _.set(params, "q" + ++n, "OR,localisation,Like, 3*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,* 3*");
           _.set(params, "q" + ++n, "OR,localisation,Like,7*");
-          _.set(params, "q" + ++n, "OR,localisation,Like, 7*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,* 7*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,*06*");
         } else if (dent === "40") {
           _.set(params, "q" + ++n, "OR,localisation,Like,4*");
-          _.set(params, "q" + ++n, "OR,localisation,Like, 4*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,* 4*");
           _.set(params, "q" + ++n, "OR,localisation,Like,8*");
-          _.set(params, "q" + ++n, "OR,localisation,Like, 8*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,* 8*");
+          _.set(params, "q" + ++n, "OR,localisation,Like,*08*");
+        } else {
+          _.set(params, "q" + ++n, "OR,localisation,Like,*" + dent + "*");
         }
       });
     }

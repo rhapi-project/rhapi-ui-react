@@ -1,7 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, Form, Icon, Modal, Ref } from "semantic-ui-react";
+import { Accordion, Button, Form, Icon, Modal, Ref } from "semantic-ui-react";
+
 import Montant from "../Shared/Montant";
+import Localisations from "../Shared/Localisations";
+
 import _ from "lodash";
 import moment from "moment";
 
@@ -36,14 +39,14 @@ export default class Edition extends React.Component {
   state = {
     id: this.props.id,
     open: this.props.open,
-    acte: null,
     date: null,
     localisation: "",
     code: "",
     cotation: -1,
-    montant: -1,
     description: "",
-    showConfirmation: false
+    montant: -1,
+    showConfirmation: false,
+    openLocalisation: false
   };
 
   componentWillMount() {
@@ -52,16 +55,17 @@ export default class Edition extends React.Component {
       {},
       acte => {
         this.setState({
-          acte: acte,
           date: moment(acte.doneAt).toDate(),
           localisation: acte.localisation,
           code: acte.code,
           cotation: acte.cotation,
-          montant: acte.montant,
-          description: acte.description
+          description: acte.description,
+          montant: acte.montant
         });
       },
-      error => {}
+      error => {
+        console.log(error);
+      }
     );
   }
 
@@ -70,6 +74,26 @@ export default class Edition extends React.Component {
       open: next.open
     });
   }
+
+  reload = () => {
+    this.props.client.Actes.read(
+      this.props.id,
+      {},
+      acte => {
+        this.setState({
+          date: moment(acte.doneAt).toDate(),
+          localisation: acte.localisation,
+          code: acte.code,
+          cotation: acte.cotation,
+          description: acte.description,
+          montant: acte.montant
+        });
+      },
+      error => {
+        console.log(error);
+      }
+    );
+  };
 
   onClose = () => {
     this.setState({ open: false });
@@ -94,10 +118,39 @@ export default class Edition extends React.Component {
 
   onConfirm = () => {
     this.setState({ showConfirmation: false });
+    this.update();
+    this.reload();
+  };
+
+  onOpenLocalisation = () => {
+    this.setState({
+      openLocalisation: !this.state.openLocalisation
+    });
+  };
+
+  update = () => {
+    let params = {
+      doneAt: this.state.date,
+      localisation: this.state.localisation,
+      code: this.state.code,
+      cotation: this.state.cotation,
+      description: this.state.description,
+      montant: this.state.montant
+    };
+
+    this.props.client.Actes.update(
+      this.props.id,
+      params,
+      result => {
+        console.log(result);
+      },
+      error => {
+        console.log(error);
+      }
+    );
   };
 
   render() {
-    let acte = this.state.acte;
     let date = this.state.date;
     let localisation = this.state.localisation;
     let code = this.state.code;
@@ -105,6 +158,7 @@ export default class Edition extends React.Component {
     let montant = this.state.montant;
     let description = this.state.description;
 
+    console.log(this.state);
     return (
       <React.Fragment>
         <Modal
@@ -165,6 +219,29 @@ export default class Edition extends React.Component {
                 placeholder="Description de l'acte sélectionné"
                 value={description}
               />
+              <div style={{ height: "320px", overflow: "auto" }}>
+                <Accordion styled={true} fluid={true}>
+                  <Accordion.Title
+                    active={this.state.openLocalisation}
+                    onClick={this.onOpenLocalisation}
+                  >
+                    <Icon name="dropdown" />
+                    Localisation
+                  </Accordion.Title>
+                  <Accordion.Content active={this.state.openLocalisation}>
+                    <Localisations
+                      dents={
+                        toISOLocalisation(localisation).length % 2 !== 0
+                          ? ""
+                          : spacedLocalisation(localisation)
+                      }
+                      onSelection={dents =>
+                        this.setState({ localisation: dents })
+                      }
+                    />
+                  </Accordion.Content>
+                </Accordion>
+              </div>
             </Form>
           </Modal.Content>
           <Modal.Actions>
