@@ -1,10 +1,21 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, Checkbox, Form, Modal, Table } from "semantic-ui-react";
+import {
+  Accordion,
+  Button,
+  Checkbox,
+  Divider,
+  Form,
+  Icon,
+  Modal,
+  Table
+} from "semantic-ui-react";
 import Search2 from "../CCAM/Search";
 import Table2 from "../CCAM/Table";
 //import Montant from "../Shared/Montant";
 import _ from "lodash";
+
+import { tarif } from "../lib/Helpers";
 
 const propDefs = {
   description:
@@ -34,7 +45,10 @@ export default class Favoris extends React.Component {
   state = {
     actes: [],
     configuration: false,
-    selectedIndex: null
+    favoris: {},
+    selectedIndex: null,
+    activeLevel: 0,
+    activeChapitre: null
   };
 
   componentWillMount() {
@@ -42,8 +56,9 @@ export default class Favoris extends React.Component {
     this.props.client.Configuration.read(
       "actesFavoris",
       result => {
-        //console.log(result.actes);
-        this.setState({ actes: result.actes });
+        console.log(result);
+        this.setState({ favoris: result });
+        //this.setState({ actes: result.actes });
       },
       error => {
         console.log(error);
@@ -53,6 +68,121 @@ export default class Favoris extends React.Component {
   componentWillReceiveProps(next) {
     // faire l'ouverture de la modal
   }
+
+  renderChapitre = (chapitreObj, level) => {
+    //let chapJSX = null;
+    /*if (_.isEmpty(chapitreObj.titre)) { // c'est le root
+      let titres = null;*/
+    //console.log("appel renderChap");
+    //console.log(chapitreObj);
+    let nextLevel = level + 1;
+    return (
+      <Accordion
+        key={level + chapitreObj.titre}
+        style={{ marginLeft: level * 15, marginTop: 0, marginBottom: 0 }}
+      >
+        <Accordion.Title
+          active={
+            level === 0
+              ? true
+              : level >= this.state.activeLevel &&
+                this.state.activeChapitre === level + chapitreObj.titre
+          }
+          onClick={() =>
+            this.setState({
+              activeLevel: level,
+              activeChapitre: level + chapitreObj.titre
+            })
+          }
+        >
+          {/*_.isEmpty(chapitreObj.titre) ? "" : <Icon name="dropdown" /> */}
+          <Icon name="dropdown" />
+          <strong>{chapitreObj.titre ? chapitreObj.titre : "FAVORIS"}</strong>
+        </Accordion.Title>
+        <Accordion.Content
+          active={
+            level === 0
+              ? true
+              : level >= this.state.activeLevel &&
+                this.state.activeChapitre === level + chapitreObj.titre
+          }
+        >
+          {_.map(chapitreObj.chapitres, chapitre => {
+            //console.log(chapitre);
+            return this.renderChapitre(chapitre, nextLevel);
+          })}
+          <Table
+            basic="very"
+            style={{ margin: 0 }}
+            size="small"
+            selectable={true}
+          >
+            <Table.Body>
+              {_.map(chapitreObj.actes, (acte, key) => (
+                <Acte
+                  key={key}
+                  index={key}
+                  code={acte.code}
+                  cotation={acte.cotation}
+                  configuration={this.state.configuration}
+                  description={acte.description}
+                  montant={acte.montant}
+                  /*onSelection={index =>
+                    this.setState({ selectedIndex: index })
+                  }*/
+                  //selected={i === this.state.selectedIndex}
+                />
+              ))}
+            </Table.Body>
+          </Table>
+        </Accordion.Content>
+      </Accordion>
+    );
+
+    /*return (
+        <React.Fragment>
+          {!_.isEmpty(chapitreObj.chapitres)
+            ? <React.Fragment>
+                <Accordion>
+                  {_.times(chapitreObj.chapitres.length, i => (
+                    <React.Fragment>
+                      <Accordion.Title key={i} active={true}>
+                        <Icon name="dropdown" />
+                        {chapitreObj.chapitres[i].titre}
+                      </Accordion.Title>
+                      <Accordion.Content key={i} active={true}>
+                        {this.renderChapitre(chapitreObj.chapitres[i])}
+                      </Accordion.Content>
+                    </React.Fragment>
+                  ))}
+                </Accordion>
+                <Table basic="very" style={{ margin: 0 }} size="small" selectable={true}>
+                  <Table.Body>
+                    {_.times(chapitreObj.actes.length, i => (
+                      <Acte
+                        key={i}
+                        index={i}
+                        code={chapitreObj.actes[i].code}
+                        cotation={chapitreObj.actes[i].cotation}
+                        configuration={this.state.configuration}
+                        description={chapitreObj.actes[i].description}
+                        montant={chapitreObj.actes[i].montant}
+                        onSelection={index =>
+                          this.setState({ selectedIndex: index })
+                        }
+                        //selected={i === this.state.selectedIndex}
+                      />
+                    ))}
+                  </Table.Body>
+                </Table>
+              </React.Fragment>
+            : null
+          }
+        </React.Fragment>
+      );
+      //return chapJSX;
+    //}*/
+  };
 
   render() {
     let open = this.props.open ? this.props.open : false;
@@ -106,6 +236,7 @@ export default class Favoris extends React.Component {
       ? {}
       : actes[this.state.selectedIndex];
     let edition = !_.isEmpty(selectedActe) && this.state.configuration;
+
     return (
       <React.Fragment>
         <Modal open={open} size="small">
@@ -114,25 +245,42 @@ export default class Favoris extends React.Component {
               <Edit client={this.props.client} />
             ) : (
               <div>
-                <Table basic="very" style={{ margin: 0 }} size="small">
-                  <Table.Body>
-                    {_.times(actes.length, i => (
-                      <Acte
-                        key={i}
-                        index={i}
-                        code={actes[i].code}
-                        cotation={actes[i].cotation}
-                        configuration={this.state.configuration}
-                        description={actes[i].description}
-                        montant={actes[i].montant}
-                        onSelection={index =>
-                          this.setState({ selectedIndex: index })
-                        }
-                        selected={i === this.state.selectedIndex}
-                      />
-                    ))}
-                  </Table.Body>
-                </Table>
+                {!_.isEmpty(this.state.favoris) ? (
+                  <div>
+                    {/*<Table basic="very" size="small" style={{ margin: 0 }} selectable={true}>
+                        <Table.Body>
+                          {_.times(this.state.favoris.chapitres.length, i => (
+                            <Chapitre
+                              key={i}
+                              chapitre={this.state.favoris.chapitres[i]}
+                              level={0}
+                            />
+                          ))}
+                        </Table.Body>
+                      </Table>
+                      <Divider style={{ margin: 0 }}/>
+                      <Table basic="very" style={{ margin: 0 }} size="small" selectable={true}>
+                        <Table.Body>
+                          {_.times(this.state.favoris.actes.length, i => (
+                            <Acte
+                              key={i}
+                              index={i}
+                              code={this.state.favoris.actes[i].code}
+                              cotation={this.state.favoris.actes[i].cotation}
+                              configuration={this.state.configuration}
+                              description={this.state.favoris.actes[i].description}
+                              montant={this.state.favoris.actes[i].montant}
+                              onSelection={index =>
+                                this.setState({ selectedIndex: index })
+                              }
+                              selected={i === this.state.selectedIndex}
+                            />
+                          ))}
+                        </Table.Body>
+                      </Table>*/}
+                    {this.renderChapitre(this.state.favoris, 0)}
+                  </div>
+                ) : null}
                 {this.state.configuration ? (
                   <Button
                     circular={true}
@@ -184,6 +332,29 @@ export default class Favoris extends React.Component {
   }
 }
 
+class Chapitre extends React.Component {
+  static defaultProps = {
+    chapitre: {},
+    level: 0
+  };
+  render() {
+    return (
+      <React.Fragment>
+        {!_.isEmpty(this.props.chapitre) ? "" : null}
+        <Table.Row>
+          <Table.Cell collapsing={true}>
+            <Icon name="triangle right" />
+          </Table.Cell>
+          <Table.Cell textAlign="left">
+            <strong>{this.props.chapitre.titre}</strong>
+          </Table.Cell>
+        </Table.Row>
+        {/* <Chapitre titre="couco"/> */}
+      </React.Fragment>
+    );
+  }
+}
+
 class Acte extends React.Component {
   static defaultProps = {
     code: "",
@@ -204,12 +375,8 @@ class Acte extends React.Component {
             }
           }}
           style={{
-            padding: 0,
-            backgroundColor: this.props.selected
-              ? "#E88615"
-              : this.props.index % 2 === 0
-              ? "#e3f6ff"
-              : "white",
+            //padding: 0,
+            backgroundColor: this.props.selected ? "#E88615" : "inherit",
             color: this.props.selected ? "white" : "black"
           }}
         >
@@ -224,8 +391,12 @@ class Acte extends React.Component {
           <Table.Cell collapsing={true} textAlign="center">
             {this.props.cotation}
           </Table.Cell>
-          <Table.Cell collapsing={true} textAlign="right">
-            {this.props.montant}
+          <Table.Cell
+            collapsing={true}
+            textAlign="right"
+            style={{ minWidth: "80px" }}
+          >
+            {tarif(this.props.montant)}
           </Table.Cell>
         </Table.Row>
       </React.Fragment>

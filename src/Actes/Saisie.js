@@ -385,7 +385,7 @@ export default class Saisie extends React.Component {
                   }}
                   onDelete={index => this.onDelete(index)}
                   onDuplicate={index => this.onDuplicate(index)}
-                  onEdit={index => this.onClickRow(index)}
+                  onEdit={index => this.setState({ selectedIndex: index })}
                   onInsertion={index => this.onInsertion(index)}
                   onSearchFavoris={() => {}}
                 />

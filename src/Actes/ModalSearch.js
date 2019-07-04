@@ -327,7 +327,7 @@ export default class ModalSearch extends React.Component {
     if (!specialite) {
       _.unset(params, "specialite");
     }
-    if (codActe !== 7) {
+    if (codActe.length !== 7) {
       _.unset(params, "activite");
       _.unset(params, "phase");
       _.unset(params, "grille");
