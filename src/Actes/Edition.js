@@ -19,12 +19,14 @@ const propDefs = {
   example: "Modal",
   propDocs: {
     id: "Id de l'acte à éditer. Par défaut id = 0",
-    open: "La modal s'ouvre si open est true. Par défaut, open = false"
+    open: "La modal s'ouvre si open est true. Par défaut, open = false",
+    newActe: "Callback permettant d'avoir les nouvelles données de l'acte"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
     id: PropTypes.number,
-    open: PropTypes.bool
+    open: PropTypes.bool,
+    newActe: PropTypes.func
   }
 };
 
@@ -51,7 +53,7 @@ export default class Edition extends React.Component {
 
   componentWillMount() {
     this.props.client.Actes.read(
-      this.props.id,
+      this.state.id,
       {},
       acte => {
         this.setState({
@@ -63,40 +65,34 @@ export default class Edition extends React.Component {
           montant: acte.montant
         });
       },
-      error => {
-        console.log(error);
-      }
+      error => {}
     );
   }
 
   componentWillReceiveProps(next) {
-    this.setState({
-      open: next.open
-    });
+    if (next.id !== this.state.id) {
+      this.props.client.Actes.read(
+        next.id,
+        {},
+        acte => {
+          this.setState({
+            id: next.id,
+            open: next.open,
+            date: moment(acte.doneAt).toDate(),
+            localisation: acte.localisation,
+            code: acte.code,
+            cotation: acte.cotation,
+            description: acte.description,
+            montant: acte.montant
+          });
+        },
+        error => {}
+      );
+    }
   }
 
-  reload = () => {
-    this.props.client.Actes.read(
-      this.props.id,
-      {},
-      acte => {
-        this.setState({
-          date: moment(acte.doneAt).toDate(),
-          localisation: acte.localisation,
-          code: acte.code,
-          cotation: acte.cotation,
-          description: acte.description,
-          montant: acte.montant
-        });
-      },
-      error => {
-        console.log(error);
-      }
-    );
-  };
-
   onClose = () => {
-    this.setState({ open: false });
+    this.props.onClose(false);
   };
 
   inputContentFormating = () => {
@@ -107,19 +103,24 @@ export default class Edition extends React.Component {
 
   onValider = () => {
     this.setState({
-      open: false,
       showConfirmation: true
     });
   };
 
   onCancel = () => {
-    this.setState({ showConfirmation: false });
+    this.setState({
+      open: false,
+      showConfirmation: false
+    });
   };
 
   onConfirm = () => {
-    this.setState({ showConfirmation: false });
+    this.setState({
+      open: false,
+      showConfirmation: false
+    });
+
     this.update();
-    this.reload();
   };
 
   onOpenLocalisation = () => {
@@ -139,10 +140,21 @@ export default class Edition extends React.Component {
     };
 
     this.props.client.Actes.update(
-      this.props.id,
+      this.state.id,
       params,
-      result => {
-        console.log(result);
+      acte => {
+        this.setState({
+          date: moment(acte.doneAt).toDate(),
+          localisation: acte.localisation,
+          code: acte.code,
+          cotation: acte.cotation,
+          description: acte.description,
+          montant: acte.montant
+        });
+
+        if (this.props.update) {
+          this.props.update(acte);
+        }
       },
       error => {
         console.log(error);
@@ -158,7 +170,6 @@ export default class Edition extends React.Component {
     let montant = this.state.montant;
     let description = this.state.description;
 
-    console.log(this.state);
     return (
       <React.Fragment>
         <Modal
@@ -193,9 +204,7 @@ export default class Edition extends React.Component {
                   label="Localisation"
                   placeholder="Num. des dents"
                   value={localisation}
-                  error={
-                    toISOLocalisation(this.state.localisation).length % 2 !== 0
-                  }
+                  error={toISOLocalisation(localisation).length % 2 !== 0}
                   onChange={(e, d) => this.setState({ localisation: d.value })}
                   onBlur={() => this.inputContentFormating()}
                 />
@@ -203,13 +212,19 @@ export default class Edition extends React.Component {
                   label="Code"
                   placeholder="Code de l'acte"
                   value={code}
+                  onChange={(e, d) => this.setState({ code: d.value })}
                 />
-                <Form.Input label="Cotation" value={cotation} width={1} />
+                <Form.Input
+                  label="Cotation"
+                  value={cotation}
+                  width={1}
+                  onChange={(e, d) => this.setState({ cotation: d.value })}
+                />
                 <Form.Input label="Montant" width={10}>
                   <Montant
                     montant={montant}
                     onChange={montant => {
-                      console.log(montant);
+                      this.setState({ montant: montant });
                     }}
                   />
                 </Form.Input>
@@ -218,6 +233,7 @@ export default class Edition extends React.Component {
                 label="Description"
                 placeholder="Description de l'acte sélectionné"
                 value={description}
+                onChange={(e, d) => this.setState({ description: d.value })}
               />
               <div style={{ height: "320px", overflow: "auto" }}>
                 <Accordion styled={true} fluid={true}>
@@ -245,6 +261,7 @@ export default class Edition extends React.Component {
             </Form>
           </Modal.Content>
           <Modal.Actions>
+            <Button content="Annuler" color="red" onClick={this.onClose} />
             <Button content="Valider" color="blue" onClick={this.onValider} />
           </Modal.Actions>
         </Modal>

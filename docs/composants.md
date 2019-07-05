@@ -40,15 +40,6 @@ La recherche n'est pas effectuée si la date ou la localisation sont NULL.
 | search | object | Documentation semantic-ui-react [Search](https://react.semantic-ui.com/modules/search) |
 | searchInputLength | number | Nombre minimum de caractères pour déclencher la recherche d'actes |
 
-## Edition
-Edition d'un acte validé pour un patient
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| id | number | Id de l'acte à éditer. Par défaut id = 0 |
-| open | bool | La modal s'ouvre si open est true. Par défaut, open = false |
-
 ## Favoris
 Modal Semantic de lecture et de configuration des actes favoris
 #### Props du composant
@@ -172,6 +163,16 @@ Composant de facturation d'un acte CCAM
 | hidden | bool | Cacher l'interface du composant de tarification |
 | modificateurs | string | Modificateurs appliqués à l'acte, par défaut une chaîne de caractères vide |
 | success | func | Callback succès de la tarification |
+
+## Edition
+Edition d'un acte validé pour un patient
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| id | number | Id de l'acte à éditer. Par défaut id = 0 |
+| open | bool | La modal s'ouvre si open est true. Par défaut, open = false |
+| newActe | func | Callback permettant d'avoir les nouvelles données de l'acte |
 
 ## Localisations
 Grille de saisie des localisations dentaires

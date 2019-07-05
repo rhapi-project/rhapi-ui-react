@@ -5,6 +5,7 @@ import { Button, Icon, Modal, Ref, Table } from "semantic-ui-react";
 import _ from "lodash";
 import { tarif } from "../lib/Helpers";
 import Actions from "../Shared/Actions";
+import Edition from "./Edition";
 import moment from "moment";
 
 const propDefs = {
@@ -156,7 +157,9 @@ export default class Historique extends React.Component {
       endAt: this.props.endAt,
       localisation: this.props.localisation,
       showConfirm: false,
-      message: ""
+      message: "",
+      idEditer: 0,
+      showEdit: false
     });
 
     this.reload(
@@ -553,7 +556,31 @@ export default class Historique extends React.Component {
 
   onEdit = id => {
     // l'id de l'acte passé en paramètre
-    console.log(`${id} - Action : onEdit`);
+    this.setState({
+      idEditer: id,
+      showEdit: true
+    });
+  };
+
+  onClose = close => {
+    this.setState({ showEdit: close });
+  };
+
+  update = acte => {
+    this.setState({
+      showEdit: false
+    });
+
+    this.reload(
+      this.state.idPatient,
+      this.state.limit,
+      this.state.offset,
+      this.state.sort,
+      this.state.order,
+      this.state.startAt,
+      this.state.endAt,
+      this.state.localisation
+    );
   };
 
   onDelete = (id, code) => {
@@ -821,6 +848,17 @@ export default class Historique extends React.Component {
             </Ref>
           </Modal.Actions>
         </Modal>
+        {!_.isEqual(this.state.idEditer, 0) ? (
+          <Edition
+            client={this.props.client}
+            id={this.state.idEditer}
+            open={this.state.showEdit}
+            onClose={this.onClose}
+            update={this.update}
+          />
+        ) : (
+          ""
+        )}
       </React.Fragment>
     );
   }
