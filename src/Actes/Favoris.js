@@ -69,47 +69,44 @@ export default class Favoris extends React.Component {
     // faire l'ouverture de la modal
   }
 
-  renderChapitre = (chapitreObj, level) => {
-    //let chapJSX = null;
-    /*if (_.isEmpty(chapitreObj.titre)) { // c'est le root
-      let titres = null;*/
-    //console.log("appel renderChap");
-    //console.log(chapitreObj);
+  renderChapitre = (chapitre, level) => {
     let nextLevel = level + 1;
     return (
       <Accordion
-        key={level + chapitreObj.titre}
-        style={{ marginLeft: level * 15, marginTop: 0, marginBottom: 0 }}
+        key={level}
+        style={{ marginLeft: level / 10, marginTop: 0, marginBottom: 0 }}
       >
         <Accordion.Title
           active={
             level === 0
               ? true
-              : level >= this.state.activeLevel &&
-                this.state.activeChapitre === level + chapitreObj.titre
+              : level === this.state.activeLevel ||
+                this.state.activeLevel === parseInt(level / 10) - 1
           }
-          onClick={() =>
+          onClick={(e, d) => {
+            //console.log(level === this.state.activeLevel);
+            //console.log((this.state.activeLevel === parseInt(level / 10) - 1));
             this.setState({
-              activeLevel: level,
-              activeChapitre: level + chapitreObj.titre
-            })
-          }
+              activeLevel: d.active ? parseInt(level / 10) - 1 : level
+              //activeChapitre: level + chapitre.titre
+            });
+          }}
         >
           {/*_.isEmpty(chapitreObj.titre) ? "" : <Icon name="dropdown" /> */}
           <Icon name="dropdown" />
-          <strong>{chapitreObj.titre ? chapitreObj.titre : "FAVORIS"}</strong>
+          <strong>{chapitre.titre ? chapitre.titre : "FAVORIS"}</strong>
         </Accordion.Title>
         <Accordion.Content
           active={
             level === 0
               ? true
-              : level >= this.state.activeLevel &&
-                this.state.activeChapitre === level + chapitreObj.titre
+              : level === this.state.activeLevel ||
+                this.state.activeLevel === parseInt(level / 10) - 1
           }
         >
-          {_.map(chapitreObj.chapitres, chapitre => {
-            //console.log(chapitre);
-            return this.renderChapitre(chapitre, nextLevel);
+          {_.map(chapitre.chapitres, (chapitre, key) => {
+            //console.log(key);
+            return this.renderChapitre(chapitre, nextLevel * 10 + key);
           })}
           <Table
             basic="very"
@@ -118,7 +115,7 @@ export default class Favoris extends React.Component {
             selectable={true}
           >
             <Table.Body>
-              {_.map(chapitreObj.actes, (acte, key) => (
+              {_.map(chapitre.actes, (acte, key) => (
                 <Acte
                   key={key}
                   index={key}
@@ -138,50 +135,6 @@ export default class Favoris extends React.Component {
         </Accordion.Content>
       </Accordion>
     );
-
-    /*return (
-        <React.Fragment>
-          {!_.isEmpty(chapitreObj.chapitres)
-            ? <React.Fragment>
-                <Accordion>
-                  {_.times(chapitreObj.chapitres.length, i => (
-                    <React.Fragment>
-                      <Accordion.Title key={i} active={true}>
-                        <Icon name="dropdown" />
-                        {chapitreObj.chapitres[i].titre}
-                      </Accordion.Title>
-                      <Accordion.Content key={i} active={true}>
-                        {this.renderChapitre(chapitreObj.chapitres[i])}
-                      </Accordion.Content>
-                    </React.Fragment>
-                  ))}
-                </Accordion>
-                <Table basic="very" style={{ margin: 0 }} size="small" selectable={true}>
-                  <Table.Body>
-                    {_.times(chapitreObj.actes.length, i => (
-                      <Acte
-                        key={i}
-                        index={i}
-                        code={chapitreObj.actes[i].code}
-                        cotation={chapitreObj.actes[i].cotation}
-                        configuration={this.state.configuration}
-                        description={chapitreObj.actes[i].description}
-                        montant={chapitreObj.actes[i].montant}
-                        onSelection={index =>
-                          this.setState({ selectedIndex: index })
-                        }
-                        //selected={i === this.state.selectedIndex}
-                      />
-                    ))}
-                  </Table.Body>
-                </Table>
-              </React.Fragment>
-            : null
-          }
-        </React.Fragment>
-      );
-      //return chapJSX;
-    //}*/
   };
 
   render() {
@@ -246,53 +199,18 @@ export default class Favoris extends React.Component {
             ) : (
               <div>
                 {!_.isEmpty(this.state.favoris) ? (
-                  <div>
-                    {/*<Table basic="very" size="small" style={{ margin: 0 }} selectable={true}>
-                        <Table.Body>
-                          {_.times(this.state.favoris.chapitres.length, i => (
-                            <Chapitre
-                              key={i}
-                              chapitre={this.state.favoris.chapitres[i]}
-                              level={0}
-                            />
-                          ))}
-                        </Table.Body>
-                      </Table>
-                      <Divider style={{ margin: 0 }}/>
-                      <Table basic="very" style={{ margin: 0 }} size="small" selectable={true}>
-                        <Table.Body>
-                          {_.times(this.state.favoris.actes.length, i => (
-                            <Acte
-                              key={i}
-                              index={i}
-                              code={this.state.favoris.actes[i].code}
-                              cotation={this.state.favoris.actes[i].cotation}
-                              configuration={this.state.configuration}
-                              description={this.state.favoris.actes[i].description}
-                              montant={this.state.favoris.actes[i].montant}
-                              onSelection={index =>
-                                this.setState({ selectedIndex: index })
-                              }
-                              selected={i === this.state.selectedIndex}
-                            />
-                          ))}
-                        </Table.Body>
-                      </Table>*/}
-                    {this.renderChapitre(this.state.favoris, 0)}
-                  </div>
+                  <div>{this.renderChapitre(this.state.favoris, 0)}</div>
                 ) : null}
-                {this.state.configuration ? (
-                  <Button
-                    circular={true}
-                    icon="add"
-                    style={{ marginTop: "15px" }}
-                  />
-                ) : (
-                  ""
-                )}
               </div>
             )}
           </Modal.Content>
+          {this.state.configuration ? (
+            <Modal.Actions>
+              <Button content="Ajouter un chapitre" />
+              <Button content="Ajouter un acte" />
+              <Button content="Supprimer un acte" />
+            </Modal.Actions>
+          ) : null}
           <Modal.Actions>
             <Checkbox
               style={{ float: "left" }}
@@ -349,7 +267,6 @@ class Chapitre extends React.Component {
             <strong>{this.props.chapitre.titre}</strong>
           </Table.Cell>
         </Table.Row>
-        {/* <Chapitre titre="couco"/> */}
       </React.Fragment>
     );
   }
@@ -416,7 +333,7 @@ class Edit extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <Form unstackable={true}>
+        {/*<Form unstackable={true}>
           <Form.Group widths="equal">
             <Form.Input label="Description" />
           </Form.Group>
@@ -457,7 +374,7 @@ class Edit extends React.Component {
           onSelection={acte => {}}
           table={{ celled: true, style: { width: "100%" } }}
           showPagination={true}
-        />
+        />*/}
       </React.Fragment>
     );
   }
