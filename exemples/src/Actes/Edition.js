@@ -31,13 +31,15 @@ export default class ActesEdition extends React.Component {
         acte => {
           this.setState({ 
             acte: acte,
-            id: acte.id
+            id: acte.id,
+            open: false
           });
         },
         error => {
           this.setState({ 
             acte: null,
-            id: 0
+            id: 0,
+            open: false
           });
         }
       )
@@ -53,6 +55,17 @@ export default class ActesEdition extends React.Component {
 
   onEdit = () => {
     this.setState({ open: true });
+  }
+
+  onClose = (close) => {
+    this.setState({ open: close });
+  }
+
+  update = acte => {
+    this.setState({
+      acte: acte,
+      open: false
+    })
   }
 
   render() {
@@ -118,6 +131,8 @@ export default class ActesEdition extends React.Component {
               client={client}
               id={this.state.id}
               open={this.state.open}
+              onClose={this.onClose}
+              update={this.update}
             />
           </React.Fragment>
         : ""
