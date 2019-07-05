@@ -88,6 +88,11 @@ export default class Edition extends React.Component {
         },
         error => {}
       );
+    } else {
+      this.setState({
+        id: next.id,
+        open: next.open
+      });
     }
   }
 
