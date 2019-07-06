@@ -46,9 +46,7 @@ export default class Favoris extends React.Component {
     actes: [],
     configuration: false,
     favoris: {},
-    selectedIndex: null,
-    activeLevel: 0,
-    activeChapitre: null
+    selectedIndex: null
   };
 
   componentWillMount() {
@@ -56,9 +54,7 @@ export default class Favoris extends React.Component {
     this.props.client.Configuration.read(
       "actesFavoris",
       result => {
-        console.log(result);
         this.setState({ favoris: result });
-        //this.setState({ actes: result.actes });
       },
       error => {
         console.log(error);
@@ -70,47 +66,35 @@ export default class Favoris extends React.Component {
   }
 
   renderChapitre = (chapitre, level) => {
-    let nextLevel = level + 1;
+    let active = chapitre.active;
     return (
       <Accordion
-        key={level}
-        style={{ marginLeft: level / 10, marginTop: 0, marginBottom: 0 }}
+        key={chapitre.titre + Math.random() /* unique key */}
+        style={{ marginLeft: level, marginTop: 0, marginBottom: 0 }}
       >
         <Accordion.Title
-          active={
-            level === 0
-              ? true
-              : level === this.state.activeLevel ||
-                this.state.activeLevel === parseInt(level / 10) - 1
-          }
+          active={active}
           onClick={(e, d) => {
-            //console.log(level === this.state.activeLevel);
-            //console.log((this.state.activeLevel === parseInt(level / 10) - 1));
-            this.setState({
-              activeLevel: d.active ? parseInt(level / 10) - 1 : level
-              //activeChapitre: level + chapitre.titre
-            });
+            // Pour Divin :
+            // - chapitre est une référence à this.state.favoris[le-chapitre-concerné]
+            // - toute modification sur chapitre est une modification sur this.state.favoris[le-chapitre-concerné]
+            // - il faudra simplement penser à ne pas sauvegarder les valeurs 'active' présentes
+            //   dans l'objet favoris, lors de sa validation vers configuration (faire des _unset)
+            // !!! Commentaire à supprimer une fois lu !!!
+            chapitre.active = !active;
+            this.setState({}); // force a new render
           }}
         >
-          {/*_.isEmpty(chapitreObj.titre) ? "" : <Icon name="dropdown" /> */}
           <Icon name="dropdown" />
-          <strong>{chapitre.titre ? chapitre.titre : "FAVORIS"}</strong>
+          <b>{chapitre.titre ? chapitre.titre : "FAVORIS"}</b>
         </Accordion.Title>
-        <Accordion.Content
-          active={
-            level === 0
-              ? true
-              : level === this.state.activeLevel ||
-                this.state.activeLevel === parseInt(level / 10) - 1
-          }
-        >
+        <Accordion.Content active={active}>
           {_.map(chapitre.chapitres, (chapitre, key) => {
-            //console.log(key);
-            return this.renderChapitre(chapitre, nextLevel * 10 + key);
+            return this.renderChapitre(chapitre, level + 10); // indentation de 10 px
           })}
           <Table
             basic="very"
-            style={{ margin: 0 }}
+            style={{ marginLeft: 22 }} // alignement du texte (largeur de l'icône dropdown du titre)
             size="small"
             selectable={true}
           >
