@@ -19,14 +19,16 @@ const propDefs = {
   example: "Modal",
   propDocs: {
     id: "Id de l'acte à éditer. Par défaut id = 0",
-    open: "La modal s'ouvre si open est true. Par défaut, open = false",
-    newActe: "Callback permettant d'avoir les nouvelles données de l'acte"
+    open: "La modale s'ouvre si open est true. Par défaut, open = false",
+    onClose: "Callback permettant de fermer la modale.",
+    update: "Callback qui renvoie l'acte modifié (avec ses nouvelles données)"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
     id: PropTypes.number,
     open: PropTypes.bool,
-    newActe: PropTypes.func
+    onClose: PropTypes.func,
+    update: PropTypes.func
   }
 };
 
@@ -47,8 +49,10 @@ export default class Edition extends React.Component {
     cotation: -1,
     description: "",
     montant: -1,
+    lockRevision: -1,
     showConfirmation: false,
-    openLocalisation: false
+    openLocalisation: false,
+    showReload: false
   };
 
   componentWillMount() {
@@ -62,7 +66,8 @@ export default class Edition extends React.Component {
           code: acte.code,
           cotation: acte.cotation,
           description: acte.description,
-          montant: acte.montant
+          montant: acte.montant,
+          lockRevision: acte.lockRevision
         });
       },
       error => {}
@@ -83,7 +88,8 @@ export default class Edition extends React.Component {
             code: acte.code,
             cotation: acte.cotation,
             description: acte.description,
-            montant: acte.montant
+            montant: acte.montant,
+            lockRevision: acte.lockRevision
           });
         },
         error => {}
@@ -97,7 +103,9 @@ export default class Edition extends React.Component {
   }
 
   onClose = () => {
-    this.props.onClose(false);
+    if (this.props.onClose) {
+      this.props.onClose(false);
+    }
   };
 
   inputContentFormating = () => {
@@ -112,20 +120,46 @@ export default class Edition extends React.Component {
     });
   };
 
-  onCancel = () => {
+  onCancelConfirmation = () => {
     this.setState({
       open: false,
       showConfirmation: false
     });
   };
 
-  onConfirm = () => {
+  onConfirmConfirmation = () => {
     this.setState({
       open: false,
       showConfirmation: false
     });
 
     this.update();
+  };
+
+  onCancelReload = () => {
+    this.setState({ showReload: false });
+  };
+
+  onConfirmReload = () => {
+    this.setState({ showReload: false });
+
+    this.props.client.Actes.read(
+      this.state.id,
+      {},
+      acte => {
+        this.setState({
+          id: acte.id,
+          date: moment(acte.doneAt).toDate(),
+          localisation: acte.localisation,
+          code: acte.code,
+          cotation: acte.cotation,
+          description: acte.description,
+          montant: acte.montant,
+          lockRevision: acte.lockRevision
+        });
+      },
+      error => {}
+    );
   };
 
   onOpenLocalisation = () => {
@@ -135,35 +169,47 @@ export default class Edition extends React.Component {
   };
 
   update = () => {
-    let params = {
-      doneAt: this.state.date,
-      localisation: this.state.localisation,
-      code: this.state.code,
-      cotation: this.state.cotation,
-      description: this.state.description,
-      montant: this.state.montant
-    };
-
-    this.props.client.Actes.update(
+    this.props.client.Actes.read(
       this.state.id,
-      params,
+      {},
       acte => {
-        this.setState({
-          date: moment(acte.doneAt).toDate(),
-          localisation: acte.localisation,
-          code: acte.code,
-          cotation: acte.cotation,
-          description: acte.description,
-          montant: acte.montant
-        });
+        if (acte.lockRevision === this.state.lockRevision) {
+          let params = {
+            doneAt: this.state.date,
+            localisation: this.state.localisation,
+            code: this.state.code,
+            cotation: this.state.cotation,
+            description: this.state.description,
+            montant: this.state.montant
+          };
 
-        if (this.props.update) {
-          this.props.update(acte);
+          this.props.client.Actes.update(
+            this.state.id,
+            params,
+            acte => {
+              this.setState({
+                date: moment(acte.doneAt).toDate(),
+                localisation: acte.localisation,
+                code: acte.code,
+                cotation: acte.cotation,
+                description: acte.description,
+                montant: acte.montant,
+                lockRevision: acte.lockRevision
+              });
+
+              if (this.props.update) {
+                this.props.update(acte);
+              }
+            },
+            error => {
+              console.log(error);
+            }
+          );
+        } else {
+          this.setState({ showReload: true });
         }
       },
-      error => {
-        console.log(error);
-      }
+      error => {}
     );
   };
 
@@ -275,7 +321,7 @@ export default class Edition extends React.Component {
             <p>Êtes-vous sûr de vouloir modifier cette acte ?</p>
           </Modal.Content>
           <Modal.Actions>
-            <Button onClick={this.onCancel}>
+            <Button onClick={this.onCancelConfirmation}>
               <Icon name="ban" color="red" />
               Non
             </Button>
@@ -286,7 +332,32 @@ export default class Edition extends React.Component {
                 }
               }}
             >
-              <Button color="blue" onClick={this.onConfirm}>
+              <Button color="blue" onClick={this.onConfirmConfirmation}>
+                <Icon name="check" color="green" />
+                Oui
+              </Button>
+            </Ref>
+          </Modal.Actions>
+        </Modal>
+        <Modal size="tiny" open={this.state.showReload}>
+          <Modal.Content>
+            <p>
+              L'acte sélectionné a été déjà modifié. Voulez-vous recharger ?
+            </p>
+          </Modal.Content>
+          <Modal.Actions>
+            <Button onClick={this.onCancelReload}>
+              <Icon name="ban" color="red" />
+              Non
+            </Button>
+            <Ref
+              innerRef={node => {
+                if (this.state.showReload) {
+                  node.focus();
+                }
+              }}
+            >
+              <Button color="blue" onClick={this.onConfirmReload}>
                 <Icon name="check" color="green" />
                 Oui
               </Button>
