@@ -82,6 +82,44 @@ const valideLocalisation = [
   "30"
 ];
 
+const secteur03 = ["14", "15", "16", "17", "18", "54", "55"];
+
+const secteur04 = [
+  "11",
+  "12",
+  "13",
+  "21",
+  "22",
+  "23",
+  "51",
+  "52",
+  "53",
+  "61",
+  "62",
+  "63"
+];
+
+const secteur05 = ["24", "25", "26", "27", "28", "64", "65"];
+
+const secteur06 = ["34", "35", "36", "37", "38", "74", "75"];
+
+const secteur07 = [
+  "31",
+  "32",
+  "33",
+  "41",
+  "42",
+  "43",
+  "71",
+  "72",
+  "73",
+  "81",
+  "82",
+  "83"
+];
+
+const secteur08 = ["44", "45", "46", "47", "48", "84", "85"];
+
 const spacedLocalisation = localisationStr => {
   let l = toISOLocalisation(localisationStr);
   let s = "";
@@ -103,4 +141,15 @@ const toISOLocalisation = localisation => {
   return _.replace(localisation, /[\s,\?.;\/:\-a-zA-Z]/g, "");
 };
 
-export { spacedLocalisation, tarif, tarifDotNotation, toISOLocalisation };
+export {
+  spacedLocalisation,
+  tarif,
+  tarifDotNotation,
+  toISOLocalisation,
+  secteur03,
+  secteur04,
+  secteur05,
+  secteur06,
+  secteur07,
+  secteur08
+};

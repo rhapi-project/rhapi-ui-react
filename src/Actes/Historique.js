@@ -1,12 +1,23 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
+
 import { Button, Icon, Modal, Ref, Table } from "semantic-ui-react";
+
 import _ from "lodash";
-import { tarif } from "../lib/Helpers";
+import moment from "moment";
+
+import {
+  tarif,
+  secteur03,
+  secteur04,
+  secteur05,
+  secteur06,
+  secteur07,
+  secteur08
+} from "../lib/Helpers";
 import Actions from "../Shared/Actions";
 import Edition from "./Edition";
-import moment from "moment";
 
 const propDefs = {
   description: "Historique des actes d'un patient",
@@ -246,43 +257,6 @@ export default class Historique extends React.Component {
   ) => {
     let n = 0; // pour incrémenter les champs q1,q2,...
     let params = {};
-    let secteur04 = [
-      "11",
-      "12",
-      "13",
-      "21",
-      "22",
-      "23",
-      "51",
-      "52",
-      "53",
-      "61",
-      "62",
-      "63"
-    ];
-
-    let secteur03 = ["14", "15", "16", "17", "18", "54", "55"];
-
-    let secteur05 = ["24", "25", "26", "27", "28", "64", "65"];
-
-    let secteur07 = [
-      "31",
-      "32",
-      "33",
-      "41",
-      "42",
-      "43",
-      "71",
-      "72",
-      "73",
-      "81",
-      "82",
-      "83"
-    ];
-
-    let secteur06 = ["34", "35", "36", "37", "38", "74", "75"];
-
-    let secteur08 = ["44", "45", "46", "47", "48", "84", "85"];
 
     if (localisation) {
       let dents = localisation.split(" ");
@@ -383,6 +357,7 @@ export default class Historique extends React.Component {
     _.set(params, "sort", sort);
     _.set(params, "order", order);
 
+    console.log(params);
     return params;
   };
 
@@ -572,7 +547,7 @@ export default class Historique extends React.Component {
     });
 
     this.reload(
-      this.state.idPatient,
+      acte.idPatient,
       this.state.limit,
       this.state.offset,
       this.state.sort,
