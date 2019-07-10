@@ -357,7 +357,6 @@ export default class Historique extends React.Component {
     _.set(params, "sort", sort);
     _.set(params, "order", order);
 
-    console.log(params);
     return params;
   };
 
