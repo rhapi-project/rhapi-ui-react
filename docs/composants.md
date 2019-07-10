@@ -9,6 +9,20 @@ Détail d'un acte tarifé
 | ---- | ----- | ------ |
 | detail | object | Objet contenant le détail d'un acte. Toutes les informations sur un acte tarifé, la date, l'activité, la grille de tarification, les modificateurs appliqués, la phase et le tarif. |
 
+## Fiche
+Composant de présentation d'une fiche d'un acte. Celui-ci utilise le composant de Tarification
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| codActe | string | Code de l'acte CCAM, par défaut "" |
+| codActivite | string | Code de l'activité, par défaut "1" |
+| codDom | number | Code du DOM, par défaut c'est la métropole. Code 0 |
+| codGrille | number | Code grille, par défaut 0 |
+| codPhase | number | Code phase, par défaut 0 |
+| date | string | Date de la tarification de l'acte, au format ISO. Par défaut la date du jour |
+| modificateurs | string | Modificateurs appliqués à l'acte, par défaut une chaîne de caractères vide |
+
 ## Search
 Composant pour la recherche des actes en CCAM (par code CCAM ou mot-clé). Retourne la liste des actes sous forme d'un tableau d'objets JSON. 
 La recherche n'est pas effectuée si la date ou la localisation sont NULL.
@@ -25,20 +39,6 @@ La recherche n'est pas effectuée si la date ou la localisation sont NULL.
 | onSelectionChange | func | Callback pour retourner l'acte sélectionné |
 | search | object | Documentation semantic-ui-react [Search](https://react.semantic-ui.com/modules/search) |
 | searchInputLength | number | Nombre minimum de caractères pour déclencher la recherche d'actes |
-
-## Fiche
-Composant de présentation d'une fiche d'un acte. Celui-ci utilise le composant de Tarification
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| codActe | string | Code de l'acte CCAM, par défaut "" |
-| codActivite | string | Code de l'activité, par défaut "1" |
-| codDom | number | Code du DOM, par défaut c'est la métropole. Code 0 |
-| codGrille | number | Code grille, par défaut 0 |
-| codPhase | number | Code phase, par défaut 0 |
-| date | string | Date de la tarification de l'acte, au format ISO. Par défaut la date du jour |
-| modificateurs | string | Modificateurs appliqués à l'acte, par défaut une chaîne de caractères vide |
 
 ## SaisieDentaire
 Composant correspondant à une ligne du tableau de saisie des actes pour les dentistes
@@ -76,16 +76,14 @@ Menu d'actions à effectuer
 | dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
 | id | any | Identifiant de la ligne sur laquelle une action est effectuée |
 
-## DateRange
+## Periode
 Période, début et fin d'une période
 #### Props du composant
 | Props | Type | Description |
 | ---- | ----- | ------ |
-| open | bool | Ouverture de la modal |
-| startAt | string | Date de début de la période. Par défaut la date du jour. |
-| endAt | string | Date de fin de la période. Par défaut une semaine après la date du jour. |
-| onRangeChange | func | Callback au changement de la période |
-| onClose | func | Callback à la fermeture de la modal |
+| startYear | number | La première année qui sera affichée. Par défaut l'année en cours |
+| onPeriodeChange | func | Callback au changement de la période. C'est une fonction qui prend 2 paramètres, début et fin de la période (inclus).
+Les valeurs de ces paramètres sont NULL si la durée est indéterminée. |
 
 ## Montant
 Input de saisie d'un montant au format français
@@ -95,15 +93,6 @@ Input de saisie d'un montant au format français
 | input | object | Documentation semantic-ui-react [Input](https://react.semantic-ui.com/elements/input) |
 | montant | number | Montant affiché |
 | onChange | func | Callback au changement du montant |
-
-## Periode
-Période, début et fin d'une période
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| startYear | number | La première année qui sera affichée. Par défaut l'année en cours |
-| onPeriodeChange | func | Callback au changement de la période. C'est une fonction qui prend 2 paramètres, début et fin de la période (inclus).
-Les valeurs de ces paramètres sont NULL si la durée est indéterminée. |
 
 ## Table
 Composant montrant sous forme d'un tableau les actes obtenus après une recherche par mot clé.
@@ -135,6 +124,44 @@ Composant montrant sous forme d'un tableau les actes obtenus après une recherch
 | btnMore | object | Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}" |
 | mode | string | mode de pagination 'pages' ou 'more', par défaut "pages" |
 
+## Edition
+Edition d'un acte validé pour un patient
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| id | number | Id de l'acte à éditer. Par défaut id = 0 |
+| open | bool | La modale s'ouvre si open est true. Par défaut, open = false |
+| onClose | func | Callback permettant de fermer la modale. |
+| update | func | Callback qui renvoie l'acte modifié (avec les nouvelles données de l'acte) |
+
+## Favoris
+Modal Semantic de lecture et de configuration des actes favoris
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| codActivite | string | Code de l'activité, par défaut '1' |
+| codDom | number | Code du DOM, par défaut c'est la métropole. Code 0 |
+| codGrille | number | Code grille, par défaut 0 |
+| codPhase | number | Code phase, par défaut 0 |
+| executant | string | Code d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes) |
+| index | number | Indice de la ligne (dans la grille de saisie des actes) à partir de laquelle le composant Actes.Favoris a été appelé. |
+| open | bool | Ouverture de la modal |
+| onClose | func | Callback à la fermeture de la modal |
+| onSelection | func | Callback à la selection et validation d'un acte. Cette fonction prend en 1er paramètre l'indice de la ligne et en 2ème paramètre l'objet acte sélectionné. |
+
+## DateRange
+Période, début et fin d'une période
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| open | bool | Ouverture de la modal |
+| startAt | string | Date de début de la période. Par défaut la date du jour. |
+| endAt | string | Date de fin de la période. Par défaut une semaine après la date du jour. |
+| onRangeChange | func | Callback au changement de la période |
+| onClose | func | Callback à la fermeture de la modal |
+
 ## Tarification
 Composant de facturation d'un acte CCAM
 #### Props du composant
@@ -152,28 +179,6 @@ Composant de facturation d'un acte CCAM
 | hidden | bool | Cacher l'interface du composant de tarification |
 | modificateurs | string | Modificateurs appliqués à l'acte, par défaut une chaîne de caractères vide |
 | success | func | Callback succès de la tarification |
-
-## Favoris
-Modal Semantic de lecture et de configuration des actes favoris
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| index | number | Indice de la ligne (dans la grille de saisie des actes) à partir de laquelle le composant Actes.Favoris a été appelé. |
-| open | bool | Ouverture de la modal |
-| onClose | func | Callback à la fermeture de la modal |
-| onSelection | func | Callback à la selection et validation d'un acte. Cette fonction prend en 1er paramètre l'indice de la ligne et en 2ème paramètre l'objet acte sélectionné. |
-
-## Edition
-Edition d'un acte validé pour un patient
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| id | number | Id de l'acte à éditer. Par défaut id = 0 |
-| open | bool | La modale s'ouvre si open est true. Par défaut, open = false |
-| onClose | func | Callback permettant de fermer la modale. |
-| update | func | Callback qui renvoie l'acte modifié (avec les nouvelles données de l'acte) |
 
 ## Localisations
 Grille de saisie des localisations dentaires
@@ -210,7 +215,16 @@ Ce composant est une modal Semantic de recherche d'un acte. Il intègre un date 
 | modificateurs | string | Modificateurs appliqués à l'acte sélectionné. Par défaut "" |
 | qualificatifs | string | Qualificatifs |
 | montant | number | Montant de l'acte sélectionné |
-| onValidation | func | Callback à la validation |
+| onValidation | func | Callback à la validation. Paramètres : 
+- index de la ligne
+ - code de l'acte sélectionné
+ - description de l'acte
+- date au format ISO
+ - localisation
+ - cotation
+ - modificateurs
+ - qualificatifs
+- montant |
 
 ## Saisie
 Tableau de saisie des actes pour les dentistes

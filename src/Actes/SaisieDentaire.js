@@ -187,9 +187,11 @@ export default class SaisieDentaire extends React.Component {
           </Table.Cell>
           <Table.Cell
             textAlign="left"
-            onClick={() =>
-              alert("Ouvrir la recherche d'un acte dans les favoris")
-            }
+            onClick={() => {
+              if (this.props.onSearchFavoris) {
+                this.props.onSearchFavoris(this.props.index);
+              }
+            }}
           >
             {this.props.description}
           </Table.Cell>

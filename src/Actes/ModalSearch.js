@@ -60,7 +60,11 @@ const propDefs = {
       'Modificateurs appliqués à l\'acte sélectionné. Par défaut ""',
     montant: "Montant de l'acte sélectionné",
     qualificatifs: "Qualificatifs",
-    onValidation: "Callback à la validation"
+    onValidation:
+      "Callback à la validation. Paramètres : \n" +
+      "- index de la ligne\n - code de l'acte sélectionné\n - description de l'acte\n" +
+      "- date au format ISO\n - localisation\n - cotation\n - modificateurs\n - qualificatifs\n" +
+      "- montant"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
@@ -128,7 +132,7 @@ export default class ModalSearch extends React.Component {
       modificateurs: this.props.modificateurs,
       qualificatifs: this.props.qualificatifs,
       description: this.props.description,
-      montant: 0,
+      montant: this.props.montant,
       openLocalisation: false,
       openModificateurs: false,
       descriptionType: 1

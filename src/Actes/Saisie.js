@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Button, Message, Modal, Table } from "semantic-ui-react";
+import Favoris from "./Favoris";
 import SaisieDentaire from "./SaisieDentaire";
 import ModalSearch from "./ModalSearch";
 import Localisations from "../Shared/Localisations";
@@ -62,6 +63,7 @@ export default class Saisie extends React.Component {
     allModificateurs: [],
     selectedDate: null, // new
     selectedIndex: null,
+    selectedFavoris: null, // new
     selectedLocalisation: null // new
   };
 
@@ -387,7 +389,9 @@ export default class Saisie extends React.Component {
                   onDuplicate={index => this.onDuplicate(index)}
                   onEdit={index => this.setState({ selectedIndex: index })}
                   onInsertion={index => this.onInsertion(index)}
-                  onSearchFavoris={() => {}}
+                  onSearchFavoris={index =>
+                    this.setState({ selectedFavoris: index })
+                  }
                 />
               ))}
             </Table.Body>
@@ -499,6 +503,33 @@ export default class Saisie extends React.Component {
               }}
             />
           ) : null}
+
+          <Favoris
+            client={this.props.client}
+            index={this.state.selectedFavoris}
+            codGrille={this.props.codGrille}
+            executant={this.props.executant} // new
+            open={!_.isNull(this.state.selectedFavoris)}
+            onClose={() => this.setState({ selectedFavoris: null })}
+            onSelection={(index, acte) => {
+              let date = moment().toISOString();
+              if (this.existActe(index)) {
+                // on garde la même date
+                date = this.state.actes[index].date;
+              }
+              this.onValidation(
+                index,
+                acte.code,
+                acte.description,
+                date,
+                acte.localisation,
+                acte.cotation,
+                acte.modificateurs,
+                acte.qualificatifs,
+                acte.montant
+              );
+            }}
+          />
 
           <Modal size="mini" open={this.state.error !== 0}>
             <Modal.Header>Mise à jour de l'acte</Modal.Header>
