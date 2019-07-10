@@ -21,7 +21,8 @@ const propDefs = {
     id: "Id de l'acte à éditer. Par défaut id = 0",
     open: "La modale s'ouvre si open est true. Par défaut, open = false",
     onClose: "Callback permettant de fermer la modale.",
-    update: "Callback qui renvoie l'acte modifié (avec ses nouvelles données)"
+    update:
+      "Callback qui renvoie l'acte modifié (avec les nouvelles données de l'acte)"
   },
   propTypes: {
     client: PropTypes.any.isRequired,

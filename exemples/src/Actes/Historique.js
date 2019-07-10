@@ -143,7 +143,6 @@ export default class ActesHistorique extends React.Component {
           localisation={this.state.localisation}
           startAt={this.state.startAt}
           endAt={this.state.endAt}
-          limit={1000}
         />
       </React.Fragment>
     );
