@@ -19,17 +19,18 @@ const propDefs = {
   example: "Modal",
   propDocs: {
     id: "Id de l'acte à éditer. Par défaut id = 0",
-    open: "La modale s'ouvre si open est true. Par défaut, open = false",
-    onClose: "Callback permettant de fermer la modale.",
-    update:
-      "Callback qui renvoie l'acte modifié (avec les nouvelles données de l'acte)"
+    open:
+      "La modale s'ouvre si la valeur de 'open' est égale à true. Par défaut, open = false",
+    onClose: "Callback à la fermeture de la modal",
+    onUpdate:
+      "Callback à la modification de l'acte sélectionné. Elle prend en paramètre l'acte modifié"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
     id: PropTypes.number,
     open: PropTypes.bool,
     onClose: PropTypes.func,
-    update: PropTypes.func
+    onUpdate: PropTypes.func
   }
 };
 
@@ -134,7 +135,7 @@ export default class Edition extends React.Component {
       showConfirmation: false
     });
 
-    this.update();
+    this.onUpdate();
   };
 
   onCancelReload = () => {
@@ -169,7 +170,7 @@ export default class Edition extends React.Component {
     });
   };
 
-  update = () => {
+  onUpdate = () => {
     this.props.client.Actes.read(
       this.state.id,
       {},
@@ -198,8 +199,8 @@ export default class Edition extends React.Component {
                 lockRevision: acte.lockRevision
               });
 
-              if (this.props.update) {
-                this.props.update(acte);
+              if (this.props.onUpdate) {
+                this.props.onUpdate(acte);
               }
             },
             error => {

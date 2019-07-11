@@ -10,6 +10,8 @@ const propDefs = {
   description: "Période, début et fin d'une période",
   example: "Periode",
   propDocs: {
+    labelDate: "Label de la période",
+    labelYear: "Label de l'année de la période",
     startYear:
       "La première année qui sera affichée. Par défaut l'année en cours",
     onPeriodeChange:
@@ -17,6 +19,8 @@ const propDefs = {
       "début et fin de la période (inclus).\nLes valeurs de ces paramètres sont NULL si la durée est indéterminée."
   },
   propTypes: {
+    labelDate: PropTypes.string,
+    labelYear: PropTypes.string,
     startYear: PropTypes.number,
     onPeriodeChange: PropTypes.func
   }
@@ -25,6 +29,8 @@ const propDefs = {
 export default class Periode extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
+    labelDate: "",
+    labelYear: "",
     startYear: moment().year()
   };
 
@@ -195,6 +201,7 @@ export default class Periode extends React.Component {
     return (
       <React.Fragment>
         <Form.Dropdown
+          label={this.props.labelDate}
           width={6}
           selection={true}
           options={periodeOptions.concat(this.months(printedYear))}
@@ -202,6 +209,7 @@ export default class Periode extends React.Component {
           onChange={(e, d) => this.onPeriodeChange(d.value, printedYear)}
         />
         <Form.Dropdown
+          label={this.props.labelYear}
           width={5}
           selection={true}
           options={years}

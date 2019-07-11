@@ -61,7 +61,7 @@ export default class ActesEdition extends React.Component {
     this.setState({ open: close });
   }
 
-  update = acte => {
+  onUpdate = acte => {
     this.setState({
       acte: acte,
       open: false
@@ -132,7 +132,7 @@ export default class ActesEdition extends React.Component {
               id={this.state.id}
               open={this.state.open}
               onClose={this.onClose}
-              update={this.update}
+              onUpdate={this.onUpdate}
             />
           </React.Fragment>
         : ""

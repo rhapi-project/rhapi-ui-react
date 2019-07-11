@@ -24,6 +24,7 @@ import ActesHistorique from "./Actes/Historique";
 import ActesFavoris from "./Actes/Favoris";
 import ActesSaisieValidation from "./Actes/SaisieValidation";
 import ActesEdition from "./Actes/Edition";
+import ActesNote from "./Actes/Note";
 
 // CSS
 //import "rhapi-ui-react/dist/index.css";
@@ -178,8 +179,7 @@ export default class App extends React.Component {
           <Menu.Item
             name="Favoris"
             active={
-              this.state.group === "Actes" &&
-              this.state.name === "Favoris"
+              this.state.group === "Actes" && this.state.name === "Favoris"
             }
             onClick={(e, d) => this.handleClickItem("Actes", d.name)}
           />
@@ -194,9 +194,13 @@ export default class App extends React.Component {
           <Menu.Item
             name="Edition"
             active={
-              this.state.group === "Actes" &&
-              this.state.name === "Edition"
+              this.state.group === "Actes" && this.state.name === "Edition"
             }
+            onClick={(e, d) => this.handleClickItem("Actes", d.name)}
+          />
+          <Menu.Item
+            name="Note"
+            active={this.state.group === "Actes" && this.state.name === "Note"}
             onClick={(e, d) => this.handleClickItem("Actes", d.name)}
           />
         </Menu.Menu>
@@ -225,8 +229,7 @@ export default class App extends React.Component {
           <Menu.Item
             name="DateRange"
             active={
-              this.state.group === "Shared" &&
-              this.state.name === "DateRange"
+              this.state.group === "Shared" && this.state.name === "DateRange"
             }
             onClick={(e, d) => this.handleClickItem("Shared", d.name)}
           />
@@ -322,9 +325,9 @@ class ViewExample extends React.Component {
       } else if (name === "Montant") {
         return <SharedMontant />;
       } else if (name === "Periode") {
-        return <SharedPeriode />
+        return <SharedPeriode />;
       } else if (name === "DateRange") {
-        return <SharedDateRange />
+        return <SharedDateRange />;
       } else {
         return "";
       }
@@ -339,6 +342,8 @@ class ViewExample extends React.Component {
         return <ActesFavoris />;
       } else if (name === "Edition") {
         return <ActesEdition />;
+      } else if (name === "Note") {
+        return <ActesNote />;
       } else {
         return "";
       }

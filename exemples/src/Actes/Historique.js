@@ -83,6 +83,8 @@ export default class ActesHistorique extends React.Component {
           />
           <Form.Group>
             <Shared.Periode
+              labelDate="Période"
+              labelYear="&nbsp;"
               startYear={2015}
               onPeriodeChange={(startAt, endAt) => {
                 if (startAt && endAt) {
@@ -102,6 +104,7 @@ export default class ActesHistorique extends React.Component {
               }}
             />
             <Form.Input
+              label="Localisation"
               width={5}
               placeholder="Localisation"
               onClick={() => this.setState({ openLocalisations: true })}

@@ -470,10 +470,10 @@ export default class Historique extends React.Component {
       deco.icon = "sticky note outline";
     } else if (code === "#TODO") {
       deco.color = "lightgrey";
-      deco.icon = "check";
+      deco.icon = "list";
     } else if (code === "#FSE") {
       deco.color = "lightgreen";
-      deco.icon = "list";
+      deco.icon = "check";
     }
 
     return deco;
@@ -540,7 +540,7 @@ export default class Historique extends React.Component {
     this.setState({ showEdit: close });
   };
 
-  update = acte => {
+  onUpdate = acte => {
     this.setState({
       showEdit: false
     });
@@ -828,7 +828,7 @@ export default class Historique extends React.Component {
             id={this.state.idEditer}
             open={this.state.showEdit}
             onClose={this.onClose}
-            update={this.update}
+            onUpdate={this.onUpdate}
           />
         ) : (
           ""
