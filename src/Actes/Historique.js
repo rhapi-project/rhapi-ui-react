@@ -469,7 +469,7 @@ export default class Historique extends React.Component {
       deco.color = "yellow";
       deco.icon = "sticky note outline";
     } else if (code === "#TODO") {
-      deco.color = "lightgrey";
+      deco.color = "pink";
       deco.icon = "list";
     } else if (code === "#FSE") {
       deco.color = "lightgreen";

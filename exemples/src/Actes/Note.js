@@ -57,7 +57,7 @@ export default class ActesNote extends React.Component {
       deco.color = "yellow";
       deco.icon = "sticky note outline";
     } else if (code === "#TODO") {
-      deco.color = "lightgrey";
+      deco.color = "pink";
       deco.icon = "list";
     } else if (code === "#FSE") {
       deco.color = "lightgreen";
@@ -72,6 +72,7 @@ export default class ActesNote extends React.Component {
       <Icon
         name="sticky note outline"
         color="white"
+        size="large"
         onClick={() => this.onOpen("note")}
       />
     );
@@ -80,6 +81,7 @@ export default class ActesNote extends React.Component {
       <Icon
         name="list"
         color="white"
+        size="large"
         onClick={() => this.onOpen("todo")}
       />
     );
@@ -91,17 +93,23 @@ export default class ActesNote extends React.Component {
         </p>
         <Divider hidden={true} />
         <Button
-          icon={iconNote}
-          size="massive"
+          animated
+          size="big"
           color="yellow"
           onClick={() => this.onOpen("note")}
-        />
+        >
+          <Button.Content visible={true}>{iconNote}</Button.Content>
+          <Button.Content hidden={true}>Note</Button.Content>
+        </Button>
         <Button
-          icon={iconTodo}
-          size="massive"
+          animated
+          size="big"
           color="red"
           onClick={() => this.onOpen("todo")}
-        />
+        >
+          <Button.Content visible={true}>{iconTodo}</Button.Content>
+          <Button.Content hidden={true}>Todo</Button.Content>
+        </Button>
         <Divider hidden={true} />
         <Actes.Note 
           client={client}

@@ -1,7 +1,7 @@
 import React from "react";
 import { Client } from "rhapi-client";
 import { Actes, Shared} from "rhapi-ui-react";
-import { Divider, Form } from "semantic-ui-react";
+import { Button, Divider, Form, Icon } from "semantic-ui-react";
 
 import moment from "moment";
 import _ from "lodash";
@@ -27,7 +27,10 @@ export default class ActesHistorique extends React.Component {
       localisation: "",
       openLocalisations: false,
       startAt: "",
-      endAt: ""
+      endAt: "",
+      open: false,
+      type: "",
+      acte: []
     });
   }
 
@@ -64,7 +67,41 @@ export default class ActesHistorique extends React.Component {
     this.setState({ openLocalisations: false });
   };
 
+  onOpen = (type) => {
+    this.setState({ 
+      open: true,
+      type: type
+    });
+  };
+
+  onCreate = (acte) => {
+    let newActe = this.state.acte;
+    newActe.push(acte);
+
+    this.setState({ 
+      open: false, 
+      type: "",
+      acte: newActe
+    });
+  };
+
   render() {
+    let iconNote = (
+      <Icon
+        name="sticky note outline"
+        color="white"
+        onClick={() => this.onOpen("note")}
+      />
+    );
+
+    let iconTodo = (
+      <Icon
+        name="list"
+        color="white"
+        onClick={() => this.onOpen("todo")}
+      />
+    );
+
     return (
       <React.Fragment>
         <p>
@@ -111,6 +148,24 @@ export default class ActesHistorique extends React.Component {
               value={this.state.localisation}
             />
           </Form.Group>
+          <Button
+            animated
+            size="large"
+            color="yellow"
+            onClick={() => this.onOpen("note")}
+          >
+            <Button.Content visible={true}>{iconNote}</Button.Content>
+            <Button.Content hidden={true}>Note</Button.Content>
+          </Button>
+          <Button
+            animated
+            size="large"
+            color="red"
+            onClick={() => this.onOpen("todo")}
+          >
+            <Button.Content visible={true}>{iconTodo}</Button.Content>
+            <Button.Content hidden={true}>Todo</Button.Content>
+          </Button>
         </Form>
         <Divider hidden={true} />
         <Shared.Localisations 
@@ -146,6 +201,13 @@ export default class ActesHistorique extends React.Component {
           localisation={this.state.localisation}
           startAt={this.state.startAt}
           endAt={this.state.endAt}
+        />
+        <Actes.Note 
+          client={client}
+          idPatient={this.state.idPatient}
+          open={this.state.open} 
+          type={this.state.type}
+          onCreate={this.onCreate}
         />
       </React.Fragment>
     );

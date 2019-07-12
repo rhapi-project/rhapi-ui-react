@@ -110,9 +110,7 @@ export default class Note extends React.Component {
       doneAt: this.state.date,
       localisation: this.state.localisation,
       code: code,
-      description: this.state.tag
-        ? this.state.tag + " " + this.state.description
-        : this.state.description
+      description: this.state.description
     };
 
     this.props.client.Actes.create(
