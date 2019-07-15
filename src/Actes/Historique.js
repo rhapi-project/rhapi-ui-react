@@ -2,6 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 
+import Note from "./Note";
+
 import { Button, Icon, Modal, Ref, Table } from "semantic-ui-react";
 
 import _ from "lodash";
@@ -170,7 +172,9 @@ export default class Historique extends React.Component {
       showConfirm: false,
       message: "",
       idEditer: 0,
-      showEdit: false
+      showEdit: false,
+      open: false,
+      type: ""
     });
 
     this.reload(
@@ -669,6 +673,31 @@ export default class Historique extends React.Component {
     this.reponseCancel = true;
   };
 
+  onOpen = (type) => {
+    this.setState({ 
+      open: true,
+      type: type
+    });
+  };
+
+  onCreate = (acte) => {
+    this.setState({
+      open: false, 
+      type: ""
+    });
+
+    this.reload(
+      this.state.idPatient,
+      this.state.limit,
+      this.state.offset,
+      this.state.sort,
+      this.state.order,
+      this.state.startAt,
+      this.state.endAt,
+      this.state.localisation
+    );
+  };
+
   render() {
     let showPagination = this.props.showPagination;
 
@@ -727,7 +756,15 @@ export default class Historique extends React.Component {
                 {
                   icon: "edit",
                   text: "Editer",
-                  action: id => this.onEdit(id)
+                  action: id => {
+                    if (acte.code === "#NOTE") {
+                      this.onOpen("note");
+                    } else if (acte.code === "#TODO") {
+                      this.onOpen("todo");
+                    } else {
+                      this.onEdit(id);
+                    }
+                  }
                 },
                 {
                   icon: "trash",
@@ -833,6 +870,13 @@ export default class Historique extends React.Component {
         ) : (
           ""
         )}
+        <Note 
+          client={this.props.client}
+          idPatient={this.state.idPatient}
+          open={this.state.open} 
+          type={this.state.type}
+          onCreate={this.onCreate}
+        />
       </React.Fragment>
     );
   }

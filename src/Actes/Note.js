@@ -25,6 +25,7 @@ const propDefs = {
   description: "Nouvelle << Note >> ou << Todo >>",
   example: "Modal",
   propDocs: {
+    id: "Id d'une Note ou TODO pour l'édition. Par défaut, id = 0",
     idPatient: "Id du patient. Par défaut, idPatient = 0",
     open:
       "La modale s'ouvre si la valeur de 'open' est égale à true. Par défaut, open = false",
@@ -33,6 +34,7 @@ const propDefs = {
   },
   propTypes: {
     client: PropTypes.any.isRequired,
+    id: PropTypes.number,
     idPatient: PropTypes.number,
     open: PropTypes.bool,
     type: PropTypes.string,
@@ -54,6 +56,7 @@ const tags = [
 export default class Note extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
+    id: 0,
     idPatient: 0,
     open: false,
     type: ""
@@ -61,6 +64,7 @@ export default class Note extends React.Component {
 
   componentWillMount() {
     this.setState({
+      id: this.props.id,
       idPatient: this.props.idPatient,
       open: this.props.open,
       type: this.props.type,
@@ -73,6 +77,7 @@ export default class Note extends React.Component {
 
   componentWillReceiveProps(next) {
     this.setState({
+      id: next.id,
       idPatient: next.idPatient,
       open: next.open,
       type: next.type
@@ -105,19 +110,61 @@ export default class Note extends React.Component {
       code = "";
     }
 
-    let params = {
-      idPatient: this.state.idPatient,
-      doneAt: this.state.date,
-      localisation: this.state.localisation,
-      code: code,
-      description: this.state.description
-    };
+    this.props.client.Actes.readAll(
+      {
+        _id: Number(this.state.id)
+      },
+      result => {
+        if (result.length === 0) {
+          let params = {
+            idPatient: this.state.idPatient,
+            doneAt: this.state.date,
+            localisation: this.state.localisation,
+            code: code,
+            description: this.state.description
+          };
+      
+          this.props.client.Actes.create(
+            params,
+            acte => {
+              if (this.props.onCreate) {
+                this.props.onCreate(acte);
+              }
+            },
+            error => {
+              console.log(error);
+            }
+          );
+        } else {
+          let params = {
+            idPatient: this.state.idPatient,
+            doneAt: this.state.date,
+            localisation: this.state.localisation,
+            code: code,
+            description: this.state.description
+          };
 
-    this.props.client.Actes.create(
-      params,
-      acte => {
-        if (this.props.onCreate) {
-          this.props.onCreate(acte);
+          this.props.client.Actes.update(
+            this.state.id,
+            params,
+            acte => {
+              this.setState({
+                idPatient: acte.idPatient,
+                date: moment(acte.doneAt).toDate(),
+                localisation: acte.localisation,
+                code: acte.code,
+                description: acte.description,
+                lockRevision: acte.lockRevision
+              });
+
+              if (this.props.onUpdate) {
+                this.props.onUpdate(acte);
+              }
+            },
+            error => {
+              console.log(error);
+            }
+          );
         }
       },
       error => {
