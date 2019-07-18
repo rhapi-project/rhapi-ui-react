@@ -8,6 +8,7 @@ import {
   Icon,
   Form,
   Modal,
+  Ref,
   Table
 } from "semantic-ui-react";
 import ModalSearch from "./ModalSearch";
@@ -95,7 +96,7 @@ export default class Favoris extends React.Component {
       }
     );
   }
-  componentWillReceiveProps(next) {
+  componentWillReceiveProps() {
     this.setState({
       chapitreTitre: null,
       configuration: false,
@@ -148,6 +149,7 @@ export default class Favoris extends React.Component {
   };
 
   updateFavoris = chapitre => {
+    let clone = _.cloneDeep(chapitre);
     let unsetActive = chapitre => {
       _.unset(chapitre, "active");
       _.forEach(chapitre.chapitres, chap => {
@@ -161,12 +163,11 @@ export default class Favoris extends React.Component {
       "actesFavoris",
       chapitre,
       result => {
-        //console.log(result);
-        result.active = true;
         this.setState({
-          favoris: result,
+          favoris: clone,
           chapitreTitre: null,
-          selectedIndex: null
+          selectedIndex: null,
+          selectedActe: {}
         });
       },
       error => {
@@ -175,27 +176,15 @@ export default class Favoris extends React.Component {
     );
   };
 
-  deleteActe = (chapitreTitre, acteIndex) => {
-    let chapitre = this.state.favoris;
-    let del = chapitre => {
+  delete = (type, chapitreTitre, acteIndex) => {
+    let deleteActe = chapitre => {
       if (chapitre.titre === chapitreTitre) {
-        let actes = chapitre.actes;
-        actes.splice(acteIndex, 1);
-        chapitre.actes = actes;
+        chapitre.actes.splice(acteIndex, 1);
       } else {
-        _.forEach(chapitre.chapitres, chap => {
-          del(chap);
-        });
+        _.forEach(chapitre.chapitres, chap => deleteActe(chap));
       }
     };
-    del(chapitre);
-    this.updateFavoris(chapitre);
-    this.setState({ modalDelete: null, selectedActe: {} });
-  };
-
-  deleteChapitre = chapitreTitre => {
-    let chapitre = this.state.favoris;
-    let del = chapitre => {
+    let deleteChapitre = chapitre => {
       let chapIndex = _.findIndex(
         chapitre.chapitres,
         ch => ch.titre === chapitreTitre
@@ -203,71 +192,66 @@ export default class Favoris extends React.Component {
       if (chapIndex !== -1) {
         chapitre.chapitres.splice(chapIndex, 1);
       } else {
-        _.forEach(chapitre.chapitres, chap => {
-          del(chap);
-        });
+        _.forEach(chapitre.chapitres, chap => deleteChapitre(chap));
       }
     };
-    del(chapitre);
+    let chapitre = this.state.favoris;
+    if (type === "acte" && !_.isNull(acteIndex)) {
+      deleteActe(chapitre);
+    }
+    if (type === "chapitre") {
+      deleteChapitre(chapitre);
+    }
     this.updateFavoris(chapitre);
-    this.setState({ modalDelete: null, chapitreTitre: null });
+    this.setState({ modalDelete: null, chapitreTitre: null, selectedActe: {} });
   };
 
-  createActe = chapitreTitre => {
-    let acte = {};
-    acte.code = "";
-    acte.description = "";
-    acte.date = moment().toISOString();
-    acte.localisation = "";
-    acte.cotation = 1;
-    acte.modificateurs = "";
-    acte.qualificatifs = "OP";
-    acte.montant = 0;
-    let chapitre = this.state.favoris;
-    let addActe = chap => {
-      if (chap.titre === chapitreTitre) {
-        chap.actes.push(acte);
-        this.setState({
-          chapitreTitre: chapitreTitre,
-          selectedIndex: chap.actes.length - 1,
-          edition: true
-        });
-        return;
-      } else {
-        _.forEach(chap.chapitres, chapitre => {
-          addActe(chapitre);
-        });
-      }
-    };
-    addActe(chapitre);
-    this.setState({
-      favoris: chapitre
-    });
-  };
-
-  createChapitre = (titre, chapitreTitre) => {
-    let ch = {};
-    ch.titre = titre;
-    ch.actes = [];
-    ch.chapitres = [];
-    let chapitre = this.state.favoris;
-    let addChap = chap => {
-      if (chap.titre === chapitreTitre) {
-        chap.chapitres.push(ch);
+  create = (type, chapitreTitre, titre) => {
+    let addChap = (chapitre, ch) => {
+      if (chapitre.titre === chapitreTitre) {
+        chapitre.chapitres.push(ch);
         this.setState({
           chapitreTitre: titre,
           modalChapitre: true,
           modifiedChapitreTitle: titre
         });
-        return;
       } else {
-        _.forEach(chap.chapitres, chapitre => {
-          addChap(chapitre);
-        });
+        _.forEach(chapitre.chapitres, chap => addChap(chap, ch));
       }
     };
-    addChap(chapitre);
-    this.setState({ favoris: chapitre });
+    let addActe = (chapitre, acte) => {
+      if (chapitre.titre === chapitreTitre) {
+        chapitre.actes.push(acte);
+        this.setState({
+          chapitreTitre: chapitreTitre,
+          selectedIndex: chapitre.actes.length - 1,
+          edition: true
+        });
+      } else {
+        _.forEach(chapitre.chapitres, chap => addActe(chap, acte));
+      }
+    };
+
+    let chapitre = this.state.favoris;
+    if (type === "chapitre" && !_.isUndefined(titre)) {
+      let ch = {};
+      ch.titre = titre;
+      ch.actes = [];
+      ch.chapitres = [];
+      addChap(chapitre, ch);
+    }
+    if (type === "acte") {
+      let acte = {};
+      acte.code = "";
+      acte.description = "";
+      acte.date = moment().toISOString();
+      acte.localisation = "";
+      acte.cotation = 1;
+      acte.modificateurs = "";
+      acte.qualificatifs = "OP";
+      acte.montant = 0;
+      addActe(chapitre, acte);
+    }
   };
 
   moveChapitre = (chapitreToMove, direction) => {
@@ -329,10 +313,11 @@ export default class Favoris extends React.Component {
     this.updateFavoris(chapitre);
   };
 
-  getActeMoveOptions = chapitreTitre => {
+  getMoveOptions = chap => {
     let options = [];
     let chapitre = this.state.favoris;
     let getOptions = chapitre => {
+      let chapitreTitre = _.isString(chap) ? chap : chap.titre;
       if (chapitre.titre !== chapitreTitre) {
         let obj = {};
         obj.text = _.isEmpty(chapitre.titre)
@@ -340,32 +325,17 @@ export default class Favoris extends React.Component {
           : chapitre.titre;
         obj.value = chapitre.titre;
         options.push(obj);
+        if (!_.isString(chap)) {
+          _.forEach(chapitre.chapitres, chap => getOptions(chap));
+        }
       }
-      _.forEach(chapitre.chapitres, chap => {
-        getOptions(chap);
-      });
-    };
-    getOptions(chapitre);
-    return options;
-  };
-
-  getChapitreMoveOptions = chapitreToMove => {
-    let options = [];
-    let chapitre = this.state.favoris;
-    let getOptions = chapitre => {
-      if (chapitre.titre !== chapitreToMove.titre) {
-        let obj = {};
-        obj.text = _.isEmpty(chapitre.titre)
-          ? "Chapitre principal"
-          : chapitre.titre;
-        obj.value = chapitre.titre;
-        options.push(obj);
-        _.forEach(chapitre.chapitres, chap => {
-          getOptions(chap);
-        });
+      if (_.isString(chap)) {
+        _.forEach(chapitre.chapitres, chap => getOptions(chap));
       }
     };
-    getOptions(chapitre);
+    if (!_.isNull(chap)) {
+      getOptions(chapitre);
+    }
     return options;
   };
 
@@ -429,8 +399,20 @@ export default class Favoris extends React.Component {
     this.updateFavoris(chapitrePrincipale);
   };
 
+  validation = selectedActe => {
+    if (this.props.onSelection) {
+      this.props.onSelection(this.props.index, selectedActe);
+    }
+    if (this.props.onClose) {
+      this.props.onClose();
+    }
+  };
+
   renderChapitre = (chapitre, level) => {
     let active = chapitre.active;
+    let isSelected =
+      !_.isEmpty(this.state.selectedChapitre) &&
+      this.state.selectedChapitre.titre === chapitre.titre;
     return (
       <Accordion
         key={chapitre.titre + Math.random()}
@@ -447,6 +429,10 @@ export default class Favoris extends React.Component {
               chapitre.active = !active;
               this.setState({}); // force a new render
             }
+          }}
+          style={{
+            backgroundColor: isSelected ? "#E88615" : "inherit",
+            color: isSelected ? "white" : "black"
           }}
         >
           <Icon name="dropdown" />
@@ -481,7 +467,7 @@ export default class Favoris extends React.Component {
                       (_.isEmpty(chapitre.titre)
                         ? ""
                         : " dans " + chapitre.titre);
-                    this.createChapitre(titre, chapitre.titre);
+                    this.create("chapitre", chapitre.titre, titre);
                   }}
                 />
                 <Dropdown.Item
@@ -489,7 +475,7 @@ export default class Favoris extends React.Component {
                   text="Ajouter un acte"
                   onClick={() => {
                     this.setState({ selectedActe: {}, selectedIndex: null });
-                    this.createActe(chapitre.titre);
+                    this.create("acte", chapitre.titre);
                   }}
                 />
                 <Dropdown.Item
@@ -538,14 +524,29 @@ export default class Favoris extends React.Component {
                   configuration={this.state.configuration}
                   description={acte.description}
                   montant={acte.montant}
-                  onSelection={index =>
-                    this.setState({
-                      chapitreTitre: chapitre.titre,
-                      selectedIndex: index,
-                      selectedActe: acte,
-                      selectedChapitre: {}
-                    })
-                  }
+                  onDoubleClick={index => {
+                    if (this.state.configuration) {
+                      this.setState({
+                        chapitreTitre: chapitre.titre,
+                        selectedIndex: index,
+                        selectedActe: acte,
+                        selectedChapitre: {},
+                        edition: true
+                      });
+                    }
+                  }}
+                  onSelection={index => {
+                    if (this.state.configuration) {
+                      this.setState({
+                        chapitreTitre: chapitre.titre,
+                        selectedIndex: index,
+                        selectedActe: acte,
+                        selectedChapitre: {}
+                      });
+                    } else {
+                      this.validation(acte);
+                    }
+                  }}
                   selected={
                     chapitre.titre === this.state.chapitreTitre &&
                     key === this.state.selectedIndex
@@ -563,9 +564,9 @@ export default class Favoris extends React.Component {
     let open = this.props.open ? this.props.open : false;
     let selectedActe = this.state.selectedActe;
     let moveOptions = !_.isEmpty(selectedActe)
-      ? this.getActeMoveOptions(this.state.chapitreTitre)
+      ? this.getMoveOptions(this.state.chapitreTitre)
       : !_.isEmpty(this.state.selectedChapitre)
-      ? this.getChapitreMoveOptions(this.state.selectedChapitre)
+      ? this.getMoveOptions(this.state.selectedChapitre)
       : null;
     return (
       <React.Fragment>
@@ -579,51 +580,32 @@ export default class Favoris extends React.Component {
           </Modal.Content>
           {this.state.configuration ? (
             <Modal.Actions>
-              <Form>
-                <Form.Group
-                  widths="equal"
-                  style={{ marginTop: 0, marginBottom: 0 }}
-                >
-                  <Form.Input>
-                    <span style={{ marginTop: "9px", paddingLeft: "2px" }}>
-                      {_.isEmpty(this.state.selectedChapitre) ? (
-                        ""
-                      ) : (
-                        <span>
-                          <strong>Chapitre sélectionné</strong> :{" "}
-                          {this.state.selectedChapitre.titre}
-                        </span>
-                      )}
-                    </span>
-                  </Form.Input>
-                  <Form.Dropdown
-                    disabled={
-                      _.isEmpty(selectedActe) &&
-                      _.isEmpty(this.state.selectedChapitre)
-                    }
-                    placeholder="Déplacer vers"
-                    selection={true}
-                    options={moveOptions}
-                    value={null}
-                    onChange={(e, d) => {
-                      if (!_.isEmpty(this.state.selectedChapitre)) {
-                        this.moveInto(
-                          "chapitre",
-                          d.value,
-                          this.state.selectedChapitre
-                        );
-                      }
-                      if (!_.isEmpty(selectedActe)) {
-                        this.moveInto(
-                          "acte",
-                          d.value,
-                          this.state.selectedIndex
-                        );
-                      }
-                    }}
-                  />
-                </Form.Group>
-              </Form>
+              <Dropdown text="Déplacer vers" direction="left" scrolling={true}>
+                <Dropdown.Menu>
+                  {_.map(moveOptions, opt => (
+                    <Dropdown.Item
+                      key={opt.text}
+                      text={opt.text}
+                      onClick={() => {
+                        if (!_.isEmpty(this.state.selectedChapitre)) {
+                          this.moveInto(
+                            "chapitre",
+                            opt.value,
+                            this.state.selectedChapitre
+                          );
+                        }
+                        if (!_.isEmpty(selectedActe)) {
+                          this.moveInto(
+                            "acte",
+                            opt.value,
+                            this.state.selectedIndex
+                          );
+                        }
+                      }}
+                    />
+                  ))}
+                </Dropdown.Menu>
+              </Dropdown>
             </Modal.Actions>
           ) : null}
           <Modal.Actions>
@@ -710,12 +692,7 @@ export default class Favoris extends React.Component {
             <Button
               content="Valider"
               onClick={() => {
-                if (this.props.onSelection) {
-                  this.props.onSelection(this.props.index, selectedActe);
-                }
-                if (this.props.onClose) {
-                  this.props.onClose();
-                }
+                this.validation(selectedActe);
               }}
             />
           </Modal.Actions>
@@ -783,15 +760,11 @@ export default class Favoris extends React.Component {
               content="Supprimer"
               negative={true}
               onClick={() => {
-                if (this.state.modalDelete === "acte") {
-                  this.deleteActe(
-                    this.state.chapitreTitre,
-                    this.state.selectedIndex
-                  );
-                } else {
-                  // suppression chapitre
-                  this.deleteChapitre(this.state.chapitreTitre);
-                }
+                this.delete(
+                  this.state.modalDelete,
+                  this.state.chapitreTitre,
+                  this.state.selectedIndex
+                );
               }}
             />
           </Modal.Actions>
@@ -866,7 +839,15 @@ class Acte extends React.Component {
   };
   render() {
     return (
-      <React.Fragment>
+      <Ref
+        innerRef={node => {
+          node.ondblclick = () => {
+            if (this.props.onDoubleClick) {
+              this.props.onDoubleClick(this.props.index);
+            }
+          };
+        }}
+      >
         <Table.Row
           onClick={() => {
             if (this.props.onSelection) {
@@ -897,7 +878,7 @@ class Acte extends React.Component {
             {tarif(this.props.montant)}
           </Table.Cell>
         </Table.Row>
-      </React.Fragment>
+      </Ref>
     );
   }
 }
