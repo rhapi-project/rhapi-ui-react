@@ -8,6 +8,7 @@ import {
   Icon,
   Form,
   Modal,
+  Ref,
   Table
 } from "semantic-ui-react";
 import ModalSearch from "./ModalSearch";
@@ -64,12 +65,13 @@ export default class Favoris extends React.Component {
     configuration: false,
     edition: false,
     favoris: {},
-    modalDelete: false,
+    modalDelete: null,
     modalChapitre: false,
-    selectedIndex: null,
     chapitreTitre: null,
     modifiedChapitreTitle: null,
-    selectedActe: {}
+    selectedActe: {},
+    selectedActes: [], // les index
+    selectedChapitre: {}
   };
 
   componentWillMount() {
@@ -94,12 +96,11 @@ export default class Favoris extends React.Component {
       }
     );
   }
-  componentWillReceiveProps(next) {
+  componentWillReceiveProps() {
     this.setState({
       chapitreTitre: null,
       configuration: false,
-      selectedIndex: null,
-      selectedActe: {}
+      selectedActes: []
     });
   }
 
@@ -130,7 +131,7 @@ export default class Favoris extends React.Component {
       chapitre,
       this.state.chapitreTitre,
       acte,
-      this.state.selectedIndex
+      this.state.selectedActes[0]
     );
     this.updateFavoris(chapitre);
   };
@@ -147,6 +148,7 @@ export default class Favoris extends React.Component {
   };
 
   updateFavoris = chapitre => {
+    let clone = _.cloneDeep(chapitre);
     let unsetActive = chapitre => {
       _.unset(chapitre, "active");
       _.forEach(chapitre.chapitres, chap => {
@@ -160,12 +162,10 @@ export default class Favoris extends React.Component {
       "actesFavoris",
       chapitre,
       result => {
-        //console.log(result);
-        result.active = true;
         this.setState({
-          favoris: result,
+          favoris: clone,
           chapitreTitre: null,
-          selectedIndex: null
+          selectedActes: []
         });
       },
       error => {
@@ -174,53 +174,301 @@ export default class Favoris extends React.Component {
     );
   };
 
-  deleteActe = (chapitre, titre, index) => {
-    if (chapitre.titre === titre) {
-      let actes = chapitre.actes;
-      actes.splice(index, 1);
-      chapitre.actes = actes;
-      return;
-    } else {
-      _.forEach(chapitre.chapitres, chap => {
-        this.deleteActe(chap, titre, index);
-      });
+  delete = (type, chapitreTitre, actesIndex) => {
+    let deleteActes = chapitre => {
+      if (chapitre.titre === chapitreTitre) {
+        chapitre.actes = _.filter(
+          chapitre.actes,
+          (acte, index) => !_.includes(actesIndex, index)
+        );
+      } else {
+        _.forEach(chapitre.chapitres, chap => deleteActes(chap));
+      }
+    };
+    let deleteChapitre = chapitre => {
+      let chapIndex = _.findIndex(
+        chapitre.chapitres,
+        ch => ch.titre === chapitreTitre
+      );
+      if (chapIndex !== -1) {
+        chapitre.chapitres.splice(chapIndex, 1);
+      } else {
+        _.forEach(chapitre.chapitres, chap => deleteChapitre(chap));
+      }
+    };
+    let chapitre = this.state.favoris;
+    if (type === "acte" && !_.isNull(actesIndex)) {
+      deleteActes(chapitre);
+    }
+    if (type === "chapitre") {
+      deleteChapitre(chapitre);
+    }
+    this.updateFavoris(chapitre);
+    this.setState({ modalDelete: null });
+  };
+
+  create = (type, chapitreTitre, titre) => {
+    let addChap = (chapitre, ch) => {
+      if (chapitre.titre === chapitreTitre) {
+        chapitre.chapitres.push(ch);
+        this.setState({
+          chapitreTitre: titre,
+          modalChapitre: true,
+          modifiedChapitreTitle: titre
+        });
+      } else {
+        _.forEach(chapitre.chapitres, chap => addChap(chap, ch));
+      }
+    };
+    let addActe = (chapitre, acte) => {
+      if (chapitre.titre === chapitreTitre) {
+        chapitre.actes.push(acte);
+        this.setState({
+          chapitreTitre: chapitreTitre,
+          selectedActes: [chapitre.actes.length - 1],
+          edition: true
+        });
+      } else {
+        _.forEach(chapitre.chapitres, chap => addActe(chap, acte));
+      }
+    };
+
+    let chapitre = this.state.favoris;
+    if (type === "chapitre" && !_.isUndefined(titre)) {
+      let ch = {};
+      ch.titre = titre;
+      ch.actes = [];
+      ch.chapitres = [];
+      addChap(chapitre, ch);
+    }
+    if (type === "acte") {
+      let acte = {};
+      acte.code = "";
+      acte.description = "";
+      acte.date = moment().toISOString();
+      acte.localisation = "";
+      acte.cotation = 1;
+      acte.modificateurs = "";
+      acte.qualificatifs = "OP";
+      acte.montant = 0;
+      addActe(chapitre, acte);
     }
   };
 
-  createActe = chapitreTitre => {
-    let acte = {};
-    acte.code = "";
-    acte.description = "";
-    acte.date = moment().toISOString();
-    acte.localisation = "";
-    acte.cotation = 1;
-    acte.modificateurs = "";
-    acte.qualificatifs = "OP";
-    acte.montant = 0;
+  moveChapitre = (chapitreToMove, direction) => {
     let chapitre = this.state.favoris;
-    let addActe = chap => {
-      if (chap.titre === chapitreTitre) {
-        chap.actes.push(acte);
-        this.setState({
-          chapitreTitre: chapitreTitre,
-          selectedIndex: chap.actes.length - 1,
-          edition: true
-        });
-        return;
+    let move = chapitre => {
+      let chapIndex = _.findIndex(
+        chapitre.chapitres,
+        chap => chap.titre === chapitreToMove.titre
+      );
+      if (chapIndex !== -1) {
+        if (chapitre.chapitres.length > 1) {
+          if (chapIndex > 0 && direction === "up") {
+            let tmp = chapitre.chapitres[chapIndex];
+            chapitre.chapitres[chapIndex] = chapitre.chapitres[chapIndex - 1];
+            chapitre.chapitres[chapIndex - 1] = tmp;
+          }
+          if (
+            chapIndex < chapitre.chapitres.length - 1 &&
+            direction === "down"
+          ) {
+            let tmp = chapitre.chapitres[chapIndex];
+            chapitre.chapitres[chapIndex] = chapitre.chapitres[chapIndex + 1];
+            chapitre.chapitres[chapIndex + 1] = tmp;
+          }
+        }
       } else {
-        _.forEach(chap.chapitres, chapitre => {
-          addActe(chapitre);
+        _.forEach(chapitre.chapitres, chap => {
+          move(chap);
         });
       }
     };
-    addActe(chapitre);
-    this.setState({
-      favoris: chapitre
-    });
+    move(chapitre);
+    this.updateFavoris(chapitre);
+  };
+
+  moveActes = (arrayIndex, chapitreTitre, direction) => {
+    let move = chapitre => {
+      if (chapitre.titre === chapitreTitre) {
+        if (!_.includes(arrayIndex, 0) && direction === "up") {
+          _.forEach(arrayIndex.sort(), index => {
+            let tmp = chapitre.actes[index];
+            chapitre.actes[index] = chapitre.actes[index - 1];
+            chapitre.actes[index - 1] = tmp;
+          });
+        }
+        if (
+          !_.includes(arrayIndex, chapitre.actes.length - 1) &&
+          direction === "down"
+        ) {
+          _.forEach(arrayIndex.sort(), index => {
+            let tmp = chapitre.actes[index];
+            chapitre.actes[index] = chapitre.actes[index + 1];
+            chapitre.actes[index + 1] = tmp;
+          });
+        }
+      } else {
+        _.forEach(chapitre.chapitres, chap => {
+          move(chap);
+        });
+      }
+    };
+    let chapitre = this.state.favoris;
+    move(chapitre);
+    this.updateFavoris(chapitre);
+  };
+
+  getMoveOptions = chap => {
+    let options = [];
+    let chapitre = this.state.favoris;
+    let getOptions = chapitre => {
+      let chapitreTitre = _.isString(chap) ? chap : chap.titre;
+      if (chapitre.titre !== chapitreTitre) {
+        let obj = {};
+        obj.text = _.isEmpty(chapitre.titre)
+          ? "Chapitre principal"
+          : chapitre.titre;
+        obj.value = chapitre.titre;
+        options.push(obj);
+        if (!_.isString(chap)) {
+          _.forEach(chapitre.chapitres, chap => getOptions(chap));
+        }
+      }
+      if (_.isString(chap)) {
+        _.forEach(chapitre.chapitres, chap => getOptions(chap));
+      }
+    };
+    if (!_.isNull(chap)) {
+      getOptions(chapitre);
+    }
+    return options;
+  };
+
+  // element : c'est l'element à déplacer
+  // si c'est un chapitre : obj chapitre
+  // si c'est un acte l'index de cet acte
+  moveInto = (type, target, element) => {
+    let chapitrePrincipale = this.state.favoris;
+    let add = (chapitre, type, element) => {
+      if (chapitre.titre === target) {
+        if (type === "chapitre") {
+          chapitre.chapitres.push(element);
+        }
+        if (type === "acte") {
+          chapitre.actes.push(element);
+        }
+      } else {
+        _.forEach(chapitre.chapitres, chap => {
+          add(chap, type, element);
+        });
+      }
+    };
+    let moveChapitre = chapitre => {
+      let chapIndex = _.findIndex(
+        chapitre.chapitres,
+        chap => chap.titre === element.titre
+      );
+      if (chapIndex !== -1) {
+        let ch = chapitre.chapitres[chapIndex];
+        chapitre.chapitres.splice(chapIndex, 1);
+        add(chapitrePrincipale, "chapitre", ch);
+      } else {
+        _.forEach(chapitre.chapitres, chap => {
+          moveChapitre(chap);
+        });
+      }
+    };
+    let moveActe = chapitre => {
+      if (chapitre.titre === this.state.chapitreTitre) {
+        _.forEach(element, acteIndex => {
+          let acte = chapitre.actes[acteIndex];
+          add(chapitrePrincipale, "acte", acte);
+        });
+        chapitre.actes = _.filter(
+          chapitre.actes,
+          (acte, index) => !_.includes(element, index)
+        );
+      } else {
+        _.forEach(chapitre.chapitres, chap => {
+          moveActe(chap);
+        });
+      }
+    };
+
+    if (type === "chapitre") {
+      moveChapitre(chapitrePrincipale);
+    }
+    if (type === "acte") {
+      moveActe(chapitrePrincipale);
+    }
+    this.updateFavoris(chapitrePrincipale);
+  };
+
+  validation = acte => {
+    if (this.props.onSelection) {
+      this.props.onSelection(this.props.index, acte);
+    }
+    if (this.props.onClose) {
+      this.props.onClose();
+    }
+  };
+
+  selection = (e, index) => {
+    let selectedActes = this.state.selectedActes;
+    if (e.ctrlKey || e.metaKey) {
+      if (_.includes(selectedActes, index)) {
+        selectedActes.splice(_.findIndex(selectedActes, i => i === index), 1);
+      } else {
+        selectedActes.push(index);
+      }
+    } else if (e.shiftKey) {
+      if (_.isEmpty(selectedActes)) {
+        selectedActes.push(index);
+      } else {
+        let repere = selectedActes[selectedActes.length - 1];
+        selectedActes = [];
+        if (index > repere) {
+          for (let i = repere + 1; i <= index; i++) {
+            selectedActes.push(i);
+          }
+          selectedActes.push(repere);
+        } else if (index < repere) {
+          for (let i = index; i < repere; i++) {
+            selectedActes.push(i);
+          }
+          selectedActes.push(repere);
+        } else {
+          selectedActes = [index];
+        }
+      }
+    } else {
+      selectedActes = [index];
+    }
+    this.setState({ selectedActes: selectedActes });
+  };
+
+  getActe = index => {
+    let acte = {};
+    let chapitre = this.state.favoris;
+    let get = chapitre => {
+      if (chapitre.titre === this.state.chapitreTitre) {
+        acte = chapitre.actes[index];
+      } else {
+        _.forEach(chapitre.chapitres, chap => {
+          get(chap);
+        });
+      }
+    };
+    get(chapitre);
+    return acte;
   };
 
   renderChapitre = (chapitre, level) => {
     let active = chapitre.active;
+    let isSelected =
+      !_.isEmpty(this.state.selectedChapitre) &&
+      this.state.selectedChapitre.titre === chapitre.titre;
     return (
       <Accordion
         key={chapitre.titre + Math.random()}
@@ -238,6 +486,10 @@ export default class Favoris extends React.Component {
               this.setState({}); // force a new render
             }
           }}
+          style={{
+            backgroundColor: isSelected ? "#E88615" : "inherit",
+            color: isSelected ? "white" : "black"
+          }}
         >
           <Icon name="dropdown" />
           <b>{chapitre.titre ? chapitre.titre : "FAVORIS"}</b>
@@ -250,14 +502,35 @@ export default class Favoris extends React.Component {
             >
               <Dropdown.Menu>
                 {level !== 0 ? (
-                  <Dropdown.Item icon="hand pointer" text="Sélectionner" />
+                  <Dropdown.Item
+                    icon="hand pointer"
+                    text="Sélectionner"
+                    onClick={() => {
+                      this.setState({
+                        selectedChapitre: chapitre,
+                        selectedActes: []
+                      });
+                    }}
+                  />
                 ) : null}
-                <Dropdown.Item icon="book" text="Ajouter un chapitre" />
+                <Dropdown.Item
+                  icon="book"
+                  text="Ajouter un chapitre"
+                  onClick={() => {
+                    let titre =
+                      "Nouveau chapitre" +
+                      (_.isEmpty(chapitre.titre)
+                        ? ""
+                        : " dans " + chapitre.titre);
+                    this.create("chapitre", chapitre.titre, titre);
+                  }}
+                />
                 <Dropdown.Item
                   icon="add"
                   text="Ajouter un acte"
                   onClick={() => {
-                    this.createActe(chapitre.titre);
+                    this.setState({ selectedActes: [] });
+                    this.create("acte", chapitre.titre);
                   }}
                 />
                 <Dropdown.Item
@@ -272,7 +545,16 @@ export default class Favoris extends React.Component {
                   }}
                 />
                 {level !== 0 ? (
-                  <Dropdown.Item icon="trash" text="Supprimer le chapitre" />
+                  <Dropdown.Item
+                    icon="trash"
+                    text="Supprimer le chapitre"
+                    onClick={() => {
+                      this.setState({
+                        chapitreTitre: chapitre.titre,
+                        modalDelete: "chapitre"
+                      });
+                    }}
+                  />
                 ) : null}
               </Dropdown.Menu>
             </Dropdown>
@@ -297,16 +579,30 @@ export default class Favoris extends React.Component {
                   configuration={this.state.configuration}
                   description={acte.description}
                   montant={acte.montant}
-                  onSelection={index =>
-                    this.setState({
-                      chapitreTitre: chapitre.titre,
-                      selectedIndex: index,
-                      selectedActe: acte
-                    })
-                  }
+                  onDoubleClick={index => {
+                    if (this.state.configuration) {
+                      this.setState({
+                        chapitreTitre: chapitre.titre,
+                        selectedActes: [index],
+                        selectedChapitre: {},
+                        edition: true
+                      });
+                    }
+                  }}
+                  onSelection={(e, index) => {
+                    if (this.state.configuration) {
+                      this.setState({
+                        chapitreTitre: chapitre.titre,
+                        selectedChapitre: {}
+                      });
+                      this.selection(e, index);
+                    } else {
+                      this.validation(acte);
+                    }
+                  }}
                   selected={
                     chapitre.titre === this.state.chapitreTitre &&
-                    key === this.state.selectedIndex
+                    _.includes(this.state.selectedActes, key)
                   }
                 />
               ))}
@@ -319,7 +615,15 @@ export default class Favoris extends React.Component {
 
   render() {
     let open = this.props.open ? this.props.open : false;
-    let selectedActe = this.state.selectedActe;
+    let selectedActe =
+      this.state.selectedActes.length !== 1
+        ? {}
+        : this.getActe(this.state.selectedActes[0]);
+    let moveOptions = !_.isEmpty(this.state.selectedActes)
+      ? this.getMoveOptions(this.state.chapitreTitre)
+      : !_.isEmpty(this.state.selectedChapitre)
+      ? this.getMoveOptions(this.state.selectedChapitre)
+      : null;
     return (
       <React.Fragment>
         <Modal open={open} size="large">
@@ -330,6 +634,32 @@ export default class Favoris extends React.Component {
               </div>
             ) : null}
           </Modal.Content>
+          {this.state.configuration ? (
+            <Modal.Actions>
+              <Dropdown text="Déplacer vers" direction="left" scrolling={true}>
+                <Dropdown.Menu>
+                  {_.map(moveOptions, opt => (
+                    <Dropdown.Item
+                      key={opt.text}
+                      text={opt.text}
+                      onClick={() => {
+                        if (!_.isEmpty(this.state.selectedChapitre)) {
+                          this.moveInto(
+                            "chapitre",
+                            opt.value,
+                            this.state.selectedChapitre
+                          );
+                        }
+                        if (!_.isEmpty(this.state.selectedActes)) {
+                          this.moveInto("acte", opt.value, selectedActes);
+                        }
+                      }}
+                    />
+                  ))}
+                </Dropdown.Menu>
+              </Dropdown>
+            </Modal.Actions>
+          ) : null}
           <Modal.Actions>
             <Checkbox
               style={{ float: "left" }}
@@ -340,21 +670,83 @@ export default class Favoris extends React.Component {
               }
               toggle={true}
             />
-            {this.state.configuration && !_.isEmpty(selectedActe) ? (
+            <Button
+              content="Désélectionner"
+              disabled={
+                _.isEmpty(this.state.selectedActes) &&
+                _.isEmpty(this.state.selectedChapitre)
+              }
+              onClick={() => {
+                this.setState({
+                  selectedChapitre: {},
+                  selectedActes: []
+                });
+              }}
+            />
+            {this.state.configuration ? (
               <React.Fragment>
-                <Button icon="arrow up" />
-                <Button icon="arrow down" />
                 <Button
-                  content="Editer"
-                  onClick={() => this.setState({ edition: true })}
+                  icon="arrow up"
+                  onClick={() => {
+                    if (!_.isEmpty(this.state.selectedChapitre)) {
+                      this.moveChapitre(this.state.selectedChapitre, "up");
+                    }
+                    if (!_.isEmpty(this.state.selectedActes)) {
+                      this.moveActes(
+                        this.state.selectedActes,
+                        this.state.chapitreTitre,
+                        "up"
+                      );
+                    }
+                    /*if (!_.isEmpty(selectedActe)) {
+                      this.moveActe(
+                        this.state.selectedActes[0],
+                        this.state.chapitreTitre,
+                        "up"
+                      );
+                    }*/
+                  }}
                 />
                 <Button
-                  negative={!_.isEmpty(selectedActe)}
-                  content="Supprimer"
-                  onClick={() => this.setState({ modalDelete: true })}
+                  icon="arrow down"
+                  onClick={() => {
+                    if (!_.isEmpty(this.state.selectedChapitre)) {
+                      this.moveChapitre(this.state.selectedChapitre, "down");
+                    }
+                    /*if (!_.isEmpty(selectedActe)) {
+                      this.moveActe(
+                        this.state.selectedActes[0],
+                        this.state.chapitreTitre,
+                        "down"
+                      );
+                    }*/
+                    if (!_.isEmpty(this.state.selectedActes)) {
+                      this.moveActes(
+                        this.state.selectedActes,
+                        this.state.chapitreTitre,
+                        "down"
+                      );
+                    }
+                  }}
                 />
+
+                {!_.isEmpty(this.state.selectedActes) ? (
+                  <React.Fragment>
+                    <Button
+                      content="Editer"
+                      disabled={this.state.selectedActes.length > 1}
+                      onClick={() => this.setState({ edition: true })}
+                    />
+                    <Button
+                      negative={true}
+                      content="Supprimer"
+                      onClick={() => this.setState({ modalDelete: "acte" })}
+                    />
+                  </React.Fragment>
+                ) : null}
               </React.Fragment>
             ) : null}
+
             <Button
               content="Annuler"
               onClick={() => {
@@ -366,12 +758,7 @@ export default class Favoris extends React.Component {
             <Button
               content="Valider"
               onClick={() => {
-                if (this.props.onSelection) {
-                  this.props.onSelection(this.props.index, selectedActe);
-                }
-                if (this.props.onClose) {
-                  this.props.onClose();
-                }
+                this.validation(selectedActe);
               }}
             />
           </Modal.Actions>
@@ -412,29 +799,49 @@ export default class Favoris extends React.Component {
           />
         ) : null}
 
-        {/* Message de confiramtion de la suppression d'un acte */}
-        <Modal open={this.state.modalDelete} size="tiny">
+        {/* Message de confirmation de la suppression d'un acte */}
+        <Modal open={!_.isNull(this.state.modalDelete)} size="tiny">
           <Modal.Content>
-            Voulez-vous supprimer l'acte{" "}
-            <strong>"{selectedActe.description}"</strong> de vos favoris ?
+            {this.state.modalDelete === "acte" ? (
+              <span>
+                {!_.isEmpty(selectedActe) ? (
+                  <span>
+                    Voulez-vous supprimer l'acte{" "}
+                    <strong>"{selectedActe.description}"</strong> de vos favoris
+                    ?
+                  </span>
+                ) : (
+                  <span>
+                    Voulez-vous supprimer de vos favoris les{" "}
+                    <strong>{this.state.selectedActes.length}</strong> actes
+                    sélectionnés ?
+                  </span>
+                )}
+              </span>
+            ) : this.state.modalDelete === "chapitre" ? (
+              <span>
+                Voulez-vous supprimer le chapitre{" "}
+                <strong>"{this.state.chapitreTitre}"</strong> de vos favoris ?{" "}
+                <br />
+                Attention : Cela entraînera la suppression de tout le contenu de
+                ce chapitre !
+              </span>
+            ) : null}
           </Modal.Content>
           <Modal.Actions>
             <Button
               content="Annuler"
-              onClick={() => this.setState({ modalDelete: false })}
+              onClick={() => this.setState({ modalDelete: null })}
             />
             <Button
               content="Supprimer"
               negative={true}
               onClick={() => {
-                let chapitre = this.state.favoris;
-                this.deleteActe(
-                  chapitre,
+                this.delete(
+                  this.state.modalDelete,
                   this.state.chapitreTitre,
-                  this.state.selectedIndex
+                  this.state.selectedActes
                 );
-                this.updateFavoris(chapitre);
-                this.setState({ modalDelete: false, selectedActe: {} });
               }}
             />
           </Modal.Actions>
@@ -509,11 +916,19 @@ class Acte extends React.Component {
   };
   render() {
     return (
-      <React.Fragment>
+      <Ref
+        innerRef={node => {
+          node.ondblclick = () => {
+            if (this.props.onDoubleClick) {
+              this.props.onDoubleClick(this.props.index);
+            }
+          };
+        }}
+      >
         <Table.Row
-          onClick={() => {
+          onClick={(e, d) => {
             if (this.props.onSelection) {
-              this.props.onSelection(this.props.index);
+              this.props.onSelection(e, this.props.index);
             }
           }}
           style={{
@@ -540,7 +955,7 @@ class Acte extends React.Component {
             {tarif(this.props.montant)}
           </Table.Cell>
         </Table.Row>
-      </React.Fragment>
+      </Ref>
     );
   }
 }
