@@ -74,17 +74,6 @@ export default class ActesHistorique extends React.Component {
     });
   };
 
-  onCreate = (acte) => {
-    let newActe = this.state.acte;
-    newActe.push(acte);
-
-    this.setState({ 
-      open: false, 
-      type: "",
-      acte: newActe
-    });
-  };
-
   render() {
     let iconNote = (
       <Icon
@@ -201,13 +190,8 @@ export default class ActesHistorique extends React.Component {
           localisation={this.state.localisation}
           startAt={this.state.startAt}
           endAt={this.state.endAt}
-        />
-        <Actes.Note 
-          client={client}
-          idPatient={this.state.idPatient}
-          open={this.state.open} 
-          type={this.state.type}
-          onCreate={this.onCreate}
+          openNoteTodo={this.state.open}
+          typeNoteTodo={this.state.type}
         />
       </React.Fragment>
     );

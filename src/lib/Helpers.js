@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { Icon, Label } from "semantic-ui-react";
 
 // Affichage du tarif au bon format
 // ex : 1250.3 => 1 250,30

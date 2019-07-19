@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 
 import Note from "./Note";
 
-import { Button, Icon, Modal, Ref, Table } from "semantic-ui-react";
+import { Button, Icon, Label, Modal, Ref, Table } from "semantic-ui-react";
 
 import _ from "lodash";
 import moment from "moment";
@@ -44,6 +44,10 @@ const propDefs = {
       "Le champs sur lequel le tri va être effectué. Par défaut, le tri se fait sur la date (doneAt)",
     order:
       "Le tri est ascendant (ASC) ou descendant (DESC). Par défaut, le tri est descendant (DESC)",
+    openNoteTodo:
+      "Ouvre la modal pour l'édition des notes ou todos. Par défaut openNoteTodo = false",
+    typeNoteTodo:
+      'Permet de savoir si c\'est une note ou todo. Par défaut, typeNoteTodo = ""',
     showPagination: 'Affiche les options de paginations, par défaut "true"',
     btnFirstContent:
       'Texte du bouton pour aller à la première page, par défaut ""',
@@ -91,6 +95,8 @@ const propDefs = {
     limit: PropTypes.number,
     sort: PropTypes.string,
     order: PropTypes.string,
+    openNoteTodo: PropTypes.bool,
+    typeNoteTodo: PropTypes.string,
     showPagination: PropTypes.bool,
     btnFirstContent: PropTypes.string,
     btnLastContent: PropTypes.string,
@@ -133,6 +139,8 @@ export default class Historique extends React.Component {
     startAt: "",
     endAt: "",
     localisation: "",
+    openNoteTodo: false,
+    typeNoteTodo: "",
     // props pour le composant de pagination
     showPagination: true,
     btnFirstContent: "",
@@ -173,8 +181,8 @@ export default class Historique extends React.Component {
       message: "",
       idEditer: 0,
       showEdit: false,
-      open: false,
-      type: ""
+      openNoteTodo: this.props.openNoteTodo,
+      typeNoteTodo: this.props.typeNoteTodo
     });
 
     this.reload(
@@ -185,7 +193,9 @@ export default class Historique extends React.Component {
       this.props.order,
       this.props.startAt,
       this.props.endAt,
-      this.props.localisation
+      this.props.localisation,
+      this.props.openNoteTodo,
+      this.props.typeNoteTodo
     );
   }
 
@@ -199,7 +209,9 @@ export default class Historique extends React.Component {
         this.state.order,
         next.startAt,
         next.endAt,
-        next.localisation.trim()
+        next.localisation.trim(),
+        next.openNoteTodo,
+        next.typeNoteTodo
       );
     } else {
       this.reload(
@@ -210,7 +222,9 @@ export default class Historique extends React.Component {
         this.state.order,
         this.state.startAt,
         this.state.endAt,
-        this.state.localisation
+        this.state.localisation,
+        next.openNoteTodo,
+        next.typeNoteTodo
       );
     }
   }
@@ -227,7 +241,9 @@ export default class Historique extends React.Component {
         this.state.order,
         this.state.startAt,
         this.state.endAt,
-        this.state.localisation
+        this.state.localisation,
+        this.state.openNoteTodo,
+        this.state.typeNoteTodo
       );
     }, 15000);
   }
@@ -360,6 +376,7 @@ export default class Historique extends React.Component {
     _.set(params, "offset", offset);
     _.set(params, "sort", sort);
     _.set(params, "order", order);
+    _.set(params, "modifiedSince", this.state ? this.state.lockRevision : "");
 
     return params;
   };
@@ -372,7 +389,9 @@ export default class Historique extends React.Component {
     order,
     startAt,
     endAt,
-    localisation
+    localisation,
+    openNoteTodo,
+    typeNoteTodo
   ) => {
     let params = this.query(
       idPatient,
@@ -388,27 +407,28 @@ export default class Historique extends React.Component {
     this.props.client.Actes.readAll(
       params,
       result => {
-        if (
-          !_.isEqual(this.state.lockRevision, result.informations.lockRevision)
-        ) {
-          this.setState({
-            idPatient: Number(idPatient),
-            limit: limit,
-            actes: result.results,
-            informations: result.informations,
-            offset: offset,
-            sort: sort,
-            order: order,
-            sorted: _.isEqual(order, "DESC") ? "descending" : "ascending",
-            lockRevision: result.informations.lockRevision,
-            startAt: startAt,
-            endAt: endAt,
-            localisation: localisation
-          });
-        }
+        this.setState({
+          idPatient: Number(idPatient),
+          limit: limit,
+          actes: result.results,
+          informations: result.informations,
+          offset: offset,
+          sort: sort,
+          order: order,
+          sorted: _.isEqual(order, "DESC") ? "descending" : "ascending",
+          lockRevision: result.informations.lockRevision,
+          startAt: startAt,
+          endAt: endAt,
+          localisation: localisation,
+          openNoteTodo: openNoteTodo,
+          typeNoteTodo: typeNoteTodo
+        });
       },
       error => {
-        console.log(`Erreur readAll`);
+        this.setState({
+          openNoteTodo: openNoteTodo,
+          typeNoteTodo: typeNoteTodo
+        });
       }
     );
   };
@@ -423,7 +443,9 @@ export default class Historique extends React.Component {
       query.order,
       this.state.startAt,
       this.state.endAt,
-      this.state.localisation
+      this.state.localisation,
+      this.state.openNoteTodo,
+      this.state.typeNoteTodo
     );
   };
 
@@ -438,7 +460,9 @@ export default class Historique extends React.Component {
         "ASC",
         this.state.startAt,
         this.state.endAt,
-        this.state.localisation
+        this.state.localisation,
+        this.state.openNoteTodo,
+        this.state.typeNoteTodo
       );
     } else {
       this.reload(
@@ -449,33 +473,46 @@ export default class Historique extends React.Component {
         "DESC",
         this.state.startAt,
         this.state.endAt,
-        this.state.localisation
+        this.state.localisation,
+        this.state.openNoteTodo,
+        this.state.typeNoteTodo
       );
     }
   };
 
-  decoration = code => {
+  style = acte => {
     // code de l'acte passé en paramètre
     let deco = {
       color: "",
       icon: "",
+      tag: 0,
+      description: "",
       code: ""
     };
 
+    if (acte.code === "#NOTE" || acte.code === "#TODO") {
+      deco.description = _.replace(acte.description, /^./, "");
+    } else {
+      deco.description = acte.description;
+    }
+
+    let tag = Number(acte.description[0]);
+    deco.tag = tag;
+
     // Un acte CCAM ou NGAP : fond par défaut sans icône, le code est affiché
-    if (!_.startsWith(code, "#")) {
-      deco.code = code;
+    if (!_.startsWith(acte.code, "#")) {
+      deco.code = acte.code;
       return deco;
     }
 
     // Une ligne autre qu'un acte : fond coloré et icône, le code n'est pas affiché
-    if (code === "#NOTE") {
+    if (acte.code === "#NOTE") {
       deco.color = "yellow";
       deco.icon = "sticky note outline";
-    } else if (code === "#TODO") {
+    } else if (acte.code === "#TODO") {
       deco.color = "pink";
       deco.icon = "list";
-    } else if (code === "#FSE") {
+    } else if (acte.code === "#FSE") {
       deco.color = "lightgreen";
       deco.icon = "check";
     }
@@ -483,7 +520,28 @@ export default class Historique extends React.Component {
     return deco;
   };
 
+  tag = value => {
+    if (value === 1) {
+      return <Label circular color="red" empty />;
+    } else if (value === 2) {
+      return <Label circular color="orange" empty />;
+    } else if (value === 3) {
+      return <Label circular color="yellow" empty />;
+    } else if (value === 4) {
+      return <Label circular color="green" empty />;
+    } else if (value === 5) {
+      return <Label circular color="blue" empty />;
+    } else if (value === 6) {
+      return <Label circular color="purple" empty />;
+    } else if (value === 7) {
+      return <Label circular color="grey" empty />;
+    } else {
+      return "";
+    }
+  };
+
   onActeClick = (e, id) => {
+    e.preventDefault();
     let actesSelected = [];
 
     if (e.ctrlKey || e.metaKey) {
@@ -524,7 +582,8 @@ export default class Historique extends React.Component {
     this.props.onSelectionChange(actesSelected);
   };
 
-  onActeDoubleClick = id => {
+  onActeDoubleClick = (e, id) => {
+    e.preventDefault();
     let actesSelected = [];
     actesSelected.push(id);
     this.setState({ actesSelected: actesSelected });
@@ -532,12 +591,32 @@ export default class Historique extends React.Component {
     this.props.onSelectionChange(actesSelected);
   };
 
-  onEdit = id => {
+  onEdit = (id, type) => {
     // l'id de l'acte passé en paramètre
-    this.setState({
-      idEditer: id,
-      showEdit: true
-    });
+    if (type === "#NOTE" || type === "#TODO") {
+      let newType = "";
+
+      if (type === "#NOTE") {
+        newType = "note";
+      } else if (type === "#TODO") {
+        newType = "todo";
+      } else {
+        newType = "";
+      }
+
+      this.setState({
+        idEditer: id,
+        openNoteTodo: true,
+        typeNoteTodo: newType
+      });
+    } else {
+      this.setState({
+        idEditer: id,
+        showEdit: true,
+        openNoteTodo: false,
+        typeNoteTodo: ""
+      });
+    }
   };
 
   onClose = close => {
@@ -557,7 +636,9 @@ export default class Historique extends React.Component {
       this.state.order,
       this.state.startAt,
       this.state.endAt,
-      this.state.localisation
+      this.state.localisation,
+      this.state.openNoteTodo,
+      this.state.typeNoteTodo
     );
   };
 
@@ -610,7 +691,9 @@ export default class Historique extends React.Component {
           this.state.order,
           this.state.startAt,
           this.state.endAt,
-          this.state.localisation
+          this.state.localisation,
+          this.state.openNoteTodo,
+          this.state.typeNoteTodo
         );
       },
       error => {
@@ -673,28 +756,23 @@ export default class Historique extends React.Component {
     this.reponseCancel = true;
   };
 
-  onOpen = (type) => {
-    this.setState({ 
-      open: true,
-      type: type
-    });
-  };
-
-  onCreate = (acte) => {
+  onCreateUpdateNoteTodo = acte => {
     this.setState({
-      open: false, 
-      type: ""
+      openNoteTodo: false,
+      typeNoteTodo: ""
     });
 
     this.reload(
-      this.state.idPatient,
+      acte.idPatient,
       this.state.limit,
       this.state.offset,
       this.state.sort,
       this.state.order,
       this.state.startAt,
       this.state.endAt,
-      this.state.localisation
+      this.state.localisation,
+      this.state.openNoteTodo,
+      this.state.typeNoteTodo
     );
   };
 
@@ -749,22 +827,14 @@ export default class Historique extends React.Component {
           </Table.Header>
           <Table.Body>
             {_.map(this.state.actes, acte => {
-              let deco = this.decoration(acte.code);
+              let deco = this.style(acte);
               let rowSelected = _.includes(this.state.actesSelected, acte.id);
               // actions du composant par défaut ["Editer","Supprimer"]
               let actions = [
                 {
                   icon: "edit",
                   text: "Editer",
-                  action: id => {
-                    if (acte.code === "#NOTE") {
-                      this.onOpen("note");
-                    } else if (acte.code === "#TODO") {
-                      this.onOpen("todo");
-                    } else {
-                      this.onEdit(id);
-                    }
-                  }
+                  action: id => this.onEdit(id, acte.code)
                 },
                 {
                   icon: "trash",
@@ -789,9 +859,9 @@ export default class Historique extends React.Component {
                         this.onActeClick(e, acte.id);
                       }
                     }}
-                    onDoubleClick={() => {
+                    onDoubleClick={e => {
                       if (this.props.onActeDoubleClick) {
-                        this.onActeDoubleClick(acte.id);
+                        this.onActeDoubleClick(e, acte.id);
                       }
                     }}
                     style={{
@@ -799,18 +869,29 @@ export default class Historique extends React.Component {
                       color: rowSelected ? "white" : "black"
                     }}
                   >
-                    <Table.Cell>{moment(acte.doneAt).format("L")}</Table.Cell>
+                    <Table.Cell>
+                      {_.isEqual(acte.code, "#TODO")
+                        ? ""
+                        : moment(acte.doneAt).format("L")}
+                    </Table.Cell>
                     <Table.Cell>{acte.localisation}</Table.Cell>
                     <Table.Cell>{deco.code}</Table.Cell>
                     <Table.Cell>
                       {_.isEqual(acte.cotation, 0) ? "" : acte.cotation}
                     </Table.Cell>
                     <Table.Cell>
-                      {_.isEmpty(deco.icon) ? "" : <Icon name={deco.icon} />}
-                      {acte.description}
+                      {_.isEqual(deco.tag, 0) ? (
+                        <Icon name={deco.icon} />
+                      ) : (
+                        this.tag(deco.tag)
+                      )}
+                      {deco.description}
                     </Table.Cell>
                     <Table.Cell textAlign="right">
-                      {tarif(acte.montant)}
+                      {_.isEqual(acte.code, "#TODO") ||
+                      _.isEqual(acte.code, "#NOTE")
+                        ? ""
+                        : tarif(acte.montant)}
                     </Table.Cell>
                     <Table.Cell>
                       <Actions
@@ -870,12 +951,14 @@ export default class Historique extends React.Component {
         ) : (
           ""
         )}
-        <Note 
+        <Note
           client={this.props.client}
+          id={this.state.idEditer}
           idPatient={this.state.idPatient}
-          open={this.state.open} 
-          type={this.state.type}
-          onCreate={this.onCreate}
+          open={this.state.openNoteTodo}
+          type={this.state.typeNoteTodo}
+          onCreate={this.onCreateUpdateNoteTodo}
+          onUpdate={this.onCreateUpdateNoteTodo}
         />
       </React.Fragment>
     );

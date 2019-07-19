@@ -1,6 +1,14 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Accordion, Button, Form, Icon, Modal, Ref } from "semantic-ui-react";
+import {
+  Accordion,
+  Button,
+  Form,
+  Icon,
+  Label,
+  Modal,
+  Ref
+} from "semantic-ui-react";
 
 import Montant from "../Shared/Montant";
 import Localisations from "../Shared/Localisations";
@@ -34,6 +42,17 @@ const propDefs = {
   }
 };
 
+const tags = [
+  { text: <Icon name="close" size="small" />, value: 0 },
+  { text: <Label circular color="red" empty />, value: 1 },
+  { text: <Label circular color="orange" empty />, value: 2 },
+  { text: <Label circular color="yellow" empty />, value: 3 },
+  { text: <Label circular color="green" empty />, value: 4 },
+  { text: <Label circular color="blue" empty />, value: 5 },
+  { text: <Label circular color="purple" empty />, value: 6 },
+  { text: <Label circular color="grey" empty />, value: 7 }
+];
+
 export default class Edition extends React.Component {
   // Props
   static propTypes = propDefs.propTypes;
@@ -51,6 +70,7 @@ export default class Edition extends React.Component {
     cotation: -1,
     description: "",
     montant: -1,
+    tag: "",
     lockRevision: -1,
     showConfirmation: false,
     openLocalisation: false,
@@ -282,12 +302,23 @@ export default class Edition extends React.Component {
                   />
                 </Form.Input>
               </Form.Group>
-              <Form.Input
-                label="Description"
-                placeholder="Description de l'acte sélectionné"
-                value={description}
-                onChange={(e, d) => this.setState({ description: d.value })}
-              />
+              <Form.Group>
+                <Form.Input
+                  width={16}
+                  label="Description"
+                  placeholder="Description de l'acte sélectionné"
+                  value={description}
+                  onChange={(e, d) => this.setState({ description: d.value })}
+                />
+                <Form.Dropdown
+                  width={1}
+                  fluid={true}
+                  label="Tags"
+                  selection={true}
+                  options={tags}
+                  onChange={(e, d) => this.setState({ tag: d.value })}
+                />
+              </Form.Group>
               <div style={{ height: "320px", overflow: "auto" }}>
                 <Accordion styled={true} fluid={true}>
                   <Accordion.Title

@@ -25,12 +25,13 @@ const propDefs = {
   description: "Nouvelle << Note >> ou << Todo >>",
   example: "Modal",
   propDocs: {
-    id: "Id d'une Note ou TODO pour l'édition. Par défaut, id = 0",
+    id: "id de l'acte sélectionné. Par défaut, id = 0",
     idPatient: "Id du patient. Par défaut, idPatient = 0",
     open:
       "La modale s'ouvre si la valeur de 'open' est égale à true. Par défaut, open = false",
     type: "Type de l'acte ('NOTE' ou 'TODO'). Par défaut, type = ''",
-    onCreate: "Callback à la création de la nouvelle 'note' ou 'todo'"
+    onCreate: "Callback à la création de la nouvelle 'note' ou 'todo'",
+    onUpdate: "Callback à la mise à jour d'une 'note' ou 'todo'"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
@@ -38,7 +39,8 @@ const propDefs = {
     idPatient: PropTypes.number,
     open: PropTypes.bool,
     type: PropTypes.string,
-    onCreate: PropTypes.func
+    onCreate: PropTypes.func,
+    onUpdate: PropTypes.func
   }
 };
 
@@ -110,20 +112,20 @@ export default class Note extends React.Component {
       code = "";
     }
 
+    let params = {
+      idPatient: this.state.idPatient,
+      doneAt: this.state.date,
+      localisation: this.state.localisation,
+      code: code,
+      description: this.state.tag + " " + this.state.description
+    };
+
     this.props.client.Actes.readAll(
       {
         _id: Number(this.state.id)
       },
       result => {
-        if (result.length === 0) {
-          let params = {
-            idPatient: this.state.idPatient,
-            doneAt: this.state.date,
-            localisation: this.state.localisation,
-            code: code,
-            description: this.state.description
-          };
-      
+        if (result.results.length === 0) {
           this.props.client.Actes.create(
             params,
             acte => {
@@ -136,27 +138,10 @@ export default class Note extends React.Component {
             }
           );
         } else {
-          let params = {
-            idPatient: this.state.idPatient,
-            doneAt: this.state.date,
-            localisation: this.state.localisation,
-            code: code,
-            description: this.state.description
-          };
-
           this.props.client.Actes.update(
             this.state.id,
             params,
             acte => {
-              this.setState({
-                idPatient: acte.idPatient,
-                date: moment(acte.doneAt).toDate(),
-                localisation: acte.localisation,
-                code: acte.code,
-                description: acte.description,
-                lockRevision: acte.lockRevision
-              });
-
               if (this.props.onUpdate) {
                 this.props.onUpdate(acte);
               }

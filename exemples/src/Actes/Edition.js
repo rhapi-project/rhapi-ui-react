@@ -1,7 +1,7 @@
 import React from "react";
 import { Client } from "rhapi-client";
 import { Actes } from "rhapi-ui-react";
-import { Button, Divider, Input, Table } from "semantic-ui-react";
+import { Button, Divider, Input, Label, Table } from "semantic-ui-react";
 
 import moment from "moment";
 import _ from "lodash";
@@ -68,8 +68,71 @@ export default class ActesEdition extends React.Component {
     })
   }
 
+  style = (acte) => {
+    // code de l'acte passé en paramètre
+    let deco = {
+      color: "",
+      icon: "",
+      tag: 0,
+      description: "",
+      code: ""
+    };
+
+    if (acte) {
+      if (acte.code === "#NOTE" || acte.code === "#TODO") {
+        deco.description = _.replace(acte.description,/^./,"");
+      } else {
+        deco.description = acte.description;
+      }
+
+      let tag = Number(acte.description[0]);
+      deco.tag = tag;
+
+      // Un acte CCAM ou NGAP : fond par défaut sans icône, le code est affiché
+      if (!_.startsWith(acte.code, "#")) {
+        deco.code = acte.code;
+        return deco;
+      }
+
+      // Une ligne autre qu'un acte : fond coloré et icône, le code n'est pas affiché
+      if (acte.code === "#NOTE") {
+        deco.color = "yellow";
+        deco.icon = "sticky note outline";
+      } else if (acte.code === "#TODO") {
+        deco.color = "pink";
+        deco.icon = "list";
+      } else if (acte.code === "#FSE") {
+        deco.color = "lightgreen";
+        deco.icon = "check";
+      }
+    }
+
+    return deco;
+  };
+
+  tag = (value) => {
+    if (value === 1) {
+      return <Label circular color="red" empty />;
+    } else if (value === 2) {
+      return <Label circular color="orange" empty />;
+    } else if (value === 3) {
+      return <Label circular color="yellow" empty />;
+    } else if (value === 4) {
+      return <Label circular color="green" empty />;
+    } else if (value === 5) {
+      return <Label circular color="blue" empty />;
+    } else if (value === 6) {
+      return <Label circular color="purple" empty />;
+    } else if (value === 7) {
+      return <Label circular color="grey" empty />;
+    } else {
+      return "";
+    }
+  }
+
   render() {
     let acte = this.state.acte;
+    let deco = this.style(acte);
 
     return (
       <React.Fragment>
@@ -113,7 +176,10 @@ export default class ActesEdition extends React.Component {
                   <Table.Cell>
                     {_.isEqual(acte.cotation, 0) ? "" : acte.cotation}
                   </Table.Cell>
-                  <Table.Cell>{acte.description}</Table.Cell>
+                  <Table.Cell>
+                    {_.isEqual(deco.tag,0)?"":this.tag(deco.tag)}
+                    {deco.description}
+                  </Table.Cell>
                   <Table.Cell textAlign="right">
                     {this.tarif(acte.montant)}
                   </Table.Cell>
