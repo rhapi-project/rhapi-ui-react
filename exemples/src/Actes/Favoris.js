@@ -12,7 +12,7 @@ export default class ActesFavoris extends React.Component {
   componentWillMount() {
     this.setState({
       openFavoris: false,
-      selectedActe: {}
+      actes: []
     });
   };
   render() {
@@ -31,43 +31,53 @@ export default class ActesFavoris extends React.Component {
           codGrille={13} // chirurgiens-dentistes - par défaut c'est à 0
           open={this.state.openFavoris}
           onClose={() => this.setState({ openFavoris: false })}
-          onSelection={(index, acte) => this.setState({ selectedActe: acte })}
+          onSelection={(index, actes) => this.setState({ actes: actes })}
         />
         <Divider hidden={true} />
-        {!_.isEmpty(this.state.selectedActe)
-          ? <Table celled={true}>
+        {_.map(this.state.actes, acte => <Acte key={acte.code} acte={acte} />)}
+      </React.Fragment>
+    )
+  }
+}
+
+class Acte extends React.Component {
+  render () {
+    return (
+      <React.Fragment>
+        {_.isEmpty(this.props.acte)
+          ? null
+          : <Table celled={true}>
               <Table.Body>
                 <Table.Row>
                   <Table.Cell collapsing={true}>Description</Table.Cell>
-                  <Table.Cell>{this.state.selectedActe.description}</Table.Cell>
+                  <Table.Cell>{this.props.acte.description}</Table.Cell>
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell>Code</Table.Cell>
-                  <Table.Cell>{this.state.selectedActe.code}</Table.Cell>
+                  <Table.Cell>{this.props.acte.code}</Table.Cell>
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell>Cotation</Table.Cell>
-                  <Table.Cell>{this.state.selectedActe.cotation}</Table.Cell>
+                  <Table.Cell>{this.props.acte.cotation}</Table.Cell>
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell>Localisation</Table.Cell>
-                  <Table.Cell>{this.state.selectedActe.localisation}</Table.Cell>
+                  <Table.Cell>{this.props.acte.localisation}</Table.Cell>
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell>Modificateurs</Table.Cell>
-                  <Table.Cell>{this.state.selectedActe.modificateurs}</Table.Cell>
+                  <Table.Cell>{this.props.acte.modificateurs}</Table.Cell>
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell>Qualificatifs</Table.Cell>
-                  <Table.Cell>{this.state.selectedActe.qualificatifs}</Table.Cell>
+                  <Table.Cell>{this.props.acte.qualificatifs}</Table.Cell>
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell>Montant</Table.Cell>
-                  <Table.Cell>{this.state.selectedActe.montant}</Table.Cell>
+                  <Table.Cell>{this.props.acte.montant}</Table.Cell>
                 </Table.Row>
               </Table.Body>
             </Table>
-          : null
         }
       </React.Fragment>
     )
