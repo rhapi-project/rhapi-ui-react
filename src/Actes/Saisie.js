@@ -209,6 +209,24 @@ export default class Saisie extends React.Component {
     );
   };
 
+  onValidationMultiple = (rowKey, actes) => {
+    this.checkLockRevision(
+      () => this.setState({ error: 1 }),
+      () => {
+        let a = this.state.actes;
+        if (this.existActe(rowKey)) {
+          a.splice(rowKey, 1);
+        }
+        _.forEach(actes, (acte, i) => {
+          a.splice(rowKey + i, 0, acte);
+        });
+        this.update(a);
+      },
+      () => this.setState({ error: 2 }),
+      () => this.setState({ error: 1 })
+    );
+  };
+
   changeFieldValue = (field, value, index) => {
     let actes = this.state.actes;
     if (this.existActe(index)) {
@@ -512,41 +530,17 @@ export default class Saisie extends React.Component {
             open={!_.isNull(this.state.selectedFavoris)}
             onClose={() => this.setState({ selectedFavoris: null })}
             onSelection={(index, actes) => {
+              let a = _.cloneDeep(actes);
               let date = moment().toISOString();
-              /*if (this.existActe(index)) {
+              if (this.existActe(index)) {
                 // on garde la même date
                 date = this.state.actes[index].date;
-              }*/
-              /*console.log(this.existActe(index));
-              _.forEach(actes, (acte, i) => {
-                if (this.existActe(index + i) || this.state.activeRow === (index + i)) {
-                  date = this.state.actes[index + i].date;
-                  this.onValidation(
-                    (index + i),
-                    acte.code,
-                    acte.description,
-                    date,
-                    acte.localisation,
-                    acte.cotation,
-                    acte.modificateurs,
-                    acte.qualificatifs,
-                    acte.montant
-                  );
-                } else if (this.state.activeRow === (index + i)) {
-                  
-                }*/
-              /*this.onValidation(
-                  (index + i),
-                  acte.code,
-                  acte.description,
-                  date,
-                  acte.localisation,
-                  acte.cotation,
-                  acte.modificateurs,
-                  acte.qualificatifs,
-                  acte.montant
-                );*/
-              //});
+              }
+              _.forEach(a, acte => {
+                _.unset(acte, "acteLie");
+                acte.date = date;
+              });
+              this.onValidationMultiple(index, a);
             }}
           />
 
