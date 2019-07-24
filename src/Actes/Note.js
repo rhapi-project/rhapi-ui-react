@@ -3,7 +3,9 @@ import PropTypes from "prop-types";
 import {
   Accordion,
   Button,
+  Dropdown,
   Form,
+  Header,
   Icon,
   Label,
   Modal,
@@ -30,8 +32,12 @@ const propDefs = {
     open:
       "La modale s'ouvre si la valeur de 'open' est égale à true. Par défaut, open = false",
     type: "Type de l'acte ('NOTE' ou 'TODO'). Par défaut, type = ''",
-    onCreate: "Callback à la création de la nouvelle 'note' ou 'todo'",
-    onUpdate: "Callback à la mise à jour d'une 'note' ou 'todo'"
+    onCreate:
+      "Callback à la création de la nouvelle 'note' ou 'todo'. L'acte créé est passé en paramètre",
+    onUpdate:
+      "Callback à la mise à jour d'une 'note' ou 'todo'. L'acte modifié est passé en paramètre",
+    onClose:
+      "Callback à la fermeture de la modal. Une valeur booléenne et le type (note ou todo) sont passés en paramètre"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
@@ -40,19 +46,52 @@ const propDefs = {
     open: PropTypes.bool,
     type: PropTypes.string,
     onCreate: PropTypes.func,
-    onUpdate: PropTypes.func
+    onUpdate: PropTypes.func,
+    onClose: PropTypes.func
   }
 };
 
-const tags = [
-  { text: <Icon name="close" size="small" />, value: 0 },
-  { text: <Label circular color="red" empty />, value: 1 },
-  { text: <Label circular color="orange" empty />, value: 2 },
-  { text: <Label circular color="yellow" empty />, value: 3 },
-  { text: <Label circular color="green" empty />, value: 4 },
-  { text: <Label circular color="blue" empty />, value: 5 },
-  { text: <Label circular color="purple" empty />, value: 6 },
-  { text: <Label circular color="grey" empty />, value: 7 }
+const optionsTag = [
+  {
+    key: "",
+    value: "",
+    text: <Icon name="close" size="small" />
+  },
+  {
+    key: "red",
+    value: "red",
+    text: <Label circular color="red" empty />
+  },
+  {
+    key: "orange",
+    value: "orange",
+    text: <Label circular color="orange" empty />
+  },
+  {
+    key: "yellow",
+    value: "yellow",
+    text: <Label circular color="yellow" empty />
+  },
+  {
+    key: "green",
+    value: "green",
+    text: <Label circular color="green" empty />
+  },
+  {
+    key: "blue",
+    value: "blue",
+    text: <Label circular color="blue" empty />
+  },
+  {
+    key: "purple",
+    value: "purple",
+    text: <Label circular color="purple" empty />
+  },
+  {
+    key: "grey",
+    value: "grey",
+    text: <Label circular color="grey" empty />
+  }
 ];
 
 export default class Note extends React.Component {
@@ -68,92 +107,85 @@ export default class Note extends React.Component {
     this.setState({
       id: this.props.id,
       idPatient: this.props.idPatient,
-      open: this.props.open,
-      type: this.props.type,
       date: moment().toISOString(),
       localisation: "",
-      tag: "",
+      couleurTag: "",
       description: ""
     });
   }
 
   componentWillReceiveProps(next) {
-    this.setState({
-      id: next.id,
-      idPatient: next.idPatient,
-      open: next.open,
-      type: next.type
-    });
+    if (next.open && next.open !== this.props.open) {
+      this.props.client.Actes.read(
+        next.id,
+        {},
+        result => {
+          this.setState({
+            id: next.id,
+            idPatient: next.idPatient,
+            date: result.doneAt,
+            localisation: result.localisation,
+            couleurTag: result.couleur,
+            description: result.description
+          });
+        },
+        error => {
+          this.setState({
+            id: next.id,
+            idPatient: next.idPatient,
+            date: moment().toISOString(),
+            localisation: "",
+            couleurTag: "",
+            description: ""
+          });
+        }
+      );
+    }
   }
 
   onClose = () => {
-    this.setState({
-      open: false,
-      type: "",
-      date: moment().toISOString(),
-      localisation: "",
-      tag: "",
-      description: ""
-    });
+    if (this.props.onClose) {
+      this.props.onClose(false, "");
+    }
   };
 
   onValider = () => {
-    this.setState({
-      open: false
-    });
-
-    let code = "";
-
-    if (this.state.type === "note") {
-      code = "#NOTE";
-    } else if (this.state.type === "todo") {
-      code = "#TODO";
-    } else {
-      code = "";
-    }
+    let code = "#" + _.upperCase(this.props.type);
 
     let params = {
       idPatient: this.state.idPatient,
       doneAt: this.state.date,
       localisation: this.state.localisation,
       code: code,
-      description: this.state.tag + " " + this.state.description
+      couleur: this.state.couleurTag,
+      description: this.state.description
     };
 
-    this.props.client.Actes.readAll(
-      {
-        _id: Number(this.state.id)
-      },
+    this.props.client.Actes.read(
+      Number(this.state.id),
+      {},
       result => {
-        if (result.results.length === 0) {
-          this.props.client.Actes.create(
-            params,
-            acte => {
-              if (this.props.onCreate) {
-                this.props.onCreate(acte);
-              }
-            },
-            error => {
-              console.log(error);
+        this.props.client.Actes.update(
+          this.state.id,
+          params,
+          acte => {
+            if (this.props.onUpdate) {
+              this.props.onUpdate(acte);
             }
-          );
-        } else {
-          this.props.client.Actes.update(
-            this.state.id,
-            params,
-            acte => {
-              if (this.props.onUpdate) {
-                this.props.onUpdate(acte);
-              }
-            },
-            error => {
-              console.log(error);
-            }
-          );
-        }
+          },
+          error => {}
+        );
       },
       error => {
-        console.log(error);
+        this.props.client.Actes.create(
+          params,
+          acte => {
+            if (this.props.onCreate) {
+              this.props.onCreate(acte);
+            }
+          },
+          error => {}
+        );
       }
     );
   };
@@ -168,15 +200,26 @@ export default class Note extends React.Component {
     let date = this.state.date;
     let localisation = this.state.localisation;
     let description = this.state.description;
+    let type = _.upperCase(this.props.type);
+    let icon =
+      type === "NOTE" ? "sticky note outline" : type === "TODO" ? "list" : "";
+
+    let textDropdown = "";
+    _.forEach(optionsTag, tag => {
+      if (tag.value === this.state.couleurTag) {
+        textDropdown = tag.value;
+      }
+    });
 
     return (
       <React.Fragment>
         <Modal
           dimmer="blurring"
-          open={this.state.open}
+          open={this.props.open}
           onClose={this.onClose}
           size="large"
         >
+          <Header icon={icon} content={type} />
           <Modal.Content>
             <Form unstackable>
               <Form.Group widths="equal">
@@ -209,12 +252,13 @@ export default class Note extends React.Component {
                   onBlur={() => this.inputContentFormating()}
                 />
                 <Form.Dropdown
+                  text={textDropdown}
                   width={2}
                   fluid={true}
                   label="Tags"
                   selection={true}
-                  options={tags}
-                  onChange={(e, d) => this.setState({ tag: d.value })}
+                  options={optionsTag}
+                  onChange={(e, d) => this.setState({ couleurTag: d.value })}
                 />
               </Form.Group>
               <div style={{ height: "320px", overflow: "auto" }}>

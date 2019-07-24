@@ -30,20 +30,12 @@ export default class ActesNote extends React.Component {
   };
 
   onEdit = (id, type) => {
-    let newType = "";
-
-    if (type === "#NOTE") {
-      newType = "note";
-    } else if (type === "#TODO") {
-      newType = "todo";
-    } else {
-      newType = "";
-    }
+    let newType = _.lowerCase(_.trimStart(type,'#'));
 
     this.setState({
       id: id,
       open: true,
-      type: newType
+      type: newType //note ou todo
     });
   }
 
@@ -71,18 +63,20 @@ export default class ActesNote extends React.Component {
     });
   }
 
+  onClose = (bool, type) => {
+    this.setState({ 
+      open: bool, 
+      type: type
+    });
+  }
+
   style = (acte) => {
     // code de l'acte passé en paramètre
     let deco = {
       color: "",
       icon: "",
-      tag: 0,
-      description: _.replace(acte.description,/^./,""),
       code: ""
     };
-
-    let tag = Number(acte.description[0]);
-    deco.tag = tag;
 
     // Un acte CCAM ou NGAP : fond par défaut sans icône, le code est affiché
     if (!_.startsWith(acte.code, "#")) {
@@ -105,42 +99,18 @@ export default class ActesNote extends React.Component {
     return deco;
   };
 
-  tag = (value) => {
-    if (value === 1) {
-      return <Label circular color="red" empty />;
-    } else if (value === 2) {
-      return <Label circular color="orange" empty />;
-    } else if (value === 3) {
-      return <Label circular color="yellow" empty />;
-    } else if (value === 4) {
-      return <Label circular color="green" empty />;
-    } else if (value === 5) {
-      return <Label circular color="blue" empty />;
-    } else if (value === 6) {
-      return <Label circular color="purple" empty />;
-    } else if (value === 7) {
-      return <Label circular color="grey" empty />;
-    } else {
-      return "";
-    }
-  }
-
   render() {
     let iconNote = (
       <Icon
         name="sticky note outline"
-        color="white"
         size="large"
-        onClick={() => this.onOpen("note")}
       />
     );
 
     let iconTodo = (
       <Icon
         name="list"
-        color="white"
         size="large"
-        onClick={() => this.onOpen("todo")}
       />
     );
 
@@ -173,15 +143,6 @@ export default class ActesNote extends React.Component {
           <Button.Content hidden={true}>Todo</Button.Content>
         </Button>
         <Divider hidden={true} />
-        <Actes.Note 
-          client={client}
-          id={this.state.id}
-          idPatient={1}
-          open={this.state.open} 
-          type={this.state.type}
-          onCreate={this.onCreate}
-          onUpdate={this.onUpdate}
-        />
         {
           (this.state.acte.length !== 0)?(
             <Table celled={true} striped={false} selectable={false} sortable={true}>
@@ -221,8 +182,14 @@ export default class ActesNote extends React.Component {
                           <Table.Cell></Table.Cell>
                           <Table.Cell></Table.Cell>
                           <Table.Cell>
-                            {_.isEqual(deco.tag,0)?<Icon name={deco.icon} />:this.tag(deco.tag)}
-                            {deco.description}
+                            {
+                              (acte.couleur === "")?(
+                                <Icon name={deco.icon} />
+                              ):(
+                                <Label circular color={acte.couleur} empty />
+                              )
+                            }
+                            {" " + acte.description}
                           </Table.Cell>
                           <Table.Cell></Table.Cell>
                           <Table.Cell>
@@ -241,6 +208,16 @@ export default class ActesNote extends React.Component {
             </Table>
           ):""
         }
+        <Actes.Note 
+          client={client}
+          id={this.state.id}
+          idPatient={1}
+          open={this.state.open} 
+          type={this.state.type}
+          onCreate={this.onCreate}
+          onUpdate={this.onUpdate}
+          onClose={this.onClose}
+        />
       </React.Fragment>
     );
   }

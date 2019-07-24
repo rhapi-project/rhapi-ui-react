@@ -193,40 +193,26 @@ export default class Historique extends React.Component {
       this.props.order,
       this.props.startAt,
       this.props.endAt,
-      this.props.localisation,
-      this.props.openNoteTodo,
-      this.props.typeNoteTodo
+      this.props.localisation
     );
   }
 
   componentWillReceiveProps(next) {
-    if (_.isEqual(this.state.idPatient, next.idPatient)) {
-      this.reload(
-        next.idPatient,
-        this.state.limit,
-        this.state.offset,
-        this.state.sort,
-        this.state.order,
-        next.startAt,
-        next.endAt,
-        next.localisation.trim(),
-        next.openNoteTodo,
-        next.typeNoteTodo
-      );
-    } else {
-      this.reload(
-        next.idPatient,
-        this.state.limit,
-        0,
-        this.state.sort,
-        this.state.order,
-        this.state.startAt,
-        this.state.endAt,
-        this.state.localisation,
-        next.openNoteTodo,
-        next.typeNoteTodo
-      );
-    }
+    this.setState({
+      openNoteTodo: next.openNoteTodo,
+      typeNoteTodo: next.typeNoteTodo
+    });
+
+    this.reload(
+      next.idPatient,
+      this.state.limit,
+      0, // offset
+      this.state.sort,
+      this.state.order,
+      next.startAt,
+      next.endAt,
+      next.localisation.trim()
+    );
   }
 
   componentDidMount() {
@@ -241,9 +227,7 @@ export default class Historique extends React.Component {
         this.state.order,
         this.state.startAt,
         this.state.endAt,
-        this.state.localisation,
-        this.state.openNoteTodo,
-        this.state.typeNoteTodo
+        this.state.localisation
       );
     }, 15000);
   }
@@ -389,9 +373,7 @@ export default class Historique extends React.Component {
     order,
     startAt,
     endAt,
-    localisation,
-    openNoteTodo,
-    typeNoteTodo
+    localisation
   ) => {
     let params = this.query(
       idPatient,
@@ -419,17 +401,10 @@ export default class Historique extends React.Component {
           lockRevision: result.informations.lockRevision,
           startAt: startAt,
           endAt: endAt,
-          localisation: localisation,
-          openNoteTodo: openNoteTodo,
-          typeNoteTodo: typeNoteTodo
+          localisation: localisation
         });
       },
-      error => {
-        this.setState({
-          openNoteTodo: openNoteTodo,
-          typeNoteTodo: typeNoteTodo
-        });
-      }
+      error => {}
     );
   };
 
@@ -443,9 +418,7 @@ export default class Historique extends React.Component {
       query.order,
       this.state.startAt,
       this.state.endAt,
-      this.state.localisation,
-      this.state.openNoteTodo,
-      this.state.typeNoteTodo
+      this.state.localisation
     );
   };
 
@@ -460,9 +433,7 @@ export default class Historique extends React.Component {
         "ASC",
         this.state.startAt,
         this.state.endAt,
-        this.state.localisation,
-        this.state.openNoteTodo,
-        this.state.typeNoteTodo
+        this.state.localisation
       );
     } else {
       this.reload(
@@ -473,35 +444,29 @@ export default class Historique extends React.Component {
         "DESC",
         this.state.startAt,
         this.state.endAt,
-        this.state.localisation,
-        this.state.openNoteTodo,
-        this.state.typeNoteTodo
+        this.state.localisation
       );
     }
   };
 
   style = acte => {
-    // code de l'acte passé en paramètre
+    // l'acte passé en paramètre
     let deco = {
       color: "",
       icon: "",
-      tag: 0,
-      description: "",
-      code: ""
+      code: "",
+      description: ""
     };
-
-    if (acte.code === "#NOTE" || acte.code === "#TODO") {
-      deco.description = _.replace(acte.description, /^./, "");
-    } else {
-      deco.description = acte.description;
-    }
-
-    let tag = Number(acte.description[0]);
-    deco.tag = tag;
 
     // Un acte CCAM ou NGAP : fond par défaut sans icône, le code est affiché
     if (!_.startsWith(acte.code, "#")) {
       deco.code = acte.code;
+      deco.description =
+        acte.couleur === "" ? (
+          acte.description
+        ) : (
+          <Label circular color={acte.couleur} empty />
+        );
       return deco;
     }
 
@@ -509,35 +474,42 @@ export default class Historique extends React.Component {
     if (acte.code === "#NOTE") {
       deco.color = "yellow";
       deco.icon = "sticky note outline";
+      deco.description =
+        acte.couleur === "" ? (
+          <Icon name="sticky note outline" />
+        ) : (
+          <Label circular color={acte.couleur} empty />
+        );
     } else if (acte.code === "#TODO") {
       deco.color = "pink";
       deco.icon = "list";
+      deco.description =
+        acte.couleur === "" ? (
+          <Icon name="list" />
+        ) : (
+          <Label circular color={acte.couleur} empty />
+        );
     } else if (acte.code === "#FSE") {
       deco.color = "lightgreen";
       deco.icon = "check";
+      deco.description =
+        acte.couleur === "" ? (
+          <Icon name="check" />
+        ) : (
+          <Label circular color={acte.couleur} empty />
+        );
+    } else if (acte.code === "#DEVIS") {
+      deco.color = "lightblue";
+      deco.icon = "file alternate";
+      deco.description =
+        acte.couleur === "" ? (
+          <Icon name="file alternate" />
+        ) : (
+          <Label circular color={acte.couleur} empty />
+        );
     }
 
     return deco;
-  };
-
-  tag = value => {
-    if (value === 1) {
-      return <Label circular color="red" empty />;
-    } else if (value === 2) {
-      return <Label circular color="orange" empty />;
-    } else if (value === 3) {
-      return <Label circular color="yellow" empty />;
-    } else if (value === 4) {
-      return <Label circular color="green" empty />;
-    } else if (value === 5) {
-      return <Label circular color="blue" empty />;
-    } else if (value === 6) {
-      return <Label circular color="purple" empty />;
-    } else if (value === 7) {
-      return <Label circular color="grey" empty />;
-    } else {
-      return "";
-    }
   };
 
   onActeClick = (e, id) => {
@@ -612,15 +584,13 @@ export default class Historique extends React.Component {
     } else {
       this.setState({
         idEditer: id,
-        showEdit: true,
-        openNoteTodo: false,
-        typeNoteTodo: ""
+        showEdit: true
       });
     }
   };
 
-  onClose = close => {
-    this.setState({ showEdit: close });
+  onClose = bool => {
+    this.setState({ showEdit: bool });
   };
 
   onUpdate = acte => {
@@ -636,9 +606,7 @@ export default class Historique extends React.Component {
       this.state.order,
       this.state.startAt,
       this.state.endAt,
-      this.state.localisation,
-      this.state.openNoteTodo,
-      this.state.typeNoteTodo
+      this.state.localisation
     );
   };
 
@@ -691,9 +659,7 @@ export default class Historique extends React.Component {
           this.state.order,
           this.state.startAt,
           this.state.endAt,
-          this.state.localisation,
-          this.state.openNoteTodo,
-          this.state.typeNoteTodo
+          this.state.localisation
         );
       },
       error => {
@@ -770,10 +736,15 @@ export default class Historique extends React.Component {
       this.state.order,
       this.state.startAt,
       this.state.endAt,
-      this.state.localisation,
-      this.state.openNoteTodo,
-      this.state.typeNoteTodo
+      this.state.localisation
     );
+  };
+
+  onCloseNote = bool => {
+    this.setState({
+      openNoteTodo: bool,
+      typeNoteTodo: ""
+    });
   };
 
   render() {
@@ -880,12 +851,8 @@ export default class Historique extends React.Component {
                       {_.isEqual(acte.cotation, 0) ? "" : acte.cotation}
                     </Table.Cell>
                     <Table.Cell>
-                      {_.isEqual(deco.tag, 0) ? (
-                        <Icon name={deco.icon} />
-                      ) : (
-                        this.tag(deco.tag)
-                      )}
                       {deco.description}
+                      {deco.icon === "" ? "" : " " + acte.description}
                     </Table.Cell>
                     <Table.Cell textAlign="right">
                       {_.isEqual(acte.code, "#TODO") ||
@@ -917,6 +884,7 @@ export default class Historique extends React.Component {
             ""
           )}
         </div>
+        {/* Modal de supression */}
         <Modal size="tiny" open={this.state.showConfirm}>
           <Modal.Content>
             <p>{this.state.message}</p>
@@ -940,6 +908,7 @@ export default class Historique extends React.Component {
             </Ref>
           </Modal.Actions>
         </Modal>
+        {/* Edition */}
         {!_.isEqual(this.state.idEditer, 0) ? (
           <Edition
             client={this.props.client}
@@ -951,6 +920,7 @@ export default class Historique extends React.Component {
         ) : (
           ""
         )}
+        {/* Note */}
         <Note
           client={this.props.client}
           id={this.state.idEditer}
@@ -959,6 +929,7 @@ export default class Historique extends React.Component {
           type={this.state.typeNoteTodo}
           onCreate={this.onCreateUpdateNoteTodo}
           onUpdate={this.onCreateUpdateNoteTodo}
+          onClose={this.onCloseNote}
         />
       </React.Fragment>
     );
