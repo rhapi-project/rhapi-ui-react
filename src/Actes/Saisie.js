@@ -27,7 +27,7 @@ const propDefs = {
     codPhase: "Code phase, par défaut 0",
     executant:
       "Code d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes)",
-    specialite: "Code spécialité du praticien", // new
+    specialite: "Code spécialité du praticien",
     onError: "Callback en cas d'erreur",
     actions: "Liste d'actions à effectuer (en plus des actions par défaut)"
   },
@@ -61,10 +61,10 @@ export default class Saisie extends React.Component {
   state = {
     fse: {},
     allModificateurs: [],
-    selectedDate: null, // new
+    selectedDate: null,
     selectedIndex: null,
-    selectedFavoris: null, // new
-    selectedLocalisation: null // new
+    selectedFavoris: null,
+    selectedLocalisation: null
   };
 
   componentWillMount() {
@@ -206,6 +206,24 @@ export default class Saisie extends React.Component {
       },
       () => this.setState({ error: 2 }),
       () => this.setState({ error: 3 })
+    );
+  };
+
+  onValidationMultiple = (rowKey, actes) => {
+    this.checkLockRevision(
+      () => this.setState({ error: 1 }),
+      () => {
+        let a = this.state.actes;
+        if (this.existActe(rowKey)) {
+          a.splice(rowKey, 1);
+        }
+        _.forEach(actes, (acte, i) => {
+          a.splice(rowKey + i, 0, acte);
+        });
+        this.update(a);
+      },
+      () => this.setState({ error: 2 }),
+      () => this.setState({ error: 1 })
     );
   };
 
@@ -511,23 +529,18 @@ export default class Saisie extends React.Component {
             executant={this.props.executant} // new
             open={!_.isNull(this.state.selectedFavoris)}
             onClose={() => this.setState({ selectedFavoris: null })}
-            onSelection={(index, acte) => {
+            onSelection={(index, actes) => {
+              let a = _.cloneDeep(actes);
               let date = moment().toISOString();
               if (this.existActe(index)) {
                 // on garde la même date
                 date = this.state.actes[index].date;
               }
-              this.onValidation(
-                index,
-                acte.code,
-                acte.description,
-                date,
-                acte.localisation,
-                acte.cotation,
-                acte.modificateurs,
-                acte.qualificatifs,
-                acte.montant
-              );
+              _.forEach(a, acte => {
+                _.unset(acte, "acteLie");
+                acte.date = date;
+              });
+              this.onValidationMultiple(index, a);
             }}
           />
 

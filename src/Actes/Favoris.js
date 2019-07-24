@@ -163,9 +163,9 @@ export default class Favoris extends React.Component {
       chapitre,
       result => {
         this.setState({
-          favoris: clone,
-          chapitreTitre: null,
-          selectedActes: []
+          favoris: clone
+          //chapitreTitre: null,
+          //selectedActes: []
         });
       },
       error => {
@@ -243,6 +243,7 @@ export default class Favoris extends React.Component {
     }
     if (type === "acte") {
       let acte = {};
+      acte.acteLie = false; // new
       acte.code = "";
       acte.description = "";
       acte.date = moment().toISOString();
@@ -297,16 +298,26 @@ export default class Favoris extends React.Component {
             chapitre.actes[index] = chapitre.actes[index - 1];
             chapitre.actes[index - 1] = tmp;
           });
+          // nouveaux index sélectionnés
+          _.forEach(arrayIndex, (value, i) => {
+            arrayIndex[i] = value - 1;
+          });
+          this.setState({ selectedActes: arrayIndex });
         }
         if (
           !_.includes(arrayIndex, chapitre.actes.length - 1) &&
           direction === "down"
         ) {
-          _.forEach(arrayIndex.sort(), index => {
+          _.forEach(arrayIndex.sort().reverse(), index => {
             let tmp = chapitre.actes[index];
             chapitre.actes[index] = chapitre.actes[index + 1];
             chapitre.actes[index + 1] = tmp;
           });
+          // nouveaux index sélectionnés
+          _.forEach(arrayIndex, (value, i) => {
+            arrayIndex[i] = value + 1;
+          });
+          this.setState({ selectedActes: arrayIndex });
         }
       } else {
         _.forEach(chapitre.chapitres, chap => {
@@ -401,13 +412,29 @@ export default class Favoris extends React.Component {
     }
     if (type === "acte") {
       moveActe(chapitrePrincipale);
+      this.setState({ chapitreTitre: null, selectedActes: [] });
     }
     this.updateFavoris(chapitrePrincipale);
   };
 
-  validation = acte => {
+  validation = (acte, selectedIndex, chapitreTitre) => {
+    if (acte.acteLie) {
+      return;
+    }
     if (this.props.onSelection) {
-      this.props.onSelection(this.props.index, acte);
+      let i = selectedIndex[0];
+      let actes = [];
+      while (!_.isUndefined(i)) {
+        let a = this.getActe(i + 1, chapitreTitre);
+        if (!_.isEmpty(a) && a.acteLie) {
+          actes.push(a);
+          i += 1;
+        } else {
+          i = undefined;
+        }
+      }
+      actes.unshift(acte);
+      this.props.onSelection(this.props.index, actes);
     }
     if (this.props.onClose) {
       this.props.onClose();
@@ -448,12 +475,14 @@ export default class Favoris extends React.Component {
     this.setState({ selectedActes: selectedActes });
   };
 
-  getActe = index => {
+  getActe = (index, chapitreTitre) => {
     let acte = {};
     let chapitre = this.state.favoris;
     let get = chapitre => {
-      if (chapitre.titre === this.state.chapitreTitre) {
-        acte = chapitre.actes[index];
+      if (chapitre.titre === chapitreTitre) {
+        acte = _.isUndefined(chapitre.actes[index])
+          ? {}
+          : chapitre.actes[index];
       } else {
         _.forEach(chapitre.chapitres, chap => {
           get(chap);
@@ -462,6 +491,25 @@ export default class Favoris extends React.Component {
     };
     get(chapitre);
     return acte;
+  };
+
+  liaison = index => {
+    let lien = chapitre => {
+      if (chapitre.titre === this.state.chapitreTitre) {
+        if (chapitre.actes[index].acteLie) {
+          chapitre.actes[index].acteLie = false;
+        } else {
+          chapitre.actes[index].acteLie = true;
+        }
+      } else {
+        _.forEach(chapitre.chapitres, chap => {
+          lien(chap);
+        });
+      }
+    };
+    let chapitre = this.state.favoris;
+    lien(chapitre);
+    this.updateFavoris(chapitre);
   };
 
   renderChapitre = (chapitre, level) => {
@@ -574,6 +622,7 @@ export default class Favoris extends React.Component {
                 <Acte
                   key={key}
                   index={key}
+                  acteLie={acte.acteLie}
                   code={acte.code}
                   cotation={acte.cotation}
                   configuration={this.state.configuration}
@@ -597,7 +646,7 @@ export default class Favoris extends React.Component {
                       });
                       this.selection(e, index);
                     } else {
-                      this.validation(acte);
+                      this.validation(acte, [index], chapitre.titre);
                     }
                   }}
                   selected={
@@ -618,7 +667,7 @@ export default class Favoris extends React.Component {
     let selectedActe =
       this.state.selectedActes.length !== 1
         ? {}
-        : this.getActe(this.state.selectedActes[0]);
+        : this.getActe(this.state.selectedActes[0], this.state.chapitreTitre);
     let moveOptions = !_.isEmpty(this.state.selectedActes)
       ? this.getMoveOptions(this.state.chapitreTitre)
       : !_.isEmpty(this.state.selectedChapitre)
@@ -651,7 +700,11 @@ export default class Favoris extends React.Component {
                           );
                         }
                         if (!_.isEmpty(this.state.selectedActes)) {
-                          this.moveInto("acte", opt.value, selectedActes);
+                          this.moveInto(
+                            "acte",
+                            opt.value,
+                            this.state.selectedActes
+                          );
                         }
                       }}
                     />
@@ -670,6 +723,18 @@ export default class Favoris extends React.Component {
               }
               toggle={true}
             />
+            {this.state.configuration &&
+            this.state.selectedActes.length === 1 ? (
+              <React.Fragment>
+                <Button
+                  //disabled={this.state.selectedActes[0] === 0}
+                  icon="linkify"
+                  onClick={() => {
+                    this.liaison(this.state.selectedActes[0]);
+                  }}
+                />
+              </React.Fragment>
+            ) : null}
             <Button
               content="Désélectionner"
               disabled={
@@ -698,13 +763,6 @@ export default class Favoris extends React.Component {
                         "up"
                       );
                     }
-                    /*if (!_.isEmpty(selectedActe)) {
-                      this.moveActe(
-                        this.state.selectedActes[0],
-                        this.state.chapitreTitre,
-                        "up"
-                      );
-                    }*/
                   }}
                 />
                 <Button
@@ -713,13 +771,6 @@ export default class Favoris extends React.Component {
                     if (!_.isEmpty(this.state.selectedChapitre)) {
                       this.moveChapitre(this.state.selectedChapitre, "down");
                     }
-                    /*if (!_.isEmpty(selectedActe)) {
-                      this.moveActe(
-                        this.state.selectedActes[0],
-                        this.state.chapitreTitre,
-                        "down"
-                      );
-                    }*/
                     if (!_.isEmpty(this.state.selectedActes)) {
                       this.moveActes(
                         this.state.selectedActes,
@@ -758,7 +809,17 @@ export default class Favoris extends React.Component {
             <Button
               content="Valider"
               onClick={() => {
-                this.validation(selectedActe);
+                if (this.state.selectedActes.length !== 1) {
+                  if (this.props.onClose) {
+                    this.props.onClose();
+                  }
+                } else {
+                  this.validation(
+                    selectedActe,
+                    this.state.selectedActes,
+                    this.state.chapitreTitre
+                  );
+                }
               }}
             />
           </Modal.Actions>
@@ -906,6 +967,7 @@ export default class Favoris extends React.Component {
 
 class Acte extends React.Component {
   static defaultProps = {
+    acteLie: false, // new
     code: "",
     cotation: 1,
     description: "",
@@ -933,10 +995,17 @@ class Acte extends React.Component {
           }}
           style={{
             backgroundColor: this.props.selected ? "#E88615" : "inherit",
-            color: this.props.selected ? "white" : "black"
+            color: this.props.selected
+              ? "white"
+              : this.props.acteLie
+              ? "#B9BBBC"
+              : "black"
           }}
         >
-          <Table.Cell>{this.props.description}</Table.Cell>
+          <Table.Cell>
+            {this.props.acteLie ? <Icon name="linkify" /> : null}
+            {this.props.description}
+          </Table.Cell>
           <Table.Cell
             collapsing={true}
             textAlign="center"
