@@ -1,7 +1,7 @@
 import React from "react";
 import { Client } from "rhapi-client";
 import { Actes } from "rhapi-ui-react";
-import { Button, Divider, Form, Message, Modal } from "semantic-ui-react";
+import { Button, Divider, Form, Message, Modal, Radio } from "semantic-ui-react";
 
 import moment from "moment";
 import _ from "lodash";
@@ -28,7 +28,8 @@ export default class ActesSaisieValidation extends React.Component {
     this.setState({
       idPatient: null,
       fse: {},
-      msgSaveFSE: ""
+      msgSaveFSE: "",
+      typeActe: "#FSE"
     });
     this.getPreferences();
   };
@@ -54,12 +55,12 @@ export default class ActesSaisieValidation extends React.Component {
     } 
   };
 
-  createFSE = idPatient => {
+  createFSE = (idPatient, typeActe) => {
     let params = {
-      code: "#FSE",
+      code: typeActe,
       etat: 1,
       idPatient: idPatient,
-      description: "Nouvelle FSE du patient d'id " + idPatient
+      description: "Nouvel acte du patient d'id " + idPatient
     };
     client.Actes.create(
       params,
@@ -74,11 +75,11 @@ export default class ActesSaisieValidation extends React.Component {
     );
   };
 
-  onPatientChange = id => {
+  onPatientChange = (id, typeActe) => {
     this.setState({ idPatient: id });
     if (id && id !== 0) {
       let params = {
-        _code: "#FSE",
+        _code: typeActe,
         _etat: 1,
         _idPatient: id
       };
@@ -88,7 +89,7 @@ export default class ActesSaisieValidation extends React.Component {
           let actes = result.results;
           //console.log(actes);
           if (_.isEmpty(actes)) {
-            this.createFSE(id);
+            this.createFSE(id, typeActe);
           } else if (actes.length > 1) {
             let recent = _.maxBy(actes, a => moment.max(moment(a.modifiedAt)));
             this.setState({ fse: recent });
@@ -144,16 +145,18 @@ export default class ActesSaisieValidation extends React.Component {
           result.id,
           { etat: 0, doneAt: moment().toISOString() },
           result => {
-            this.setState({ msgSaveFSE: "Cette FSE a été bien enregistrée !" });
+            this.setState({ 
+              msgSaveFSE: `L'acte ${this.state.typeActe} a été bien enregistré !` 
+            });
             this.onPatientChange(result.idPatient);
           },
           error => {
-            this.setState({ msgSaveFSE: "Erreur de sauvegarde de la FSE !" });
+            this.setState({ msgSaveFSE: "Erreur de sauvegarde de l'acte !" });
           }
         );
       },
       error => {
-        this.setState({ msgSaveFSE:  "Erreur de sauvegarde de la FSE ! Lecture de cette acte impossible "});
+        this.setState({ msgSaveFSE:  `Erreur de sauvegarde de l'acte ${this.state.typeActe} ! Lecture de cet acte impossible`});
       }
     );
   };
@@ -175,6 +178,11 @@ export default class ActesSaisieValidation extends React.Component {
     this.setState({ fse: {} });
   };
 
+  handleChangeType = type => {
+    this.setState({ typeActe: type });
+    this.onPatientChange(this.state.idPatient, type);
+  };
+
   render() {
     let actions = [
       { text: "Exemple action", icon: "check", action: il => console.log(il)}
@@ -182,7 +190,7 @@ export default class ActesSaisieValidation extends React.Component {
     return (
       <React.Fragment>
         <p>
-          Saisie et validation d'un acte FSE pour un patient donné.
+          Saisie et validation d'un acte #FSE ou #DEVIS pour un patient donné.
         </p>
         <Divider hidden={true} />
         <Form>
@@ -192,7 +200,7 @@ export default class ActesSaisieValidation extends React.Component {
               placeholder="Sélectionner un patient"
               selection={true}
               options={patients}
-              onChange={(e, d) => this.onPatientChange(d.value)}
+              onChange={(e, d) => this.onPatientChange(d.value, this.state.typeActe)}
               value={this.state.idPatient}
             />
             <Form.Dropdown 
@@ -213,6 +221,21 @@ export default class ActesSaisieValidation extends React.Component {
               }}
             />
           </Form.Group>
+          <Form.Input label="Type de l'acte">
+            <Radio 
+              label="DEVIS"
+              value="#DEVIS"
+              checked={this.state.typeActe === "#DEVIS"}
+              onChange={(e, d) => this.handleChangeType(d.value)}
+            />
+            <Radio
+              style={{ marginLeft: "20px" }}
+              label="FSE"
+              value="#FSE"
+              checked={this.state.typeActe === "#FSE"}
+              onChange={(e, d) => this.handleChangeType(d.value)}
+            />
+          </Form.Input>
         </Form>
         <Divider hidden={true} />
         {!_.isEmpty(this.state.fse)
@@ -242,7 +265,7 @@ export default class ActesSaisieValidation extends React.Component {
           : ""
         }
         <Modal size="mini" open={!_.isEmpty(this.state.msgSaveFSE)} onClose={() => this.setState({ msgSaveFSE: "" })}>
-          <Modal.Header>Résultat validation FSE</Modal.Header>
+          <Modal.Header>Résultat validation de l'acte</Modal.Header>
           <Modal.Content>
             <Message>{this.state.msgSaveFSE}</Message>
           </Modal.Content>
