@@ -26,12 +26,8 @@ const propDefs = {
   example: "Tableau",
   propDocs: {
     idPatient: "Id du patient, par défaut 0 (Aucun patient)",
-    onActeClick:
-      "Retourne en paramètre l'id de l'acte sélectionné sur un click",
-    onActeDoubleClick:
-      "Retourne en paramètre l'id l'acte sélectionné sur un double click",
-    onSelectionChange:
-      "Retourne en paramètre la liste des id des actes sélectionnés (multi-sélection possible par CTRL+click)",
+    id:
+      "Id de l'acte sélectionné par un click, un double click ou par une édition",
     actions:
       'Tableau d\'objet contenant des actions à effectuer (en plus des actions par défaut). Exemple [{icon:"add",text:"Ajouter",action:fonction de l\'action ajouter}]',
     startAt: 'Filtre sur le début d\'une période (incluse). Par défaut ""',
@@ -48,6 +44,16 @@ const propDefs = {
       "Ouvre la modal pour l'édition des notes ou todos. Par défaut openNoteTodo = false",
     typeNoteTodo:
       'Permet de savoir si c\'est une note ou todo. Par défaut, typeNoteTodo = ""',
+    onActeClick:
+      "Retourne en paramètre l'id de l'acte sélectionné sur un click",
+    onActeDoubleClick:
+      "Retourne en paramètre l'id l'acte sélectionné sur un double click",
+    onSelectionChange:
+      "Retourne en paramètre la liste des id des actes sélectionnés (multi-sélection possible par CTRL+click)",
+    onEditActeClick:
+      "Retourne en paramètre l'id d'un #DEVIS ou d'une #FSE lorsque l'on édite",
+    onOpenNoteTodo: "Callback à l'ouverture de la note",
+    onCloseNoteTodo: "Callback à la fermeture de la note",
     showPagination: 'Affiche les options de paginations, par défaut "true"',
     btnFirstContent:
       'Texte du bouton pour aller à la première page, par défaut ""',
@@ -84,9 +90,7 @@ const propDefs = {
   propTypes: {
     client: PropTypes.any.isRequired,
     idPatient: PropTypes.number,
-    onActeClick: PropTypes.func,
-    onActeDoubleClick: PropTypes.func,
-    onSelectionChange: PropTypes.func,
+    id: PropTypes.number,
     actions: PropTypes.array,
     startAt: PropTypes.string,
     endAt: PropTypes.string,
@@ -97,6 +101,12 @@ const propDefs = {
     order: PropTypes.string,
     openNoteTodo: PropTypes.bool,
     typeNoteTodo: PropTypes.string,
+    onActeClick: PropTypes.func,
+    onActeDoubleClick: PropTypes.func,
+    onSelectionChange: PropTypes.func,
+    onEditActeClick: PropTypes.func,
+    onOpenNoteTodo: PropTypes.func,
+    onCloseNoteTodo: PropTypes.func,
     showPagination: PropTypes.bool,
     btnFirstContent: PropTypes.string,
     btnLastContent: PropTypes.string,
@@ -117,6 +127,8 @@ const propDefs = {
   }
 };
 
+const LIMIT = 1000;
+
 export default class Historique extends React.Component {
   // variables utilisées pour la multi-sélection avec la touche 'shift'
   firstClick = "";
@@ -131,6 +143,7 @@ export default class Historique extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
     idPatient: 0,
+    id: 0,
     table: {},
     limit: 5,
     sort: "doneAt",
@@ -165,6 +178,7 @@ export default class Historique extends React.Component {
   componentWillMount() {
     this.setState({
       idPatient: this.props.idPatient,
+      idEditer: this.props.id,
       limit: this.props.limit,
       actes: [],
       actesSelected: [],
@@ -179,10 +193,7 @@ export default class Historique extends React.Component {
       localisation: this.props.localisation,
       showConfirm: false,
       message: "",
-      idEditer: 0,
-      showEdit: false,
-      openNoteTodo: this.props.openNoteTodo,
-      typeNoteTodo: this.props.typeNoteTodo
+      showEdit: false
     });
 
     this.reload(
@@ -199,8 +210,7 @@ export default class Historique extends React.Component {
 
   componentWillReceiveProps(next) {
     this.setState({
-      openNoteTodo: next.openNoteTodo,
-      typeNoteTodo: next.typeNoteTodo
+      idEditer: next.id
     });
 
     this.reload(
@@ -463,7 +473,7 @@ export default class Historique extends React.Component {
       deco.code = acte.code;
       deco.description =
         acte.couleur === "" ? (
-          acte.description
+          ""
         ) : (
           <Label circular color={acte.couleur} empty />
         );
@@ -499,11 +509,11 @@ export default class Historique extends React.Component {
           <Label circular color={acte.couleur} empty />
         );
     } else if (acte.code === "#DEVIS") {
-      deco.color = "lightblue";
-      deco.icon = "file alternate";
+      deco.color = "orange";
+      deco.icon = "file";
       deco.description =
         acte.couleur === "" ? (
-          <Icon name="file alternate" />
+          <Icon name="file" />
         ) : (
           <Label circular color={acte.couleur} empty />
         );
@@ -550,8 +560,14 @@ export default class Historique extends React.Component {
     }
 
     this.setState({ actesSelected: actesSelected });
-    this.props.onActeClick(id);
-    this.props.onSelectionChange(actesSelected);
+
+    if (this.props.onActeClick) {
+      this.props.onActeClick(id);
+    }
+
+    if (this.props.onSelectionChange) {
+      this.props.onSelectionChange(actesSelected);
+    }
   };
 
   onActeDoubleClick = (e, id) => {
@@ -559,12 +575,25 @@ export default class Historique extends React.Component {
     let actesSelected = [];
     actesSelected.push(id);
     this.setState({ actesSelected: actesSelected });
-    this.props.onActeDoubleClick(id);
-    this.props.onSelectionChange(actesSelected);
+
+    if (this.props.onActeDoubleClick) {
+      this.props.onActeDoubleClick(id);
+    }
+
+    if (this.props.onSelectionChange) {
+      this.props.onSelectionChange(actesSelected);
+    }
   };
 
   onEdit = (id, type) => {
     // l'id de l'acte passé en paramètre
+    if (type === "#FSE" || type === "#DEVIS") {
+      if (this.props.onEditActeClick) {
+        this.props.onEditActeClick(id);
+      }
+      return;
+    }
+
     if (type === "#NOTE" || type === "#TODO") {
       let newType = "";
 
@@ -576,17 +605,18 @@ export default class Historique extends React.Component {
         newType = "";
       }
 
-      this.setState({
-        idEditer: id,
-        openNoteTodo: true,
-        typeNoteTodo: newType
-      });
-    } else {
-      this.setState({
-        idEditer: id,
-        showEdit: true
-      });
+      if (this.props.onOpenNoteTodo) {
+        this.props.onOpenNoteTodo(id, newType);
+      }
+
+      return;
     }
+
+    // Un acte CCAM ou NGAP : fond par défaut sans icône, le code est affiché
+    this.setState({
+      idEditer: id,
+      showEdit: true
+    });
   };
 
   onClose = bool => {
@@ -615,6 +645,7 @@ export default class Historique extends React.Component {
     this.reponseCancel = false;
     this.reponseConfirm = true;
     this.id = id;
+
     _.map(this.state.actes, acte => {
       if (this.id === acte.id) {
         this.idDocument = acte.idDocument;
@@ -641,31 +672,11 @@ export default class Historique extends React.Component {
         message:
           "Souhaitez-vous également supprimer les actes associés à cette FSE ?"
       });
-    } else {
-      this.destroy(this.id);
+      return false;
     }
-  };
 
-  destroy = id => {
-    // Suppression d'un acte dont l'id de l'acte est passé en paramètre
-    this.props.client.Actes.destroy(
-      id,
-      result => {
-        this.reload(
-          this.state.idPatient,
-          this.state.limit,
-          this.state.offset,
-          this.state.sort,
-          this.state.order,
-          this.state.startAt,
-          this.state.endAt,
-          this.state.localisation
-        );
-      },
-      error => {
-        console.log(`Erreur destroy`);
-      }
-    );
+    // #NOTE, #TODO, #DEVIS ...
+    this.destroy(this.id);
   };
 
   onCancel = () => {
@@ -699,34 +710,75 @@ export default class Historique extends React.Component {
       this.setState({ showConfirm: false });
 
       if (!this.isFSE) {
-        _.map(this.state.actes, acte => {
-          if (this.idDocument === acte.idDocument) {
-            this.destroy(acte.id);
-          }
+        this.props.client.Actes.readAll(
+          {
+            _idPatient: this.state.idPatient,
+            _etat: 0,
+            limit: LIMIT
+          },
+          result => {
+            _.map(result.results, acte => {
+              if (this.idDocument === acte.idDocument) {
+                this.destroy(acte.id);
+              }
 
-          if (this.idDocument === acte.id) {
-            this.destroy(acte.id);
-          }
-        });
+              if (this.idDocument === acte.id) {
+                this.destroy(acte.id);
+              }
+            });
+          },
+          error => {}
+        );
       } else {
-        _.map(this.state.actes, acte => {
-          if (this.id === acte.idDocument) {
-            this.destroy(acte.id);
-          }
-        });
-        this.destroy(this.id);
-        this.isFSE = false;
+        this.props.client.Actes.readAll(
+          {
+            _idPatient: this.state.idPatient,
+            _etat: 0,
+            limit: LIMIT
+          },
+          result => {
+            _.map(result.results, acte => {
+              if (this.id === acte.idDocument) {
+                this.destroy(acte.id);
+              }
+            });
+            this.destroy(this.id);
+            this.isFSE = false;
+          },
+          error => {}
+        );
       }
     }
 
     this.reponseCancel = true;
   };
 
+  destroy = id => {
+    // Suppression d'un acte dont l'id de l'acte est passé en paramètre
+    this.props.client.Actes.destroy(
+      id,
+      result => {
+        this.reload(
+          this.state.idPatient,
+          this.state.limit,
+          this.state.offset,
+          this.state.sort,
+          this.state.order,
+          this.state.startAt,
+          this.state.endAt,
+          this.state.localisation
+        );
+      },
+      error => {
+        console.log(`Erreur destroy`);
+      }
+    );
+  };
+
   onCreateUpdateNoteTodo = acte => {
-    this.setState({
-      openNoteTodo: false,
-      typeNoteTodo: ""
-    });
+    if (this.props.onCloseNoteTodo) {
+      this.props.onCloseNoteTodo();
+    }
 
     this.reload(
       acte.idPatient,
@@ -738,13 +790,6 @@ export default class Historique extends React.Component {
       this.state.endAt,
       this.state.localisation
     );
-  };
-
-  onCloseNote = bool => {
-    this.setState({
-      openNoteTodo: bool,
-      typeNoteTodo: ""
-    });
   };
 
   render() {
@@ -815,7 +860,7 @@ export default class Historique extends React.Component {
               ];
 
               if (!_.isEmpty(this.props.actions)) {
-                actions = _.concat(actions, this.props.actions); // J'ajoute les actions (props) de l'utilisateur
+                actions = _.concat(actions, this.props.actions); // Ajout des actions (props) de l'utilisateur
               }
 
               return (
@@ -852,7 +897,7 @@ export default class Historique extends React.Component {
                     </Table.Cell>
                     <Table.Cell>
                       {deco.description}
-                      {deco.icon === "" ? "" : " " + acte.description}
+                      {" " + acte.description}
                     </Table.Cell>
                     <Table.Cell textAlign="right">
                       {_.isEqual(acte.code, "#TODO") ||
@@ -913,8 +958,8 @@ export default class Historique extends React.Component {
           <Edition
             client={this.props.client}
             id={this.state.idEditer}
-            open={this.state.showEdit}
-            onClose={this.onClose}
+            openEdit={this.state.showEdit}
+            onCloseEdit={this.onClose}
             onUpdate={this.onUpdate}
           />
         ) : (
@@ -925,11 +970,15 @@ export default class Historique extends React.Component {
           client={this.props.client}
           id={this.state.idEditer}
           idPatient={this.state.idPatient}
-          open={this.state.openNoteTodo}
-          type={this.state.typeNoteTodo}
+          open={this.props.openNoteTodo}
+          type={this.props.typeNoteTodo}
           onCreate={this.onCreateUpdateNoteTodo}
           onUpdate={this.onCreateUpdateNoteTodo}
-          onClose={this.onCloseNote}
+          onClose={() => {
+            if (this.props.onCloseNoteTodo) {
+              this.props.onCloseNoteTodo();
+            }
+          }}
         />
       </React.Fragment>
     );

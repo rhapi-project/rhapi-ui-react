@@ -27,30 +27,62 @@ const propDefs = {
   example: "Modal",
   propDocs: {
     id: "Id de l'acte à éditer. Par défaut id = 0",
-    open:
+    openEdit:
       "La modale s'ouvre si la valeur de 'open' est égale à true. Par défaut, open = false",
-    onClose: "Callback à la fermeture de la modal",
+    onCloseEdit: "Callback à la fermeture de la modal",
     onUpdate:
       "Callback à la modification de l'acte sélectionné. Elle prend en paramètre l'acte modifié"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
     id: PropTypes.number,
-    open: PropTypes.bool,
-    onClose: PropTypes.func,
+    openEdit: PropTypes.bool,
+    onCloseEdit: PropTypes.func,
     onUpdate: PropTypes.func
   }
 };
 
-const tags = [
-  { text: <Icon name="close" size="small" />, value: 0 },
-  { text: <Label circular color="red" empty />, value: 1 },
-  { text: <Label circular color="orange" empty />, value: 2 },
-  { text: <Label circular color="yellow" empty />, value: 3 },
-  { text: <Label circular color="green" empty />, value: 4 },
-  { text: <Label circular color="blue" empty />, value: 5 },
-  { text: <Label circular color="purple" empty />, value: 6 },
-  { text: <Label circular color="grey" empty />, value: 7 }
+const optionsTag = [
+  {
+    key: "",
+    value: "",
+    text: <Icon name="close" size="small" />
+  },
+  {
+    key: "red",
+    value: "red",
+    text: <Label circular color="red" empty />
+  },
+  {
+    key: "orange",
+    value: "orange",
+    text: <Label circular color="orange" empty />
+  },
+  {
+    key: "yellow",
+    value: "yellow",
+    text: <Label circular color="yellow" empty />
+  },
+  {
+    key: "green",
+    value: "green",
+    text: <Label circular color="green" empty />
+  },
+  {
+    key: "blue",
+    value: "blue",
+    text: <Label circular color="blue" empty />
+  },
+  {
+    key: "purple",
+    value: "purple",
+    text: <Label circular color="purple" empty />
+  },
+  {
+    key: "grey",
+    value: "grey",
+    text: <Label circular color="grey" empty />
+  }
 ];
 
 export default class Edition extends React.Component {
@@ -58,19 +90,18 @@ export default class Edition extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
     id: 0,
-    open: false
+    openEdit: false
   };
 
   state = {
     id: this.props.id,
-    open: this.props.open,
     date: null,
     localisation: "",
     code: "",
     cotation: -1,
     description: "",
+    couleurTag: "",
     montant: -1,
-    tag: "",
     lockRevision: -1,
     showConfirmation: false,
     openLocalisation: false,
@@ -79,7 +110,7 @@ export default class Edition extends React.Component {
 
   componentWillMount() {
     this.props.client.Actes.read(
-      this.state.id,
+      this.props.id,
       {},
       acte => {
         this.setState({
@@ -88,6 +119,7 @@ export default class Edition extends React.Component {
           code: acte.code,
           cotation: acte.cotation,
           description: acte.description,
+          couleurTag: acte.couleur,
           montant: acte.montant,
           lockRevision: acte.lockRevision
         });
@@ -104,12 +136,12 @@ export default class Edition extends React.Component {
         acte => {
           this.setState({
             id: next.id,
-            open: next.open,
             date: moment(acte.doneAt).toDate(),
             localisation: acte.localisation,
             code: acte.code,
             cotation: acte.cotation,
             description: acte.description,
+            couleurTag: acte.couleur,
             montant: acte.montant,
             lockRevision: acte.lockRevision
           });
@@ -118,44 +150,69 @@ export default class Edition extends React.Component {
       );
     } else {
       this.setState({
-        id: next.id,
-        open: next.open
+        id: next.id
       });
     }
   }
 
   onClose = () => {
-    if (this.props.onClose) {
-      this.props.onClose(false);
+    if (this.props.onCloseEdit) {
+      this.props.onCloseEdit();
     }
   };
 
-  inputContentFormating = () => {
-    this.setState({
-      localisation: spacedLocalisation(this.state.localisation)
-    });
-  };
-
-  onValider = () => {
-    this.setState({
-      showConfirmation: true
-    });
-  };
-
   onCancelConfirmation = () => {
-    this.setState({
-      open: false,
-      showConfirmation: false
-    });
+    this.setState({ showConfirmation: false });
   };
 
   onConfirmConfirmation = () => {
-    this.setState({
-      open: false,
-      showConfirmation: false
-    });
-
+    this.setState({ showConfirmation: false });
     this.onUpdate();
+  };
+
+  onUpdate = () => {
+    this.props.client.Actes.read(
+      this.state.id,
+      {
+        modifiedSince: this.state.lockRevision
+      },
+      acte => {
+        this.setState({ showReload: true });
+      },
+      error => {
+        let params = {
+          doneAt: this.state.date,
+          localisation: this.state.localisation,
+          code: this.state.code,
+          cotation: this.state.cotation,
+          description: this.state.description,
+          couleur: this.state.couleurTag,
+          montant: this.state.montant
+        };
+
+        this.props.client.Actes.update(
+          this.state.id,
+          params,
+          acte => {
+            this.setState({
+              date: moment(acte.doneAt).toDate(),
+              localisation: acte.localisation,
+              code: acte.code,
+              cotation: acte.cotation,
+              description: acte.description,
+              couleurTag: acte.couleur,
+              montant: acte.montant,
+              lockRevision: acte.lockRevision
+            });
+
+            if (this.props.onUpdate) {
+              this.props.onUpdate(acte);
+            }
+          },
+          error => {}
+        );
+      }
+    );
   };
 
   onCancelReload = () => {
@@ -176,6 +233,7 @@ export default class Edition extends React.Component {
           code: acte.code,
           cotation: acte.cotation,
           description: acte.description,
+          couleurTag: acte.couleur,
           montant: acte.montant,
           lockRevision: acte.lockRevision
         });
@@ -190,49 +248,10 @@ export default class Edition extends React.Component {
     });
   };
 
-  onUpdate = () => {
-    this.props.client.Actes.read(
-      this.state.id,
-      {},
-      acte => {
-        if (acte.lockRevision === this.state.lockRevision) {
-          let params = {
-            doneAt: this.state.date,
-            localisation: this.state.localisation,
-            code: this.state.code,
-            cotation: this.state.cotation,
-            description: this.state.description,
-            montant: this.state.montant
-          };
-
-          this.props.client.Actes.update(
-            this.state.id,
-            params,
-            acte => {
-              this.setState({
-                date: moment(acte.doneAt).toDate(),
-                localisation: acte.localisation,
-                code: acte.code,
-                cotation: acte.cotation,
-                description: acte.description,
-                montant: acte.montant,
-                lockRevision: acte.lockRevision
-              });
-
-              if (this.props.onUpdate) {
-                this.props.onUpdate(acte);
-              }
-            },
-            error => {
-              console.log(error);
-            }
-          );
-        } else {
-          this.setState({ showReload: true });
-        }
-      },
-      error => {}
-    );
+  inputContentFormating = () => {
+    this.setState({
+      localisation: spacedLocalisation(this.state.localisation)
+    });
   };
 
   render() {
@@ -242,12 +261,18 @@ export default class Edition extends React.Component {
     let cotation = this.state.cotation;
     let montant = this.state.montant;
     let description = this.state.description;
+    let textDropdown = "";
+    _.forEach(optionsTag, tag => {
+      if (tag.value === this.state.couleurTag) {
+        textDropdown = tag.value;
+      }
+    });
 
     return (
       <React.Fragment>
         <Modal
           dimmer="blurring"
-          open={this.state.open}
+          open={this.props.openEdit}
           onClose={this.onClose}
           size="large"
         >
@@ -311,12 +336,13 @@ export default class Edition extends React.Component {
                   onChange={(e, d) => this.setState({ description: d.value })}
                 />
                 <Form.Dropdown
-                  width={1}
+                  text={textDropdown}
+                  width={2}
                   fluid={true}
                   label="Tags"
                   selection={true}
-                  options={tags}
-                  onChange={(e, d) => this.setState({ tag: d.value })}
+                  options={optionsTag}
+                  onChange={(e, d) => this.setState({ couleurTag: d.value })}
                 />
               </Form.Group>
               <div style={{ height: "320px", overflow: "auto" }}>
@@ -346,7 +372,17 @@ export default class Edition extends React.Component {
           </Modal.Content>
           <Modal.Actions>
             <Button content="Annuler" color="red" onClick={this.onClose} />
-            <Button content="Valider" color="blue" onClick={this.onValider} />
+            <Button
+              content="Valider"
+              color="blue"
+              onClick={() => {
+                if (this.props.onCloseEdit) {
+                  this.props.onCloseEdit();
+                }
+
+                this.setState({ showConfirmation: true });
+              }}
+            />
           </Modal.Actions>
         </Modal>
         <Modal size="tiny" open={this.state.showConfirmation}>
