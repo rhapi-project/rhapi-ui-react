@@ -40,6 +40,20 @@ La recherche n'est pas effectuée si la date ou la localisation sont NULL.
 | search | object | Documentation semantic-ui-react [Search](https://react.semantic-ui.com/modules/search) |
 | searchInputLength | number | Nombre minimum de caractères pour déclencher la recherche d'actes |
 
+## Note
+Nouvelle << Note >> ou << Todo >>
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| id | number | id de l'acte sélectionné. Par défaut, id = 0 |
+| idPatient | number | Id du patient. Par défaut, idPatient = 0 |
+| open | bool | La modale s'ouvre si la valeur de 'open' est égale à true. Par défaut, open = false |
+| type | string | Type de l'acte ('NOTE' ou 'TODO'). Par défaut, type = '' |
+| onCreate | func | Callback à la création de la nouvelle 'note' ou 'todo'. L'acte créé est passé en paramètre |
+| onUpdate | func | Callback à la mise à jour d'une 'note' ou 'todo'. L'acte modifié est passé en paramètre |
+| onClose | func | Callback à la fermeture de la modal. |
+
 ## Actions
 Menu d'actions à effectuer
 #### Props du composant
@@ -48,6 +62,33 @@ Menu d'actions à effectuer
 | actions | array | Tableau contenant une liste d'actions |
 | dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
 | id | any | Identifiant de la ligne sur laquelle une action est effectuée |
+
+## SaisieDentaire
+Composant correspondant à une ligne du tableau de saisie des actes pour les dentistes
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| index | number | Indice de la ligne |
+| acte | object | Acte sur la ligne courante |
+| actions | array | Liste d'actions à effectuer (en plus des actions par défaut) |
+| code | string | Code de l'Acte sélectionné |
+| cotation | number | Cotation/coefficient applicable au code (significatif uniquement en NGAP, 0 si non significatif) |
+| description | string | Description de l'acte |
+| date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
+| localisation | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
+| modificateurs | string | Modificateurs appliqués à l'acte sélectionné. Par défaut "" |
+| qualificatifs | string | Les qualificatifs |
+| disabled | bool | Désactivation de la ligne |
+| montant | number | Le moment pour cet acte |
+| onClick | func | Callback au clic sur une ligne |
+| onClickDate | func | Callback au clic sur la colonne de la date |
+| onClickLocalisation | func | Callback au clic sur la colonne Localisation |
+| onDelete | func | Callback à la suppression de la ligne |
+| onDuplicate | func | Callback à la duplication de la ligne |
+| onEdit | func | Callback action de recherche en CCAM |
+| onInsertion | func | Callback à l'insertion d'un nouvel acte |
+| onSearchFavoris | func | Callback au clic sur la colonne libellé (Recherche d'un acte dans les favoris) |
 
 ## DateRange
 Période, début et fin d'une période
@@ -79,47 +120,6 @@ Période, début et fin d'une période
 | startYear | number | La première année qui sera affichée. Par défaut l'année en cours |
 | onPeriodeChange | func | Callback au changement de la période. C'est une fonction qui prend 2 paramètres, début et fin de la période (inclus).
 Les valeurs de ces paramètres sont NULL si la durée est indéterminée. |
-
-## Note
-Nouvelle << Note >> ou << Todo >>
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| id | number | id de l'acte sélectionné. Par défaut, id = 0 |
-| idPatient | number | Id du patient. Par défaut, idPatient = 0 |
-| open | bool | La modale s'ouvre si la valeur de 'open' est égale à true. Par défaut, open = false |
-| type | string | Type de l'acte ('NOTE' ou 'TODO'). Par défaut, type = '' |
-| onCreate | func | Callback à la création de la nouvelle 'note' ou 'todo'. L'acte créé est passé en paramètre |
-| onUpdate | func | Callback à la mise à jour d'une 'note' ou 'todo'. L'acte modifié est passé en paramètre |
-| onClose | func | Callback à la fermeture de la modal. Une valeur booléenne et le type (note ou todo) sont passés en paramètre |
-
-## SaisieDentaire
-Composant correspondant à une ligne du tableau de saisie des actes pour les dentistes
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| index | number | Indice de la ligne |
-| acte | object | Acte sur la ligne courante |
-| actions | array | Liste d'actions à effectuer (en plus des actions par défaut) |
-| code | string | Code de l'Acte sélectionné |
-| cotation | number | Cotation/coefficient applicable au code (significatif uniquement en NGAP, 0 si non significatif) |
-| description | string | Description de l'acte |
-| date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
-| localisation | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
-| modificateurs | string | Modificateurs appliqués à l'acte sélectionné. Par défaut "" |
-| qualificatifs | string | Les qualificatifs |
-| disabled | bool | Désactivation de la ligne |
-| montant | number | Le moment pour cet acte |
-| onClick | func | Callback au clic sur une ligne |
-| onClickDate | func | Callback au clic sur la colonne de la date |
-| onClickLocalisation | func | Callback au clic sur la colonne Localisation |
-| onDelete | func | Callback à la suppression de la ligne |
-| onDuplicate | func | Callback à la duplication de la ligne |
-| onEdit | func | Callback action de recherche en CCAM |
-| onInsertion | func | Callback à l'insertion d'un nouvel acte |
-| onSearchFavoris | func | Callback au clic sur la colonne libellé (Recherche d'un acte dans les favoris) |
 
 ## Tarification
 Composant de facturation d'un acte CCAM
@@ -169,6 +169,17 @@ Composant montrant sous forme d'un tableau les actes obtenus après une recherch
 | btnMore | object | Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}" |
 | mode | string | mode de pagination 'pages' ou 'more', par défaut "pages" |
 
+## Edition
+Edition d'un acte validé pour un patient
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| id | number | Id de l'acte à éditer. Par défaut id = 0 |
+| openEdit | bool | La modale s'ouvre si la valeur de 'open' est égale à true. Par défaut, open = false |
+| onCloseEdit | func | Callback à la fermeture de la modal |
+| onUpdate | func | Callback à la modification de l'acte sélectionné. Elle prend en paramètre l'acte modifié |
+
 ## Localisations
 Grille de saisie des localisations dentaires
 #### Props du composant
@@ -177,17 +188,6 @@ Grille de saisie des localisations dentaires
 | dents | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
 | modal | object | Documentation semantic-ui-react [Modal](https://react.semantic-ui.com/modules/modal) |
 | onSelection | func | Callback à la selection d'une liste de dents |
-
-## Edition
-Edition d'un acte validé pour un patient
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| id | number | Id de l'acte à éditer. Par défaut id = 0 |
-| open | bool | La modale s'ouvre si la valeur de 'open' est égale à true. Par défaut, open = false |
-| onClose | func | Callback à la fermeture de la modal |
-| onUpdate | func | Callback à la modification de l'acte sélectionné. Elle prend en paramètre l'acte modifié |
 
 ## ModalSearch
 Ce composant est une modal Semantic de recherche d'un acte. Il intègre un date picker, les composants CCAM.Search, CCAM.Table et Shared.Localisations
@@ -266,9 +266,7 @@ Historique des actes d'un patient
 | ---- | ----- | ------ |
 | client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
 | idPatient | number | Id du patient, par défaut 0 (Aucun patient) |
-| onActeClick | func | Retourne en paramètre l'id de l'acte sélectionné sur un click |
-| onActeDoubleClick | func | Retourne en paramètre l'id l'acte sélectionné sur un double click |
-| onSelectionChange | func | Retourne en paramètre la liste des id des actes sélectionnés (multi-sélection possible par CTRL+click) |
+| id | number | Id de l'acte sélectionné par un click, un double click ou par une édition |
 | actions | array | Tableau d'objet contenant des actions à effectuer (en plus des actions par défaut). Exemple [{icon:"add",text:"Ajouter",action:fonction de l'action ajouter}] |
 | startAt | string | Filtre sur le début d'une période (incluse). Par défaut "" |
 | endAt | string | Filtre sur la fin d'une période (incluse). Par défaut "" |
@@ -279,6 +277,12 @@ Historique des actes d'un patient
 | order | string | Le tri est ascendant (ASC) ou descendant (DESC). Par défaut, le tri est descendant (DESC) |
 | openNoteTodo | bool | Ouvre la modal pour l'édition des notes ou todos. Par défaut openNoteTodo = false |
 | typeNoteTodo | string | Permet de savoir si c'est une note ou todo. Par défaut, typeNoteTodo = "" |
+| onActeClick | func | Retourne en paramètre l'id de l'acte sélectionné sur un click |
+| onActeDoubleClick | func | Retourne en paramètre l'id l'acte sélectionné sur un double click |
+| onSelectionChange | func | Retourne en paramètre la liste des id des actes sélectionnés (multi-sélection possible par CTRL+click) |
+| onEditActeClick | func | Retourne en paramètre l'id d'un #DEVIS ou d'une #FSE lorsque l'on édite |
+| onOpenNoteTodo | func | Callback à l'ouverture de la note |
+| onCloseNoteTodo | func | Callback à la fermeture de la note |
 | showPagination | bool | Affiche les options de paginations, par défaut "true" |
 | btnFirstContent | string | Texte du bouton pour aller à la première page, par défaut "" |
 | btnLastContent | string | Texte du bouton pour aller à la dernière page, par défaut "" |

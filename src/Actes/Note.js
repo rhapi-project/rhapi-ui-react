@@ -36,8 +36,7 @@ const propDefs = {
       "Callback à la création de la nouvelle 'note' ou 'todo'. L'acte créé est passé en paramètre",
     onUpdate:
       "Callback à la mise à jour d'une 'note' ou 'todo'. L'acte modifié est passé en paramètre",
-    onClose:
-      "Callback à la fermeture de la modal. Une valeur booléenne et le type (note ou todo) sont passés en paramètre"
+    onClose: "Callback à la fermeture de la modal."
   },
   propTypes: {
     client: PropTypes.any.isRequired,
@@ -145,7 +144,7 @@ export default class Note extends React.Component {
 
   onClose = () => {
     if (this.props.onClose) {
-      this.props.onClose(false, "");
+      this.props.onClose();
     }
   };
 

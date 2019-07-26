@@ -24,6 +24,7 @@ export default class ActesHistorique extends React.Component {
   componentWillMount() {
     this.setState({
       idPatient : 1,
+      id: 0,
       localisation: "",
       openLocalisations: false,
       startAt: "",
@@ -54,6 +55,11 @@ export default class ActesHistorique extends React.Component {
     console.log(`onSelectionChange ${actes}`);
   }
 
+  onEditActeClick = id => {
+    // l'id de l'acte en paramètre
+    console.log(`onEditActeClick ${id}`);
+  }
+
   onAction = (id, action) => {
     // l'id de l'acte et l'action passés en paramètres
     if (_.isEqual(action, "ajouter")) {
@@ -68,7 +74,8 @@ export default class ActesHistorique extends React.Component {
   };
 
   onOpen = (type) => {
-    this.setState({ 
+    this.setState({
+      id: 0, 
       open: true,
       type: type
     });
@@ -164,9 +171,11 @@ export default class ActesHistorique extends React.Component {
         <Actes.Historique
           client={client}
           idPatient={this.state.idPatient}
+          id={this.state.id}
           onActeClick={this.onActeClick}
           onActeDoubleClick={this.onActeDoubleClick}
           onSelectionChange={this.onSelectionChange}
+          onEditActeClick={this.onEditActeClick}
           actions={[
             {
               icon: "add",
@@ -184,6 +193,19 @@ export default class ActesHistorique extends React.Component {
           endAt={this.state.endAt}
           openNoteTodo={this.state.open}
           typeNoteTodo={this.state.type}
+          onOpenNoteTodo={(id, type) => {
+            this.setState({
+              id: id,
+              open: true,
+              type: type
+            });
+          }}
+          onCloseNoteTodo={() => {
+            this.setState({ 
+              open: false,
+              type: ""
+            });
+          }}
         />
       </React.Fragment>
     );
