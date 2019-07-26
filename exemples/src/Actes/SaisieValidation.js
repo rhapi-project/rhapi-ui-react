@@ -27,6 +27,7 @@ export default class ActesSaisieValidation extends React.Component {
   componentWillMount() {
     this.setState({
       idPatient: null,
+      acteToAdd: {}, // acte à ajouter dans une FSE
       fse: {},
       msgSaveFSE: "",
       typeActe: "#FSE"
@@ -55,7 +56,7 @@ export default class ActesSaisieValidation extends React.Component {
     } 
   };
 
-  createFSE = (idPatient, typeActe) => {
+  createFSE = (idPatient, typeActe, acteToAdd) => {
     let params = {
       code: typeActe,
       etat: 1,
@@ -66,7 +67,7 @@ export default class ActesSaisieValidation extends React.Component {
       params,
       result => {
         //console.log(result);
-        this.setState({ fse: result, msgSaveFSE: "" });
+        this.setState({ fse: result, msgSaveFSE: "", acteToAdd: acteToAdd });
       },
       error => {
         console.log(error);
@@ -75,7 +76,7 @@ export default class ActesSaisieValidation extends React.Component {
     );
   };
 
-  onPatientChange = (id, typeActe) => {
+  onPatientChange = (id, typeActe, acteToAdd) => {
     this.setState({ idPatient: id });
     if (id && id !== 0) {
       let params = {
@@ -87,14 +88,13 @@ export default class ActesSaisieValidation extends React.Component {
         params,
         result => {
           let actes = result.results;
-          //console.log(actes);
           if (_.isEmpty(actes)) {
-            this.createFSE(id, typeActe);
+            this.createFSE(id, typeActe, acteToAdd);
           } else if (actes.length > 1) {
             let recent = _.maxBy(actes, a => moment.max(moment(a.modifiedAt)));
-            this.setState({ fse: recent });
+            this.setState({ fse: recent, acteToAdd: acteToAdd });
           } else {
-            this.setState({ fse: actes[0] });
+            this.setState({ fse: actes[0], acteToAdd: acteToAdd });
           }
         },
         error => {
@@ -148,7 +148,7 @@ export default class ActesSaisieValidation extends React.Component {
             this.setState({ 
               msgSaveFSE: `L'acte ${this.state.typeActe} a été bien enregistré !` 
             });
-            this.onPatientChange(result.idPatient);
+            this.onPatientChange(result.idPatient, this.state.typeActe, {});
           },
           error => {
             this.setState({ msgSaveFSE: "Erreur de sauvegarde de l'acte !" });
@@ -165,8 +165,8 @@ export default class ActesSaisieValidation extends React.Component {
     client.Actes.destroy(
       this.state.fse.id,
       result => {
-        //this.setState({ fse: {} });
-        this.onPatientChange(this.state.fse.id);
+        this.setState({ fse: {} });
+        this.onPatientChange(this.state.idPatient, this.state.typeActe, {});
       },
       error => {
         console.log(error);
@@ -178,9 +178,9 @@ export default class ActesSaisieValidation extends React.Component {
     this.setState({ fse: {} });
   };
 
-  handleChangeType = type => {
+  handleChangeType = (type, acteToAdd) => {
     this.setState({ typeActe: type });
-    this.onPatientChange(this.state.idPatient, type);
+    this.onPatientChange(this.state.idPatient, type, acteToAdd);
   };
 
   render() {
@@ -200,7 +200,7 @@ export default class ActesSaisieValidation extends React.Component {
               placeholder="Sélectionner un patient"
               selection={true}
               options={patients}
-              onChange={(e, d) => this.onPatientChange(d.value, this.state.typeActe)}
+              onChange={(e, d) => this.onPatientChange(d.value, this.state.typeActe, {})}
               value={this.state.idPatient}
             />
             <Form.Dropdown 
@@ -221,19 +221,19 @@ export default class ActesSaisieValidation extends React.Component {
               }}
             />
           </Form.Group>
-          <Form.Input label="Type de l'acte">
-            <Radio 
-              label="DEVIS"
-              value="#DEVIS"
-              checked={this.state.typeActe === "#DEVIS"}
-              onChange={(e, d) => this.handleChangeType(d.value)}
-            />
+          <Form.Input label="Type d'actes">
             <Radio
-              style={{ marginLeft: "20px" }}
               label="FSE"
               value="#FSE"
               checked={this.state.typeActe === "#FSE"}
-              onChange={(e, d) => this.handleChangeType(d.value)}
+              onChange={(e, d) => this.handleChangeType(d.value, {})}
+            />
+            <Radio
+              style={{ marginLeft: "20px" }}
+              label="PROJET"
+              value="#DEVIS"
+              checked={this.state.typeActe === "#DEVIS"}
+              onChange={(e, d) => this.handleChangeType(d.value, {})}
             />
           </Form.Input>
         </Form>
@@ -249,6 +249,12 @@ export default class ActesSaisieValidation extends React.Component {
                 onError={this.onError}
                 lignes={10}
                 actions={actions}
+                acteToAdd={this.state.acteToAdd}
+                addToFSE={acte => {
+                  //this.setState({ acteToAdd: acte });
+                  this.handleChangeType("#FSE", acte);
+                  //console.log(acte);
+                }}
               />
               <span>
                 <Button

@@ -19,6 +19,7 @@ const propDefs = {
   example: "Tableau",
   propDocs: {
     index: "Indice de la ligne",
+    type: "Type d'acte (#DEVIS ou #FSE). Par défaut c'est une #FSE",
     acte: "Acte sur la ligne courante",
     actions: "Liste d'actions à effectuer (en plus des actions par défaut)",
     code: "Code de l'Acte sélectionné",
@@ -41,10 +42,12 @@ const propDefs = {
     onEdit: "Callback action de recherche en CCAM",
     onInsertion: "Callback à l'insertion d'un nouvel acte",
     onSearchFavoris:
-      "Callback au clic sur la colonne libellé (Recherche d'un acte dans les favoris)"
-  },
+      "Callback au clic sur la colonne libellé (Recherche d'un acte dans les favoris)",
+    onMoveToFSE: "Callback déplacement d'un acte de #DEVIS vers #FSE"
+    },
   propTypes: {
     client: PropTypes.any.isRequired,
+    type: PropTypes.string,
     index: PropTypes.number,
     acte: PropTypes.object,
     actions: PropTypes.array,
@@ -64,7 +67,8 @@ const propDefs = {
     onDuplicate: PropTypes.func,
     onEdit: PropTypes.func,
     onInsertion: PropTypes.func,
-    onSearchFavoris: PropTypes.func
+    onSearchFavoris: PropTypes.func,
+    onMoveToFSE: PropTypes.func
   }
 };
 
@@ -79,7 +83,8 @@ export default class SaisieDentaire extends React.Component {
     index: 0,
     localisation: "",
     disabled: true,
-    montant: 0
+    montant: 0,
+    type: "#FSE"
   };
 
   componentWillMount() {
@@ -135,6 +140,18 @@ export default class SaisieDentaire extends React.Component {
       }
     ];
 
+    if (this.props.type === "#DEVIS") {
+      actions.push({
+        icon: "exchange",
+        text: "Vers FSE",
+        action: index => {
+          if (this.props.onMoveToFSE) {
+            this.props.onMoveToFSE(index);
+          }
+        }
+      })
+    }
+
     if (this.props.actions) {
       _.forEach(this.props.actions, a => {
         actions.push(a);
@@ -148,7 +165,23 @@ export default class SaisieDentaire extends React.Component {
           textAlign="center"
           style={{ height: "35px" }}
         >
-          <Table.Cell
+          {this.props.type === "#DEVIS"
+            ? null
+            : <Table.Cell
+                collapsing={true}
+                style={{ minWidth: "100px" }}
+                onClick={() => {
+                  if (this.props.onClickDate) {
+                    this.props.onClickDate(this.props.index);
+                  }
+                }}
+              >
+                {_.isEmpty(this.props.acte)
+                  ? ""
+                  : moment(this.props.date).format("L")}
+              </Table.Cell>
+          }
+          {/* <Table.Cell
             collapsing={true}
             style={{ minWidth: "100px" }}
             onClick={() => {
@@ -160,7 +193,7 @@ export default class SaisieDentaire extends React.Component {
             {_.isEmpty(this.props.acte)
               ? ""
               : moment(this.props.date).format("L")}
-          </Table.Cell>
+          </Table.Cell> */}
           <Table.Cell
             collapsing={true}
             onClick={() => {

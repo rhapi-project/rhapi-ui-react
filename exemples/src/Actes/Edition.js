@@ -1,7 +1,7 @@
 import React from "react";
 import { Client } from "rhapi-client";
 import { Actes } from "rhapi-ui-react";
-import { Button, Divider, Input, Label, Table } from "semantic-ui-react";
+import { Button, Divider, Input, Table } from "semantic-ui-react";
 
 import moment from "moment";
 import _ from "lodash";
@@ -99,7 +99,7 @@ export default class ActesEdition extends React.Component {
 
   render() {
     let acte = this.state.acte;
-    let deco = this.style(acte);
+    //let deco = this.style(acte);
 
     return (
       <React.Fragment>

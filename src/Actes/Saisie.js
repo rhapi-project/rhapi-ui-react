@@ -29,7 +29,9 @@ const propDefs = {
       "Code d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes)",
     specialite: "Code spécialité du praticien",
     onError: "Callback en cas d'erreur",
-    actions: "Liste d'actions à effectuer (en plus des actions par défaut)"
+    actions: "Liste d'actions à effectuer (en plus des actions par défaut)",
+    addToFSE: "Callback ajout d'un acte dans une FSE (à partir d'un #DEVIS)",
+    acteToAdd: "Acte à ajouter dans une FSE"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
@@ -42,7 +44,9 @@ const propDefs = {
     executant: PropTypes.string,
     specialite: PropTypes.number,
     onError: PropTypes.func,
-    actions: PropTypes.array
+    actions: PropTypes.array,
+    addToFSE: PropTypes.func,
+    acteToAdd: PropTypes.object // new
   }
 };
 
@@ -50,6 +54,7 @@ export default class Saisie extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
     actions: [],
+    acteToAdd: {},
     codActivite: "1",
     codDom: 0,
     codGrille: 0,
@@ -80,27 +85,40 @@ export default class Saisie extends React.Component {
       }
     );
     if (this.props.idActe) {
-      this.reload(this.props.idActe);
+      this.reload(this.props.idActe, {});
     }
   }
 
   componentWillReceiveProps(next) {
-    if (next.idActe) {
-      this.reload(next.idActe);
+    if (next.idActe === this.props.idActe) {
+      this.reload(next.idActe, {});
+    } else {
+      this.reload(next.idActe, next.acteToAdd);
     }
   }
 
-  reload = idActe => {
+  reload = (idActe, acteToAdd) => {
     this.props.client.Actes.read(
       idActe,
       {},
       result => {
-        this.setState({
-          fse: result,
-          actes: _.get(result, "contentJO.actes", []),
-          activeRow: _.get(result, "contentJO.actes", []).length,
-          error: 0
-        });
+        //console.log(result);
+        if (_.isEmpty(acteToAdd)) {
+          this.setState({
+            fse: result,
+            actes: _.get(result, "contentJO.actes", []),
+            activeRow: _.get(result, "contentJO.actes", []).length,
+            error: 0
+          });
+        } else {
+          let a = acteToAdd;
+          if (!acteToAdd.date) {
+            a.date = moment().toISOString();
+          }
+          let actes = _.get(result, "contentJO.actes", []);
+          actes.push(a);
+          this.update(actes);
+        }
       },
       error => {
         console.log(error);
@@ -143,6 +161,11 @@ export default class Saisie extends React.Component {
 
   update = actes => {
     let obj = {};
+    if (this.state.fse.code === "#DEVIS") {
+      _.forEach(actes, a => {
+        _.unset(a, "date");
+      });
+    }
     obj.actes = actes;
     this.props.client.Actes.update(
       this.props.idActe,
@@ -350,7 +373,7 @@ export default class Saisie extends React.Component {
           <Table celled={true} striped={true} selectable={true}>
             <Table.Header>
               <Table.Row textAlign="center">
-                <Table.HeaderCell>Date</Table.HeaderCell>
+                {this.state.fse.code === "#DEVIS" ? null : <Table.HeaderCell>Date</Table.HeaderCell>}
                 <Table.HeaderCell>Localisation</Table.HeaderCell>
                 <Table.HeaderCell>Code</Table.HeaderCell>
                 <Table.HeaderCell>Cotation</Table.HeaderCell>
@@ -366,6 +389,7 @@ export default class Saisie extends React.Component {
                 <SaisieDentaire
                   key={i}
                   index={i}
+                  type={this.state.fse.code}
                   acte={this.existActe(i) ? this.state.actes[i] : {}} // new
                   actions={this.props.actions}
                   client={this.props.client}
@@ -374,9 +398,11 @@ export default class Saisie extends React.Component {
                     this.existActe(i) ? this.state.actes[i].cotation : 1
                   }
                   date={
-                    this.existActe(i)
-                      ? this.state.actes[i].date
-                      : moment().toISOString()
+                    this.state.fse.code === "#DEVIS"
+                      ? moment().toISOString()
+                      : this.existActe(i)
+                        ? this.state.actes[i].date
+                        : moment().toISOString()
                   }
                   description={
                     this.existActe(i) ? this.state.actes[i].description : ""
@@ -410,6 +436,14 @@ export default class Saisie extends React.Component {
                   onSearchFavoris={index =>
                     this.setState({ selectedFavoris: index })
                   }
+                  onMoveToFSE={index => {
+                    if (this.existActe(index)) {
+                      let acte = this.state.actes[i];
+                      if (this.props.addToFSE) {
+                        this.props.addToFSE(acte);
+                      }
+                    }
+                  }}
                 />
               ))}
             </Table.Body>
@@ -435,9 +469,11 @@ export default class Saisie extends React.Component {
                 : this.state.actes[selectedIndex].cotation
             }
             date={
-              _.isEmpty(selectedActe)
+              this.state.fse.code === "#DEVIS"
                 ? moment().toISOString()
-                : this.state.actes[selectedIndex].date
+                : _.isEmpty(selectedActe)
+                  ? moment().toISOString()
+                  : this.state.actes[selectedIndex].date
             }
             localisation={
               _.isEmpty(selectedActe)
@@ -572,7 +608,7 @@ export default class Saisie extends React.Component {
                 <Button
                   content="Recharger"
                   onClick={() => {
-                    this.reload(this.state.fse.id);
+                    this.reload(this.state.fse.id, {});
                   }}
                 />
               ) : null}
