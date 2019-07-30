@@ -44,7 +44,7 @@ const propDefs = {
     onSearchFavoris:
       "Callback au clic sur la colonne libellé (Recherche d'un acte dans les favoris)",
     onMoveToFSE: "Callback déplacement d'un acte de #DEVIS vers #FSE"
-    },
+  },
   propTypes: {
     client: PropTypes.any.isRequired,
     type: PropTypes.string,
@@ -149,7 +149,7 @@ export default class SaisieDentaire extends React.Component {
             this.props.onMoveToFSE(index);
           }
         }
-      })
+      });
     }
 
     if (this.props.actions) {
@@ -165,22 +165,21 @@ export default class SaisieDentaire extends React.Component {
           textAlign="center"
           style={{ height: "35px" }}
         >
-          {this.props.type === "#DEVIS"
-            ? null
-            : <Table.Cell
-                collapsing={true}
-                style={{ minWidth: "100px" }}
-                onClick={() => {
-                  if (this.props.onClickDate) {
-                    this.props.onClickDate(this.props.index);
-                  }
-                }}
-              >
-                {_.isEmpty(this.props.acte)
-                  ? ""
-                  : moment(this.props.date).format("L")}
-              </Table.Cell>
-          }
+          {this.props.type === "#DEVIS" ? null : (
+            <Table.Cell
+              collapsing={true}
+              style={{ minWidth: "100px" }}
+              onClick={() => {
+                if (this.props.onClickDate) {
+                  this.props.onClickDate(this.props.index);
+                }
+              }}
+            >
+              {_.isEmpty(this.props.acte)
+                ? ""
+                : moment(this.props.date).format("L")}
+            </Table.Cell>
+          )}
           {/* <Table.Cell
             collapsing={true}
             style={{ minWidth: "100px" }}

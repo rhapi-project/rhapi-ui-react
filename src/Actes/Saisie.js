@@ -373,7 +373,9 @@ export default class Saisie extends React.Component {
           <Table celled={true} striped={true} selectable={true}>
             <Table.Header>
               <Table.Row textAlign="center">
-                {this.state.fse.code === "#DEVIS" ? null : <Table.HeaderCell>Date</Table.HeaderCell>}
+                {this.state.fse.code === "#DEVIS" ? null : (
+                  <Table.HeaderCell>Date</Table.HeaderCell>
+                )}
                 <Table.HeaderCell>Localisation</Table.HeaderCell>
                 <Table.HeaderCell>Code</Table.HeaderCell>
                 <Table.HeaderCell>Cotation</Table.HeaderCell>
@@ -401,8 +403,8 @@ export default class Saisie extends React.Component {
                     this.state.fse.code === "#DEVIS"
                       ? moment().toISOString()
                       : this.existActe(i)
-                        ? this.state.actes[i].date
-                        : moment().toISOString()
+                      ? this.state.actes[i].date
+                      : moment().toISOString()
                   }
                   description={
                     this.existActe(i) ? this.state.actes[i].description : ""
@@ -472,8 +474,8 @@ export default class Saisie extends React.Component {
               this.state.fse.code === "#DEVIS"
                 ? moment().toISOString()
                 : _.isEmpty(selectedActe)
-                  ? moment().toISOString()
-                  : this.state.actes[selectedIndex].date
+                ? moment().toISOString()
+                : this.state.actes[selectedIndex].date
             }
             localisation={
               _.isEmpty(selectedActe)

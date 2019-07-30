@@ -522,44 +522,51 @@ export default class Historique extends React.Component {
     return deco;
   };
 
-  onActeClick = (e, id) => {
+  onActeClick = (e, acte) => {
     e.preventDefault();
+    let id = acte.id;
+    let code = acte.code;
     let actesSelected = [];
 
-    if (e.ctrlKey || e.metaKey) {
-      actesSelected = this.state.actesSelected;
-      if (_.includes(actesSelected, id)) {
-        actesSelected.splice(_.indexOf(actesSelected, id), 1);
+    if (code === "#NOTE" || code === "#TODO") {
+      this.changeNoteTodo(id);
+      this.setState({ actesSelected: actesSelected });
+    } else {
+      if (e.ctrlKey || e.metaKey) {
+        actesSelected = this.state.actesSelected;
+        if (_.includes(actesSelected, id)) {
+          actesSelected.splice(_.indexOf(actesSelected, id), 1);
+        } else {
+          actesSelected.push(id);
+        }
+      } else if (e.shiftKey) {
+        this.secondClick = id;
+        let first = _.findIndex(
+          this.state.actes,
+          acte => acte.id === this.firstClick
+        );
+        let last = _.findIndex(
+          this.state.actes,
+          acte => acte.id === this.secondClick
+        );
+
+        // Permutation entre first et last si le "secondClick" est situé au-dessus du "firstClick"
+        if (first > last) {
+          let tmp = first;
+          first = last;
+          last = tmp;
+        }
+
+        for (let i = first; i <= last; i++) {
+          actesSelected.push(this.state.actes[i].id);
+        }
       } else {
         actesSelected.push(id);
-      }
-    } else if (e.shiftKey) {
-      this.secondClick = id;
-      let first = _.findIndex(
-        this.state.actes,
-        acte => acte.id === this.firstClick
-      );
-      let last = _.findIndex(
-        this.state.actes,
-        acte => acte.id === this.secondClick
-      );
-
-      // Permutation entre first et last si le "secondClick" est situé au-dessus du "firstClick"
-      if (first > last) {
-        let tmp = first;
-        first = last;
-        last = tmp;
+        this.firstClick = id;
       }
 
-      for (let i = first; i <= last; i++) {
-        actesSelected.push(this.state.actes[i].id);
-      }
-    } else {
-      actesSelected.push(id);
-      this.firstClick = id;
+      this.setState({ actesSelected: actesSelected });
     }
-
-    this.setState({ actesSelected: actesSelected });
 
     if (this.props.onActeClick) {
       this.props.onActeClick(id);
@@ -570,11 +577,40 @@ export default class Historique extends React.Component {
     }
   };
 
-  onActeDoubleClick = (e, id) => {
+  onActeDoubleClick = (e, acte) => {
     e.preventDefault();
     let actesSelected = [];
+    let id = acte.id;
+
     actesSelected.push(id);
     this.setState({ actesSelected: actesSelected });
+
+    // Double click, ouvre l'édition d'une note ou todo
+    this.props.client.Actes.read(
+      id,
+      {},
+      resultActe => {
+        let type = resultActe.code;
+        if (type === "#NOTE" || type === "#TODO") {
+          let newType = "";
+
+          if (type === "#NOTE") {
+            newType = "note";
+          } else if (type === "#TODO") {
+            newType = "todo";
+          } else {
+            newType = "";
+          }
+
+          if (this.props.onOpenNoteTodo) {
+            this.props.onOpenNoteTodo(resultActe.id, newType);
+          }
+
+          return false;
+        }
+      },
+      error => {}
+    );
 
     if (this.props.onActeDoubleClick) {
       this.props.onActeDoubleClick(id);
@@ -583,6 +619,60 @@ export default class Historique extends React.Component {
     if (this.props.onSelectionChange) {
       this.props.onSelectionChange(actesSelected);
     }
+  };
+
+  changeNoteTodo = id => {
+    this.props.client.Actes.read(
+      id,
+      {},
+      acte => {
+        if (acte.code === "#TODO") {
+          this.props.client.Actes.update(
+            id,
+            {
+              code: "#NOTE",
+              doneAt: moment().toISOString()
+            },
+            result => {
+              this.reload(
+                this.state.idPatient,
+                this.state.limit,
+                this.state.offset,
+                this.state.sort,
+                this.state.order,
+                this.state.startAt,
+                this.state.endAt,
+                this.state.localisation
+              );
+            },
+            error => {}
+          );
+        } else if (acte.code === "#NOTE") {
+          this.props.client.Actes.update(
+            id,
+            {
+              code: "#TODO"
+            },
+            result => {
+              this.reload(
+                this.state.idPatient,
+                this.state.limit,
+                this.state.offset,
+                this.state.sort,
+                this.state.order,
+                this.state.startAt,
+                this.state.endAt,
+                this.state.localisation
+              );
+            },
+            error => {}
+          );
+        } else {
+          return "";
+        }
+      },
+      error => {}
+    );
   };
 
   onEdit = (id, type) => {
@@ -868,16 +958,20 @@ export default class Historique extends React.Component {
                   <Table.Row
                     key={acte.id}
                     onClick={e => {
-                      if (
-                        this.props.onActeClick &&
-                        this.props.onSelectionChange
-                      ) {
-                        this.onActeClick(e, acte.id);
+                      if (e.detail === 1) {
+                        if (
+                          this.props.onActeClick &&
+                          this.props.onSelectionChange
+                        ) {
+                          this.onActeClick(e, acte);
+                        }
                       }
                     }}
                     onDoubleClick={e => {
-                      if (this.props.onActeDoubleClick) {
-                        this.onActeDoubleClick(e, acte.id);
+                      if (e.detail === 2) {
+                        if (this.props.onActeDoubleClick) {
+                          this.onActeDoubleClick(e, acte);
+                        }
                       }
                     }}
                     style={{
@@ -887,7 +981,7 @@ export default class Historique extends React.Component {
                   >
                     <Table.Cell>
                       {_.isEqual(acte.code, "#TODO")
-                        ? ""
+                        ? moment(acte.doneAt).fromNow()
                         : moment(acte.doneAt).format("L")}
                     </Table.Cell>
                     <Table.Cell>{acte.localisation}</Table.Cell>
