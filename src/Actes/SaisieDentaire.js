@@ -27,6 +27,8 @@ const propDefs = {
       "Cotation/coefficient applicable au code (significatif uniquement en NGAP, 0 si non significatif)",
     description: "Description de l'acte",
     date: "Date effective de l'acte au format ISO. Par défaut date du jour",
+    editable: "Définir si une ligne va être éditable ou pas. Par défaut elle est éditable si elle n'est pas désactivée. " +
+      "Voir la props 'disabled'.",
     localisation:
       'Liste des dents sélectionnées, séparées par des espaces. Par défaut ""',
     modificateurs:
@@ -55,6 +57,7 @@ const propDefs = {
     cotation: PropTypes.number,
     description: PropTypes.string,
     date: PropTypes.string,
+    editable: PropTypes.bool,
     localisation: PropTypes.string,
     modificateurs: PropTypes.string,
     qualificatifs: PropTypes.string,
@@ -80,6 +83,7 @@ export default class SaisieDentaire extends React.Component {
     cotation: 0,
     description: "",
     date: moment().toISOString(),
+    editable: true,
     index: 0,
     localisation: "",
     disabled: true,
@@ -161,7 +165,7 @@ export default class SaisieDentaire extends React.Component {
     return (
       <React.Fragment>
         <Table.Row
-          disabled={this.props.disabled}
+          disabled={this.props.disabled || !this.props.editable}
           textAlign="center"
           style={{ height: "35px" }}
         >

@@ -27,6 +27,7 @@ const propDefs = {
     codPhase: "Code phase, par défaut 0",
     executant:
       "Code d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes)",
+    editable: "Un acte peut être éditable ou pas",
     specialite: "Code spécialité du praticien",
     onError: "Callback en cas d'erreur",
     actions: "Liste d'actions à effectuer (en plus des actions par défaut)",
@@ -41,6 +42,7 @@ const propDefs = {
     codDom: PropTypes.number,
     codGrille: PropTypes.number,
     codPhase: PropTypes.number,
+    editable: PropTypes.bool,
     executant: PropTypes.string,
     specialite: PropTypes.number,
     onError: PropTypes.func,
@@ -60,7 +62,8 @@ export default class Saisie extends React.Component {
     codGrille: 0,
     codPhase: 0,
     executant: "",
-    lignes: 5
+    lignes: 5,
+    editable: true // new
   };
 
   state = {
@@ -407,6 +410,7 @@ export default class Saisie extends React.Component {
                   description={
                     this.existActe(i) ? this.state.actes[i].description : ""
                   }
+                  editable={this.props.editable}
                   localisation={
                     this.existActe(i) ? this.state.actes[i].localisation : ""
                   }
