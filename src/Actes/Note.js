@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import {
   Accordion,
   Button,
-  Dropdown,
   Form,
   Header,
   Icon,
@@ -206,7 +205,7 @@ export default class Note extends React.Component {
     let textDropdown = "";
     _.forEach(optionsTag, tag => {
       if (tag.value === this.state.couleurTag) {
-        textDropdown = tag.value;
+        textDropdown = tag.text;
       }
     });
 
@@ -251,11 +250,10 @@ export default class Note extends React.Component {
                   onBlur={() => this.inputContentFormating()}
                 />
                 <Form.Dropdown
-                  text={textDropdown}
+                  trigger={textDropdown}
                   width={2}
                   fluid={true}
                   label="Tags"
-                  selection={true}
                   options={optionsTag}
                   onChange={(e, d) => this.setState({ couleurTag: d.value })}
                 />

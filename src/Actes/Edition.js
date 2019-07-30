@@ -264,7 +264,7 @@ export default class Edition extends React.Component {
     let textDropdown = "";
     _.forEach(optionsTag, tag => {
       if (tag.value === this.state.couleurTag) {
-        textDropdown = tag.value;
+        textDropdown = tag.text;
       }
     });
 
@@ -336,11 +336,10 @@ export default class Edition extends React.Component {
                   onChange={(e, d) => this.setState({ description: d.value })}
                 />
                 <Form.Dropdown
-                  text={textDropdown}
+                  trigger={textDropdown}
                   width={2}
                   fluid={true}
                   label="Tags"
-                  selection={true}
                   options={optionsTag}
                   onChange={(e, d) => this.setState({ couleurTag: d.value })}
                 />
