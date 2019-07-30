@@ -27,7 +27,8 @@ const propDefs = {
       "Cotation/coefficient applicable au code (significatif uniquement en NGAP, 0 si non significatif)",
     description: "Description de l'acte",
     date: "Date effective de l'acte au format ISO. Par défaut date du jour",
-    editable: "Définir si une ligne va être éditable ou pas. Par défaut elle est éditable si elle n'est pas désactivée. " +
+    editable:
+      "Définir si une ligne va être éditable ou pas. Par défaut elle est éditable si elle n'est pas désactivée. " +
       "Voir la props 'disabled'.",
     localisation:
       'Liste des dents sélectionnées, séparées par des espaces. Par défaut ""',

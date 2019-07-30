@@ -68,6 +68,7 @@ Composant correspondant à une ligne du tableau de saisie des actes pour les den
 | cotation | number | Cotation/coefficient applicable au code (significatif uniquement en NGAP, 0 si non significatif) |
 | description | string | Description de l'acte |
 | date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
+| editable | bool | Définir si une ligne va être éditable ou pas. Par défaut elle est éditable si elle n'est pas désactivée. Voir la props 'disabled'. |
 | localisation | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
 | modificateurs | string | Modificateurs appliqués à l'acte sélectionné. Par défaut "" |
 | qualificatifs | string | Les qualificatifs |
@@ -240,6 +241,7 @@ Tableau de saisie des actes pour les dentistes
 | codDom | number | Code du DOM, par défaut c'est la métropole. Code 0 |
 | codGrille | number | Code grille, par défaut 0 |
 | codPhase | number | Code phase, par défaut 0 |
+| editable | bool | Un acte peut être éditable ou pas |
 | executant | string | Code d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes) |
 | specialite | number | Code spécialité du praticien |
 | onError | func | Callback en cas d'erreur |
