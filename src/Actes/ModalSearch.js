@@ -779,7 +779,7 @@ class Modificateurs extends React.Component {
       }
 
       if (this.props.executant === "D1") {
-        if (!_.includes(["N", "F", "J", "U"], m.codModifi)) {
+        if (!_.includes(["N", "F", "J", "U", "E"], m.codModifi)) {
           return false;
         }
       }
