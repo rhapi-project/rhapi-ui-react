@@ -135,12 +135,13 @@ export default class ActesSaisieValidation extends React.Component {
     client.Actes.read(
       this.state.fse.id,
       {},
-      result => {
-        // les actes vides ne sont pas sauvegardés
-        let actes = _.filter(_.get(result, "contentJO.actes", []), a => !_.isEmpty(a.code));
-        _.forEach(actes, acte => {
-          this.createActe(acte, result.id, result.idPatient);
-        });
+      result => {        
+        if (this.state.fse.code === "#FSE") {
+          let actes = _.filter(_.get(result, "contentJO.actes", []), a => !_.isEmpty(a.code));
+          _.forEach(actes, acte => {
+            this.createActe(acte, result.id, result.idPatient);
+          });
+        }
         client.Actes.update(
           result.id,
           { etat: 0, doneAt: moment().toISOString() },

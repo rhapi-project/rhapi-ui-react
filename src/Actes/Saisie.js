@@ -144,7 +144,7 @@ export default class Saisie extends React.Component {
       this.props.idActe,
       {},
       result => {
-        if (result.etat === 0) {
+        if (result.etat === 0 && resultat.code === "#FSE") {
           onValidatedEtat();
           return;
         }
@@ -591,7 +591,7 @@ export default class Saisie extends React.Component {
             <Modal.Content>
               <Message warning={true}>
                 {this.state.error === 1
-                  ? "Cet acte a déjà été validé. Vous ne pouvez pas faire de modifications !"
+                  ? "Cette série d'actes a déjà été validée. Vous ne pouvez plus la modifier."
                   : this.state.error === 2
                   ? "Des modifications ont été apportées à cet acte. Voulez-vous la recharger et continuer ?"
                   : this.state.error === 3
