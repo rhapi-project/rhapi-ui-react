@@ -24,8 +24,7 @@ import {
   Label,
   Modal,
   Ref,
-  Table,
-  TextArea
+  Table
 } from "semantic-ui-react";
 
 import _ from "lodash";
@@ -1217,11 +1216,9 @@ export default class Historique extends React.Component {
                         />
                       </Table.Cell>
                       <Table.Cell>
-                        <TextArea
+                        <Input
                           value={descriptionInput}
-                          rows={7}
-                          width={9}
-                          fluid="true"
+                          fluid={true}
                           onChange={(e, d) => {
                             this.setState({ descriptionInput: d.value });
                           }}
