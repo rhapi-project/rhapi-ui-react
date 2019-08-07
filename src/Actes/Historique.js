@@ -787,7 +787,7 @@ export default class Historique extends React.Component {
         code: this.state.codeInput,
         cotation: this.state.codeInput,
         description: this.state.descriptionInput,
-        montant: this.state.montant
+        montant: this.state.montantInput
       },
       result => {
         this.reload(
@@ -1234,7 +1234,7 @@ export default class Historique extends React.Component {
                         />
                       </Table.Cell>
                       <Table.Cell>
-                        <span>
+                        <div>
                           <Button
                             icon="save"
                             positive={true}
@@ -1259,7 +1259,7 @@ export default class Historique extends React.Component {
                             }}
                             size="mini"
                           />
-                        </span>
+                        </div>
                       </Table.Cell>
                     </Table.Row>
                   </React.Fragment>
