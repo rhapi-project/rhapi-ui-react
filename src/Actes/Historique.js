@@ -3,12 +3,8 @@ import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 
 import Note from "./Note";
-
-import { Button, Icon, Label, Modal, Ref, Table } from "semantic-ui-react";
-
-import _ from "lodash";
-import moment from "moment";
-
+import Montant from "../Shared/Montant";
+import Localisations from "../Shared/Localisations";
 import {
   tarif,
   secteur03,
@@ -19,7 +15,26 @@ import {
   secteur08
 } from "../lib/Helpers";
 import Actions from "../Shared/Actions";
-import Edition from "./Edition";
+
+import {
+  Button,
+  Dropdown,
+  Icon,
+  Input,
+  Label,
+  Modal,
+  Ref,
+  Table
+} from "semantic-ui-react";
+
+import _ from "lodash";
+import moment from "moment";
+
+import DatePicker from "react-datepicker";
+import fr from "date-fns/locale/fr";
+import "react-datepicker/dist/react-datepicker.css";
+
+import { toISOLocalisation } from "../lib/Helpers";
 
 const propDefs = {
   description: "Historique des actes d'un patient",
@@ -129,6 +144,49 @@ const propDefs = {
 
 const LIMIT = 1000;
 
+const optionsTag = [
+  {
+    key: "",
+    value: "",
+    text: <Icon name="close" size="small" />
+  },
+  {
+    key: "red",
+    value: "red",
+    text: <Label circular color="red" empty />
+  },
+  {
+    key: "orange",
+    value: "orange",
+    text: <Label circular color="orange" empty />
+  },
+  {
+    key: "yellow",
+    value: "yellow",
+    text: <Label circular color="yellow" empty />
+  },
+  {
+    key: "green",
+    value: "green",
+    text: <Label circular color="green" empty />
+  },
+  {
+    key: "blue",
+    value: "blue",
+    text: <Label circular color="blue" empty />
+  },
+  {
+    key: "purple",
+    value: "purple",
+    text: <Label circular color="purple" empty />
+  },
+  {
+    key: "grey",
+    value: "grey",
+    text: <Label circular color="grey" empty />
+  }
+];
+
 export default class Historique extends React.Component {
   // variables utilisées pour la multi-sélection avec la touche 'shift'
   firstClick = "";
@@ -139,6 +197,9 @@ export default class Historique extends React.Component {
   reponseCancel = false;
   reponseConfirm = false;
   isFSE = false;
+  isDEVIS = false;
+  // variable utilisé pour éviter le click lors d'un double click
+  timeout = null;
   // Props
   static propTypes = propDefs.propTypes;
   static defaultProps = {
@@ -178,7 +239,7 @@ export default class Historique extends React.Component {
   componentWillMount() {
     this.setState({
       idPatient: this.props.idPatient,
-      idEditer: this.props.id,
+      idEditer: 0,
       limit: this.props.limit,
       actes: [],
       actesSelected: [],
@@ -193,7 +254,16 @@ export default class Historique extends React.Component {
       localisation: this.props.localisation,
       showConfirm: false,
       message: "",
-      showEdit: false
+      showInput: false,
+      dateInput: null,
+      localisationInput: "",
+      codeInput: "",
+      cotationInput: -1,
+      descriptionInput: "",
+      couleurTagInput: "",
+      montantInput: -1,
+      openLocalisation: false,
+      showDatePicker: false
     });
 
     this.reload(
@@ -209,10 +279,6 @@ export default class Historique extends React.Component {
   }
 
   componentWillReceiveProps(next) {
-    this.setState({
-      idEditer: next.id
-    });
-
     this.reload(
       next.idPatient,
       this.state.limit,
@@ -252,9 +318,9 @@ export default class Historique extends React.Component {
 
     if (!event.ctrlKey) {
       if (!domNode.contains(event.target)) {
-        this.setState({
-          actesSelected: []
-        });
+        if (!_.isEmpty(this.state.actesSelected)) {
+          this.setState({ actesSelected: [] });
+        }
       }
     }
   };
@@ -399,10 +465,23 @@ export default class Historique extends React.Component {
     this.props.client.Actes.readAll(
       params,
       result => {
+        // Affichage des todos en premiers
+        let oldActes = result.results;
+        let todos = _.remove(oldActes, acte => {
+          return acte.code === "#TODO";
+        });
+
+        // Trie des todos de la plus récente à la plus ancienne
+        todos.sort((acte1, acte2) => {
+          return acte2.doneAt - acte1.doneAt;
+        });
+
+        let newActes = todos.concat(oldActes);
+
         this.setState({
           idPatient: Number(idPatient),
           limit: limit,
-          actes: result.results,
+          actes: newActes,
           informations: result.informations,
           offset: offset,
           sort: sort,
@@ -523,13 +602,12 @@ export default class Historique extends React.Component {
   };
 
   onActeClick = (e, acte) => {
-    e.preventDefault();
     let id = acte.id;
     let code = acte.code;
     let actesSelected = [];
 
     if (code === "#NOTE" || code === "#TODO") {
-      this.changeNoteTodo(id);
+      this.switchNoteTodo(id);
       this.setState({ actesSelected: actesSelected });
     } else {
       if (e.ctrlKey || e.metaKey) {
@@ -578,7 +656,6 @@ export default class Historique extends React.Component {
   };
 
   onActeDoubleClick = (e, acte) => {
-    e.preventDefault();
     let actesSelected = [];
     let id = acte.id;
 
@@ -621,7 +698,7 @@ export default class Historique extends React.Component {
     }
   };
 
-  changeNoteTodo = id => {
+  switchNoteTodo = id => {
     this.props.client.Actes.read(
       id,
       {},
@@ -675,14 +752,8 @@ export default class Historique extends React.Component {
     );
   };
 
-  onEdit = (id, type) => {
-    // l'id de l'acte passé en paramètre
-    if (type === "#FSE" || type === "#DEVIS") {
-      if (this.props.onEditActeClick) {
-        this.props.onEditActeClick(id);
-      }
-      return;
-    }
+  onEdit = (id, acte) => {
+    let type = acte.code;
 
     if (type === "#NOTE" || type === "#TODO") {
       let newType = "";
@@ -702,39 +773,54 @@ export default class Historique extends React.Component {
       return;
     }
 
-    // Un acte CCAM ou NGAP : fond par défaut sans icône, le code est affiché
-    this.setState({
-      idEditer: id,
-      showEdit: true
-    });
-  };
-
-  onClose = bool => {
-    this.setState({ showEdit: bool });
+    if (this.props.onEditActeClick) {
+      this.props.onEditActeClick(id);
+    }
   };
 
   onUpdate = acte => {
-    this.setState({
-      showEdit: false
-    });
+    this.props.client.Actes.update(
+      acte.id,
+      {
+        doneAt: this.state.dateInput,
+        localisation: this.state.localisationInput,
+        code: this.state.codeInput,
+        cotation: this.state.codeInput,
+        description: this.state.descriptionInput,
+        montant: this.state.montant
+      },
+      result => {
+        this.reload(
+          this.state.idPatient,
+          this.state.limit,
+          this.state.offset,
+          this.state.sort,
+          this.state.order,
+          this.state.startAt,
+          this.state.endAt,
+          this.state.localisation
+        );
 
-    this.reload(
-      acte.idPatient,
-      this.state.limit,
-      this.state.offset,
-      this.state.sort,
-      this.state.order,
-      this.state.startAt,
-      this.state.endAt,
-      this.state.localisation
+        this.setState({
+          idEditer: 0,
+          showInput: false
+        });
+      },
+      error => {
+        this.setState({
+          idEditer: 0,
+          showInput: false
+        });
+      }
     );
   };
 
-  onDelete = (id, code) => {
+  onDelete = (id, acte) => {
     // l'id et le code de l'acte sélectionné passés en paramètres
     this.reponseCancel = false;
     this.reponseConfirm = true;
     this.id = id;
+    let code = acte.code;
 
     _.map(this.state.actes, acte => {
       if (this.id === acte.id) {
@@ -743,6 +829,7 @@ export default class Historique extends React.Component {
       }
     });
     this.isFSE = false;
+    this.isDEVIS = false;
 
     // Suppression des actes sans #
     if (!_.startsWith(code, "#")) {
@@ -754,7 +841,7 @@ export default class Historique extends React.Component {
       return false;
     }
 
-    // Suppression des actes avec #
+    // Suppression des actes avec # => #FSE, #DEVIS ...
     if (code === "#FSE") {
       this.isFSE = true;
       this.setState({
@@ -763,84 +850,100 @@ export default class Historique extends React.Component {
           "Souhaitez-vous également supprimer les actes associés à cette FSE ?"
       });
       return false;
+    } else if (code === "#DEVIS") {
+      this.isDEVIS = true;
+      this.setState({
+        showConfirm: true,
+        message: "Vous confirmez la suppression de ce DEVIS ?"
+      });
+      return false;
     }
 
-    // #NOTE, #TODO, #DEVIS ...
+    // #NOTE, #TODO ...
     this.destroy(this.id);
   };
 
   onCancel = () => {
-    if (!this.reponseCancel && this.reponseConfirm) {
-      this.setState({
-        message: this.isFSE
-          ? "Souhaitez-vous supprimer uniquement la FSE sélectionnée ?"
-          : "Souhaitez-vous supprimer uniquement l'acte sélectionné ?"
-      });
+    if (!this.isDEVIS) {
+      if (!this.reponseCancel && this.reponseConfirm) {
+        this.setState({
+          message: this.isFSE
+            ? "Souhaitez-vous supprimer uniquement la FSE sélectionnée ?"
+            : "Souhaitez-vous supprimer uniquement l'acte sélectionné ?"
+        });
+      } else {
+        this.setState({ showConfirm: false });
+      }
+
+      this.reponseCancel = true;
+      this.reponseConfirm = false;
     } else {
       this.setState({ showConfirm: false });
     }
-
-    this.reponseCancel = true;
-    this.reponseConfirm = false;
   };
 
   onConfirm = () => {
-    if (this.reponseCancel && !this.reponseConfirm) {
+    if (!this.isDEVIS) {
+      if (this.reponseCancel && !this.reponseConfirm) {
+        this.setState({ showConfirm: false, message: "" });
+        this.destroy(this.id);
+      } else if (!this.reponseCancel && this.reponseConfirm) {
+        this.setState({
+          message: this.isFSE
+            ? "Vous confirmez la suppression de cette FSE ainsi que les actes associés ?"
+            : "Vous confirmez la suppression des actes associés ainsi que la FSE correspondante ?"
+        });
+
+        this.reponseConfirm = true;
+      } else {
+        this.setState({ showConfirm: false });
+
+        if (!this.isFSE) {
+          this.props.client.Actes.readAll(
+            {
+              _idPatient: this.state.idPatient,
+              _etat: 0,
+              limit: LIMIT
+            },
+            result => {
+              _.map(result.results, acte => {
+                if (this.idDocument === acte.idDocument) {
+                  this.destroy(acte.id);
+                }
+
+                if (this.idDocument === acte.id) {
+                  this.destroy(acte.id);
+                }
+              });
+            },
+            error => {}
+          );
+        } else {
+          this.props.client.Actes.readAll(
+            {
+              _idPatient: this.state.idPatient,
+              _etat: 0,
+              limit: LIMIT
+            },
+            result => {
+              _.map(result.results, acte => {
+                if (this.id === acte.idDocument) {
+                  this.destroy(acte.id);
+                }
+              });
+              this.destroy(this.id);
+              this.isFSE = false;
+            },
+            error => {}
+          );
+        }
+      }
+
+      this.reponseCancel = true;
+    } else {
       this.setState({ showConfirm: false, message: "" });
       this.destroy(this.id);
-    } else if (!this.reponseCancel && this.reponseConfirm) {
-      this.setState({
-        message: this.isFSE
-          ? "Vous confirmez la suppression de cette FSE ainsi que les actes associés ?"
-          : "Vous confirmez la suppression des actes associés ainsi que la FSE correspondante ?"
-      });
-
-      this.reponseConfirm = true;
-    } else {
-      this.setState({ showConfirm: false });
-
-      if (!this.isFSE) {
-        this.props.client.Actes.readAll(
-          {
-            _idPatient: this.state.idPatient,
-            _etat: 0,
-            limit: LIMIT
-          },
-          result => {
-            _.map(result.results, acte => {
-              if (this.idDocument === acte.idDocument) {
-                this.destroy(acte.id);
-              }
-
-              if (this.idDocument === acte.id) {
-                this.destroy(acte.id);
-              }
-            });
-          },
-          error => {}
-        );
-      } else {
-        this.props.client.Actes.readAll(
-          {
-            _idPatient: this.state.idPatient,
-            _etat: 0,
-            limit: LIMIT
-          },
-          result => {
-            _.map(result.results, acte => {
-              if (this.id === acte.idDocument) {
-                this.destroy(acte.id);
-              }
-            });
-            this.destroy(this.id);
-            this.isFSE = false;
-          },
-          error => {}
-        );
-      }
     }
-
-    this.reponseCancel = true;
   };
 
   destroy = id => {
@@ -865,6 +968,20 @@ export default class Historique extends React.Component {
     );
   };
 
+  onModify = (id, acte) => {
+    this.setState({
+      idEditer: id,
+      showInput: true,
+      dateInput: moment(acte.doneAt).toDate(),
+      localisationInput: acte.localisation,
+      codeInput: acte.code,
+      cotationInput: acte.cotation,
+      descriptionInput: acte.description,
+      couleurTagInput: acte.couleur,
+      montantInput: acte.montant
+    });
+  };
+
   onCreateUpdateNoteTodo = acte => {
     if (this.props.onCloseNoteTodo) {
       this.props.onCloseNoteTodo();
@@ -880,6 +997,12 @@ export default class Historique extends React.Component {
       this.state.endAt,
       this.state.localisation
     );
+  };
+
+  onOpenLocalisation = () => {
+    this.setState({
+      openLocalisation: !this.state.openLocalisation
+    });
   };
 
   render() {
@@ -905,8 +1028,15 @@ export default class Historique extends React.Component {
     };
 
     let dropdown = {
-      direction: "left"
+      direction: "right"
     };
+
+    let dateInput = this.state.dateInput;
+    let localisationInput = this.state.localisationInput;
+    let codeInput = this.state.codeInput;
+    let cotationInput = this.state.cotationInput;
+    let descriptionInput = this.state.descriptionInput;
+    let montantInput = this.state.montantInput;
 
     return (
       <React.Fragment>
@@ -927,7 +1057,14 @@ export default class Historique extends React.Component {
               <Table.HeaderCell collapsing={true}>Code/Type</Table.HeaderCell>
               <Table.HeaderCell collapsing={true}>Cotation</Table.HeaderCell>
               <Table.HeaderCell>Description</Table.HeaderCell>
-              <Table.HeaderCell collapsing={true}>Montant</Table.HeaderCell>
+              <Table.HeaderCell
+                collapsing={true}
+                style={{
+                  minWidth: this.state.showInput ? "100px" : undefined
+                }}
+              >
+                Montant
+              </Table.HeaderCell>
               <Table.HeaderCell collapsing={true}>Action</Table.HeaderCell>
             </Table.Row>
           </Table.Header>
@@ -935,80 +1072,268 @@ export default class Historique extends React.Component {
             {_.map(this.state.actes, acte => {
               let deco = this.style(acte);
               let rowSelected = _.includes(this.state.actesSelected, acte.id);
-              // actions du composant par défaut ["Editer","Supprimer"]
-              let actions = [
+
+              // Les actions possibles des #FSE, #DEVIS, #NOTE, #TODO et CCAM ou NGAP
+              let actions = [];
+
+              if (acte.code === "#NOTE" || acte.code === "#TODO") {
+                actions = [
+                  {
+                    icon: "edit",
+                    text: "Éditer",
+                    action: id => this.onEdit(id, acte)
+                  },
+                  {
+                    icon: "trash",
+                    text: "Supprimer",
+                    action: id => this.onDelete(id, acte)
+                  }
+                ];
+              } else {
+                actions = [
+                  {
+                    icon: "edit",
+                    text: "Éditer",
+                    action: id => this.onEdit(id, acte)
+                  },
+                  {
+                    icon: "pencil",
+                    text: "Modifier cette ligne",
+                    action: id => this.onModify(id, acte)
+                  },
+                  {
+                    icon: "trash",
+                    text: "Supprimer",
+                    action: id => this.onDelete(id, acte)
+                  }
+                ];
+              }
+
+              let actionTag = [
                 {
-                  icon: "edit",
-                  text: "Editer",
-                  action: id => this.onEdit(id, acte.code)
-                },
-                {
-                  icon: "trash",
-                  text: "Supprimer",
-                  action: id => this.onDelete(id, acte.code)
+                  icon: "tag",
+                  text: (
+                    <Dropdown text="Tags" pointing="left" className="link item">
+                      <Dropdown.Menu>
+                        {_.map(optionsTag, action => (
+                          <Dropdown.Item
+                            key={action.key}
+                            text={action.text}
+                            onClick={() => {
+                              this.props.client.Actes.update(
+                                acte.id,
+                                {
+                                  couleur: action.value
+                                },
+                                result => {
+                                  this.reload(
+                                    this.state.idPatient,
+                                    this.state.limit,
+                                    this.state.offset,
+                                    this.state.sort,
+                                    this.state.order,
+                                    this.state.startAt,
+                                    this.state.endAt,
+                                    this.state.localisation
+                                  );
+                                },
+                                error => {}
+                              );
+                            }}
+                          />
+                        ))}
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  ),
+                  action: id => {}
                 }
               ];
 
-              if (!_.isEmpty(this.props.actions)) {
-                actions = _.concat(actions, this.props.actions); // Ajout des actions (props) de l'utilisateur
+              if (
+                acte.code === "#NOTE" ||
+                acte.code === "#TODO" ||
+                !_.startsWith(acte.code, "#")
+              ) {
+                actions = _.concat(actions, actionTag);
               }
 
-              return (
-                <React.Fragment key={acte.id}>
-                  <Table.Row
-                    key={acte.id}
-                    onClick={e => {
-                      if (e.detail === 1) {
-                        if (
-                          this.props.onActeClick &&
-                          this.props.onSelectionChange
-                        ) {
-                          this.onActeClick(e, acte);
+              // Ajout des actions (props) de l'utilisateur
+              if (!_.isEmpty(this.props.actions)) {
+                actions = _.concat(actions, this.props.actions);
+              }
+
+              // La ligne en modification
+              if (this.state.idEditer === acte.id && this.state.showInput) {
+                return (
+                  <React.Fragment key={acte.id}>
+                    <Table.Row
+                      key={acte.id}
+                      style={{
+                        backgroundColor: rowSelected ? "#E88615" : deco.color,
+                        color: rowSelected ? "white" : "black"
+                      }}
+                      textAlign="center"
+                    >
+                      <Table.Cell
+                        onClick={() => {
+                          this.setState({ showDatePicker: true });
+                        }}
+                      >
+                        {moment(dateInput).format("L")}
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Input
+                          fluid={true}
+                          value={localisationInput}
+                          error={
+                            toISOLocalisation(localisationInput).length % 2 !==
+                            0
+                          }
+                          onClick={() =>
+                            this.setState({ openLocalisation: true })
+                          }
+                          style={{ margin: 0 }}
+                        />
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Input
+                          fluid={true}
+                          value={codeInput}
+                          onChange={(e, d) =>
+                            this.setState({ codeInput: d.value })
+                          }
+                          style={{ margin: 0 }}
+                        />
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Input
+                          fluid={true}
+                          value={cotationInput}
+                          onChange={(e, d) =>
+                            this.setState({ cotationInput: d.value })
+                          }
+                          style={{ margin: 0 }}
+                        />
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Input
+                          value={descriptionInput}
+                          fluid={true}
+                          onChange={(e, d) => {
+                            this.setState({ descriptionInput: d.value });
+                          }}
+                        />
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Montant
+                          montant={montantInput}
+                          onChange={montant => {
+                            this.setState({ montantInput: montant });
+                          }}
+                          input={{ fluid: true }}
+                        />
+                      </Table.Cell>
+                      <Table.Cell>
+                        <span>
+                          <Button
+                            icon="save"
+                            positive={true}
+                            onClick={() => this.onUpdate(acte)}
+                            size="mini"
+                          />
+                          <Button
+                            icon="cancel"
+                            negative={true}
+                            onClick={() => {
+                              this.setState({
+                                idEditer: 0,
+                                showInput: false,
+                                dateInput: null,
+                                localisationInput: "",
+                                codeInput: "",
+                                cotationInput: -1,
+                                descriptionInput: "",
+                                couleurTagInput: "",
+                                montantInput: -1
+                              });
+                            }}
+                            size="mini"
+                          />
+                        </span>
+                      </Table.Cell>
+                    </Table.Row>
+                  </React.Fragment>
+                );
+              } else {
+                return (
+                  <React.Fragment key={acte.id}>
+                    <Table.Row
+                      key={acte.id}
+                      onClick={e => {
+                        e.preventDefault();
+                        e.persist();
+                        if (this.timeout === null) {
+                          this.timeout = setTimeout(() => {
+                            this.timeout = null;
+                            if (
+                              this.props.onActeClick &&
+                              this.props.onSelectionChange
+                            ) {
+                              this.onActeClick(e, acte);
+                            }
+                          }, 300);
                         }
-                      }
-                    }}
-                    onDoubleClick={e => {
-                      if (e.detail === 2) {
-                        if (this.props.onActeDoubleClick) {
-                          this.onActeDoubleClick(e, acte);
+                      }}
+                      onDoubleClick={e => {
+                        e.preventDefault();
+                        clearTimeout(this.timeout);
+                        this.timeout = null;
+                        if (!_.startsWith(acte.code, "#")) {
+                          this.onModify(acte.id, acte);
+                        } else {
+                          if (this.props.onActeDoubleClick) {
+                            this.onActeDoubleClick(e, acte);
+                          }
                         }
-                      }
-                    }}
-                    style={{
-                      backgroundColor: rowSelected ? "#E88615" : deco.color,
-                      color: rowSelected ? "white" : "black"
-                    }}
-                  >
-                    <Table.Cell>
-                      {_.isEqual(acte.code, "#TODO")
-                        ? moment(acte.doneAt).fromNow()
-                        : moment(acte.doneAt).format("L")}
-                    </Table.Cell>
-                    <Table.Cell>{acte.localisation}</Table.Cell>
-                    <Table.Cell>{deco.code}</Table.Cell>
-                    <Table.Cell>
-                      {_.isEqual(acte.cotation, 0) ? "" : acte.cotation}
-                    </Table.Cell>
-                    <Table.Cell>
-                      {deco.description}
-                      {" " + acte.description}
-                    </Table.Cell>
-                    <Table.Cell textAlign="right">
-                      {_.isEqual(acte.code, "#TODO") ||
-                      _.isEqual(acte.code, "#NOTE")
-                        ? ""
-                        : tarif(acte.montant)}
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Actions
-                        actions={actions}
-                        id={acte.id}
-                        dropdown={dropdown}
-                      />
-                    </Table.Cell>
-                  </Table.Row>
-                </React.Fragment>
-              );
+                      }}
+                      style={{
+                        backgroundColor: rowSelected ? "#E88615" : deco.color,
+                        color: rowSelected ? "white" : "black"
+                      }}
+                    >
+                      <Table.Cell>
+                        {_.isEqual(acte.code, "#TODO") ? (
+                          <b>{_.capitalize(moment(acte.doneAt).fromNow())}</b>
+                        ) : (
+                          moment(acte.doneAt).format("L")
+                        )}
+                      </Table.Cell>
+                      <Table.Cell>{acte.localisation}</Table.Cell>
+                      <Table.Cell>{deco.code}</Table.Cell>
+                      <Table.Cell>
+                        {_.isEqual(acte.cotation, 0) ? "" : acte.cotation}
+                      </Table.Cell>
+                      <Table.Cell>
+                        {deco.description}
+                        {" " + acte.description}
+                      </Table.Cell>
+                      <Table.Cell textAlign="right">
+                        {_.isEqual(acte.code, "#TODO") ||
+                        _.isEqual(acte.code, "#NOTE")
+                          ? ""
+                          : tarif(acte.montant)}
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Actions
+                          actions={actions}
+                          id={acte.id}
+                          dropdown={dropdown}
+                        />
+                      </Table.Cell>
+                    </Table.Row>
+                  </React.Fragment>
+                );
+              }
             })}
           </Table.Body>
         </Table>
@@ -1047,22 +1372,10 @@ export default class Historique extends React.Component {
             </Ref>
           </Modal.Actions>
         </Modal>
-        {/* Edition */}
-        {!_.isEqual(this.state.idEditer, 0) ? (
-          <Edition
-            client={this.props.client}
-            id={this.state.idEditer}
-            openEdit={this.state.showEdit}
-            onCloseEdit={this.onClose}
-            onUpdate={this.onUpdate}
-          />
-        ) : (
-          ""
-        )}
-        {/* Note */}
+        {/* Modal Note */}
         <Note
           client={this.props.client}
-          id={this.state.idEditer}
+          id={this.props.id}
           idPatient={this.state.idPatient}
           open={this.props.openNoteTodo}
           type={this.props.typeNoteTodo}
@@ -1074,6 +1387,39 @@ export default class Historique extends React.Component {
             }
           }}
         />
+        {/* Modal Localisation */}
+        <Localisations
+          dents={localisationInput}
+          onSelection={dents => {
+            this.setState({ localisationInput: dents });
+          }}
+          modal={{
+            size: "large",
+            open: this.state.openLocalisation,
+            onClose: () => {
+              this.setState({ openLocalisation: false });
+            }
+          }}
+        />
+        {/* DatePicker au moment de la modification d'un acte */}
+        {this.state.showDatePicker ? (
+          <DatePicker
+            fixedHeight={true}
+            withPortal={true}
+            inline={true}
+            dateFormat="dd/MM/yyyy"
+            selected={_.isNull(dateInput) ? moment().toDate() : dateInput}
+            onChange={date => {
+              if (date) {
+                this.setState({
+                  dateInput: moment(date).toDate(),
+                  showDatePicker: false
+                });
+              }
+            }}
+            locale={fr}
+          />
+        ) : null}
       </React.Fragment>
     );
   }
