@@ -192,6 +192,26 @@ Grille de saisie des localisations dentaires
 | modal | object | Documentation semantic-ui-react [Modal](https://react.semantic-ui.com/modules/modal) |
 | onSelection | func | Callback à la selection d'une liste de dents |
 
+## Saisie
+Tableau de saisie des actes pour les dentistes
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| idActe | any, isRequired | Identifiant de l'acte principal |
+| lignes | number | Nombre de lignes à afficher pour ce tableau. Par défaut 5 |
+| codActivite | string | Code de l'activité, par défaut "1" |
+| codDom | number | Code du DOM, par défaut c'est la métropole. Code 0 |
+| codGrille | number | Code grille, par défaut 0 |
+| codPhase | number | Code phase, par défaut 0 |
+| editable | bool | Un acte peut être éditable ou pas |
+| executant | string | Code d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes) |
+| specialite | number | Code spécialité du praticien |
+| onError | func | Callback en cas d'erreur |
+| actions | array | Liste d'actions à effectuer (en plus des actions par défaut) |
+| addToFSE | func | Callback ajout d'un acte dans une FSE (à partir d'un #DEVIS) |
+| acteToAdd | object | Acte à ajouter dans une FSE |
+
 ## ModalSearch
 Ce composant est une modal Semantic de recherche d'un acte. Il intègre un date picker, les composants CCAM.Search, CCAM.Table et Shared.Localisations
 #### Props du composant
@@ -228,26 +248,6 @@ Ce composant est une modal Semantic de recherche d'un acte. Il intègre un date 
  - modificateurs
  - qualificatifs
 - montant |
-
-## Saisie
-Tableau de saisie des actes pour les dentistes
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| idActe | any, isRequired | Identifiant de l'acte principal |
-| lignes | number | Nombre de lignes à afficher pour ce tableau. Par défaut 5 |
-| codActivite | string | Code de l'activité, par défaut "1" |
-| codDom | number | Code du DOM, par défaut c'est la métropole. Code 0 |
-| codGrille | number | Code grille, par défaut 0 |
-| codPhase | number | Code phase, par défaut 0 |
-| editable | bool | Un acte peut être éditable ou pas |
-| executant | string | Code d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes) |
-| specialite | number | Code spécialité du praticien |
-| onError | func | Callback en cas d'erreur |
-| actions | array | Liste d'actions à effectuer (en plus des actions par défaut) |
-| addToFSE | func | Callback ajout d'un acte dans une FSE (à partir d'un #DEVIS) |
-| acteToAdd | object | Acte à ajouter dans une FSE |
 
 ## Favoris
 Modal Semantic de lecture et de configuration des actes favoris

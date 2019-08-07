@@ -4,7 +4,6 @@ import { Actes, Shared} from "rhapi-ui-react";
 import { Button, Divider, Form, Icon } from "semantic-ui-react";
 
 import moment from "moment";
-import _ from "lodash";
 
 // Instanciation du client RHAPI sans authentification
 const client = new Client("https://demo.rhapi.net/demo01");
@@ -62,9 +61,7 @@ export default class ActesHistorique extends React.Component {
 
   onAction = (id, action) => {
     // l'id de l'acte et l'action passés en paramètres
-    if (_.isEqual(action, "ajouter")) {
-      console.log(`${id} - Action : ${action}`);
-    } else if (_.isEqual(action, "tache")) {
+    if (action === "Autre action") {
       console.log(`${id} - Action : ${action}`);
     }
   };
@@ -157,7 +154,7 @@ export default class ActesHistorique extends React.Component {
         </Form>
         <Divider hidden={true} />
         <Shared.Localisations 
-          localisation={this.state.localisation}
+          dents={this.state.localisation}
           onSelection={localisation => {
             this.setState({ localisation: localisation });
           }}
@@ -176,16 +173,12 @@ export default class ActesHistorique extends React.Component {
           onActeDoubleClick={this.onActeDoubleClick}
           onSelectionChange={this.onSelectionChange}
           onEditActeClick={this.onEditActeClick}
+          limit={20}
           actions={[
             {
-              icon: "add",
-              text: "Ajouter",
-              action: (id) => this.onAction(id,"ajouter")
-            },
-            {
-              icon: "tasks",
-              text: "Tache",
-              action: (id) => this.onAction(id,"tache")
+              icon: "question circle",
+              text: "Autre action",
+              action: (id) => this.onAction(id,"Autre action")
             }
           ]}
           localisation={this.state.localisation}
