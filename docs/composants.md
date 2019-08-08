@@ -40,50 +40,6 @@ La recherche n'est pas effectuée si la date ou la localisation sont NULL.
 | search | object | Documentation semantic-ui-react [Search](https://react.semantic-ui.com/modules/search) |
 | searchInputLength | number | Nombre minimum de caractères pour déclencher la recherche d'actes |
 
-## Note
-Nouvelle << Note >> ou << Todo >>
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| id | number | id de l'acte sélectionné. Par défaut, id = 0 |
-| idPatient | number | Id du patient. Par défaut, idPatient = 0 |
-| open | bool | La modale s'ouvre si la valeur de 'open' est égale à true. Par défaut, open = false |
-| type | string | Type de l'acte ('NOTE' ou 'TODO'). Par défaut, type = '' |
-| onCreate | func | Callback à la création de la nouvelle 'note' ou 'todo'. L'acte créé est passé en paramètre |
-| onUpdate | func | Callback à la mise à jour d'une 'note' ou 'todo'. L'acte modifié est passé en paramètre |
-| onClose | func | Callback à la fermeture de la modal. |
-
-## SaisieDentaire
-Composant correspondant à une ligne du tableau de saisie des actes pour les dentistes
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| type | string | Type d'acte (#DEVIS ou #FSE). Par défaut c'est une #FSE |
-| index | number | Indice de la ligne |
-| acte | object | Acte sur la ligne courante |
-| actions | array | Liste d'actions à effectuer (en plus des actions par défaut) |
-| code | string | Code de l'Acte sélectionné |
-| cotation | number | Cotation/coefficient applicable au code (significatif uniquement en NGAP, 0 si non significatif) |
-| description | string | Description de l'acte |
-| date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
-| editable | bool | Définir si une ligne va être éditable ou pas. Par défaut elle est éditable si elle n'est pas désactivée. Voir la props 'disabled'. |
-| localisation | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
-| modificateurs | string | Modificateurs appliqués à l'acte sélectionné. Par défaut "" |
-| qualificatifs | string | Les qualificatifs |
-| disabled | bool | Désactivation de la ligne |
-| montant | number | Le moment pour cet acte |
-| onClick | func | Callback au clic sur une ligne |
-| onClickDate | func | Callback au clic sur la colonne de la date |
-| onClickLocalisation | func | Callback au clic sur la colonne Localisation |
-| onDelete | func | Callback à la suppression de la ligne |
-| onDuplicate | func | Callback à la duplication de la ligne |
-| onEdit | func | Callback action de recherche en CCAM |
-| onInsertion | func | Callback à l'insertion d'un nouvel acte |
-| onSearchFavoris | func | Callback au clic sur la colonne libellé (Recherche d'un acte dans les favoris) |
-| onMoveToFSE | func | Callback déplacement d'un acte de #DEVIS vers #FSE |
-
 ## Actions
 Menu d'actions à effectuer
 #### Props du composant
@@ -172,6 +128,59 @@ Composant de facturation d'un acte CCAM
 | modificateurs | string | Modificateurs appliqués à l'acte, par défaut une chaîne de caractères vide |
 | success | func | Callback succès de la tarification |
 
+## Localisations
+Grille de saisie des localisations dentaires
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| dents | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
+| modal | object | Documentation semantic-ui-react [Modal](https://react.semantic-ui.com/modules/modal) |
+| onSelection | func | Callback à la selection d'une liste de dents |
+
+## Note
+Nouvelle << Note >> ou << Todo >>
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| id | number | id de l'acte sélectionné. Par défaut, id = 0 |
+| idPatient | number | Id du patient. Par défaut, idPatient = 0 |
+| open | bool | La modale s'ouvre si la valeur de 'open' est égale à true. Par défaut, open = false |
+| type | string | Type de l'acte ('NOTE' ou 'TODO'). Par défaut, type = '' |
+| onCreate | func | Callback à la création de la nouvelle 'note' ou 'todo'. L'acte créé est passé en paramètre |
+| onUpdate | func | Callback à la mise à jour d'une 'note' ou 'todo'. L'acte modifié est passé en paramètre |
+| onClose | func | Callback à la fermeture de la modal. |
+
+## SaisieDentaire
+Composant correspondant à une ligne du tableau de saisie des actes pour les dentistes
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| type | string | Type d'acte (#DEVIS ou #FSE). Par défaut c'est une #FSE |
+| index | number | Indice de la ligne |
+| acte | object | Acte sur la ligne courante |
+| actions | array | Liste d'actions à effectuer (en plus des actions par défaut) |
+| code | string | Code de l'Acte sélectionné |
+| cotation | number | Cotation/coefficient applicable au code (significatif uniquement en NGAP, 0 si non significatif) |
+| description | string | Description de l'acte |
+| date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
+| editable | bool | Définir si une ligne va être éditable ou pas. Par défaut elle est éditable si elle n'est pas désactivée. Voir la props 'disabled'. |
+| localisation | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
+| modificateurs | string | Modificateurs appliqués à l'acte sélectionné. Par défaut "" |
+| qualificatifs | string | Les qualificatifs |
+| disabled | bool | Désactivation de la ligne |
+| montant | number | Le moment pour cet acte |
+| onClick | func | Callback au clic sur une ligne |
+| onClickDate | func | Callback au clic sur la colonne de la date |
+| onClickLocalisation | func | Callback au clic sur la colonne Localisation |
+| onDelete | func | Callback à la suppression de la ligne |
+| onDuplicate | func | Callback à la duplication de la ligne |
+| onEdit | func | Callback action de recherche en CCAM |
+| onInsertion | func | Callback à l'insertion d'un nouvel acte |
+| onSearchFavoris | func | Callback au clic sur la colonne libellé (Recherche d'un acte dans les favoris) |
+| onMoveToFSE | func | Callback déplacement d'un acte de #DEVIS vers #FSE |
+
 ## Edition
 Edition d'un acte validé pour un patient
 #### Props du composant
@@ -182,15 +191,6 @@ Edition d'un acte validé pour un patient
 | openEdit | bool | La modale s'ouvre si la valeur de 'open' est égale à true. Par défaut, open = false |
 | onCloseEdit | func | Callback à la fermeture de la modal |
 | onUpdate | func | Callback à la modification de l'acte sélectionné. Elle prend en paramètre l'acte modifié |
-
-## Localisations
-Grille de saisie des localisations dentaires
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| dents | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
-| modal | object | Documentation semantic-ui-react [Modal](https://react.semantic-ui.com/modules/modal) |
-| onSelection | func | Callback à la selection d'une liste de dents |
 
 ## ModalSearch
 Ce composant est une modal Semantic de recherche d'un acte. Il intègre un date picker, les composants CCAM.Search, CCAM.Table et Shared.Localisations

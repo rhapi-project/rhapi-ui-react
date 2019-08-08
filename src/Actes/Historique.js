@@ -1255,7 +1255,7 @@ export default class Historique extends React.Component {
                       </Table.Cell>
                       <Table.Cell>
                         <Button
-                          icon="save"
+                          icon="check"
                           positive={true}
                           onClick={() => this.onUpdate(acte)}
                           size="mini"
