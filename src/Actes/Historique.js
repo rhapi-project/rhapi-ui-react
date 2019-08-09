@@ -260,7 +260,6 @@ export default class Historique extends React.Component {
       codeInput: "",
       cotationInput: -1,
       descriptionInput: "",
-      couleurTagInput: "",
       montantInput: -1,
       openLocalisation: false,
       showDatePicker: false
@@ -977,7 +976,6 @@ export default class Historique extends React.Component {
       codeInput: acte.code,
       cotationInput: acte.cotation,
       descriptionInput: acte.description,
-      couleurTagInput: acte.couleur,
       montantInput: acte.montant
     });
   };
@@ -1028,7 +1026,7 @@ export default class Historique extends React.Component {
     };
 
     let dropdown = {
-      direction: "right"
+      direction: "left"
     };
 
     let dateInput = this.state.dateInput;
@@ -1113,7 +1111,7 @@ export default class Historique extends React.Component {
                 {
                   icon: "tag",
                   text: (
-                    <Dropdown text="Tags" pointing="left" className="link item">
+                    <Dropdown text="Tags" direction="right" icon={null}>
                       <Dropdown.Menu>
                         {_.map(optionsTag, action => (
                           <Dropdown.Item
@@ -1164,6 +1162,9 @@ export default class Historique extends React.Component {
 
               // La ligne en modification
               if (this.state.idEditer === acte.id && this.state.showInput) {
+                let isFSEORDEVIS =
+                  acte.code === "#FSE" || acte.code === "#DEVIS";
+
                 return (
                   <React.Fragment key={acte.id}>
                     <Table.Row
@@ -1176,44 +1177,59 @@ export default class Historique extends React.Component {
                     >
                       <Table.Cell
                         onClick={() => {
-                          this.setState({ showDatePicker: true });
+                          if (!isFSEORDEVIS) {
+                            this.setState({ showDatePicker: true });
+                          }
                         }}
                       >
                         {moment(dateInput).format("L")}
                       </Table.Cell>
                       <Table.Cell>
-                        <Input
-                          fluid={true}
-                          value={localisationInput}
-                          error={
-                            toISOLocalisation(localisationInput).length % 2 !==
-                            0
-                          }
-                          onClick={() =>
-                            this.setState({ openLocalisation: true })
-                          }
-                          style={{ margin: 0 }}
-                        />
+                        {isFSEORDEVIS ? (
+                          acte.localisation
+                        ) : (
+                          <Input
+                            fluid={true}
+                            value={localisationInput}
+                            error={
+                              toISOLocalisation(localisationInput).length %
+                                2 !==
+                              0
+                            }
+                            onClick={() =>
+                              this.setState({ openLocalisation: true })
+                            }
+                            style={{ margin: 0 }}
+                          />
+                        )}
                       </Table.Cell>
                       <Table.Cell>
-                        <Input
-                          fluid={true}
-                          value={codeInput}
-                          onChange={(e, d) =>
-                            this.setState({ codeInput: d.value })
-                          }
-                          style={{ margin: 0 }}
-                        />
+                        {isFSEORDEVIS ? (
+                          ""
+                        ) : (
+                          <Input
+                            fluid={true}
+                            value={codeInput}
+                            onChange={(e, d) =>
+                              this.setState({ codeInput: d.value })
+                            }
+                            style={{ margin: 0 }}
+                          />
+                        )}
                       </Table.Cell>
                       <Table.Cell>
-                        <Input
-                          fluid={true}
-                          value={cotationInput}
-                          onChange={(e, d) =>
-                            this.setState({ cotationInput: d.value })
-                          }
-                          style={{ margin: 0 }}
-                        />
+                        {isFSEORDEVIS ? (
+                          ""
+                        ) : (
+                          <Input
+                            fluid={true}
+                            value={cotationInput}
+                            onChange={(e, d) =>
+                              this.setState({ cotationInput: d.value })
+                            }
+                            style={{ margin: 0 }}
+                          />
+                        )}
                       </Table.Cell>
                       <Table.Cell>
                         <Input
@@ -1225,41 +1241,42 @@ export default class Historique extends React.Component {
                         />
                       </Table.Cell>
                       <Table.Cell>
-                        <Montant
-                          montant={montantInput}
-                          onChange={montant => {
-                            this.setState({ montantInput: montant });
-                          }}
-                          input={{ fluid: true }}
-                        />
+                        {isFSEORDEVIS ? (
+                          tarif(acte.montant)
+                        ) : (
+                          <Montant
+                            montant={montantInput}
+                            onChange={montant => {
+                              this.setState({ montantInput: montant });
+                            }}
+                            input={{ fluid: true }}
+                          />
+                        )}
                       </Table.Cell>
                       <Table.Cell>
-                        <div>
-                          <Button
-                            icon="save"
-                            positive={true}
-                            onClick={() => this.onUpdate(acte)}
-                            size="mini"
-                          />
-                          <Button
-                            icon="cancel"
-                            negative={true}
-                            onClick={() => {
-                              this.setState({
-                                idEditer: 0,
-                                showInput: false,
-                                dateInput: null,
-                                localisationInput: "",
-                                codeInput: "",
-                                cotationInput: -1,
-                                descriptionInput: "",
-                                couleurTagInput: "",
-                                montantInput: -1
-                              });
-                            }}
-                            size="mini"
-                          />
-                        </div>
+                        <Button
+                          icon="check"
+                          positive={true}
+                          onClick={() => this.onUpdate(acte)}
+                          size="mini"
+                        />
+                        <Button
+                          icon="cancel"
+                          negative={true}
+                          onClick={() => {
+                            this.setState({
+                              idEditer: 0,
+                              showInput: false,
+                              dateInput: null,
+                              localisationInput: "",
+                              codeInput: "",
+                              cotationInput: -1,
+                              descriptionInput: "",
+                              montantInput: -1
+                            });
+                          }}
+                          size="mini"
+                        />
                       </Table.Cell>
                     </Table.Row>
                   </React.Fragment>
@@ -1288,7 +1305,11 @@ export default class Historique extends React.Component {
                         e.preventDefault();
                         clearTimeout(this.timeout);
                         this.timeout = null;
-                        if (!_.startsWith(acte.code, "#")) {
+                        if (
+                          !_.startsWith(acte.code, "#") ||
+                          acte.code === "#FSE" ||
+                          acte.code === "#DEVIS"
+                        ) {
                           this.onModify(acte.id, acte);
                         } else {
                           if (this.props.onActeDoubleClick) {
