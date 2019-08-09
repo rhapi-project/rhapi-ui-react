@@ -84,6 +84,15 @@ Composant correspondant à une ligne du tableau de saisie des actes pour les den
 | onSearchFavoris | func | Callback au clic sur la colonne libellé (Recherche d'un acte dans les favoris) |
 | onMoveToFSE | func | Callback déplacement d'un acte de #DEVIS vers #FSE |
 
+## Actions
+Menu d'actions à effectuer
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| actions | array | Tableau contenant une liste d'actions |
+| dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
+| id | any | Identifiant de la ligne sur laquelle une action est effectuée |
+
 ## DateRange
 Période, début et fin d'une période
 #### Props du composant
@@ -94,15 +103,6 @@ Période, début et fin d'une période
 | endAt | string | Date de fin de la période. Par défaut une semaine après la date du jour. |
 | onRangeChange | func | Callback au changement de la période |
 | onClose | func | Callback à la fermeture de la modal |
-
-## Actions
-Menu d'actions à effectuer
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| actions | array | Tableau contenant une liste d'actions |
-| dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
-| id | any | Identifiant de la ligne sur laquelle une action est effectuée |
 
 ## Montant
 Input de saisie d'un montant au format français
@@ -123,24 +123,6 @@ Période, début et fin d'une période
 | startYear | number | La première année qui sera affichée. Par défaut l'année en cours |
 | onPeriodeChange | func | Callback au changement de la période. C'est une fonction qui prend 2 paramètres, début et fin de la période (inclus).
 Les valeurs de ces paramètres sont NULL si la durée est indéterminée. |
-
-## Tarification
-Composant de facturation d'un acte CCAM
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| codActe | string | Code de l'acte CCAM |
-| codActivite | string | Code de l'activité, par défaut "1" |
-| codDom | number | Code du DOM, par défaut c'est la métropole. Code 0 |
-| codGrille | number | Code grille, par défaut 0 |
-| codPhase | number | Code phase, par défaut 0 |
-| date | string | Date de la tarification de l'acte, au format ISO. Par défaut la date du jour |
-| dynamic | bool | Affichage de l'interface dynamique de tarification, par défaut "false" |
-| error | string, func | Message d'erreur ou Callback acte non tarifé à la date donnée |
-| hidden | bool | Cacher l'interface du composant de tarification |
-| modificateurs | string | Modificateurs appliqués à l'acte, par défaut une chaîne de caractères vide |
-| success | func | Callback succès de la tarification |
 
 ## Table
 Composant montrant sous forme d'un tableau les actes obtenus après une recherche par mot clé.
@@ -171,6 +153,24 @@ Composant montrant sous forme d'un tableau les actes obtenus après une recherch
 | btnPrev | object | Props semantic du bouton pour aller à la page précédente, par défaut un objet vide "{}" |
 | btnMore | object | Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}" |
 | mode | string | mode de pagination 'pages' ou 'more', par défaut "pages" |
+
+## Tarification
+Composant de facturation d'un acte CCAM
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| codActe | string | Code de l'acte CCAM |
+| codActivite | string | Code de l'activité, par défaut "1" |
+| codDom | number | Code du DOM, par défaut c'est la métropole. Code 0 |
+| codGrille | number | Code grille, par défaut 0 |
+| codPhase | number | Code phase, par défaut 0 |
+| date | string | Date de la tarification de l'acte, au format ISO. Par défaut la date du jour |
+| dynamic | bool | Affichage de l'interface dynamique de tarification, par défaut "false" |
+| error | string, func | Message d'erreur ou Callback acte non tarifé à la date donnée |
+| hidden | bool | Cacher l'interface du composant de tarification |
+| modificateurs | string | Modificateurs appliqués à l'acte, par défaut une chaîne de caractères vide |
+| success | func | Callback succès de la tarification |
 
 ## Edition
 Edition d'un acte validé pour un patient
