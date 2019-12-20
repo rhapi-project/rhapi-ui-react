@@ -104,19 +104,6 @@ export default class Table2 extends React.Component {
     informations: {},
     mode: "pages"
   };
-  componentWillMount() {
-    this.setState({
-      actes: this.props.actes,
-      informations: this.props.informations
-    });
-  }
-
-  componentWillReceiveProps(next) {
-    this.setState({
-      actes: next.actes,
-      informations: next.informations
-    });
-  }
 
   displayValue = (champ, value) => {
     if (_.isNull(value)) {
@@ -154,9 +141,6 @@ export default class Table2 extends React.Component {
           obj.actes = results.results;
           obj.informations = results.informations;
           this.props.onPageSelect(obj);
-        } else {
-          console.log("Callback onPageSelect non défini");
-          console.log(results);
         }
       },
       error => {
@@ -237,32 +221,28 @@ export default class Table2 extends React.Component {
           <div style={{ textAlign: "center" }}>
             {showPagination ? (
               <Pagination
-                informations={this.state.informations}
-                onPageSelect={this.onPageSelect}
+                informations={this.props.informations}
+                onPageSelect={query => this.onPageSelect(query)}
                 {...pagination}
               />
-            ) : (
-              ""
-            )}
+            ) : null}
           </div>
         </React.Fragment>
       );
     } else {
-      return "";
+      return null;
     }
   }
 }
 
 class Pagination extends React.Component {
   state = {
-    loadingMore: false
+    loadingMore: false // affichage du loader dans le cas de la recherche "more"
   };
 
-  componentWillReceiveProps() {
-    if (this.props.mode === "more") {
-      this.setState({
-        loadingMore: false
-      });
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.informations.pageSize !== prevProps.informations.pageSize) {
+      this.setState({ loadingMore: false });
     }
   }
 
@@ -399,7 +379,7 @@ class Pagination extends React.Component {
         </React.Fragment>
       );
     } else {
-      return "";
+      return null;
     }
   }
 }

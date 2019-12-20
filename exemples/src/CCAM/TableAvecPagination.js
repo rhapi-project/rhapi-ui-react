@@ -20,10 +20,10 @@ export default class CCAMPaginationPages extends React.Component {
     this.setState({ actes: obj.results, informations: obj.informations });
   };
 
-  onPageSelect = obj => {
+  onPageSelect = result => {
     this.setState({
-      actes: obj.actes,
-      informations: obj.informations
+      actes: result.actes,
+      informations: result.informations
     });
   };
 
@@ -58,7 +58,7 @@ export default class CCAMPaginationPages extends React.Component {
           client={client}
           actes={this.state.actes}
           informations={this.state.informations}
-          onPageSelect={this.onPageSelect}
+          onPageSelect={result => this.onPageSelect(result)}
           showPagination={true}
         />
       </React.Fragment>

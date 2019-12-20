@@ -52,26 +52,30 @@ export default class Search2 extends React.Component {
     localisation: ""
   };
 
-  componentWillMount() {
+  state = {
+    typeSearch: "keyword",
+    results: [], // mots clés résultat de la recherche
+    search: {},
+    value: ""
+  };
+
+  componentDidMount() {
     this.setState({
-      typeSearch: "keyword",
-      results: [], // mots clés résultat de la recherche
       search: _.isUndefined(this.props.search)
         ? this.getSemanticSearchProps({})
-        : this.getSemanticSearchProps(this.props.search),
-      value: ""
+        : this.getSemanticSearchProps(this.props.search)
     });
   }
 
-  componentWillReceiveProps(next) {
+  componentDidUpdate(prevProps, prevState) {
     if (
-      next.date !== this.props.date ||
-      next.executant !== this.props.executant ||
-      next.limit !== this.props.limit ||
-      next.localisation !== this.props.localisation
+      this.props.date !== prevProps.date ||
+      this.props.executant !== prevProps.executant ||
+      this.props.limit !== prevProps.limit ||
+      this.props.localisation !== prevProps.localisation
     ) {
-      if (!_.isNull(next.date) && !_.isNull(next.localisation)) {
-        this.search(this.state.value, next.date, next.localisation);
+      if (!_.isNull(this.props.date) && !_.isNull(this.props.localisation)) {
+        this.search(this.state.value, this.props.date, this.props.localisation);
       }
     }
   }
@@ -87,8 +91,6 @@ export default class Search2 extends React.Component {
   // fonction this.props.getActesObject est faite (si elle est définie)
   // Cette fonction est sensée renvoyer le résultat de la recherche au composant parent.
   loadActes = (inputVal, dateStr, localisation) => {
-    //console.log("Recherche");
-    //console.log(dateStr);
     let params = {
       texte: inputVal,
       date: dateStr,

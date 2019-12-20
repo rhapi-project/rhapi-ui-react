@@ -38,7 +38,7 @@ export default class App extends React.Component {
     name: ""
   };
 
-  componentWillMount() {
+  componentDidMount() {
     let parts = window.location.hash.split("/");
     if (parts.length === 2) {
       this.setState({

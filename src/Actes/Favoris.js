@@ -445,7 +445,10 @@ export default class Favoris extends React.Component {
     let selectedActes = this.state.selectedActes;
     if (e.ctrlKey || e.metaKey) {
       if (_.includes(selectedActes, index)) {
-        selectedActes.splice(_.findIndex(selectedActes, i => i === index), 1);
+        selectedActes.splice(
+          _.findIndex(selectedActes, i => i === index),
+          1
+        );
       } else {
         selectedActes.push(index);
       }

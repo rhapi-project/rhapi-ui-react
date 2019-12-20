@@ -55,19 +55,32 @@ export default class Tarification extends React.Component {
     modificateurs: ""
   };
 
-  componentWillMount() {
+  state = {
+    acte: {},
+    selectedModif: [], // modificateurs sélectionnés
+    selectableModif: [], // modificateurs applicables
+    modifShow: false, // true -> afficher les modificateurs possibles
+    tarif: {},
+    errorMessage: "",
+    currentActivite: 0,
+    currentDom: 0,
+    currentGrille: 0,
+    currentPhase: 0,
+    activites: [],
+    doms: [],
+    grilles: [],
+    modificateurs: [],
+    phase: []
+  };
+
+  componentDidMount() {
     this.setState({
-      acte: {},
-      selectedModif: [], // modificateurs sélectionnés
-      selectableModif: [], // modificateurs applicables
-      modifShow: false, // true -> afficher les modificateurs possibles
-      tarif: {},
-      errorMessage: "",
       currentActivite: this.props.codActivite,
       currentDom: this.props.codDom,
       currentGrille: this.props.codGrille,
       currentPhase: this.props.codPhase
     });
+
     this.props.client.CCAM.contextes(
       results => {
         this.setState({
@@ -80,30 +93,29 @@ export default class Tarification extends React.Component {
       },
       error => {
         console.log(error);
-        this.setState({ acte: {}, selectedModif: [], modifShow: false });
       }
     );
   }
 
-  componentWillReceiveProps(next) {
+  componentDidUpdate(prevProps, prevState) {
     if (
-      next.codActe !== this.props.codActe ||
-      next.codActivite !== this.props.codActivite ||
-      next.codPhase !== this.props.codPhase ||
-      next.codGrille !== this.props.codGrille ||
-      next.date !== this.props.date ||
-      next.codDom !== this.props.codDom ||
-      next.modificateurs !== this.props.modificateurs
+      prevProps.codActe !== this.props.codActe ||
+      prevProps.codActivite !== this.props.codActivite ||
+      prevProps.codPhase !== this.props.codPhase ||
+      prevProps.codGrille !== this.props.codGrille ||
+      prevProps.date !== this.props.date ||
+      prevProps.codDom !== this.props.codDom ||
+      prevProps.modificateurs !== this.props.modificateurs
     ) {
-      if (next.codActe) {
+      if (this.props.codActe) {
         this.readActe(
-          next.codActe,
-          next.codActivite,
-          next.codPhase,
-          next.codGrille,
-          next.date,
-          next.codDom,
-          next.modificateurs
+          this.props.codActe,
+          this.props.codActivite,
+          this.props.codPhase,
+          this.props.codGrille,
+          this.props.date,
+          this.props.codDom,
+          this.props.modificateurs
         );
       } else {
         this.setState({ acte: {}, selectableModif: [], modifShow: false });
@@ -533,7 +545,7 @@ export default class Tarification extends React.Component {
       // Tarification statique
       return tarifPrint;
     } else {
-      return "";
+      return null;
     }
   }
 }
