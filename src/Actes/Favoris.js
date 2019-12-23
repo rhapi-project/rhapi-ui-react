@@ -74,7 +74,7 @@ export default class Favoris extends React.Component {
     selectedChapitre: {}
   };
 
-  componentWillMount() {
+  componentDidMount() {
     this.props.client.Configuration.read(
       "actesFavoris",
       result => {
@@ -96,12 +96,15 @@ export default class Favoris extends React.Component {
       }
     );
   }
-  componentWillReceiveProps() {
-    this.setState({
-      chapitreTitre: null,
-      configuration: false,
-      selectedActes: []
-    });
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.open && prevProps.open !== this.props.open) {
+      this.setState({
+        chapitreTitre: null,
+        configuration: false,
+        selectedActes: []
+      });
+    }
   }
 
   onEdition = (
@@ -239,6 +242,7 @@ export default class Favoris extends React.Component {
       ch.titre = titre;
       ch.actes = [];
       ch.chapitres = [];
+      //console.log("je passe ici");
       addChap(chapitre, ch);
     }
     if (type === "acte") {

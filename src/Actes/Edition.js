@@ -108,7 +108,7 @@ export default class Edition extends React.Component {
     showReload: false
   };
 
-  componentWillMount() {
+  componentDidMount() {
     this.props.client.Actes.read(
       this.props.id,
       {},
@@ -128,7 +128,52 @@ export default class Edition extends React.Component {
     );
   }
 
-  componentWillReceiveProps(next) {
+  /*componentWillMount() {
+    this.props.client.Actes.read(
+      this.props.id,
+      {},
+      acte => {
+        this.setState({
+          date: moment(acte.doneAt).toDate(),
+          localisation: acte.localisation,
+          code: acte.code,
+          cotation: acte.cotation,
+          description: acte.description,
+          couleurTag: acte.couleur,
+          montant: acte.montant,
+          lockRevision: acte.lockRevision
+        });
+      },
+      error => {}
+    );
+  }*/
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.id !== this.state.id) {
+      this.props.client.Actes.read(
+        this.props.id,
+        {},
+        acte => {
+          this.setState({
+            id: this.props.id,
+            date: moment(acte.doneAt).toDate(),
+            localisation: acte.localisation,
+            code: acte.code,
+            cotation: acte.cotation,
+            description: acte.description,
+            couleurTag: acte.couleur,
+            montant: acte.montant,
+            lockRevision: acte.lockRevision
+          });
+        },
+        error => {}
+      );
+    } /*else {
+
+    }*/
+  }
+
+  /*componentWillReceiveProps(next) {
     if (next.id !== this.state.id) {
       this.props.client.Actes.read(
         next.id,
@@ -153,7 +198,7 @@ export default class Edition extends React.Component {
         id: next.id
       });
     }
-  }
+  }*/
 
   onClose = () => {
     if (this.props.onCloseEdit) {

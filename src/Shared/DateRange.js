@@ -42,18 +42,16 @@ export default class DateRange extends React.Component {
       .toISOString()
   };
 
-  componentWillMount() {
-    this.setState({
-      startAt: this.props.startAt,
-      endAt: this.props.endAt
-    });
-  }
+  state = {
+    startAt: this.props.startAt,
+    endAt: this.props.endAt
+  };
 
-  componentWillReceiveProps(next) {
-    if (next.open) {
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.open && prevProps.open !== this.props.open) {
       this.setState({
-        startAt: next.startAt,
-        endAt: next.endAt
+        startAt: this.props.startAt,
+        endAt: this.props.endAt
       });
     }
   }
@@ -98,7 +96,9 @@ export default class DateRange extends React.Component {
                 <Form.Input label="Du" fluid={true}>
                   <Ref
                     innerRef={node => {
-                      node.firstChild.firstChild.style.width = "100%";
+                      if (node) {
+                        node.firstChild.firstChild.style.width = "100%";
+                      }
                     }}
                   >
                     <DatePicker
@@ -115,7 +115,9 @@ export default class DateRange extends React.Component {
                 <Form.Input label="Au" fluid={true}>
                   <Ref
                     innerRef={node => {
-                      node.firstChild.firstChild.style.width = "100%";
+                      if (node) {
+                        node.firstChild.firstChild.style.width = "100%";
+                      }
                     }}
                   >
                     <DatePicker

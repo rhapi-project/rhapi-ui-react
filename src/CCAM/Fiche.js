@@ -42,45 +42,21 @@ export default class Fiche extends React.Component {
     modificateurs: ""
   };
 
-  componentWillMount() {
-    this.setState({
-      codActe: this.props.codActe,
-      codActivite: this.props.codActivite,
-      codDom: this.props.codDom,
-      codGrille: this.props.codGrille,
-      codPhase: this.props.codPhase,
-      date: this.props.date,
-      modificateurs: this.props.modificateurs
-    });
-  }
-
-  componentWillReceiveProps(next) {
-    this.setState({
-      codActe: next.codActe,
-      codActivite: next.codActivite,
-      codDom: next.codDom,
-      codGrille: next.codGrille,
-      codPhase: next.codPhase,
-      date: next.date,
-      modificateurs: next.modificateurs
-    });
-  }
-
   render() {
     return (
       <React.Fragment>
         <Tarification
           client={this.props.client}
-          codActe={this.state.codActe}
-          codActivite={this.state.codActivite}
-          codDom={this.state.codDom}
-          codGrille={this.state.codGrille}
-          codPhase={this.state.codPhase}
-          date={this.state.date}
+          codActe={this.props.codActe}
+          codActivite={this.props.codActivite}
+          codDom={this.props.codDom}
+          codGrille={this.props.codGrille}
+          codPhase={this.props.codPhase}
+          date={this.props.date}
           dynamic={false}
           error={() => {}}
           hidden={false}
-          modificateurs={this.state.modificateurs}
+          modificateurs={this.props.modificateurs}
           success={obj => {} /*console.log(obj)*/}
         />
       </React.Fragment>

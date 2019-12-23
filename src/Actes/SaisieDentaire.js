@@ -92,12 +92,10 @@ export default class SaisieDentaire extends React.Component {
     type: "#FSE"
   };
 
-  componentWillMount() {
-    this.setState({
-      openDatePicker: false,
-      openLocalisation: false
-    });
-  }
+  state = {
+    openDatePicker: false,
+    openLocalisation: false
+  };
 
   onClickCell = () => {
     if (this.props.onClick) {

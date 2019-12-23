@@ -101,7 +101,16 @@ export default class Note extends React.Component {
     type: ""
   };
 
-  componentWillMount() {
+  state = {
+    id: this.props.id,
+    idPatient: this.props.idPatient,
+    date: moment().toISOString(),
+    localisation: "",
+    couleurTag: "",
+    description: ""
+  };
+
+  /*componentWillMount() {
     this.setState({
       id: this.props.id,
       idPatient: this.props.idPatient,
@@ -110,17 +119,17 @@ export default class Note extends React.Component {
       couleurTag: "",
       description: ""
     });
-  }
+  }*/
 
-  componentWillReceiveProps(next) {
-    if (next.open && next.open !== this.props.open) {
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.open && this.props.open !== prevProps.open) {
       this.props.client.Actes.read(
-        next.id,
+        this.props.id,
         {},
         result => {
           this.setState({
-            id: next.id,
-            idPatient: next.idPatient,
+            id: this.props.id,
+            idPatient: this.props.idPatient,
             date: result.doneAt,
             localisation: result.localisation,
             couleurTag: result.couleur,
@@ -129,8 +138,8 @@ export default class Note extends React.Component {
         },
         error => {
           this.setState({
-            id: next.id,
-            idPatient: next.idPatient,
+            id: this.props.id,
+            idPatient: this.props.idPatient,
             date: moment().toISOString(),
             localisation: "",
             couleurTag: "",
@@ -224,8 +233,10 @@ export default class Note extends React.Component {
                 <Form.Input label="Date" width={4}>
                   <Ref
                     innerRef={node => {
-                      let input = node.firstChild.firstChild;
-                      input.style.width = "100%";
+                      if (node) {
+                        let input = node.firstChild.firstChild;
+                        input.style.width = "100%";
+                      }
                     }}
                   >
                     <DatePicker

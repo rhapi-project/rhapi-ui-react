@@ -12,13 +12,11 @@ import moment from "moment";
 const client = new Client("https://demo.rhapi.net/demo01");
 
 export default class ActesNote extends React.Component {
-  componentWillMount() {
-    this.setState({
-      id: 0,
-      open: false,
-      type: "",
-      acte: []
-    });
+  state = {
+    id: 0,
+    open: false,
+    type: "",
+    acte: []
   };
 
   onOpen = type => {

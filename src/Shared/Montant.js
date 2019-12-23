@@ -28,22 +28,20 @@ export default class Montant extends React.Component {
 
   input = null;
 
-  componentWillMount() {
-    this.setState({
-      montant: tarif(this.props.montant)
-    });
-  }
-
-  componentWillReceiveProps(next) {
-    this.setState({
-      montant: tarif(next.montant)
-    });
-  }
+  state = {
+    montant: tarif(this.props.montant)
+  };
 
   componentDidMount() {
     let input = this.input.firstChild;
     input.style.textAlign = "right";
     input.addEventListener("keypress", this.validation);
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.montant !== this.props.montant) {
+      this.setState({ montant: tarif(this.props.montant) });
+    }
   }
 
   componentWillUnmount() {

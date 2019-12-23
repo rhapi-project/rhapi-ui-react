@@ -6,13 +6,12 @@ import { Button, Divider } from "semantic-ui-react";
 import moment from "moment";
 
 export default class SharedDateRange extends React.Component {
-  componentWillMount() {
-    this.setState({
-      startAt: undefined,
-      endAt: undefined,
-      periode: false
-    });
+  state = {
+    startAt: undefined,
+    endAt: undefined,
+    periode: false
   };
+
   render() {
     let datepickerlink = (
       <a

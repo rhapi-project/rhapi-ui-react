@@ -34,15 +34,13 @@ export default class Periode extends React.Component {
     startYear: moment().year()
   };
 
-  componentWillMount() {
-    this.setState({
-      currentOption: null,
-      currentYear: moment().year(),
-      rangeStart: undefined,
-      rangeEnd: undefined,
-      rangeOpen: false
-    });
-  }
+  state = {
+    currentOption: null,
+    currentYear: moment().year(),
+    rangeStart: undefined,
+    rangeEnd: undefined,
+    rangeOpen: false
+  };
 
   allYears = startYear => {
     let array = [];
@@ -177,11 +175,7 @@ export default class Periode extends React.Component {
       {
         text: "Année " + printedYear,
         value: "civilYear"
-      } /*,
-      {
-        text: "Année glissante au " + moment().format("DD/MM"),
-        value: "glissanteYear"
-      }*/
+      }
     ];
 
     let opt4 = [

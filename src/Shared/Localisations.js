@@ -28,17 +28,15 @@ export default class Localisations extends React.Component {
     dents: ""
   };
 
-  componentWillMount() {
-    this.setState({
-      multSelection: this.props.modal ? false : true,
-      selected: _.split(this.props.dents, " ")
-    });
-  }
+  state = {
+    multSelection: this.props.modal ? false : true,
+    selected: _.split(this.props.dents, " ")
+  };
 
-  componentWillReceiveProps(next) {
-    this.setState({
-      selected: _.split(next.dents, " ")
-    });
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.dents !== this.props.dents) {
+      this.setState({ selected: _.split(this.props.dents, " ") });
+    }
   }
 
   isSelected = val => {

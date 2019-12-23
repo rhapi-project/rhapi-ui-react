@@ -122,7 +122,22 @@ export default class ModalSearch extends React.Component {
     montant: 0
   };
 
-  componentWillMount() {
+  state = {
+    acte: {},
+    code: this.props.code,
+    cotation: this.props.cotation,
+    date: this.props.date,
+    localisation: this.props.localisation,
+    modificateurs: this.props.modificateurs,
+    qualificatifs: this.props.qualificatifs,
+    description: this.props.description,
+    montant: this.props.montant,
+    openLocalisation: false,
+    openModificateurs: false,
+    descriptionType: 1
+  };
+
+  /*componentWillMount() {
     this.setState({
       acte: {},
       code: this.props.code,
@@ -137,38 +152,40 @@ export default class ModalSearch extends React.Component {
       openModificateurs: false,
       descriptionType: 1
     });
-  }
+  }*/
 
-  componentWillReceiveProps(next) {
-    if (next.code) {
-      this.setState({
-        code: next.code,
-        cotation: next.cotation,
-        date: next.date,
-        localisation: next.localisation,
-        modificateurs: next.modificateurs,
-        qualificatifs: next.qualificatifs,
-        montant: next.montant,
-        description: next.description
-      });
-      this.readActe(next.code, next.date);
-    } else {
-      this.setState({
-        acte: {},
-        actes: [],
-        code: "",
-        cotation: this.props.cotation,
-        date: this.props.date,
-        localisation: "",
-        modificateurs: "",
-        qualificatifs: "OP",
-        description: "",
-        montant: 0,
-        openLocalisation: false,
-        openModificateurs: false,
-        informations: {},
-        descriptionType: this.getDescriptionType()
-      });
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.open && this.props.open !== prevProps.open) {
+      if (this.props.code) {
+        this.setState({
+          code: this.props.code,
+          cotation: this.props.cotation,
+          date: this.props.date,
+          localisation: this.props.localisation,
+          modificateurs: this.props.modificateurs,
+          qualificatifs: this.props.qualificatifs,
+          montant: this.props.montant,
+          description: this.props.description
+        });
+        this.readActe(this.props.code, this.props.date);
+      } else {
+        this.setState({
+          acte: {},
+          actes: [],
+          code: "",
+          cotation: this.props.cotation,
+          date: this.props.date,
+          localisation: "",
+          modificateurs: "",
+          qualificatifs: "OP",
+          description: "",
+          montant: 0,
+          openLocalisation: false,
+          openModificateurs: false,
+          informations: {},
+          descriptionType: this.getDescriptionType()
+        });
+      }
     }
   }
 
@@ -484,8 +501,10 @@ export default class ModalSearch extends React.Component {
               <Form.Input label="Date" width={9}>
                 <Ref
                   innerRef={node => {
-                    let input = node.firstChild.firstChild;
-                    input.style.width = "100%";
+                    if (node) {
+                      let input = node.firstChild.firstChild;
+                      input.style.width = "100%";
+                    }
                   }}
                 >
                   <DatePicker
@@ -543,7 +562,9 @@ export default class ModalSearch extends React.Component {
               />
               <Ref
                 innerRef={node => {
-                  node.childNodes[1].firstChild.style.textAlign = "right";
+                  if (node) {
+                    node.childNodes[1].firstChild.style.textAlign = "right";
+                  }
                 }}
               >
                 <Form.Input
@@ -631,7 +652,9 @@ export default class ModalSearch extends React.Component {
               <Form.Input fluid={true}>
                 <Ref
                   innerRef={node => {
-                    node.firstChild.firstChild.focus();
+                    //if (node) {
+                    //node.firstChild.firstChild.focus();
+                    //}
                   }}
                 >
                   <Search2
@@ -722,7 +745,7 @@ class Modificateurs extends React.Component {
     selectedModif: []
   };
 
-  componentWillMount() {
+  componentDidMount() {
     let listModificateurs = this.listModificateurs(
       this.props.allModificateurs,
       this.props.codGrille,
@@ -734,21 +757,23 @@ class Modificateurs extends React.Component {
     });
   }
 
-  componentWillReceiveProps(next) {
-    let selectables = this.getSelectables(
-      this.state.listModificateurs,
-      next.codActe
-    );
-    let s = _.map(next.modificateurs, m => {
-      let modif = _.find(selectables, mod => mod.codModifi === m);
-      if (modif) {
-        return modif;
-      } else {
-        this.props.onError();
-        return;
-      }
-    });
-    this.setState({ selectedModif: s, selectables: selectables });
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.modificateurs !== this.props.modificateurs) {
+      let selectables = this.getSelectables(
+        this.state.listModificateurs,
+        this.props.codActe
+      );
+      let s = _.map(this.props.modificateurs, m => {
+        let modif = _.find(selectables, mod => mod.codModifi === m);
+        if (modif) {
+          return modif;
+        } else {
+          this.props.onError();
+          return;
+        }
+      });
+      this.setState({ selectedModif: s, selectables: selectables });
+    }
   }
 
   checkedModif = m => {

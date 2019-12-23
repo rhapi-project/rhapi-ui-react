@@ -75,7 +75,7 @@ export default class Saisie extends React.Component {
     selectedLocalisation: null
   };
 
-  componentWillMount() {
+  componentDidMount() {
     this.props.client.CCAM.contextes(
       result => {
         //console.log(result.ngap);
@@ -92,13 +92,19 @@ export default class Saisie extends React.Component {
     }
   }
 
-  componentWillReceiveProps(next) {
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.idActe !== this.props.idActe) {
+      this.reload(this.props.idActe, this.props.acteToAdd);
+    }
+  }
+
+  /*componentWillReceiveProps(next) {
     if (next.idActe === this.props.idActe) {
       this.reload(next.idActe, {});
     } else {
       this.reload(next.idActe, next.acteToAdd);
     }
-  }
+  }*/
 
   reload = (idActe, acteToAdd) => {
     this.props.client.Actes.read(

@@ -24,14 +24,15 @@ const descriptionType = [
 ]
 
 export default class ActesSaisieValidation extends React.Component {
-  componentWillMount() {
-    this.setState({
-      idPatient: null,
-      acteToAdd: {}, // acte à ajouter dans une FSE
-      fse: {},
-      msgSaveFSE: "",
-      typeActe: "#FSE"
-    });
+  state = {
+    idPatient: null,
+    acteToAdd: {}, // acte à ajouter dans une FSE
+    fse: {},
+    msgSaveFSE: "",
+    typeActe: "#FSE"
+  };
+
+  componentDidMount() {
     this.getPreferences();
   };
 

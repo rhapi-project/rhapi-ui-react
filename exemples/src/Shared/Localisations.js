@@ -3,16 +3,15 @@ import { Shared } from "rhapi-ui-react";
 import { Divider, Input } from "semantic-ui-react";
 
 export default class SharedLocalisations extends React.Component {
-  componentWillMount() {
-    this.setState({
-      dents: "",
-      openLocalisations: false
-    });
+  state = {
+    dents: "",
+    openLocalisations: false
   };
 
   close = () => {
     this.setState({ openLocalisations: false });
   };
+  
   render() {
     return (
       <React.Fragment>

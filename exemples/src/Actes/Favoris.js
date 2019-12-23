@@ -9,12 +9,11 @@ import _ from "lodash";
 const client = new Client("https://demo.rhapi.net/demo01");
 
 export default class ActesFavoris extends React.Component {
-  componentWillMount() {
-    this.setState({
-      openFavoris: false,
-      actes: []
-    });
+  state = {
+    openFavoris: false,
+    actes: []
   };
+  
   render() {
     return (
       <React.Fragment>

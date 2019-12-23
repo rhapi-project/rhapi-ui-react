@@ -8,6 +8,7 @@ export default class Localisation extends React.Component {
     isSelected: PropTypes.bool.isRequired,
     onClick: PropTypes.func.isRequired
   };
+
   render() {
     return (
       <div>

@@ -3,11 +3,10 @@ import { Shared } from "rhapi-ui-react";
 import { Divider } from "semantic-ui-react";
 
 export default class SharedMontant extends React.Component {
-  componentWillMount() {
-    this.setState({ 
-      montant: 0
-    });
+  state = {
+    montant: 0
   };
+
   render () {
     let semanticInput = (
       <a

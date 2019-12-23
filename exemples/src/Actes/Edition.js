@@ -10,13 +10,11 @@ import _ from "lodash";
 const client = new Client("https://demo.rhapi.net/demo01");
 
 export default class ActesEdition extends React.Component {
-  componentWillMount(){
-    this.setState({
-      acte: null,
-      id: 0,
-      open: false
-    })
-  }
+  state = {
+    acte: null,
+    id: 0,
+    open: false
+  };
 
   displayActe = (id) => {
     if (!id) {
