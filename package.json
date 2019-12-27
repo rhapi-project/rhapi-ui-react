@@ -72,6 +72,7 @@
     "dist"
   ],
   "dependencies": {
+    "jodit-react": "^1.0.33",
     "lodash": "^4.17.15",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",

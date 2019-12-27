@@ -236,64 +236,37 @@ export default class Historique extends React.Component {
     mode: "pages"
   };
 
-  componentWillMount() {
-    this.setState({
-      idPatient: this.props.idPatient,
-      idEditer: 0,
-      limit: this.props.limit,
-      actes: [],
-      actesSelected: [],
-      informations: {},
-      offset: 0,
-      sort: this.props.sort,
-      order: this.props.order,
-      sorted: _.isEqual(this.props.order, "DESC") ? "descending" : "ascending",
-      lockRevision: "",
-      startAt: this.props.startAt,
-      endAt: this.props.endAt,
-      localisation: this.props.localisation,
-      showConfirm: false,
-      message: "",
-      showInput: false,
-      dateInput: null,
-      localisationInput: "",
-      codeInput: "",
-      cotationInput: -1,
-      descriptionInput: "",
-      montantInput: -1,
-      openLocalisation: false,
-      showDatePicker: false
-    });
-
-    this.reload(
-      this.props.idPatient,
-      this.props.limit,
-      0,
-      this.props.sort,
-      this.props.order,
-      this.props.startAt,
-      this.props.endAt,
-      this.props.localisation
-    );
-  }
-
-  componentWillReceiveProps(next) {
-    this.reload(
-      next.idPatient,
-      this.state.limit,
-      0, // offset
-      this.state.sort,
-      this.state.order,
-      next.startAt,
-      next.endAt,
-      next.localisation.trim()
-    );
-  }
+  state = {
+    idPatient: this.props.idPatient,
+    idEditer: 0,
+    limit: this.props.limit,
+    actes: [],
+    actesSelected: [],
+    informations: {},
+    offset: 0,
+    sort: this.props.sort,
+    order: this.props.order,
+    sorted: _.isEqual(this.props.order, "DESC") ? "descending" : "ascending",
+    lockRevision: "",
+    startAt: this.props.startAt,
+    endAt: this.props.endAt,
+    localisation: this.props.localisation,
+    showConfirm: false,
+    message: "",
+    showInput: false,
+    dateInput: null,
+    localisationInput: "",
+    codeInput: "",
+    cotationInput: -1,
+    descriptionInput: "",
+    montantInput: -1,
+    openLocalisation: false,
+    showDatePicker: false
+  };
 
   componentDidMount() {
     document.addEventListener("click", this.onClickOutside); // Outside click du composant
-    this.interval = setInterval(() => {
-      // Reload des données toutes les 15 secondes
+    let reloadFunc = () => {
       this.reload(
         this.state.idPatient,
         this.state.limit,
@@ -304,7 +277,45 @@ export default class Historique extends React.Component {
         this.state.endAt,
         this.state.localisation
       );
-    }, 15000);
+    };
+
+    // reload toutes les 15 secondes
+    this.interval = setInterval(() => reloadFunc(), 15000);
+
+    // reload la 1ère fois
+    reloadFunc();
+  }
+
+  /*componentWillReceiveProps(next) {
+    this.reload(
+      next.idPatient,
+      this.state.limit,
+      0, // offset
+      this.state.sort,
+      this.state.order,
+      next.startAt,
+      next.endAt,
+      next.localisation.trim()
+    );
+  }*/
+
+  componentDidUpdate(prevProps, prevState) {
+    if (
+      prevProps.idPatient !== this.props.idPatient ||
+      prevProps.startAt !== this.props.startAt ||
+      prevProps.endAt !== this.props.endAt
+    ) {
+      this.reload(
+        this.props.idPatient,
+        this.state.limit,
+        0, // offset
+        this.state.sort,
+        this.state.order,
+        this.props.startAt,
+        this.props.endAt,
+        this.props.localisation.trim()
+      );
+    }
   }
 
   componentWillUnmount() {
@@ -460,7 +471,6 @@ export default class Historique extends React.Component {
       endAt,
       localisation
     );
-
     this.props.client.Actes.readAll(
       params,
       result => {
@@ -1451,11 +1461,9 @@ class Pagination extends React.Component {
     loadingMore: false
   };
 
-  componentWillReceiveProps() {
-    if (this.props.mode === "more") {
-      this.setState({
-        loadingMore: false
-      });
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.informations.pageSize !== prevProps.informations.pageSize) {
+      this.setState({ loadingMore: false });
     }
   }
 

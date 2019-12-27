@@ -25,6 +25,7 @@ import ActesFavoris from "./Actes/Favoris";
 import ActesSaisieValidation from "./Actes/SaisieValidation";
 import ActesEdition from "./Actes/Edition";
 import ActesNote from "./Actes/Note";
+import ActesDocument from "./Actes/Document";
 
 // CSS
 //import "rhapi-ui-react/dist/index.css";
@@ -203,6 +204,11 @@ export default class App extends React.Component {
             active={this.state.group === "Actes" && this.state.name === "Note"}
             onClick={(e, d) => this.handleClickItem("Actes", d.name)}
           />
+          <Menu.Item
+            name="Document"
+            active={this.state.group === "Actes" && this.state.name === "Document"}
+            onClick={(e, d) => this.handleClickItem("Actes", d.name)}
+          />
         </Menu.Menu>
       </Menu.Item>
     );
@@ -344,8 +350,8 @@ class ViewExample extends React.Component {
         return <ActesEdition />;
       } else if (name === "Note") {
         return <ActesNote />;
-      } else {
-        return "";
+      } else if (name === "Document"){
+        return <ActesDocument />;
       }
     }
   };

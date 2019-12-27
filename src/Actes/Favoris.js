@@ -237,12 +237,19 @@ export default class Favoris extends React.Component {
     };
 
     let chapitre = this.state.favoris;
+    // initialisation du chapitre principal s'il est vide
+    if (_.isUndefined(chapitre.actes)) {
+      chapitre.actes = [];
+    }
+    if (_.isUndefined(chapitre.chapitres)) {
+      chapitre.chapitres = [];
+    }
+
     if (type === "chapitre" && !_.isUndefined(titre)) {
       let ch = {};
       ch.titre = titre;
       ch.actes = [];
       ch.chapitres = [];
-      //console.log("je passe ici");
       addChap(chapitre, ch);
     }
     if (type === "acte") {
@@ -335,10 +342,13 @@ export default class Favoris extends React.Component {
   };
 
   getMoveOptions = chap => {
+    // attention : la vérification de l'existence de chap
+    // est nécessaire surtout dans le cas où les favoris sont vides
+    let ch = _.isUndefined(chap) ? "" : chap;
     let options = [];
     let chapitre = this.state.favoris;
     let getOptions = chapitre => {
-      let chapitreTitre = _.isString(chap) ? chap : chap.titre;
+      let chapitreTitre = _.isString(ch) ? ch : ch.titre;
       if (chapitre.titre !== chapitreTitre) {
         let obj = {};
         obj.text = _.isEmpty(chapitre.titre)
@@ -346,15 +356,15 @@ export default class Favoris extends React.Component {
           : chapitre.titre;
         obj.value = chapitre.titre;
         options.push(obj);
-        if (!_.isString(chap)) {
+        if (!_.isString(ch)) {
           _.forEach(chapitre.chapitres, chap => getOptions(chap));
         }
       }
-      if (_.isString(chap)) {
+      if (_.isString(ch)) {
         _.forEach(chapitre.chapitres, chap => getOptions(chap));
       }
     };
-    if (!_.isNull(chap)) {
+    if (!_.isNull(ch)) {
       getOptions(chapitre);
     }
     return options;
@@ -987,11 +997,13 @@ class Acte extends React.Component {
     return (
       <Ref
         innerRef={node => {
-          node.ondblclick = () => {
-            if (this.props.onDoubleClick) {
-              this.props.onDoubleClick(this.props.index);
-            }
-          };
+          if (node) {
+            node.ondblclick = () => {
+              if (this.props.onDoubleClick) {
+                this.props.onDoubleClick(this.props.index);
+              }
+            };
+          }
         }}
       >
         <Table.Row

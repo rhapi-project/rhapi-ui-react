@@ -20,19 +20,17 @@ const patients = [
 ]
 
 export default class ActesHistorique extends React.Component {
-  componentWillMount() {
-    this.setState({
-      idPatient : 1,
-      id: 0,
-      localisation: "",
-      openLocalisations: false,
-      startAt: "",
-      endAt: "",
-      open: false,
-      type: "",
-      acte: []
-    });
-  }
+  state = {
+    idPatient : 1,
+    id: 0,
+    localisation: "",
+    openLocalisations: false,
+    startAt: "",
+    endAt: "",
+    open: false,
+    type: "",
+    acte: []
+  };
 
   onPatientChange = id => {
     this.setState({ idPatient: id });

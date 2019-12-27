@@ -5,14 +5,16 @@ import ModalSearch from "./ModalSearch";
 import Favoris from "./Favoris";
 import Edition from "./Edition";
 import Note from "./Note";
+import Document from "./Document";
 
-export default class Shared extends React.Component {
+export default class Actes extends React.Component {
   static Saisie = Saisie;
   static Historique = Historique;
   static ModalSearch = ModalSearch;
   static Favoris = Favoris;
   static Edition = Edition;
   static Note = Note;
+  static Document = Document;
 
   render() {
     const { children } = this.props;
