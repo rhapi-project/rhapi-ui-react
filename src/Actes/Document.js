@@ -1,23 +1,8 @@
 import React from "react";
+import _ from "lodash";
+import moment from "moment";
 
-//import "jodit";
-//import "jodit/build/jodit.min.css";
-//import JoditEditor from "jodit-react";
-
-// Require Editor JS files.
-//import 'froala-editor/js/froala_editor.pkgd.min.js';
-//import "froala-editor/css/froala_editor.pkgd.min.css";
-
-// Require Editor CSS files.
-//import 'froala-editor/css/froala_style.min.css';
-//import 'froala-editor/css/froala_editor.pkgd.min.css';
-
-// Require Font Awesome.
-//import 'font-awesome/css/font-awesome.css';
-
-//import FroalaEditor from 'react-froala-wysiwyg';
-
-//import FroalaEditorView from 'react-froala-wysiwyg/FroalaEditorView';
+import Mustache from "mustache"; // moteur de template
 
 // CKeditor 4
 import CKEditor from "ckeditor4-react";
@@ -25,99 +10,43 @@ import CKEditor from "ckeditor4-react";
 export default class Document extends React.Component {
   state = {
     data: ""
-  }
-  
-  /*updateContent = value => {
-		this.setState({ content: value });
   };
 
-  jodit;
-  setRef = jodit => (this.jodit = jodit);
-  
-  config = {
-		readonly: false // all options from https://xdsoft.net/jodit/doc/
-	};*/
-  //editor = React.createRef();
-  render() {
-    /*const editor = useRef(null);
-    const [content, setContent] = useState('');
-    
-    const config = {
-      readonly: false // all options from https://xdsoft.net/jodit/doc/
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.data !== prevProps.data) {
+      this.setState({ data: this.props.data });
     }
-    try {
-      
-      const jodit = (
-        <JoditEditor
-          //ref={editor}
-          editorRef={}
-          value={content}
-          config={config}
-		      tabIndex={1} // tabIndex of textarea
-		      onBlur={newContent => setContent(newContent)} // preferred to use only this option to update the content for performance reasons
-          onChange={newContent => setContent(newContent)}
-        />
-      );
-      //jodit.ref = undefined;
-      //console.log(jodit.ref);
-      return (
-        <React.Fragment>
-          {jodit}
-        </React.Fragment>
-      )
-    } catch (error) {
-      console.log("affichage de l'erreur");
-      console.log(error);
-    }*/
+  };
 
-    console.log(this.state.data);
-    
+  render() {
+    //console.log(this.props.patient);
+    console.log(this.props.devis);
+    let dataObject = {
+      praticien: this.props.praticien,
+      patient: {
+        nom: this.props.patient.nom,
+        prenom: this.props.patient.prenom,
+        naissance: _.isEmpty(this.props.patient.naissance) ? "" : moment(this.props.patient.naissance).format("DD/MM/YYYY"),
+        nir: this.props.patient.nir
+      },
+      devis: this.props.devis
+    };
     return (
       <React.Fragment>
-        {/*<JoditEditor
-          editorRef={this.setRef}
-          value={this.state.content}
-          config={this.config}
-          onChange={this.updateContent}
-          styleName="textarea"
-          Name="body"
-        />*/}
-        {/*<FroalaEditor
-          //language="fr"
-          //id="froala-editor"
-          //toolbarButtons={['bold', 'italic', 'html']}
-          document={true}
-          modes={{
-            documentReady: true
-          }}
-        />*/}
-        <div style={{ marginTop: "40px" }}/>
-        {/*<CKEditor
-          id="doc"
-          editor={DecoupledEditor}
-          onInit={ editor => {
-            console.log(editor);
-            editor.locale.uiLanguage = "fr";
-            editor.locale.contentLanguage = "fr";
-            // Insert the toolbar before the editable area.
-            editor.ui.getEditableElement().parentElement.insertBefore(
-                editor.ui.view.toolbar.element,
-                editor.ui.getEditableElement()
-            );
-          }}
-          onChange={ ( event, editor ) => console.log( { event, editor } ) }
-          data="<p>Hello from CKEditor 5's DecoupledEditor!</p>"
-          uiLanguage="fr"
-          language={{ ui: "fr", content: "fr" }}
-        />*/}
-        
-
-        <CKEditor 
-          data={this.state.content}
-          onChange={e => {
-            this.setState({ data: e.editor.getData() });
-          }}
-        />
+        {_.isEmpty(this.state.data) || _.isEmpty(this.props.patient)
+          ? null
+          : <CKEditor
+              onBeforeLoad={editor => {
+                // https://github.com/ckeditor/ckeditor4-react/issues/57#issuecomment-520377696
+                editor.disableAutoInline = true 
+              }}
+              //data={this.state.data}
+              data={Mustache.render(this.state.data, dataObject)}
+              onChange={e => {
+                this.setState({ data: e.editor.getData() });
+              }}
+            />
+        }
       </React.Fragment>
     );
   }
