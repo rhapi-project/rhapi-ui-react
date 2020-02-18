@@ -25,7 +25,10 @@ import ActesFavoris from "./Actes/Favoris";
 import ActesSaisieValidation from "./Actes/SaisieValidation";
 import ActesEdition from "./Actes/Edition";
 import ActesNote from "./Actes/Note";
-import ActesDocument from "./Actes/Document";
+
+// Exemples Documents
+import DocumentsCreationDocument from "./Documents/CreationDocument";
+import DocumentsTextDocument from "./Documents/TextDocument";
 
 // CSS
 //import "rhapi-ui-react/dist/index.css";
@@ -204,10 +207,34 @@ export default class App extends React.Component {
             active={this.state.group === "Actes" && this.state.name === "Note"}
             onClick={(e, d) => this.handleClickItem("Actes", d.name)}
           />
-          <Menu.Item
+          {/*<Menu.Item
             name="Document"
             active={this.state.group === "Actes" && this.state.name === "Document"}
             onClick={(e, d) => this.handleClickItem("Actes", d.name)}
+          />*/}
+        </Menu.Menu>
+      </Menu.Item>
+    );
+
+    let documents = (
+      <Menu.Item>
+        <Menu.Header>Documents</Menu.Header>
+        <Menu.Menu>
+          <Menu.Item 
+            name="CreationDocument"
+            active={
+              this.state.group === "Documents" &&
+              this.state.name === "CreationDocument"
+            }
+            onClick={(e, d) => this.handleClickItem("Documents", d.name)}
+          />
+          <Menu.Item 
+            name="TextDocument"
+            active={
+              this.state.group === "Documents" &&
+              this.state.name === "TextDocument"
+            }
+            onClick={(e, d) => this.handleClickItem("Documents", d.name)}
           />
         </Menu.Menu>
       </Menu.Item>
@@ -263,6 +290,7 @@ export default class App extends React.Component {
             {patients}
             {plannings}
             {actes}
+            {documents}
             {shared}
           </Menu>
         </Grid.Column>
@@ -350,8 +378,16 @@ class ViewExample extends React.Component {
         return <ActesEdition />;
       } else if (name === "Note") {
         return <ActesNote />;
-      } else if (name === "Document"){
+      }/* else if (name === "Document"){
         return <ActesDocument />;
+      }*/
+    }
+
+    if (group === "Documents") {
+      if (name === "TextDocument") {
+        return <DocumentsTextDocument />;
+      } else if (name === "CreationDocument") {
+        return <DocumentsCreationDocument />;
       }
     }
   };

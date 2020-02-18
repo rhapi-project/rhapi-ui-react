@@ -2,6 +2,10 @@
 export CCAM from "./CCAM";
 export Shared from "./Shared";
 export Actes from "./Actes";
+
+// Documents
+export Documents from "./Documents";
+
 // Patients
 // ...
 
