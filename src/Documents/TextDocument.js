@@ -17,16 +17,38 @@ const propDefs = {
   description: "Manupulation d'un document sous format texte",
   example: "",
   propDocs: {
-    document: "Contenu d'un document au format texte",
+    autoFilling: "remplissage automatique des champs dynamiques",
+    document: "contenu d'un document au format texte",
     mode: "mode d'édition du document : html|plain",
     onEdit: "Callback à la modification du texte"
   },
   propTypes: {
+    autoFilling: PropTypes.bool,
     document: PropTypes.string,
     mode: PropTypes.string,
     onEdit: PropTypes.func
   }
-}
+};
+
+// custom CKEditor toolbar
+// https://ckeditor.com/latest/samples/toolbarconfigurator/index.html#advanced
+
+/*const toolbarConfig = [
+    { name: 'document', items: [ 'Source', '-', 'Save', 'NewPage', 'Preview', 'Print', '-', 'Templates' ] },
+		{ name: 'clipboard', items: [ 'Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo' ] },
+		{ name: 'editing', items: [ 'Find', 'Replace', '-', 'SelectAll', '-', 'Scayt' ] },
+		{ name: 'forms', items: [ 'Form', 'Checkbox', 'Radio', 'TextField', 'Textarea', 'Select', 'Button', 'ImageButton', 'HiddenField' ] },
+		'/',
+		{ name: 'basicstyles', items: [ 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'CopyFormatting', 'RemoveFormat' ] },
+		{ name: 'paragraph', items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl', 'Language' ] },
+		{ name: 'links', items: [ 'Link', 'Unlink', 'Anchor' ] },
+		{ name: 'insert', items: [ 'Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak', 'Iframe' ] },
+		'/',
+		{ name: 'styles', items: [ 'Styles', 'Format', 'Font', 'FontSize' ] },
+		{ name: 'colors', items: [ 'TextColor', 'BGColor' ] },
+		{ name: 'tools', items: [ 'Maximize', 'ShowBlocks' ] },
+		{ name: 'about', items: [ 'About' ] }
+];*/
 
 export default class TextDocument extends React.Component {
   static propTypes = propDefs.propTypes;
@@ -79,12 +101,19 @@ export default class TextDocument extends React.Component {
                   // https://github.com/ckeditor/ckeditor4-react/issues/57#issuecomment-520377696
                   editor.disableAutoInline = true 
                 }}
-                data={Mustache.render(this.props.document, {})}
+                data={
+                  this.props.autoFilling
+                    ? Mustache.render(this.props.document, {})
+                    : this.props.document
+                }
                 onChange={e => {
                   if (this.props.onEdit) {
                     this.props.onEdit(e.editor.getData());
                   }
                 }}
+                /*config={{
+                  toolbar: toolbarConfig
+                }}*/
               />
             : null
         }

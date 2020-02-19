@@ -161,6 +161,19 @@ export default class DocumentsTextDocument extends React.Component {
     )
   };
 
+  deleteDocument = () => {
+    client.Documents.destroy(
+      this.state.selectedDocument.id,
+      result => {
+        //console.log(result);
+        this.reload(this.state.idPatient, this.state.type);
+      },
+      error => {
+        console.log(error);
+      }
+    )
+  };
+
   render() {
     return (
       <React.Fragment>
@@ -258,9 +271,10 @@ export default class DocumentsTextDocument extends React.Component {
                 onClick={() => this.updateDocument()}
               />
               <Button
-                disabled={true}
+                //disabled={true}
                 negative={true}
                 content="Supprimer"
+                onClick={() => this.deleteDocument()}
               />
             </React.Fragment>
           : null
