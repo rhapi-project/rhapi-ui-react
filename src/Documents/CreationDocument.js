@@ -45,6 +45,7 @@ export default class CreationDocument extends React.Component {
     fileName: "",
     extension: "html",
     mimeType: "text/x-html-template",
+    content: "", // contenu en base64 si c'est un fichier binaire
     creationSuccess: false
   };
 
@@ -61,7 +62,8 @@ export default class CreationDocument extends React.Component {
         idPatient: this.state.mimeType === "text/x-html-template"
           ? 0
           : this.props.idPatient,
-        mimeType: this.state.mimeType
+        mimeType: this.state.mimeType,
+        document: this.state.content
       },
       result => {
         //console.log(result);
@@ -108,6 +110,12 @@ export default class CreationDocument extends React.Component {
           </Modal.Content>
           <Modal.Actions>
             <Button 
+              content="Parcourir"
+              onClick={() => {
+                document.getElementById("file").click();
+              }}
+            />
+            <Button 
               content="Créer"
               onClick={() => this.createDocument()}
             />
@@ -121,6 +129,44 @@ export default class CreationDocument extends React.Component {
             />
           </Modal.Actions>
         </Modal>
+
+        {/* upload d'un document */}
+        <input
+          id="file"
+          type="file"
+          //accept="image/*"
+          hidden={true}
+          onChange={e => {
+            if (_.get(e.target.files, "length") !== 0) {
+              let file = _.get(e.target.files, "0");
+              //console.log(file);
+              let content = "";
+              let fileReader = new FileReader();
+
+              // TODO : gérer plusieurs types de fichiers
+              // par exemple les document textuels
+              // html ou plain text etc.
+              if (_.split(file.type, "/")[0] === "application") {
+                //console.log("on passe ici car application");
+                fileReader.readAsDataURL(file);
+                fileReader.onload = () => {
+                  //console.log("conversion en base64");
+                  content = fileReader.result;
+                  //console.log(content);
+                }
+              }/* else if (_.split(file.type, "/")[0] === "text") {
+
+              }*/
+
+              this.setState({
+                fileName: file.name,
+                mimeType: file.type,
+                extension: _.split(file.type, "/")[1],
+                document: content
+              });
+            }
+          }}
+        />
 
         
         <Modal size="tiny" open={this.state.creationSuccess}>

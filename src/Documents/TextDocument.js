@@ -17,13 +17,13 @@ const propDefs = {
   description: "Manupulation d'un document sous format texte",
   example: "",
   propDocs: {
-    autoFilling: "remplissage automatique des champs dynamiques",
+    data: "un objet qui contient les données à utiliser pour le remplissage automatique des champs dynamiques",
     document: "contenu d'un document au format texte",
     mode: "mode d'édition du document : html|plain",
     onEdit: "Callback à la modification du texte"
   },
   propTypes: {
-    autoFilling: PropTypes.bool,
+    data: PropTypes.object,
     document: PropTypes.string,
     mode: PropTypes.string,
     onEdit: PropTypes.func
@@ -52,7 +52,9 @@ const propDefs = {
 
 export default class TextDocument extends React.Component {
   static propTypes = propDefs.propTypes;
-  //static defaultProps = {};
+  static defaultProps = {
+    data: {}
+  };
   
   /*state = {
     document: ""
@@ -69,9 +71,10 @@ export default class TextDocument extends React.Component {
   }
 
   render() {
+    //console.log(this.props.data.devis);  
     //console.log(this.props.patient);
-    /*console.log(this.props.devis);
-    let dataObject = {
+    //console.log(this.props.devis);
+    /*let dataObject = {
       praticien: this.props.praticien,
       patient: {
         nom: this.props.patient.nom,
@@ -79,7 +82,7 @@ export default class TextDocument extends React.Component {
         naissance: _.isEmpty(this.props.patient.naissance) ? "" : moment(this.props.patient.naissance).format("DD/MM/YYYY"),
         nir: this.props.patient.nir
       },
-      devis: this.props.devis
+      devis: this.props.data.devis
     };*/
     return (
       <React.Fragment>
@@ -102,8 +105,8 @@ export default class TextDocument extends React.Component {
                   editor.disableAutoInline = true 
                 }}
                 data={
-                  this.props.autoFilling
-                    ? Mustache.render(this.props.document, {})
+                  !_.isEmpty(this.props.data)
+                    ? Mustache.render(this.props.document, this.props.data)
                     : this.props.document
                 }
                 onChange={e => {
@@ -111,9 +114,11 @@ export default class TextDocument extends React.Component {
                     this.props.onEdit(e.editor.getData());
                   }
                 }}
-                /*config={{
-                  toolbar: toolbarConfig
-                }}*/
+                config={{
+                  //toolbar: toolbarConfig
+                  // https://ckeditor.com/docs/ckeditor4/latest/guide/dev_acf.html
+                  allowedContent: true
+                }}
               />
             : null
         }

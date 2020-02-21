@@ -6,6 +6,7 @@ export Actes from "./Actes";
 // Documents
 export Documents from "./Documents";
 
+export Functions from "./Functions";
 // Patients
 // ...
 
