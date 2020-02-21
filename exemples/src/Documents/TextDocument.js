@@ -8,7 +8,7 @@ import {
 } from "semantic-ui-react";
 import _ from "lodash";
 import { Client } from "rhapi-client";
-import { /*Actes,*/ Documents } from "rhapi-ui-react";
+import { Documents, Functions } from "rhapi-ui-react";
 
 // Instanciation du client RHAPI sans authentification
 const client = new Client("https://demo.rhapi.net/demo01");
@@ -29,8 +29,9 @@ const types = [
 export default class DocumentsTextDocument extends React.Component {
   state = {
     idPatient: null,
-    patient: {},
-    //data: "",
+    //patient: {},
+    data: {},
+    autoFilling: false,
     //devis: {},
     type: 0,
     documents: [],
@@ -44,7 +45,9 @@ export default class DocumentsTextDocument extends React.Component {
         {},
         result => {
           //console.log(result);
-          this.setState({ patient: result });
+          let d = this.state.data;
+          d.patient = result;
+          this.setState({ data: d, autoFilling: false });
           //this.loadActes(id);
         },
         error => {
@@ -102,8 +105,12 @@ export default class DocumentsTextDocument extends React.Component {
     }
   };*/
 
+  autoFilling = () => {
+    this.loadActes(this.state.idPatient);
+  };
+
   // sur cet exemple on récupère les actes d'un devis (pour un patient donné)
-  /*loadActes = idPatient => {
+  loadActes = idPatient => {
     let params = {
       _code: "#DEVIS",
       //_etat: 1, // TODO : voir quel type de devis récupérer
@@ -113,15 +120,15 @@ export default class DocumentsTextDocument extends React.Component {
       params,
       result => {
         //console.log(result);
-        this.setState({
-          devis: _.isEmpty(result.results) ? {} : result.results[0]
-        });
+        let d = this.state.data;
+        d.devis = _.isEmpty(result.results) ? {} : result.results[0]
+        this.setState({ data: d, autoFilling: true });
       },
       error => {
         console.log(error);
       }
-    )
-  };*/
+    );
+  };
 
   changeDateFormat = dateStr => {
     let d = new Date(dateStr);
@@ -140,7 +147,11 @@ export default class DocumentsTextDocument extends React.Component {
         console.log(error);
       }
     )
-  }
+  };
+
+  /*saveDocument = () => {
+
+  }*/
 
   updateDocument = () => {
     client.Documents.update(
@@ -175,6 +186,7 @@ export default class DocumentsTextDocument extends React.Component {
   };
 
   render() {
+    console.log(this.state.selectedDocument);
     return (
       <React.Fragment>
         <p>
@@ -241,7 +253,12 @@ export default class DocumentsTextDocument extends React.Component {
               <div style={{ textAlign: "center" }}>
                 <strong>{this.state.selectedDocument.fileName}</strong>
               </div>
-              <Documents.TextDocument 
+              <Documents.TextDocument
+                data={
+                  this.state.autoFilling
+                  ? this.state.data
+                  : {}
+                }
                 document={this.state.selectedDocument.document}
                 mode={
                   this.state.selectedDocument.mimeType === "text/plain"
@@ -266,9 +283,23 @@ export default class DocumentsTextDocument extends React.Component {
                 content="Fermer"
                 onClick={() => this.setState({ selectedDocument: {} })}
               />
+              {!_.isNull(this.state.idPatient)
+                ? <Button 
+                    content="Remplissage auto"
+                    onClick={() => this.autoFilling()}
+                  />
+                : null
+              }
               <Button
                 content="Enregistrer"
                 onClick={() => this.updateDocument()}
+              />
+              <Button
+                content="Télécharger (PDF)"
+                onClick={() => {
+                  let func = new Functions();
+                  func.PDF.download(this.state.selectedDocument.document);
+                }}
               />
               <Button
                 //disabled={true}

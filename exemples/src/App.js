@@ -29,6 +29,8 @@ import ActesNote from "./Actes/Note";
 // Exemples Documents
 import DocumentsCreationDocument from "./Documents/CreationDocument";
 import DocumentsTextDocument from "./Documents/TextDocument";
+import DocumentsPDFDocument from "./Documents/PDFDocument";
+import DocumentsSauvegardeDocument from "./Documents/SauvegardeDocument";
 
 // CSS
 //import "rhapi-ui-react/dist/index.css";
@@ -236,6 +238,22 @@ export default class App extends React.Component {
             }
             onClick={(e, d) => this.handleClickItem("Documents", d.name)}
           />
+          <Menu.Item 
+            name="PDFDocument"
+            active={
+              this.state.group === "Documents" &&
+              this.state.name === "PDFDocument"
+            }
+            onClick={(e, d) => this.handleClickItem("Documents", d.name)}
+          />
+          <Menu.Item 
+            name="SauvegardeDocument"
+            active={
+              this.state.group === "Documents" &&
+              this.state.name === "SauvegardeDocument"
+            }
+            onClick={(e, d) => this.handleClickItem("Documents", d.name)}
+          />
         </Menu.Menu>
       </Menu.Item>
     );
@@ -378,9 +396,7 @@ class ViewExample extends React.Component {
         return <ActesEdition />;
       } else if (name === "Note") {
         return <ActesNote />;
-      }/* else if (name === "Document"){
-        return <ActesDocument />;
-      }*/
+      }
     }
 
     if (group === "Documents") {
@@ -388,6 +404,10 @@ class ViewExample extends React.Component {
         return <DocumentsTextDocument />;
       } else if (name === "CreationDocument") {
         return <DocumentsCreationDocument />;
+      } else if (name === "PDFDocument") {
+        return <DocumentsPDFDocument />
+      } else if (name === "SauvegardeDocument") {
+        return <DocumentsSauvegardeDocument />
       }
     }
   };
