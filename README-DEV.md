@@ -95,3 +95,12 @@ Par défaut la variable d'environnement `NODE_ENV` n'est pas reconnue sur **Wind
 Cette dépendence ne sera installée que si l'on se trouve sur un Système d'exploitation Windows pour pallier le problème.
 
 Plus sur cet outil : [win-node-env](https://github.com/laggingreflex/win-node-env).
+
+## Publication sur NPM
+
+```bash
+cd rhapi-ui-react
+npm run build
+# npm login # s'authentifier sur NPM
+npm publish
+```
