@@ -3,7 +3,7 @@
 const fs = require("fs");
 const _ = require("lodash");
 
-const src = process.cwd() + "/src/"; // ou ../src
+const src = process.cwd() + "/src/Components/"; // ou ../src/Components
 
 const docClient = "https://github.com/rhapi-project/rhapi-client";
 

@@ -2,10 +2,10 @@
 
 >
 
-[![NPM](https://img.shields.io/npm/v/rhapi-ccam.svg)](https://www.npmjs.com/package/rhapi-ui-react) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+[![NPM](https://img.shields.io/npm/v/rhapi-ui-react?color=brightgreen&logo=npm)](https://www.npmjs.com/package/rhapi-ui-react) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
 
-Les composants de cette bibliothèque sont documentés [ici](https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md)
+Les composants de cette bibliothèque sont documentés [ici](https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md).
 
 ## Installation pour développement et tests sur les exemples
 
@@ -16,17 +16,11 @@ git clone https://github.com/rhapi-project/rhapi-ui-react.git
 Pour tester les exemples :
 
 ```bash
-cd rhapi-ui-react/exemples
-npm install
-npm start
-```
-Les composants sont distribués dans le répertoire ***rhapi-ui-react/dist*** et leur code source se trouve dans le répertoire ***rhapi-ui-react/src***.
-Pour activer, à chaque modification, la mise à jour automatique des fichiers dans ***rhapi-ui-react/dist*** : 
-```bash
 cd rhapi-ui-react
 npm install
 npm start
 ```
+Les composants sont distribués dans le répertoire *`rhapi-ui-react/dist`* et leur code source se trouve dans le répertoire *`rhapi-ui-react/src/Components`*.
 
 ## Utilisation dans un projet React
 
@@ -43,7 +37,7 @@ npm install --save rhapi-client
 npm install --save rhapi-ui-react
 ```
 
-Dans le fichier ***src/App.js*** de notre projet **reactapp** nous allons utiliser les composants **rhapi-ui-react**.
+Dans le fichier *`*src/App.js`* de notre projet **reactapp** nous allons utiliser les composants **rhapi-ui-react**.
 
 ```jsx
 import React from 'react';
@@ -72,8 +66,8 @@ export default App;
 
 Cet exemple montre une utilisation simple du composant **CCAM.Search** pour la recherche d'une acte en CCAM.
 
-Voir plus d'exemples d'utilisation [rhapi-ui-react/exemples](https://github.com/rhapi-project/rhapi-ui-react/tree/master/exemples).
+Voir plus d'exemples d'utilisation [rhapi-ui-react/exemples](https://github.com/rhapi-project/rhapi-ui-react/tree/master/src/exemples).
 
 ## License
 
-MIT © [](https://github.com/)
+[Licence MIT ©](https://github.com/rhapi-project/rhapi-ui-react/blob/master/LICENSE)

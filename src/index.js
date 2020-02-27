@@ -1,21 +1,8 @@
-// CCAM
-export CCAM from "./CCAM";
-export Shared from "./Shared";
-export Actes from "./Actes";
+import React from "react";
+import { render } from "react-dom";
 
-// Documents
-export Documents from "./Documents";
+import "semantic-ui-css/semantic.css";
 
-export Functions from "./Functions";
-// Patients
-// ...
+import App from "./exemples/App";
 
-// Plannings
-// ...
-
-// ...
-// ...
-
-// Shared
-// export default from './Shared/DatePicker.js'
-// export default from './Shared/SaisieLocalisation.js'
+render(<App />, document.getElementById("root"));

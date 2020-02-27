@@ -1,11 +1,7 @@
-# Répertoire dist
+# Répertoires dist et build
 /dist
-
-# examples
-/exemples/node_modules
-/exemples/package-lock.json
+/build
 
 # Racine du repository
-.editorconfig
 package-lock.json
 /node_modules

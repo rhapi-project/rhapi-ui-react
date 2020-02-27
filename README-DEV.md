@@ -1,43 +1,59 @@
 # rhapi-ui-react
 
+[![NPM](https://img.shields.io/npm/v/rhapi-ui-react?color=brightgreen&logo=npm)](https://www.npmjs.com/package/rhapi-ui-react)
+
 ## Organisation du projet
 
 ```bash
 rhapi-ui-react
-|-- dist # Répertoire 'build' où les sources des composants
+├── dist # Répertoire où les sources des composants
 |        # sont compilés au format Javascript standard.
 |        # C'est ce répertoire qui est mis sur la registry NPM.
-|-- docs # Résultat de la documentation automatique des composants.
-|-- exemples # Structure d'un répertoire d'application React
-|            # obtenu par un create-react-app.
-|            # Exemples d'utilisation des composants rhapi-ui-react
-|            # dans une application.
-|-- scripts
-|   |-- makedocs.js # Script de production automatique de documentation
-|   |               # des composants.
-|-- src
-|   |-- Groupe_de_composants_1
-|   |   |-- Composant1.js # Code source JSX d'un composant
-|   |   |-- Composant2.js
-|   |   |-- ... # Autres composants
-|   |   |-- index.js # Export des composants du groupe
-|   |-- Groupe_de_composants_2
-|   |-- lib # Fonctions et constantes utilisées par plusieurs
-|   |       # composants de plusieurs groupes
-|   |-- ... # Autres groupes
-|   |-- index.js # Export de tous les groupes
-|-- .babelrc # Configuration Babel
-|-- .eslintrc # Configuration du Linter utilisé dans ce projet (ESLint)
-|-- LICENCE
-|-- package.json
-|-- rollup.config.js # Configuration Rollup
+├── docs
+|   └── composants.md # Résultat de la documentation automatique des composants
+├── public
+|   ├── ...
+|   └── index.html
+├── scripts
+|   └── makedocs.js # Script NODE de production automatique de documentation
+|                   # des composants.
+├── src
+|   ├── Components
+|   |   ├── Groupe_de_composants_1
+|   |   |   ├── Composant1.js # Code source JSX d'un composant
+|   |   |   ├── Composant2.js
+|   |   |   ├── ... # Autres composants
+|   |   |   └── index.js # Export des composants du groupe
+|   |   ├── Groupe_de_composants_2
+|   |   ├── ... # Autres groupes
+|   |   ├── lib # Fonctions et constantes utilisées par plusieurs
+|   |   |       # composants de plusieurs groupes
+|   |   └── index.js # Export de tous les groupes
+|   ├── exemples
+|   |   ├── Exemples_groupe_1
+|   |   |   ├── Exemple1.js
+|   |   |   ├── Exemple2.js
+|   |   |   └── ... # Autres exemples d'utilisation des composants du
+|   |   |           # groupe 1
+|   |   ├── Exemples_groupe_2
+|   |   ├── ... # Autres exemples
+|   |   └── App.js # Composant principal - point d'entrée sur tous les exemples
+|   └── index.js
+├── .babelrc # Configuration Babel
+├── .eslintrc # Configuration du Linter utilisé dans ce projet (ESLint)
+└── package.json
 ```
 
-Les sources des composants **rhapi-ui-react** se trouvent dans le répertoire `src`. Les composants React de cette librairie sont organisés par groupes (répertoires) selon les fonctionnalités qu'ils offrent.
-Par exemple, les composants de gestion des actes se trouvent dans le répertoire `src/Actes` et ceux de gestion des documents dans le répertoire `src/Documents`.
+Les sources des composants **rhapi-ui-react** se trouvent dans le répertoire `src/Components`. Les composants React de cette librairie sont organisés par groupes (répertoires) selon les fonctionnalités qu'ils offrent.
+Par exemple, les composants de gestion des actes se trouvent dans le répertoire `src/Components/Actes` et ceux de gestion des documents dans le répertoire `src/Components/Documents`.
 
-Chaque groupe de composants comporte un fichier `index.js`, fichier d'exportation des composants de ce groupe. Tous les groupes sont quant à eux exportés dans le fichier `src/index.js`.
-Ceci permet d'utiliser (dans les exemples ou dans votre application) les composants à la manière suivante :
+Pour ajouter les composants dans le répertoire `dist` :
+```bash
+npm run build
+```
+
+Chaque groupe de composants comporte un fichier `index.js`, fichier d'exportation des composants de ce groupe. Tous les groupes sont quant à eux exportés dans le fichier `src/Components/index.js`.
+Ceci permet d'utiliser les composants dans votre application à la manière suivante :
 
 ```jsx
 import React from "react";
@@ -73,6 +89,9 @@ Le code **JSX** des composants sera compilé en Javascript standard par **Babel*
 
 `.babelrc` est le fichier (par défaut) de configuration de **Babel**.
 
-### Rollup
+### win-node-env (dépendance optionnelle)
 
-[Rollup](https://rollupjs.org/guide/en/) est un outil qui permet ici de compiler les composants en modules exportables et utilisables comme éléments d'une librairie.
+Par défaut la variable d'environnement `NODE_ENV` n'est pas reconnue sur **Windows** (voir dans `package.json` le script *build*).
+Cette dépendence ne sera installée que si l'on se trouve sur un Système d'exploitation Windows pour pallier le problème.
+
+Plus sur cet outil : [win-node-env](https://github.com/laggingreflex/win-node-env).
