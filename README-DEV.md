@@ -99,7 +99,8 @@ Plus sur cet outil : [win-node-env](https://github.com/laggingreflex/win-node-en
 ## Publication sur NPM
 
 ```bash
-cd rhapi-ui-react
+cd rhapi-ui-react-master
+npm install
 npm run build
 # npm login # s'authentifier sur NPM
 npm publish
