@@ -37,7 +37,7 @@ npm install --save rhapi-client
 npm install --save rhapi-ui-react
 ```
 
-Dans le fichier *`*src/App.js`* de notre projet **reactapp** nous allons utiliser les composants **rhapi-ui-react**.
+Dans le fichier *`src/App.js`* de notre projet **reactapp** nous allons utiliser les composants **rhapi-ui-react**.
 
 ```jsx
 import React from 'react';
