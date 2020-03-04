@@ -12,8 +12,8 @@ export default class PDFDocument extends React.Component {
     //doc.output('pdfobjectnewwindow', { filename: "test.pdf" });
     //doc.output("pdfjsnewwindow");
 
-    //let base64 = doc.output('datauristring', { filename: "test.pdf" });
-    /*let pdfWindow = window.open("#", "_blank");
+    /*let base64 = doc.output('datauristring', { filename: "test.pdf" });
+    let pdfWindow = window.open("#", "_blank");
     pdfWindow.document.write(
       "<iframe width='100%' height='100%' src='" + base64 + "'></iframe>"
     );*/

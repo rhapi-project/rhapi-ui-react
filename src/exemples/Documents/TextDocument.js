@@ -23,10 +23,8 @@ const types = [
 export default class DocumentsTextDocument extends React.Component {
   state = {
     idPatient: null,
-    //patient: {},
     data: {},
     autoFilling: false,
-    //devis: {},
     type: 0,
     documents: [],
     selectedDocument: {}
@@ -84,21 +82,6 @@ export default class DocumentsTextDocument extends React.Component {
     );
   };
 
-  /*loadHtmlFile = (e, d) => {
-    let filesSelected = document.getElementById(d.id).files;
-    if (filesSelected.length === 1) {
-      let f = filesSelected[0];
-      let fr = new FileReader();
-      fr.readAsText(f);
-      fr.onload = event => {
-        //let data = event.target.result;
-        this.setState({
-          data: event.target.result
-        });
-      }
-    }
-  };*/
-
   autoFilling = () => {
     this.loadActes(this.state.idPatient);
   };
@@ -143,9 +126,23 @@ export default class DocumentsTextDocument extends React.Component {
     );
   };
 
-  /*saveDocument = () => {
-
-  }*/
+  savePDFDocument = base64Content => {
+    client.Documents.create(
+      {
+        fileName: this.state.selectedDocument.fileName + ".pdf",
+        idPatient: this.state.idPatient,
+        mimeType: "application/pdf",
+        document: base64Content
+      },
+      result => {
+        console.log(result);
+        this.setState({ selectedDocument: {} });
+      },
+      error => {
+        console.log(error);
+      }
+    );
+  };
 
   updateDocument = () => {
     client.Documents.update(
@@ -180,7 +177,6 @@ export default class DocumentsTextDocument extends React.Component {
   };
 
   render() {
-    console.log(this.state.selectedDocument);
     return (
       <React.Fragment>
         <p>Traitement de documents (exemple modèle Devis)</p>
@@ -286,6 +282,18 @@ export default class DocumentsTextDocument extends React.Component {
                 func.PDF.download(this.state.selectedDocument.document);
               }}
             />
+            {!_.isNull(this.state.idPatient)
+              ? <Button 
+                  content="Enregistrer (PDF)"
+                  onClick={() => {
+                    let func = new Functions();
+                    let base64Content = func.PDF.toBase64(this.state.selectedDocument.document);
+                    this.savePDFDocument(base64Content);
+                    //func.PDF.experimentalDownload(this.state.selectedDocument.document, "fichier");
+                  }}
+                />
+              : null
+            }
             <Button
               //disabled={true}
               negative={true}
