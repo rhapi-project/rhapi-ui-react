@@ -92,4 +92,5 @@ parseGroup = group => {
 parseGroup("CCAM");
 parseGroup("Actes");
 parseGroup("Shared");
+parseGroup("Documents");
 //...
