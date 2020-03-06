@@ -282,18 +282,19 @@ export default class DocumentsTextDocument extends React.Component {
                 func.PDF.download(this.state.selectedDocument.document);
               }}
             />
-            {!_.isNull(this.state.idPatient)
-              ? <Button 
-                  content="Enregistrer (PDF)"
-                  onClick={() => {
-                    let func = new Functions();
-                    let base64Content = func.PDF.toBase64(this.state.selectedDocument.document);
-                    this.savePDFDocument(base64Content);
-                    //func.PDF.experimentalDownload(this.state.selectedDocument.document, "fichier");
-                  }}
-                />
-              : null
-            }
+            {!_.isNull(this.state.idPatient) ? (
+              <Button
+                content="Enregistrer (PDF)"
+                onClick={() => {
+                  let func = new Functions();
+                  let base64Content = func.PDF.toBase64(
+                    this.state.selectedDocument.document
+                  );
+                  this.savePDFDocument(base64Content);
+                  //func.PDF.experimentalDownload(this.state.selectedDocument.document, "fichier");
+                }}
+              />
+            ) : null}
             <Button
               //disabled={true}
               negative={true}

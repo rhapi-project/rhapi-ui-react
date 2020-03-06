@@ -21,16 +21,6 @@ const propDefs = {
   }
 };
 
-const mimeTypes = [
-  { text: "text/x-html-template", value: "text/x-html-template" },
-  { text: "text/plain", value: "text/plain" }
-];
-
-const extensions = [
-  { text: "html", value: "html" },
-  { text: "txt", value: "txt" }
-];
-
 export default class CreationDocument extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
@@ -38,36 +28,100 @@ export default class CreationDocument extends React.Component {
   };
 
   state = {
-    fileName: "",
-    extension: "html",
-    mimeType: "text/x-html-template",
-    content: "", // contenu en base64 si c'est un fichier binaire
+    fileName: "Nouveau document",
+    model: false,
+    modelCheckboxDisabled: false,
+    mimeType: "text/html",
+    content: "",
     creationSuccess: false
+  };
+
+  generateFilename = () => {
+    let getExtension = () => {
+      return this.state.mimeType.split("/")[1];
+    };
+    let filenameHasExtension = () => {
+      let parts = this.state.fileName.split(".");
+      if (parts.length > 1) {
+        return true;
+      }
+      return false;
+    };
+    return filenameHasExtension()
+      ? this.state.fileName
+      : this.state.fileName + "." + getExtension();
+  };
+
+  importer = event => {
+    if (_.get(event.target.files, "length") !== 0) {
+      let file = _.get(event.target.files, "0");
+      let fileReader = new FileReader();
+      if (_.split(file.type, "/")[0] !== "text") {
+        // conversion en base64
+        fileReader.readAsDataURL(file);
+        fileReader.onload = () => {
+          this.setState({
+            fileName: file.name,
+            content: fileReader.result,
+            mimeType: file.type,
+            model: false,
+            modelCheckboxDisabled: true
+          });
+        };
+      } else {
+        fileReader.readAsText(file);
+        fileReader.onload = e => {
+          this.setState({
+            fileName: file.name,
+            content: e.target.result,
+            mimeType: file.type,
+            model:
+              file.type.split("/")[1] !== "html" ? false : this.state.model,
+            modelCheckboxDisabled:
+              file.type.split("/")[1] !== "html"
+                ? true
+                : this.state.modelCheckboxDisabled
+          });
+        };
+        fileReader.onerror = () => {
+          return;
+        };
+      }
+    }
   };
 
   createDocument = () => {
     if (_.isEmpty(this.state.fileName)) {
       return;
     }
-    if (
-      this.state.mimeType !== "text/x-html-template" &&
-      _.isNull(this.props.idPatient)
-    ) {
-      return;
-    }
+    let idPatient = _.isNull(this.props.idPatient) ? 0 : this.props.idPatient;
     this.props.client.Documents.create(
       {
-        fileName: this.state.fileName + "." + this.state.extension,
-        idPatient:
-          this.state.mimeType === "text/x-html-template"
-            ? 0
-            : this.props.idPatient,
-        mimeType: this.state.mimeType,
+        fileName: this.generateFilename(),
+        idPatient: idPatient,
+        mimeType: this.state.model
+          ? "text/x-html-template"
+          : this.state.mimeType,
         document: this.state.content
       },
       result => {
         //console.log(result);
-        this.setState({ creationSuccess: true });
+        this.props.client.Actes.create(
+          {
+            code: "#DOC_" + _.toUpper(result.mimeType.split("/")[1]),
+            etat: 0,
+            idPatient: idPatient,
+            description: result.fileName,
+            idDocument: result.id
+          },
+          res => {
+            //console.log(res);
+            this.setState({ creationSuccess: true });
+          },
+          err => {
+            console.log(err);
+          }
+        );
       },
       error => {
         console.log(error);
@@ -88,27 +142,16 @@ export default class CreationDocument extends React.Component {
                 value={this.state.fileName}
                 onChange={(e, d) => this.setState({ fileName: d.value })}
               />
-              <Form.Group widths="equal">
-                <Form.Dropdown
-                  label="Type - document"
-                  selection={true}
-                  options={mimeTypes}
-                  onChange={(e, d) => this.setState({ mimeType: d.value })}
-                  value={this.state.mimeType}
-                />
-                <Form.Dropdown
-                  label="Extension"
-                  selection={true}
-                  options={extensions}
-                  onChange={(e, d) => this.setState({ extension: d.value })}
-                  value={this.state.extension}
-                />
-              </Form.Group>
+              <Form.Checkbox
+                label="Utiliser comme modèle"
+                disabled={this.state.modelCheckboxDisabled}
+                checked={this.state.model}
+              />
             </Form>
           </Modal.Content>
           <Modal.Actions>
             <Button
-              content="Parcourir"
+              content="Importer"
               onClick={() => {
                 document.getElementById("file").click();
               }}
@@ -118,6 +161,12 @@ export default class CreationDocument extends React.Component {
               content="Annuler"
               onClick={() => {
                 if (this.props.onClose) {
+                  this.setState({
+                    fileName: "Nouveau document",
+                    mimeType: "text/html",
+                    model: false,
+                    modelCheckboxDisabled: false
+                  });
                   this.props.onClose();
                 }
               }}
@@ -126,42 +175,7 @@ export default class CreationDocument extends React.Component {
         </Modal>
 
         {/* upload d'un document */}
-        <input
-          id="file"
-          type="file"
-          //accept="image/*"
-          hidden={true}
-          onChange={e => {
-            if (_.get(e.target.files, "length") !== 0) {
-              let file = _.get(e.target.files, "0");
-              //console.log(file);
-              let content = "";
-              let fileReader = new FileReader();
-
-              // TODO : gérer plusieurs types de fichiers
-              // par exemple les document textuels
-              // html ou plain text etc.
-              if (_.split(file.type, "/")[0] === "application") {
-                //console.log("on passe ici car application");
-                fileReader.readAsDataURL(file);
-                fileReader.onload = () => {
-                  //console.log("conversion en base64");
-                  content = fileReader.result;
-                  //console.log(content);
-                };
-              } /* else if (_.split(file.type, "/")[0] === "text") {
-
-              }*/
-
-              this.setState({
-                fileName: file.name,
-                mimeType: file.type,
-                extension: _.split(file.type, "/")[1],
-                document: content
-              });
-            }
-          }}
-        />
+        <input id="file" type="file" hidden={true} onChange={this.importer} />
 
         <Modal size="tiny" open={this.state.creationSuccess}>
           <Modal.Content>
@@ -172,8 +186,6 @@ export default class CreationDocument extends React.Component {
               content={
                 "Le document '" +
                 this.state.fileName +
-                "." +
-                this.state.extension +
                 "' a été créé avec succès"
               }
             />
@@ -182,7 +194,13 @@ export default class CreationDocument extends React.Component {
             <Button
               content="OK"
               onClick={() => {
-                this.setState({ fileName: "", creationSuccess: false });
+                this.setState({
+                  fileName: "Nouveau document",
+                  mimeType: "text/html",
+                  creationSuccess: false,
+                  model: false,
+                  modelCheckboxDisabled: false
+                });
                 if (this.props.onClose) {
                   this.props.onClose();
                 }
