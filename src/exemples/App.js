@@ -31,6 +31,7 @@ import DocumentsCreationDocument from "./Documents/CreationDocument";
 import DocumentsTextDocument from "./Documents/TextDocument";
 import DocumentsPDFDocument from "./Documents/PDFDocument";
 import DocumentsSauvegardeDocument from "./Documents/SauvegardeDocument";
+import DocumentsListeDocument from "./Documents/ListeDocument";
 
 // CSS
 //import "rhapi-ui-react/dist/index.css";
@@ -254,6 +255,14 @@ export default class App extends React.Component {
             }
             onClick={(e, d) => this.handleClickItem("Documents", d.name)}
           />
+          <Menu.Item
+            name="ListeDocument"
+            active={
+              this.state.group === "Documents" &&
+              this.state.name === "ListeDocument"
+            }
+            onClick={(e, d) => this.handleClickItem("Documents", d.name)}
+          />
         </Menu.Menu>
       </Menu.Item>
     );
@@ -408,6 +417,8 @@ class ViewExample extends React.Component {
         return <DocumentsPDFDocument />;
       } else if (name === "SauvegardeDocument") {
         return <DocumentsSauvegardeDocument />;
+      } else if (name === "ListeDocument") {
+        return <DocumentsListeDocument />
       }
     }
   };
