@@ -2,6 +2,15 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
 class Functions {
+  BinaryFiles = {
+    download: (base64, filename) => {
+      let a = document.createElement("a");
+      a.href = base64;
+      a.download = filename;
+      a.click();
+    }
+  };
+
   PDF = {
     download: (content, filename) => {
       let doc = new jsPDF();

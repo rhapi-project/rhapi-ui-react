@@ -141,6 +141,12 @@ const toISOLocalisation = localisation => {
   return _.replace(localisation, /[\s,?.;/:\-a-zA-Z]/g, "");
 };
 
+// pas encore utilisé
+/*const mimeTypes = [
+  { mime: "text/x-html-template", extension: "html" },
+  { mime: "text/plain", extension: "txt" }
+];*/
+
 export {
   spacedLocalisation,
   tarif,
@@ -152,4 +158,5 @@ export {
   secteur06,
   secteur07,
   secteur08
+  //mimeTypes
 };

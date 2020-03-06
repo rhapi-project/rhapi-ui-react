@@ -98,14 +98,6 @@ export default class Saisie extends React.Component {
     }
   }
 
-  /*componentWillReceiveProps(next) {
-    if (next.idActe === this.props.idActe) {
-      this.reload(next.idActe, {});
-    } else {
-      this.reload(next.idActe, next.acteToAdd);
-    }
-  }*/
-
   reload = (idActe, acteToAdd) => {
     this.props.client.Actes.read(
       idActe,
