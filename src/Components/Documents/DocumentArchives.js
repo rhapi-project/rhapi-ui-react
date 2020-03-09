@@ -8,7 +8,7 @@ const propDefs = {
   description: "Liste des documents d'un patient (archives)",
   example: "Tableau",
   propDocs: {
-    idPatient: "id du patient"
+    idPatient: "ID du patient. Si idPatient = 0, le document est partagé par tous les patients (ex. un modèle de document)"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
