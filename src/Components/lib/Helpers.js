@@ -1,4 +1,5 @@
 import _ from "lodash";
+//import jsPDF from "jspdf";
 
 // Affichage du tarif au bon format
 // ex : 1250.3 => 1 250,30
@@ -141,11 +142,34 @@ const toISOLocalisation = localisation => {
   return _.replace(localisation, /[\s,?.;/:\-a-zA-Z]/g, "");
 };
 
-// pas encore utilisé
-/*const mimeTypes = [
-  { mime: "text/x-html-template", extension: "html" },
-  { mime: "text/plain", extension: "txt" }
-];*/
+const downloadBinaryFile = (base64, filename) => {
+  let a = document.createElement("a");
+  a.href = base64;
+  a.download = filename;
+  a.click();
+};
+
+/*const downloadPDF = (content, filename) => {
+  let doc = new jsPDF();
+  doc.fromHTML(content, 15, 5, {});
+  doc.save(filename + ".pdf");
+};*/
+
+/*const outputPDF = content => {
+  let doc = new jsPDF();
+  doc.fromHTML(content, 15, 5, {});
+  let base64 = doc.output("datauristring", { filename: "output.pdf" });
+  let pdfWindow = window.open("#", "_blank");
+  pdfWindow.document.write(
+    "<iframe width='100%' height='100%' src='" + base64 + "'></iframe>"
+  );
+};*/
+
+/*const contentToBase64PDF = content => {
+  let doc = new jsPDF();
+  doc.fromHTML(content, 15, 5, {});
+  return doc.output("datauristring");
+};*/
 
 export {
   spacedLocalisation,
@@ -157,6 +181,6 @@ export {
   secteur05,
   secteur06,
   secteur07,
-  secteur08
-  //mimeTypes
+  secteur08,
+  downloadBinaryFile
 };

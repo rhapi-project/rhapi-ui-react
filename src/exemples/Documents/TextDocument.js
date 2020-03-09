@@ -2,7 +2,7 @@ import React from "react";
 import { Button, Divider, Form, Table, TableRow } from "semantic-ui-react";
 import _ from "lodash";
 import { Client } from "rhapi-client";
-import { Documents, Functions } from "../../Components";
+import { Documents /*, Functions*/ } from "../../Components";
 
 // Instanciation du client RHAPI sans authentification
 const client = new Client("https://demo.rhapi.net/demo01");
@@ -278,19 +278,19 @@ export default class DocumentsTextDocument extends React.Component {
             <Button
               content="Télécharger (PDF)"
               onClick={() => {
-                let func = new Functions();
-                func.PDF.download(this.state.selectedDocument.document);
+                //let func = new Functions();
+                //func.PDF.download(this.state.selectedDocument.document);
               }}
             />
             {!_.isNull(this.state.idPatient) ? (
               <Button
                 content="Enregistrer (PDF)"
                 onClick={() => {
-                  let func = new Functions();
+                  /*let func = new Functions();
                   let base64Content = func.PDF.toBase64(
                     this.state.selectedDocument.document
-                  );
-                  this.savePDFDocument(base64Content);
+                  );*/
+                  //this.savePDFDocument(base64Content);
                   //func.PDF.experimentalDownload(this.state.selectedDocument.document, "fichier");
                 }}
               />
