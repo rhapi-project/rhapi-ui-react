@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import _ from "lodash";
-import { Functions } from "..";
 import ListeDocument from "./ListeDocument";
 import { Button } from "semantic-ui-react";
 
@@ -68,8 +67,10 @@ export default class DocumentArchives extends React.Component {
       {},
       result => {
         if (!_.startsWith(result.mimeType, "text/")) {
-          let f = new Functions();
-          f.BinaryFiles.download(result.document, result.fileName);
+          let a = document.createElement("a");
+          a.href = result.document;
+          a.download = result.fileName;
+          a.click();
         }
       },
       error => {}

@@ -1,7 +1,7 @@
 import React from "react";
 import { Client } from "rhapi-client";
 import _ from "lodash";
-import { Documents, Functions } from "../../Components";
+import { Documents } from "../../Components";
 import { Divider, Form } from "semantic-ui-react";
 
 // Instanciation du client RHAPI sans authentification
@@ -49,17 +49,6 @@ export default class DocumentsListeDocument extends React.Component {
 
   onDocumentDoubleClick = id => {
     console.log(id);
-    client.Documents.read(
-      id,
-      {},
-      result => {
-        if (!_.startsWith(result.mimeType, "text/")) {
-          let f = new Functions();
-          f.BinaryFiles.download(result.document, result.fileName);
-        }
-      },
-      error => {}
-    );
   };
 
   onSelectionChange = documents => {
