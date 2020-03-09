@@ -24,6 +24,24 @@ Composant de présentation d'une fiche d'un acte. Celui-ci utilise le composant 
 | date | string | Date de la tarification de l'acte, au format ISO. Par défaut la date du jour |
 | modificateurs | string | Modificateurs appliqués à l'acte, par défaut une chaîne de caractères vide |
 
+## Tarification
+Composant de facturation d'un acte CCAM
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| codActe | string | Code de l'acte CCAM |
+| codActivite | string | Code de l'activité, par défaut "1" |
+| codDom | number | Code du DOM, par défaut c'est la métropole. Code 0 |
+| codGrille | number | Code grille, par défaut 0 |
+| codPhase | number | Code phase, par défaut 0 |
+| date | string | Date de la tarification de l'acte, au format ISO. Par défaut la date du jour |
+| dynamic | bool | Affichage de l'interface dynamique de tarification, par défaut "false" |
+| error | string, func | Message d'erreur ou Callback acte non tarifé à la date donnée |
+| hidden | bool | Cacher l'interface du composant de tarification |
+| modificateurs | string | Modificateurs appliqués à l'acte, par défaut une chaîne de caractères vide |
+| success | func | Callback succès de la tarification |
+
 ## Table
 Composant montrant sous forme d'un tableau les actes obtenus après une recherche par mot clé.
 #### Props du composant
@@ -53,24 +71,6 @@ Composant montrant sous forme d'un tableau les actes obtenus après une recherch
 | btnPrev | object | Props semantic du bouton pour aller à la page précédente, par défaut un objet vide "{}" |
 | btnMore | object | Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}" |
 | mode | string | mode de pagination 'pages' ou 'more', par défaut "pages" |
-
-## Tarification
-Composant de facturation d'un acte CCAM
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| codActe | string | Code de l'acte CCAM |
-| codActivite | string | Code de l'activité, par défaut "1" |
-| codDom | number | Code du DOM, par défaut c'est la métropole. Code 0 |
-| codGrille | number | Code grille, par défaut 0 |
-| codPhase | number | Code phase, par défaut 0 |
-| date | string | Date de la tarification de l'acte, au format ISO. Par défaut la date du jour |
-| dynamic | bool | Affichage de l'interface dynamique de tarification, par défaut "false" |
-| error | string, func | Message d'erreur ou Callback acte non tarifé à la date donnée |
-| hidden | bool | Cacher l'interface du composant de tarification |
-| modificateurs | string | Modificateurs appliqués à l'acte, par défaut une chaîne de caractères vide |
-| success | func | Callback succès de la tarification |
 
 ## Search
 Composant pour la recherche des actes en CCAM (par code CCAM ou mot-clé). Retourne la liste des actes sous forme d'un tableau d'objets JSON. 
@@ -259,15 +259,6 @@ Composant correspondant à une ligne du tableau de saisie des actes pour les den
 | onSearchFavoris | func | Callback au clic sur la colonne libellé (Recherche d'un acte dans les favoris) |
 | onMoveToFSE | func | Callback déplacement d'un acte de #DEVIS vers #FSE |
 
-## Actions
-Menu d'actions à effectuer
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| actions | array | Tableau contenant une liste d'actions |
-| dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
-| id | any | Identifiant de la ligne sur laquelle une action est effectuée |
-
 ## DateRange
 Période, début et fin d'une période
 #### Props du composant
@@ -279,16 +270,23 @@ Période, début et fin d'une période
 | onRangeChange | func | Callback au changement de la période |
 | onClose | func | Callback à la fermeture de la modal |
 
-## Periode
-Période, début et fin d'une période
+## Actions
+Menu d'actions à effectuer
 #### Props du composant
 | Props | Type | Description |
 | ---- | ----- | ------ |
-| labelDate | string | Label de la période |
-| labelYear | string | Label de l'année de la période |
-| startYear | number | La première année qui sera affichée. Par défaut l'année en cours |
-| onPeriodeChange | func | Callback au changement de la période. C'est une fonction qui prend 2 paramètres, début et fin de la période (inclus).
-Les valeurs de ces paramètres sont NULL si la durée est indéterminée. |
+| actions | array | Tableau contenant une liste d'actions |
+| dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
+| id | any | Identifiant de la ligne sur laquelle une action est effectuée |
+
+## Montant
+Input de saisie d'un montant au format français
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| input | object | Documentation semantic-ui-react [Input](https://react.semantic-ui.com/elements/input) |
+| montant | number | Montant affiché |
+| onChange | func | Callback au changement du montant |
 
 ## CreationDocument
 Modal Semantic contenant les options de création d'un document
@@ -300,24 +298,6 @@ Modal Semantic contenant les options de création d'un document
 | onClose | func | Callback à la fermeture de la modal |
 | open | bool | ouverture de la modal |
 
-## Montant
-Input de saisie d'un montant au format français
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| input | object | Documentation semantic-ui-react [Input](https://react.semantic-ui.com/elements/input) |
-| montant | number | Montant affiché |
-| onChange | func | Callback au changement du montant |
-
-## Localisations
-Grille de saisie des localisations dentaires
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| dents | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
-| modal | object | Documentation semantic-ui-react [Modal](https://react.semantic-ui.com/modules/modal) |
-| onSelection | func | Callback à la selection d'une liste de dents |
-
 ## DocumentModeles
 Composant de gestion des modèles appartenant à un ou plusieurs praticiens
 #### Props du composant
@@ -326,6 +306,17 @@ Composant de gestion des modèles appartenant à un ou plusieurs praticiens
 | client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
 | idPatient | number | identifiant du patient nécessaire si l'on souhaite créer un document à partir d'un modèle |
 | origine | string | identifiant du praticien |
+
+## Periode
+Période, début et fin d'une période
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| labelDate | string | Label de la période |
+| labelYear | string | Label de l'année de la période |
+| startYear | number | La première année qui sera affichée. Par défaut l'année en cours |
+| onPeriodeChange | func | Callback au changement de la période. C'est une fonction qui prend 2 paramètres, début et fin de la période (inclus).
+Les valeurs de ces paramètres sont NULL si la durée est indéterminée. |
 
 ## ListeDocument
 Liste des documents d'un patient
@@ -339,6 +330,15 @@ Liste des documents d'un patient
 | onActionClick | func | Retourne en paramètre l'id et l'action d'un document |
 | actions | array | Tableau d'objet contenant des actions à effectuer (en plus des actions par défaut) |
 
+## Localisations
+Grille de saisie des localisations dentaires
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| dents | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
+| modal | object | Documentation semantic-ui-react [Modal](https://react.semantic-ui.com/modules/modal) |
+| onSelection | func | Callback à la selection d'une liste de dents |
+
 ## TextDocument
 Manupulation d'un document sous format texte
 #### Props du composant
@@ -348,3 +348,11 @@ Manupulation d'un document sous format texte
 | document | string | contenu d'un document au format texte |
 | mode | string | mode d'édition du document : html|plain |
 | onEdit | func | Callback à la modification du texte |
+
+## DocumentArchives
+Liste des documents d'un patient (archives)
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| idPatient | number | id du patient |
