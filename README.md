@@ -64,7 +64,7 @@ class App extends React.Component {
 export default App;
 ```
 
-Cet exemple montre une utilisation simple du composant **CCAM.Search** pour la recherche d'une acte en CCAM.
+Cet exemple montre une utilisation simple du composant **CCAM.Search** pour la recherche d'un acte en CCAM.
 
 Voir plus d'exemples d'utilisation [rhapi-ui-react/exemples](https://github.com/rhapi-project/rhapi-ui-react/tree/master/src/exemples).
 
