@@ -8,7 +8,8 @@ const propDefs = {
   description: "Liste des documents d'un patient (archives)",
   example: "Tableau",
   propDocs: {
-    idPatient: "ID du patient. Si idPatient = 0, le document est partagé par tous les patients (ex. un modèle de document)"
+    idPatient:
+      "ID du patient. Si idPatient = 0, le document est partagé par tous les patients (ex. un modèle de document)"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
@@ -59,9 +60,12 @@ export default class DocumentArchives extends React.Component {
     );
   };
 
-  onDocumentClick = id => {};
+  onDocumentClick = id => {
+    // l'id du document en paramètre sur un click
+  };
 
   onDocumentDoubleClick = id => {
+    // l'id du document en paramètre sur un double click => téléchargement du document
     this.props.client.Documents.read(
       id,
       {},
@@ -77,7 +81,9 @@ export default class DocumentArchives extends React.Component {
     );
   };
 
-  onSelectionChange = documents => {};
+  onSelectionChange = documents => {
+    // array des id des documents en paramètre sur une sélection multiple
+  };
 
   onActionClick = (id, action) => {
     if (action === "supprimer") {
@@ -88,28 +94,6 @@ export default class DocumentArchives extends React.Component {
         },
         error => {}
       );
-    }
-  };
-
-  importer = event => {
-    if (_.get(event.target.files, "length") !== 0) {
-      let file = _.get(event.target.files, "0");
-      let fileReader = new FileReader();
-      if (_.split(file.type, "/")[0] !== "text") {
-        // conversion en base64
-        fileReader.readAsDataURL(file);
-        fileReader.onload = () => {
-          this.createDocument(file.name, file.type, fileReader.result);
-        };
-      } else {
-        fileReader.readAsText(file);
-        fileReader.onload = e => {
-          this.createDocument(file.name, file.type, e.target.result);
-        };
-        fileReader.onerror = () => {
-          return;
-        };
-      }
     }
   };
 
@@ -138,6 +122,28 @@ export default class DocumentArchives extends React.Component {
       },
       error => {}
     );
+  };
+
+  importer = event => {
+    if (_.get(event.target.files, "length") !== 0) {
+      let file = _.get(event.target.files, "0");
+      let fileReader = new FileReader();
+      if (_.split(file.type, "/")[0] !== "text") {
+        // conversion en base64
+        fileReader.readAsDataURL(file);
+        fileReader.onload = () => {
+          this.createDocument(file.name, file.type, fileReader.result);
+        };
+      } else {
+        fileReader.readAsText(file);
+        fileReader.onload = e => {
+          this.createDocument(file.name, file.type, e.target.result);
+        };
+        fileReader.onerror = () => {
+          return;
+        };
+      }
+    }
   };
 
   render() {

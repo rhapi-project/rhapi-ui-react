@@ -12,7 +12,8 @@ import {
   secteur05,
   secteur06,
   secteur07,
-  secteur08
+  secteur08,
+  codesDocs
 } from "../lib/Helpers";
 import Actions from "../Shared/Actions";
 
@@ -197,7 +198,7 @@ export default class Historique extends React.Component {
   reponseCancel = false;
   reponseConfirm = false;
   isFSE = false;
-  isDEVIS = false;
+  isDEVIS_DOC = false;
   // variable utilisé pour éviter le click lors d'un double click
   timeout = null;
   // Props
@@ -285,19 +286,6 @@ export default class Historique extends React.Component {
     // reload la 1ère fois
     reloadFunc();
   }
-
-  /*componentWillReceiveProps(next) {
-    this.reload(
-      next.idPatient,
-      this.state.limit,
-      0, // offset
-      this.state.sort,
-      this.state.order,
-      next.startAt,
-      next.endAt,
-      next.localisation.trim()
-    );
-  }*/
 
   componentDidUpdate(prevProps, prevState) {
     if (
@@ -605,6 +593,19 @@ export default class Historique extends React.Component {
         ) : (
           <Label circular color={acte.couleur} empty />
         );
+    } else if (_.startsWith(acte.code, "#DOC_")) {
+      deco.color = "lightblue";
+      deco.description = (
+        <Icon
+          name={
+            codesDocs[
+              _.findIndex(codesDocs, i => acte.code === i.code) !== -1
+                ? _.findIndex(codesDocs, i => acte.code === i.code)
+                : _.findIndex(codesDocs, i => i.code === "default")
+            ].icon
+          }
+        />
+      );
     }
 
     return deco;
@@ -838,7 +839,7 @@ export default class Historique extends React.Component {
       }
     });
     this.isFSE = false;
-    this.isDEVIS = false;
+    this.isDEVIS_DOC = false;
 
     // Suppression des actes sans #
     if (!_.startsWith(code, "#")) {
@@ -860,10 +861,17 @@ export default class Historique extends React.Component {
       });
       return false;
     } else if (code === "#DEVIS") {
-      this.isDEVIS = true;
+      this.isDEVIS_DOC = true;
       this.setState({
         showConfirm: true,
         message: "Vous confirmez la suppression de ce DEVIS ?"
+      });
+      return false;
+    } else if (_.startsWith(code, "#DOC")) {
+      this.isDEVIS_DOC = true;
+      this.setState({
+        showConfirm: true,
+        message: "Vous confirmez la suppression du document sélectionné ?"
       });
       return false;
     }
@@ -873,7 +881,7 @@ export default class Historique extends React.Component {
   };
 
   onCancel = () => {
-    if (!this.isDEVIS) {
+    if (!this.isDEVIS_DOC) {
       if (!this.reponseCancel && this.reponseConfirm) {
         this.setState({
           message: this.isFSE
@@ -892,7 +900,7 @@ export default class Historique extends React.Component {
   };
 
   onConfirm = () => {
-    if (!this.isDEVIS) {
+    if (!this.isDEVIS_DOC) {
       if (this.reponseCancel && !this.reponseConfirm) {
         this.setState({ showConfirm: false, message: "" });
         this.destroy(this.id);
@@ -1091,6 +1099,14 @@ export default class Historique extends React.Component {
                     text: "Éditer",
                     action: id => this.onEdit(id, acte)
                   },
+                  {
+                    icon: "trash",
+                    text: "Supprimer",
+                    action: id => this.onDelete(id, acte)
+                  }
+                ];
+              } else if (_.startsWith(acte.code, "#DOC")) {
+                actions = [
                   {
                     icon: "trash",
                     text: "Supprimer",
@@ -1321,6 +1337,21 @@ export default class Historique extends React.Component {
                           acte.code === "#DEVIS"
                         ) {
                           this.onModify(acte.id, acte);
+                        } else if (_.startsWith(acte.code, "#DOC")) {
+                          // Téléchargement du document
+                          this.props.client.Documents.read(
+                            acte.idDocument,
+                            {},
+                            result => {
+                              if (!_.startsWith(result.mimeType, "text/")) {
+                                let a = document.createElement("a");
+                                a.href = result.document;
+                                a.download = result.fileName;
+                                a.click();
+                              }
+                            },
+                            error => {}
+                          );
                         } else {
                           if (this.props.onActeDoubleClick) {
                             this.onActeDoubleClick(e, acte);
@@ -1350,7 +1381,8 @@ export default class Historique extends React.Component {
                       </Table.Cell>
                       <Table.Cell textAlign="right">
                         {_.isEqual(acte.code, "#TODO") ||
-                        _.isEqual(acte.code, "#NOTE")
+                        _.isEqual(acte.code, "#NOTE") ||
+                        _.startsWith(acte.code, "#DOC")
                           ? ""
                           : tarif(acte.montant)}
                       </Table.Cell>

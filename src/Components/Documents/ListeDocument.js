@@ -4,6 +4,7 @@ import { Icon, Table } from "semantic-ui-react";
 import _ from "lodash";
 import moment from "moment";
 import Actions from "../Shared/Actions";
+import { codesDocs } from "../lib/Helpers";
 
 const propDefs = {
   description: "Liste des documents d'un patient",
@@ -28,22 +29,6 @@ const propDefs = {
     actions: PropTypes.array
   }
 };
-
-const icons = [
-  {
-    mimeType: "text/plain",
-    icon: "file alternate outline",
-    type: "Document texte"
-  },
-  {
-    mimeType: "application/pdf",
-    icon: "file pdf outline",
-    type: "Document PDF"
-  },
-  { mimeType: "text/x-html-template", icon: "file outline", type: "Modèle" },
-  { mimeType: "text/html", icon: "file code outline", type: "Document HTML" },
-  { mimeType: "default", icon: "square outline", type: "Document" }
-];
 
 export default class ListeDocument extends React.Component {
   // variable utilisé pour éviter le click lors d'un double click
@@ -199,17 +184,17 @@ export default class ListeDocument extends React.Component {
                     <Table.Cell>
                       <Icon
                         name={
-                          icons[
+                          codesDocs[
                             _.findIndex(
-                              icons,
+                              codesDocs,
                               i => document.mimeType === i.mimeType
                             ) !== -1
                               ? _.findIndex(
-                                  icons,
+                                  codesDocs,
                                   i => document.mimeType === i.mimeType
                                 )
                               : _.findIndex(
-                                  icons,
+                                  codesDocs,
                                   i => i.mimeType === "default"
                                 )
                           ].icon
@@ -219,16 +204,19 @@ export default class ListeDocument extends React.Component {
                     </Table.Cell>
                     <Table.Cell style={{ textAlign: "center" }}>
                       {
-                        icons[
+                        codesDocs[
                           _.findIndex(
-                            icons,
+                            codesDocs,
                             i => document.mimeType === i.mimeType
                           ) !== -1
                             ? _.findIndex(
-                                icons,
+                                codesDocs,
                                 i => document.mimeType === i.mimeType
                               )
-                            : _.findIndex(icons, i => i.mimeType === "default")
+                            : _.findIndex(
+                                codesDocs,
+                                i => i.mimeType === "default"
+                              )
                         ].type
                       }
                     </Table.Cell>
