@@ -1343,10 +1343,19 @@ export default class Historique extends React.Component {
                             acte.idDocument,
                             {},
                             result => {
+                              let a = document.createElement("a");
+
                               if (!_.startsWith(result.mimeType, "text/")) {
-                                let a = document.createElement("a");
                                 a.href = result.document;
                                 a.download = result.fileName;
+                                a.click();
+                              } else {
+                                let file = new Blob([result.document], {
+                                  type: result.mimeType
+                                });
+                                a.href = URL.createObjectURL(file);
+                                a.download = result.fileName;
+                                document.body.appendChild(a); // pour FireFox
                                 a.click();
                               }
                             },
