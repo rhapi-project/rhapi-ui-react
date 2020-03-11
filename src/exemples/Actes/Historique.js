@@ -78,7 +78,6 @@ export default class ActesHistorique extends React.Component {
 
   render() {
     let iconNote = <Icon name="sticky note outline" />;
-
     let iconTodo = <Icon name="list" />;
 
     return (

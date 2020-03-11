@@ -121,6 +121,38 @@ const secteur07 = [
 
 const secteur08 = ["44", "45", "46", "47", "48", "84", "85"];
 
+const codesDocs = [
+  {
+    mimeType: "text/plain",
+    icon: "file alternate outline",
+    code: "#DOC_PLAIN",
+    type: "Document texte"
+  },
+  {
+    mimeType: "application/pdf",
+    icon: "file pdf outline",
+    code: "#DOC_PDF",
+    type: "Document PDF"
+  },
+  {
+    mimeType: "text/html",
+    icon: "file code outline",
+    code: "#DOC_HTML",
+    type: "Document HTML"
+  },
+  {
+    mimeType: "text/x-html-template",
+    icon: "file code outline",
+    type: "Modèle"
+  },
+  {
+    mimeType: "default",
+    icon: "square outline",
+    code: "default",
+    type: "Document"
+  }
+];
+
 const spacedLocalisation = localisationStr => {
   let l = toISOLocalisation(localisationStr);
   let s = "";
@@ -182,5 +214,6 @@ export {
   secteur06,
   secteur07,
   secteur08,
+  codesDocs,
   downloadBinaryFile
 };
