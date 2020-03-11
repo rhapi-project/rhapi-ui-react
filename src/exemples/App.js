@@ -27,10 +27,7 @@ import ActesEdition from "./Actes/Edition";
 import ActesNote from "./Actes/Note";
 
 // Exemples Documents
-import DocumentsCreationDocument from "./Documents/CreationDocument";
 import DocumentsTextDocument from "./Documents/TextDocument";
-import DocumentsPDFDocument from "./Documents/PDFDocument";
-import DocumentsSauvegardeDocument from "./Documents/SauvegardeDocument";
 import DocumentsListeDocument from "./Documents/ListeDocument";
 import DocumentsDocumentModeles from "./Documents/DocumentModeles";
 import DocumentsDocumentArchives from "./Documents/DocumentArchives";
@@ -226,42 +223,10 @@ export default class App extends React.Component {
         <Menu.Header>Documents</Menu.Header>
         <Menu.Menu>
           <Menu.Item
-            name="CreationDocument"
-            active={
-              this.state.group === "Documents" &&
-              this.state.name === "CreationDocument"
-            }
-            onClick={(e, d) => this.handleClickItem("Documents", d.name)}
-          />
-          <Menu.Item
             name="TextDocument"
             active={
               this.state.group === "Documents" &&
               this.state.name === "TextDocument"
-            }
-            onClick={(e, d) => this.handleClickItem("Documents", d.name)}
-          />
-          <Menu.Item
-            name="DocumentModeles"
-            active={
-              this.state.group === "Documents" &&
-              this.state.name === "DocumentModeles"
-            }
-            onClick={(e, d) => this.handleClickItem("Documents", d.name)}
-          />
-          <Menu.Item
-            name="PDFDocument"
-            active={
-              this.state.group === "Documents" &&
-              this.state.name === "PDFDocument"
-            }
-            onClick={(e, d) => this.handleClickItem("Documents", d.name)}
-          />
-          <Menu.Item
-            name="SauvegardeDocument"
-            active={
-              this.state.group === "Documents" &&
-              this.state.name === "SauvegardeDocument"
             }
             onClick={(e, d) => this.handleClickItem("Documents", d.name)}
           />
@@ -278,6 +243,14 @@ export default class App extends React.Component {
             active={
               this.state.group === "Documents" &&
               this.state.name === "DocumentArchives"
+            }
+            onClick={(e, d) => this.handleClickItem("Documents", d.name)}
+          />
+          <Menu.Item
+            name="DocumentModeles"
+            active={
+              this.state.group === "Documents" &&
+              this.state.name === "DocumentModeles"
             }
             onClick={(e, d) => this.handleClickItem("Documents", d.name)}
           />
@@ -429,12 +402,6 @@ class ViewExample extends React.Component {
     if (group === "Documents") {
       if (name === "TextDocument") {
         return <DocumentsTextDocument />;
-      } else if (name === "CreationDocument") {
-        return <DocumentsCreationDocument />;
-      } else if (name === "PDFDocument") {
-        return <DocumentsPDFDocument />;
-      } else if (name === "SauvegardeDocument") {
-        return <DocumentsSauvegardeDocument />;
       } else if (name === "ListeDocument") {
         return <DocumentsListeDocument />;
       } else if (name === "DocumentModeles") {
