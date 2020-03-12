@@ -4,6 +4,8 @@ import { Button, Divider, Form, Modal } from "semantic-ui-react";
 import _ from "lodash";
 import ListeDocument from "./ListeDocument";
 import TextDocument from "./TextDocument";
+import RenameDocument from "./RenameDocument";
+import { downloadTextFile, uploadFile } from "../lib/Helpers";
 
 const propDefs = {
   description:
@@ -33,6 +35,7 @@ export default class DocumentModeles extends React.Component {
     disabledBtnSave: true,
     modalDelete: false,
     modalCreate: false,
+    modalRename: false,
     currentDocumentId: null
   };
 
@@ -63,19 +66,15 @@ export default class DocumentModeles extends React.Component {
     );
   };
 
-  readDocument = id => {
+  readDocument = (id, onSuccess, onError) => {
     this.props.client.Documents.read(
       id,
       {},
       result => {
-        //console.log(result);
-        this.setState({
-          selectedDocument: result,
-          currentDocumentId: result.id
-        });
+        onSuccess(result);
       },
       error => {
-        console.log(error);
+        onError(error);
       }
     );
   };
@@ -116,7 +115,7 @@ export default class DocumentModeles extends React.Component {
   createModele = (fileName, content) => {
     this.props.client.Documents.create(
       {
-        fileName: fileName + ".html",
+        fileName: fileName,
         mimeType: "text/x-html-template",
         document: content
       },
@@ -131,23 +130,50 @@ export default class DocumentModeles extends React.Component {
   };
 
   handleActions = (id, action) => {
-    if (action === "supprimer") {
-      this.setState({ modalDelete: true, currentDocumentId: id });
+    switch (action) {
+      case "supprimer":
+        this.setState({ modalDelete: true, currentDocumentId: id });
+        break;
+      case "rename":
+        this.setState({ modalRename: true, currentDocumentId: id });
+        break;
+      case "duplicate":
+        this.readDocument(
+          id,
+          result => {
+            this.createModele("(Copie) " + result.fileName, result.document);
+          },
+          error => {
+            console.log(error);
+          }
+        );
+        break;
+      case "download":
+        this.readDocument(
+          id,
+          result => {
+            downloadTextFile(result.document, result.fileName, "text/html");
+          },
+          error => {
+            console.log(error);
+          }
+        );
+        break;
+      default:
+        break;
     }
   };
 
   importerDocument = event => {
-    if (_.get(event.target.files, "length") !== 0) {
-      let file = _.get(event.target.files, "0");
-      let fileReader = new FileReader();
-      fileReader.readAsText(file);
-      fileReader.onload = e => {
-        this.createModele(file.name, e.target.result);
-      };
-      fileReader.onerror = () => {
+    uploadFile(
+      event,
+      (file, fileReader) => {
+        this.createModele(file.name, fileReader.result);
+      },
+      () => {
         return;
-      };
-    }
+      }
+    );
   };
 
   render() {
@@ -158,14 +184,37 @@ export default class DocumentModeles extends React.Component {
             <ListeDocument
               documents={this.state.modeles}
               onDocumentClick={id => {}}
-              onDocumentDoubleClick={this.readDocument}
+              onDocumentDoubleClick={id => {
+                this.readDocument(
+                  id,
+                  result => {
+                    this.setState({
+                      selectedDocument: result,
+                      currentDocumentId: result.id
+                    });
+                  },
+                  error => {
+                    console.log(error);
+                  }
+                );
+              }}
               onSelectionChange={modeles => {}}
               onActionClick={this.handleActions}
               actions={[
                 {
+                  icon: "copy outline",
+                  text: "Dupliquer",
+                  action: id => this.handleActions(id, "duplicate")
+                },
+                {
+                  icon: "write",
+                  text: "Renommer",
+                  action: id => this.handleActions(id, "rename")
+                },
+                {
                   icon: "download",
                   text: "Télécharger",
-                  action: id => {}
+                  action: id => this.handleActions(id, "download")
                 }
               ]}
             />
@@ -222,6 +271,25 @@ export default class DocumentModeles extends React.Component {
             </div>
           </React.Fragment>
         )}
+
+        {/* modal - renommer un document */}
+        <RenameDocument
+          open={this.state.modalRename}
+          fileName={
+            _.isNull(this.state.currentDocumentId)
+              ? ""
+              : this.state.modeles[
+                  _.findIndex(
+                    this.state.modeles,
+                    mod => mod.id === this.state.currentDocumentId
+                  )
+                ].fileName
+          }
+          onClose={() =>
+            this.setState({ modalRename: false, currentDocumentId: null })
+          }
+          onRename={() => {}}
+        />
 
         {/* modal de création d'un modèle */}
         <CreationModele
@@ -283,7 +351,7 @@ class CreationModele extends React.Component {
               content="Créer"
               onClick={() => {
                 if (!_.isEmpty(this.state.fileName)) {
-                  this.props.onCreate(this.state.fileName, "");
+                  this.props.onCreate(this.state.fileName + ".html", "");
                 }
               }}
             />
@@ -293,3 +361,15 @@ class CreationModele extends React.Component {
     );
   }
 }
+
+/*class Rename extends React.Component {
+  state = {
+    fileName: ""
+  }
+
+  render() {
+    return(
+
+    );
+  }
+}*/
