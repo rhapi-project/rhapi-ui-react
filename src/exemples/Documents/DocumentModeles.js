@@ -6,13 +6,6 @@ import { Client } from "rhapi-client";
 const client = new Client("https://demo.rhapi.net/demo01");
 
 export default class DocumentsDocumentModeles extends React.Component {
-  /*state = {
-    modeles: []
-  };
-
-  componentDidMount() {
-
-  };*/
   render() {
     return (
       <React.Fragment>

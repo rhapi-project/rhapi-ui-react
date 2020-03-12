@@ -113,12 +113,12 @@ export default class DocumentModeles extends React.Component {
     );
   };
 
-  createModele = fileName => {
+  createModele = (fileName, content) => {
     this.props.client.Documents.create(
       {
         fileName: fileName + ".html",
         mimeType: "text/x-html-template",
-        document: ""
+        document: content
       },
       result => {
         //console.log(result);
@@ -133,6 +133,20 @@ export default class DocumentModeles extends React.Component {
   handleActions = (id, action) => {
     if (action === "supprimer") {
       this.setState({ modalDelete: true, currentDocumentId: id });
+    }
+  };
+
+  importerDocument = event => {
+    if (_.get(event.target.files, "length") !== 0) {
+      let file = _.get(event.target.files, "0");
+      let fileReader = new FileReader();
+      fileReader.readAsText(file);
+      fileReader.onload = e => {
+        this.createModele(file.name, e.target.result);
+      };
+      fileReader.onerror = () => {
+        return;
+      };
     }
   };
 
@@ -161,10 +175,19 @@ export default class DocumentModeles extends React.Component {
                 content="Créer un modèle"
                 onClick={() => this.setState({ modalCreate: true })}
               />
-              {/*<Button 
-                  content="Importer un modèle"
-                  onClick={() => {}}
-                />*/}
+              <Button
+                content="Importer un modèle"
+                onClick={() => {
+                  document.getElementById("file").click();
+                }}
+              />
+              <input
+                id="file"
+                type="file"
+                hidden={true}
+                accept="text/html"
+                onChange={this.importerDocument}
+              />
             </div>
           </React.Fragment>
         ) : (
@@ -260,7 +283,7 @@ class CreationModele extends React.Component {
               content="Créer"
               onClick={() => {
                 if (!_.isEmpty(this.state.fileName)) {
-                  this.props.onCreate(this.state.fileName);
+                  this.props.onCreate(this.state.fileName, "");
                 }
               }}
             />
