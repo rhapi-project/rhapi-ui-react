@@ -4,7 +4,11 @@ import _ from "lodash";
 import ListeDocument from "./ListeDocument";
 import TextDocument from "./TextDocument";
 import { Button, Divider, Modal } from "semantic-ui-react";
-import { downloadBinaryFile, downloadTextFile, uploadFile } from "../lib/Helpers";
+import {
+  downloadBinaryFile,
+  downloadTextFile,
+  uploadFile
+} from "../lib/Helpers";
 
 const propDefs = {
   description: "Liste des documents d'un patient (archives)",
@@ -117,7 +121,11 @@ export default class DocumentArchives extends React.Component {
     if (!_.startsWith(resultDoc.mimeType, "text/")) {
       downloadBinaryFile(resultDoc.document, resultDoc.fileName);
     } else {
-      downloadTextFile(resultDoc.document, resultDoc.fileName, resultDoc.mimeType);
+      downloadTextFile(
+        resultDoc.document,
+        resultDoc.fileName,
+        resultDoc.mimeType
+      );
     }
   };
 
@@ -130,7 +138,7 @@ export default class DocumentArchives extends React.Component {
       () => {
         return;
       }
-    )
+    );
   };
 
   createDocument = (fileName, mimeType, document) => {

@@ -188,7 +188,7 @@ const downloadTextFile = (content, filename, mimeType) => {
   a.download = filename;
   document.body.appendChild(a); // pour FireFox
   a.click();
-}
+};
 
 const uploadFile = (event, onSucess, onError) => {
   if (_.get(event.target.files, "length") !== 0) {
@@ -211,7 +211,7 @@ const uploadFile = (event, onSucess, onError) => {
       };
     }
   }
-}
+};
 
 /*const downloadPDF = (content, filename) => {
   let doc = new jsPDF();
