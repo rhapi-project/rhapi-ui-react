@@ -181,6 +181,38 @@ const downloadBinaryFile = (base64, filename) => {
   a.click();
 };
 
+const downloadTextFile = (content, filename, mimeType) => {
+  let a = document.createElement("a");
+  let file = new Blob([content], { type: mimeType });
+  a.href = URL.createObjectURL(file);
+  a.download = filename;
+  document.body.appendChild(a); // pour FireFox
+  a.click();
+}
+
+const uploadFile = (event, onSucess, onError) => {
+  if (_.get(event.target.files, "length") !== 0) {
+    let file = _.get(event.target.files, "0");
+    let fileReader = new FileReader();
+
+    if (_.split(file.type, "/")[0] !== "text") {
+      // conversion en base64
+      fileReader.readAsDataURL(file);
+      fileReader.onload = () => {
+        onSucess(file, fileReader);
+      };
+    } else {
+      fileReader.readAsText(file);
+      fileReader.onload = e => {
+        onSucess(file, fileReader);
+      };
+      fileReader.onerror = () => {
+        onError();
+      };
+    }
+  }
+}
+
 /*const downloadPDF = (content, filename) => {
   let doc = new jsPDF();
   doc.fromHTML(content, 15, 5, {});
@@ -215,5 +247,7 @@ export {
   secteur07,
   secteur08,
   codesDocs,
-  downloadBinaryFile
+  downloadBinaryFile,
+  downloadTextFile,
+  uploadFile
 };

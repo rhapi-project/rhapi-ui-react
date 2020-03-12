@@ -4,6 +4,7 @@ import _ from "lodash";
 import ListeDocument from "./ListeDocument";
 import TextDocument from "./TextDocument";
 import { Button, Divider, Modal } from "semantic-ui-react";
+import { downloadBinaryFile, downloadTextFile, uploadFile } from "../lib/Helpers";
 
 const propDefs = {
   description: "Liste des documents d'un patient (archives)",
@@ -113,41 +114,23 @@ export default class DocumentArchives extends React.Component {
 
   telechargerDocument = resultDoc => {
     // objet du document passé en paramètre
-    let a = document.createElement("a");
-
     if (!_.startsWith(resultDoc.mimeType, "text/")) {
-      a.href = resultDoc.document;
-      a.download = resultDoc.fileName;
-      a.click();
+      downloadBinaryFile(resultDoc.document, resultDoc.fileName);
     } else {
-      let file = new Blob([resultDoc.document], { type: resultDoc.mimeType });
-      a.href = URL.createObjectURL(file);
-      a.download = resultDoc.fileName;
-      document.body.appendChild(a); // pour FireFox
-      a.click();
+      downloadTextFile(resultDoc.document, resultDoc.fileName, resultDoc.mimeType);
     }
   };
 
   importerDocument = event => {
-    if (_.get(event.target.files, "length") !== 0) {
-      let file = _.get(event.target.files, "0");
-      let fileReader = new FileReader();
-      if (_.split(file.type, "/")[0] !== "text") {
-        // conversion en base64
-        fileReader.readAsDataURL(file);
-        fileReader.onload = () => {
-          this.createDocument(file.name, file.type, fileReader.result);
-        };
-      } else {
-        fileReader.readAsText(file);
-        fileReader.onload = e => {
-          this.createDocument(file.name, file.type, e.target.result);
-        };
-        fileReader.onerror = () => {
-          return;
-        };
+    uploadFile(
+      event,
+      (file, fileReader) => {
+        this.createDocument(file.name, file.type, fileReader.result);
+      },
+      () => {
+        return;
       }
-    }
+    )
   };
 
   createDocument = (fileName, mimeType, document) => {
