@@ -57,7 +57,8 @@ export default class DocumentModeles extends React.Component {
           selectedDocument: {},
           currentDocumentId: null,
           modalDelete: false,
-          modalCreate: false
+          modalCreate: false,
+          modalRename: false
         });
       },
       error => {
@@ -79,15 +80,27 @@ export default class DocumentModeles extends React.Component {
     );
   };
 
-  updateDocument = () => {
+  updateDocument = (id, params, onSuccess, onError) => {
     this.props.client.Documents.update(
+      id,
+      params,
+      result => {
+        onSuccess(result);
+      },
+      error => {
+        onError(error);
+      }
+    );
+  };
+
+  save = () => {
+    this.updateDocument(
       this.state.selectedDocument.id,
       {
         document: this.state.selectedDocument.document,
         lockRevision: this.state.selectedDocument.lockRevision
       },
       result => {
-        //console.log(result);
         this.setState({
           selectedDocument: result,
           disabledBtnSave: true,
@@ -162,6 +175,30 @@ export default class DocumentModeles extends React.Component {
       default:
         break;
     }
+  };
+
+  rename = fileName => {
+    this.readDocument(
+      this.state.currentDocumentId,
+      result => {
+        this.updateDocument(
+          result.id,
+          {
+            fileName: fileName + ".html",
+            lockRevision: result.lockRevision
+          },
+          res => {
+            this.reload();
+          },
+          err => {
+            console.log(err);
+          }
+        );
+      },
+      error => {
+        console.log(error);
+      }
+    );
   };
 
   importerDocument = event => {
@@ -261,7 +298,7 @@ export default class DocumentModeles extends React.Component {
               <Button
                 disabled={this.state.disabledBtnSave}
                 content="Enregistrer"
-                onClick={this.updateDocument}
+                onClick={this.save}
               />
               <Button
                 negative={true}
@@ -288,7 +325,7 @@ export default class DocumentModeles extends React.Component {
           onClose={() =>
             this.setState({ modalRename: false, currentDocumentId: null })
           }
-          onRename={() => {}}
+          onRename={this.rename}
         />
 
         {/* modal de création d'un modèle */}

@@ -30,8 +30,19 @@ export default class RenameDocument extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.open && prevProps.open !== this.props.open) {
-      // TODO : enlever l'extension
-      this.setState({ fileName: this.props.fileName, disableRenameBtn: true });
+      // l'extension n'est pas prise en compte
+      let fileNameSplit = _.split(this.props.fileName, ".");
+      //let f = "";
+      if (fileNameSplit.length > 1) {
+        _.forEach(fileNameSplit, (str, i) => {
+          if (i < fileNameSplit.length - 1) {
+            f += str;
+          }
+        });
+      } else {
+        f = this.props.fileName;
+      }
+      this.setState({ fileName: f, disableRenameBtn: true });
     }
   }
 
@@ -68,7 +79,7 @@ export default class RenameDocument extends React.Component {
               content="Renommer"
               onClick={() => {
                 if (this.props.onRename) {
-                  //this.props.onRename()
+                  this.props.onRename(this.state.fileName);
                 }
               }}
             />
