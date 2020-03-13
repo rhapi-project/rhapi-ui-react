@@ -4,7 +4,11 @@ import _ from "lodash";
 import ListeDocument from "./ListeDocument";
 import TextDocument from "./TextDocument";
 import { Button, Divider, Modal } from "semantic-ui-react";
-import { downloadBinaryFile, downloadTextFile, uploadFile } from "../lib/Helpers";
+import {
+  downloadBinaryFile,
+  downloadTextFile,
+  uploadFile
+} from "../lib/Helpers";
 
 const propDefs = {
   description: "Liste des documents d'un patient (archives)",
@@ -83,7 +87,7 @@ export default class DocumentArchives extends React.Component {
       {},
       result => {
         if (!_.startsWith(result.mimeType, "text/")) {
-          this.telechargerDocument(result);
+          this.downloadDocument(result);
         } else {
           this.setState({
             selectedDocument: result,
@@ -112,16 +116,20 @@ export default class DocumentArchives extends React.Component {
     }
   };
 
-  telechargerDocument = resultDoc => {
+  downloadDocument = resultDoc => {
     // objet du document passé en paramètre
     if (!_.startsWith(resultDoc.mimeType, "text/")) {
       downloadBinaryFile(resultDoc.document, resultDoc.fileName);
     } else {
-      downloadTextFile(resultDoc.document, resultDoc.fileName, resultDoc.mimeType);
+      downloadTextFile(
+        resultDoc.document,
+        resultDoc.fileName,
+        resultDoc.mimeType
+      );
     }
   };
 
-  importerDocument = event => {
+  uploadDocument = event => {
     uploadFile(
       event,
       (file, fileReader) => {
@@ -130,7 +138,7 @@ export default class DocumentArchives extends React.Component {
       () => {
         return;
       }
-    )
+    );
   };
 
   createDocument = (fileName, mimeType, document) => {
@@ -224,7 +232,13 @@ export default class DocumentArchives extends React.Component {
             <TextDocument
               data={{}}
               document={this.state.selectedDocument.document}
-              mode={this.state.modeText === "text/html" ? "html" : "plain"}
+              mode={
+                this.state.modeText === "text/html"
+                  ? "html"
+                  : this.state.modeText === "text/rtf"
+                  ? "rtf"
+                  : "plain"
+              }
               onEdit={content => {
                 let sd = this.state.selectedDocument;
                 sd.document = content;
@@ -243,7 +257,7 @@ export default class DocumentArchives extends React.Component {
               <Button
                 content="Télécharger"
                 onClick={() =>
-                  this.telechargerDocument(this.state.selectedDocument)
+                  this.downloadDocument(this.state.selectedDocument)
                 }
               />
               <Button
@@ -279,7 +293,7 @@ export default class DocumentArchives extends React.Component {
           id="file"
           type="file"
           hidden={true}
-          onChange={this.importerDocument}
+          onChange={this.uploadDocument}
         />
       </React.Fragment>
     );

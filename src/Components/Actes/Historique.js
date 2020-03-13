@@ -1333,7 +1333,6 @@ export default class Historique extends React.Component {
                         this.timeout = null;
                         if (
                           !_.startsWith(acte.code, "#") ||
-                          acte.code === "#FSE" ||
                           acte.code === "#DEVIS"
                         ) {
                           this.onModify(acte.id, acte);
@@ -1361,6 +1360,10 @@ export default class Historique extends React.Component {
                             },
                             error => {}
                           );
+                        } else if (acte.code === "#FSE") {
+                          if (this.props.onEditActeClick) {
+                            this.props.onEditActeClick(acte.id);
+                          }
                         } else {
                           if (this.props.onActeDoubleClick) {
                             this.onActeDoubleClick(e, acte);
