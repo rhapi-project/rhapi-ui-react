@@ -2,7 +2,7 @@ import React from "react";
 import { Button, Divider, Form, Table, TableRow } from "semantic-ui-react";
 import _ from "lodash";
 import { Client } from "rhapi-client";
-import { Documents /*, Functions*/ } from "../../Components";
+import { Documents } from "../../Components";
 
 // Instanciation du client RHAPI sans authentification
 const client = new Client("https://demo.rhapi.net/demo01");
@@ -24,7 +24,7 @@ export default class DocumentsTextDocument extends React.Component {
   state = {
     idPatient: null,
     data: {},
-    autoFilling: false,
+    //autoFilling: false,
     type: 0,
     documents: [],
     selectedDocument: {}
@@ -82,12 +82,12 @@ export default class DocumentsTextDocument extends React.Component {
     );
   };
 
-  autoFilling = () => {
+  /*autoFilling = () => {
     this.loadActes(this.state.idPatient);
-  };
+  };*/
 
   // sur cet exemple on récupère les actes d'un devis (pour un patient donné)
-  loadActes = idPatient => {
+  /*loadActes = idPatient => {
     let params = {
       _code: "#DEVIS",
       //_etat: 1, // TODO : voir quel type de devis récupérer
@@ -105,12 +105,12 @@ export default class DocumentsTextDocument extends React.Component {
         console.log(error);
       }
     );
-  };
+  };*/
 
-  changeDateFormat = dateStr => {
+  /*changeDateFormat = dateStr => {
     let d = new Date(dateStr);
     return d.toLocaleDateString();
-  };
+  };*/
 
   readDocument = id => {
     client.Documents.read(
@@ -126,7 +126,7 @@ export default class DocumentsTextDocument extends React.Component {
     );
   };
 
-  savePDFDocument = base64Content => {
+  /*savePDFDocument = base64Content => {
     client.Documents.create(
       {
         fileName: this.state.selectedDocument.fileName + ".pdf",
@@ -142,7 +142,7 @@ export default class DocumentsTextDocument extends React.Component {
         console.log(error);
       }
     );
-  };
+  };*/
 
   updateDocument = () => {
     client.Documents.update(
@@ -203,35 +203,12 @@ export default class DocumentsTextDocument extends React.Component {
 
         <Divider hidden={true} />
 
-        {!_.isEmpty(this.state.documents) ? (
-          <Table singleLine={true} selectable={true}>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell>Nom du fichier</Table.HeaderCell>
-                <Table.HeaderCell>Mime</Table.HeaderCell>
-                <Table.HeaderCell>Dernière modification</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
-
-            <Table.Body>
-              {_.map(this.state.documents, (doc, i) => (
-                <TableRow
-                  key={i}
-                  //onClick={() => this.setState({ selectedDocument: doc })}
-                  onClick={() => this.readDocument(doc.id)}
-                  active={doc.id === this.state.selectedDocument.id}
-                >
-                  <Table.Cell>{doc.fileName}</Table.Cell>
-                  <Table.Cell>{doc.mimeType}</Table.Cell>
-                  <Table.Cell>
-                    {this.changeDateFormat(doc.modifiedAt)}
-                  </Table.Cell>
-                </TableRow>
-              ))}
-              <Table.Row></Table.Row>
-            </Table.Body>
-          </Table>
-        ) : null}
+        <Documents.ListeDocument
+          documents={this.state.documents}
+          onDocumentDoubleClick={id => {
+            this.readDocument(id);
+          }}
+        />
 
         <Divider hidden={true} />
 
@@ -243,6 +220,7 @@ export default class DocumentsTextDocument extends React.Component {
             <Documents.TextDocument
               data={this.state.autoFilling ? this.state.data : {}}
               document={this.state.selectedDocument.document}
+              // TODO : Rajouter un mode de lecture RTF
               mode={
                 this.state.selectedDocument.mimeType === "text/plain"
                   ? "plain"
@@ -265,42 +243,38 @@ export default class DocumentsTextDocument extends React.Component {
               content="Fermer"
               onClick={() => this.setState({ selectedDocument: {} })}
             />
-            {!_.isNull(this.state.idPatient) ? (
+            {/*!_.isNull(this.state.idPatient) ? (
               <Button
                 content="Remplissage auto"
                 onClick={() => this.autoFilling()}
               />
-            ) : null}
-            <Button
+            ) : null*/}
+            {/*<Button
               content="Enregistrer"
               onClick={() => this.updateDocument()}
-            />
-            <Button
+            />*/}
+            {/*<Button
               content="Télécharger (PDF)"
               onClick={() => {
                 //let func = new Functions();
                 //func.PDF.download(this.state.selectedDocument.document);
               }}
-            />
-            {!_.isNull(this.state.idPatient) ? (
+            />*/}
+            {/*!_.isNull(this.state.idPatient) ? (
               <Button
                 content="Enregistrer (PDF)"
                 onClick={() => {
-                  /*let func = new Functions();
-                  let base64Content = func.PDF.toBase64(
-                    this.state.selectedDocument.document
-                  );*/
                   //this.savePDFDocument(base64Content);
                   //func.PDF.experimentalDownload(this.state.selectedDocument.document, "fichier");
                 }}
               />
-            ) : null}
-            <Button
+            ) : null*/}
+            {/*<Button
               //disabled={true}
               negative={true}
               content="Supprimer"
               onClick={() => this.deleteDocument()}
-            />
+            />*/}
           </React.Fragment>
         ) : null}
       </React.Fragment>

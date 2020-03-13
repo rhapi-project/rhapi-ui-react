@@ -4,6 +4,8 @@ import { Button, Divider, Form, Modal } from "semantic-ui-react";
 import _ from "lodash";
 import ListeDocument from "./ListeDocument";
 import TextDocument from "./TextDocument";
+import RenameDocument from "./RenameDocument";
+import { downloadTextFile, uploadFile } from "../lib/Helpers";
 
 const propDefs = {
   description:
@@ -33,6 +35,7 @@ export default class DocumentModeles extends React.Component {
     disabledBtnSave: true,
     modalDelete: false,
     modalCreate: false,
+    modalRename: false,
     currentDocumentId: null
   };
 
@@ -54,7 +57,8 @@ export default class DocumentModeles extends React.Component {
           selectedDocument: {},
           currentDocumentId: null,
           modalDelete: false,
-          modalCreate: false
+          modalCreate: false,
+          modalRename: false
         });
       },
       error => {
@@ -63,32 +67,40 @@ export default class DocumentModeles extends React.Component {
     );
   };
 
-  readDocument = id => {
+  readDocument = (id, onSuccess, onError) => {
     this.props.client.Documents.read(
       id,
       {},
       result => {
-        //console.log(result);
-        this.setState({
-          selectedDocument: result,
-          currentDocumentId: result.id
-        });
+        onSuccess(result);
       },
       error => {
-        console.log(error);
+        onError(error);
       }
     );
   };
 
-  updateDocument = () => {
+  updateDocument = (id, params, onSuccess, onError) => {
     this.props.client.Documents.update(
+      id,
+      params,
+      result => {
+        onSuccess(result);
+      },
+      error => {
+        onError(error);
+      }
+    );
+  };
+
+  save = () => {
+    this.updateDocument(
       this.state.selectedDocument.id,
       {
         document: this.state.selectedDocument.document,
         lockRevision: this.state.selectedDocument.lockRevision
       },
       result => {
-        //console.log(result);
         this.setState({
           selectedDocument: result,
           disabledBtnSave: true,
@@ -113,12 +125,12 @@ export default class DocumentModeles extends React.Component {
     );
   };
 
-  createModele = fileName => {
+  createModele = (fileName, content) => {
     this.props.client.Documents.create(
       {
-        fileName: fileName + ".html",
+        fileName: fileName,
         mimeType: "text/x-html-template",
-        document: ""
+        document: content
       },
       result => {
         //console.log(result);
@@ -131,9 +143,74 @@ export default class DocumentModeles extends React.Component {
   };
 
   handleActions = (id, action) => {
-    if (action === "supprimer") {
-      this.setState({ modalDelete: true, currentDocumentId: id });
+    switch (action) {
+      case "supprimer":
+        this.setState({ modalDelete: true, currentDocumentId: id });
+        break;
+      case "rename":
+        this.setState({ modalRename: true, currentDocumentId: id });
+        break;
+      case "duplicate":
+        this.readDocument(
+          id,
+          result => {
+            this.createModele("(Copie) " + result.fileName, result.document);
+          },
+          error => {
+            console.log(error);
+          }
+        );
+        break;
+      case "download":
+        this.readDocument(
+          id,
+          result => {
+            downloadTextFile(result.document, result.fileName, "text/html");
+          },
+          error => {
+            console.log(error);
+          }
+        );
+        break;
+      default:
+        break;
     }
+  };
+
+  rename = fileName => {
+    this.readDocument(
+      this.state.currentDocumentId,
+      result => {
+        this.updateDocument(
+          result.id,
+          {
+            fileName: fileName + ".html",
+            lockRevision: result.lockRevision
+          },
+          res => {
+            this.reload();
+          },
+          err => {
+            console.log(err);
+          }
+        );
+      },
+      error => {
+        console.log(error);
+      }
+    );
+  };
+
+  importerDocument = event => {
+    uploadFile(
+      event,
+      (file, fileReader) => {
+        this.createModele(file.name, fileReader.result);
+      },
+      () => {
+        return;
+      }
+    );
   };
 
   render() {
@@ -144,14 +221,37 @@ export default class DocumentModeles extends React.Component {
             <ListeDocument
               documents={this.state.modeles}
               onDocumentClick={id => {}}
-              onDocumentDoubleClick={this.readDocument}
+              onDocumentDoubleClick={id => {
+                this.readDocument(
+                  id,
+                  result => {
+                    this.setState({
+                      selectedDocument: result,
+                      currentDocumentId: result.id
+                    });
+                  },
+                  error => {
+                    console.log(error);
+                  }
+                );
+              }}
               onSelectionChange={modeles => {}}
               onActionClick={this.handleActions}
               actions={[
                 {
+                  icon: "copy outline",
+                  text: "Dupliquer",
+                  action: id => this.handleActions(id, "duplicate")
+                },
+                {
+                  icon: "write",
+                  text: "Renommer",
+                  action: id => this.handleActions(id, "rename")
+                },
+                {
                   icon: "download",
                   text: "Télécharger",
-                  action: id => {}
+                  action: id => this.handleActions(id, "download")
                 }
               ]}
             />
@@ -161,10 +261,19 @@ export default class DocumentModeles extends React.Component {
                 content="Créer un modèle"
                 onClick={() => this.setState({ modalCreate: true })}
               />
-              {/*<Button 
-                  content="Importer un modèle"
-                  onClick={() => {}}
-                />*/}
+              <Button
+                content="Importer un modèle"
+                onClick={() => {
+                  document.getElementById("file").click();
+                }}
+              />
+              <input
+                id="file"
+                type="file"
+                hidden={true}
+                accept="text/html"
+                onChange={this.importerDocument}
+              />
             </div>
           </React.Fragment>
         ) : (
@@ -189,7 +298,7 @@ export default class DocumentModeles extends React.Component {
               <Button
                 disabled={this.state.disabledBtnSave}
                 content="Enregistrer"
-                onClick={this.updateDocument}
+                onClick={this.save}
               />
               <Button
                 negative={true}
@@ -199,6 +308,25 @@ export default class DocumentModeles extends React.Component {
             </div>
           </React.Fragment>
         )}
+
+        {/* modal - renommer un document */}
+        <RenameDocument
+          open={this.state.modalRename}
+          fileName={
+            _.isNull(this.state.currentDocumentId)
+              ? ""
+              : this.state.modeles[
+                  _.findIndex(
+                    this.state.modeles,
+                    mod => mod.id === this.state.currentDocumentId
+                  )
+                ].fileName
+          }
+          onClose={() =>
+            this.setState({ modalRename: false, currentDocumentId: null })
+          }
+          onRename={this.rename}
+        />
 
         {/* modal de création d'un modèle */}
         <CreationModele
@@ -260,7 +388,7 @@ class CreationModele extends React.Component {
               content="Créer"
               onClick={() => {
                 if (!_.isEmpty(this.state.fileName)) {
-                  this.props.onCreate(this.state.fileName);
+                  this.props.onCreate(this.state.fileName + ".html", "");
                 }
               }}
             />
@@ -270,3 +398,15 @@ class CreationModele extends React.Component {
     );
   }
 }
+
+/*class Rename extends React.Component {
+  state = {
+    fileName: ""
+  }
+
+  render() {
+    return(
+
+    );
+  }
+}*/
