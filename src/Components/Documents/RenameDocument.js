@@ -32,7 +32,7 @@ export default class RenameDocument extends React.Component {
     if (this.props.open && prevProps.open !== this.props.open) {
       // l'extension n'est pas prise en compte
       let fileNameSplit = _.split(this.props.fileName, ".");
-      //let f = "";
+      let f = "";
       if (fileNameSplit.length > 1) {
         _.forEach(fileNameSplit, (str, i) => {
           if (i < fileNameSplit.length - 1) {
