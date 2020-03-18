@@ -302,7 +302,7 @@ export default class App extends React.Component {
             pointing={true}
             vertical={true}
             inverted={true}
-            style={{ height: "100vh" }}
+            // style={{ height: "100vh" }}
           >
             {ccam}
             {patients}

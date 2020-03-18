@@ -16,7 +16,6 @@ const propDefs = {
       "Retourne en paramètre l'id d'un document sur un double click",
     onSelectionChange:
       "Retourne en paramètre la liste des id des documents sélectionnés (multi-sélection possible par CTRL+click)",
-    onActionClick: "Retourne en paramètre l'id et l'action d'un document",
     actions:
       "Tableau d'objet contenant des actions à effectuer (en plus des actions par défaut)"
   },
@@ -25,7 +24,6 @@ const propDefs = {
     onDocumentClick: PropTypes.func,
     onDocumentDoubleClick: PropTypes.func,
     onSelectionChange: PropTypes.func,
-    onActionClick: PropTypes.func,
     actions: PropTypes.array
   }
 };
@@ -39,18 +37,11 @@ export default class ListeDocument extends React.Component {
 
   static propTypes = propDefs.propTypes;
   static defaultProps = {
-    documents: [],
-    actions: []
+    documents: []
   };
 
   state = {
     documentsSelected: []
-  };
-
-  onClick = (id, action) => {
-    if (this.props.onActionClick) {
-      this.props.onActionClick(id, action);
-    }
   };
 
   onDocumentClick = (e, document) => {
@@ -147,18 +138,7 @@ export default class ListeDocument extends React.Component {
                 document.id
               );
 
-              let actions = [
-                {
-                  icon: "trash",
-                  text: "Supprimer",
-                  action: id => this.onClick(id, "supprimer")
-                }
-              ];
-
-              // Ajout des actions (props)
-              if (this.props.actions) {
-                actions = _.concat(actions, this.props.actions);
-              }
+              let actions = this.props.actions;
 
               return (
                 <React.Fragment key={index}>

@@ -49,19 +49,22 @@ export default class DocumentArchives extends React.Component {
   }
 
   reload = () => {
-    let params = {};
+    // let params = {};
 
-    if (!this.props.idPatient) {
-      _.set(params, "q1", "AND,idPatient,Equal,0");
-      _.set(params, "q2", "AND,mimeType,NotLike,text/x-html-template");
-    } else {
-      _.set(params, "q1", "AND,idPatient,Equal," + this.props.idPatient);
-    }
+    // if (!this.props.idPatient) {
+    //   _.set(params, "q1", "AND,idPatient,Equal,0");
+    //   _.set(params, "q2", "AND,mimeType,NotLike,text/x-html-template");
+    // } else {
+    //   _.set(params, "q1", "AND,idPatient,Equal," + this.props.idPatient);
+    // }
 
-    _.set(params, "exfields", "document");
+    // _.set(params, "exfields", "document");
 
     this.props.client.Documents.readAll(
-      params,
+      {
+        _idPatient: this.props.idPatient, // idPatient est nécessairement > 0 donc il ne peut pas s'agir d'un modèle
+        exfields: "document"
+      },
       result => {
         this.setState({
           documents: result.results,
@@ -206,8 +209,12 @@ export default class DocumentArchives extends React.Component {
               onDocumentClick={this.onDocumentClick}
               onDocumentDoubleClick={this.onDocumentDoubleClick}
               onSelectionChange={this.onSelectionChange}
-              onActionClick={this.onActionClick}
               actions={[
+                {
+                  icon: "trash",
+                  text: "Supprimer",
+                  action: id => this.onActionClick(id, "supprimer")
+                },
                 {
                   icon: "question circle",
                   text: "Autre action",
