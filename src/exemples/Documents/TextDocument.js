@@ -176,6 +176,20 @@ export default class DocumentsTextDocument extends React.Component {
     );
   };
 
+  onActionClick = (id, action) => {
+    if (action === "supprimer") {
+      client.Documents.destroy(
+        id,
+        result => {
+          this.reload(this.state.idPatient, this.state.type);
+        },
+        error => {}
+      );
+    }
+
+    console.log(id + " " + action);
+  };
+
   render() {
     return (
       <React.Fragment>
@@ -208,6 +222,13 @@ export default class DocumentsTextDocument extends React.Component {
           onDocumentDoubleClick={id => {
             this.readDocument(id);
           }}
+          actions={[
+            {
+              icon: "trash",
+              text: "Supprimer",
+              action: id => this.onActionClick(id, "supprimer")
+            }
+          ]}
         />
 
         <Divider hidden={true} />

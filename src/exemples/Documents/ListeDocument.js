@@ -110,9 +110,9 @@ export default class DocumentsListeDocument extends React.Component {
           onActionClick={this.onActionClick}
           actions={[
             {
-              icon: "question circle",
-              text: "Autre action",
-              action: id => this.onActionClick(id, "autre action")
+              icon: "trash",
+              text: "Supprimer",
+              action: id => this.onActionClick(id, "supprimer")
             }
           ]}
         />

@@ -289,7 +289,7 @@ export default class DocumentModeles extends React.Component {
                 },
                 {
                   icon: "trash",
-                  text: "SUPPRIMER",
+                  text: "Supprimer",
                   action: id => this.handleActions(id, "delete")
                 }
               ]}
