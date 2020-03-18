@@ -4,6 +4,7 @@ import TextDocument from "./TextDocument";
 import ListeDocument from "./ListeDocument";
 import DocumentArchives from "./DocumentArchives";
 import RenameDocument from "./RenameDocument";
+import PropertiesModele from "./PropertiesModele";
 
 export default class Documents extends React.Component {
   static DocumentModeles = DocumentModeles;
@@ -11,6 +12,7 @@ export default class Documents extends React.Component {
   static ListeDocument = ListeDocument;
   static DocumentArchives = DocumentArchives;
   static RenameDocument = RenameDocument;
+  static PropertiesModele = PropertiesModele;
 
   render() {
     const { children } = this.props;

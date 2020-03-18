@@ -235,6 +235,114 @@ const uploadFile = (event, onSucess, onError) => {
   return doc.output("datauristring");
 };*/
 
+/*const modeleDocument = (client, origine, usage, onSucess, onError) => {
+  let modelesUsage = [];
+  client.Documents.readAll(
+    {
+      _mimeType: "text/x-html-template",
+      origine: origine,
+      exfields: "document"
+    },
+    result => {
+      _.forEach(result.results, (modele, index) => {
+        if (modele.infosJO.modele) {
+          if (modele.infosJO.modele.usage === usage) {
+            modelesUsage.push(modele);
+          }
+        }
+      });
+      console.log(modelesUsage);
+    }
+  );
+};*/
+
+const setModeleDocument = (
+  client,
+  origine,
+  id,
+  nom,
+  usage,
+  defaut,
+  onSuccess,
+  onError
+) => {
+  client.Documents.read(
+    id,
+    {},
+    result => {
+      if (result.origine !== origine) {
+        onError(undefined);
+        return;
+      }
+      if (defaut) {
+        client.Documents.readAll(
+          {
+            _mimeType: "text/x-html-template",
+            origine: origine,
+            exfields: "document"
+          },
+          res => {
+            _.forEach(res.results, modele => {
+              if (
+                modele.id !== id &&
+                modele.origine === origine &&
+                _.get(modele.infosJO.modele, "usage", "") === usage &&
+                _.get(modele.infosJO.modele, "defaut", false)
+              ) {
+                client.Documents.update(
+                  modele.id,
+                  {
+                    infosJO: {
+                      modele: {
+                        defaut: false,
+                        nom: _.get(modele.infosJO.modele, "nom", ""),
+                        usage: _.get(modele.infosJO.modele, "usage", "")
+                      }
+                    }
+                  },
+                  r => {
+                    //console.log("màj d'un modèle");
+                  },
+                  e => {
+                    //console.log(e);
+                  }
+                );
+              }
+            });
+          },
+          err => {
+            onError(err);
+            return;
+          }
+        );
+      }
+
+      // màj du modèle courant
+      client.Documents.update(
+        id,
+        {
+          infosJO: {
+            modele: {
+              nom: nom, // vérifier (utilisation des caractères acceptables pour la nomenclature des fichiers)
+              usage: usage,
+              defaut: defaut
+            }
+          }
+        },
+        res => {
+          onSuccess(res);
+        },
+        err => {
+          onError(err);
+        }
+      );
+    },
+    error => {
+      onError(error);
+    }
+  );
+};
+
 export {
   spacedLocalisation,
   tarif,
@@ -249,5 +357,7 @@ export {
   codesDocs,
   downloadBinaryFile,
   downloadTextFile,
-  uploadFile
+  uploadFile,
+  //modeleDocument,
+  setModeleDocument
 };

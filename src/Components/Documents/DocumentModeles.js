@@ -5,6 +5,7 @@ import _ from "lodash";
 import ListeDocument from "./ListeDocument";
 import TextDocument from "./TextDocument";
 import RenameDocument from "./RenameDocument";
+import PropertiesModele from "./PropertiesModele";
 import { downloadTextFile, uploadFile } from "../lib/Helpers";
 
 const propDefs = {
@@ -14,19 +15,19 @@ const propDefs = {
   propDocs: {
     idPatient:
       "identifiant du patient nécessaire si l'on souhaite créer un document à partir d'un modèle",
-    origine: "identifiant du praticien"
+    user: "identifiant du praticien"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
     idPatient: PropTypes.number,
-    origine: PropTypes.string
+    user: PropTypes.string
   }
 };
 
 export default class DocumentModeles extends React.Component {
   static propTypes = propDefs.propTypes;
   static defaultProps = {
-    origine: ""
+    user: ""
   };
 
   state = {
@@ -36,6 +37,7 @@ export default class DocumentModeles extends React.Component {
     modalDelete: false,
     modalCreate: false,
     modalRename: false,
+    modalProperties: false, //
     currentDocumentId: null
   };
 
@@ -47,7 +49,7 @@ export default class DocumentModeles extends React.Component {
     this.props.client.Documents.readAll(
       {
         _mimeType: "text/x-html-template",
-        origine: this.props.origine,
+        origine: this.props.user, // Attention : l'utilisation de _origine ne donne pas le bon résultat
         exfields: "document"
       },
       result => {
@@ -144,7 +146,7 @@ export default class DocumentModeles extends React.Component {
 
   handleActions = (id, action) => {
     switch (action) {
-      case "supprimer":
+      case "delete":
         this.setState({ modalDelete: true, currentDocumentId: id });
         break;
       case "rename":
@@ -171,6 +173,15 @@ export default class DocumentModeles extends React.Component {
             console.log(error);
           }
         );
+        break;
+      case "edit":
+        this.editionDocument(id);
+        break;
+      case "generate":
+        // implémenter la génération d'un document si un idPatient est défini
+        break;
+      case "properties":
+        this.setState({ modalProperties: true, currentDocumentId: id });
         break;
       default:
         break;
@@ -213,6 +224,21 @@ export default class DocumentModeles extends React.Component {
     );
   };
 
+  editionDocument = id => {
+    this.readDocument(
+      id,
+      result => {
+        this.setState({
+          selectedDocument: result,
+          currentDocumentId: result.id
+        });
+      },
+      error => {
+        console.log(error);
+      }
+    );
+  };
+
   render() {
     return (
       <React.Fragment>
@@ -220,24 +246,22 @@ export default class DocumentModeles extends React.Component {
           <React.Fragment>
             <ListeDocument
               documents={this.state.modeles}
-              onDocumentClick={id => {}}
+              //onDocumentClick={id => {}}
               onDocumentDoubleClick={id => {
-                this.readDocument(
-                  id,
-                  result => {
-                    this.setState({
-                      selectedDocument: result,
-                      currentDocumentId: result.id
-                    });
-                  },
-                  error => {
-                    console.log(error);
-                  }
-                );
+                if (this.props.idPatient) {
+                  // TODO : générer un document
+                } else {
+                  this.editionDocument(id);
+                }
               }}
-              onSelectionChange={modeles => {}}
+              //onSelectionChange={modeles => {}}
               onActionClick={this.handleActions}
               actions={[
+                {
+                  icon: "edit",
+                  text: "Éditer",
+                  action: id => this.handleActions(id, "edit")
+                },
                 {
                   icon: "copy outline",
                   text: "Dupliquer",
@@ -249,9 +273,24 @@ export default class DocumentModeles extends React.Component {
                   action: id => this.handleActions(id, "rename")
                 },
                 {
+                  icon: "file alternate outline",
+                  text: "Générer un document",
+                  action: id => this.handleActions(id, "generate")
+                },
+                {
                   icon: "download",
                   text: "Télécharger",
                   action: id => this.handleActions(id, "download")
+                },
+                {
+                  icon: "settings",
+                  text: "Propriétés",
+                  action: id => this.handleActions(id, "properties")
+                },
+                {
+                  icon: "trash",
+                  text: "SUPPRIMER",
+                  action: id => this.handleActions(id, "delete")
                 }
               ]}
             />
@@ -351,6 +390,17 @@ export default class DocumentModeles extends React.Component {
             />
           </Modal.Actions>
         </Modal>
+
+        {/* modal des propriétés d'un modèle */}
+        <PropertiesModele
+          client={this.props.client}
+          id={this.state.currentDocumentId}
+          user={this.props.user}
+          open={this.state.modalProperties}
+          onClose={() =>
+            this.setState({ modalProperties: false, currentDocumentId: null })
+          }
+        />
       </React.Fragment>
     );
   }
@@ -398,15 +448,3 @@ class CreationModele extends React.Component {
     );
   }
 }
-
-/*class Rename extends React.Component {
-  state = {
-    fileName: ""
-  }
-
-  render() {
-    return(
-
-    );
-  }
-}*/

@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Divider, Form, Table, TableRow } from "semantic-ui-react";
+import { Button, Divider, Form } from "semantic-ui-react";
 import _ from "lodash";
 import { Client } from "rhapi-client";
 import { Documents } from "../../Components";
