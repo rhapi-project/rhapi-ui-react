@@ -278,7 +278,7 @@ const setModeleDocument = (
         client.Documents.readAll(
           {
             _mimeType: "text/x-html-template",
-            origine: origine,
+            _origine: origine,
             exfields: "document"
           },
           res => {
@@ -301,7 +301,7 @@ const setModeleDocument = (
                     }
                   },
                   r => {
-                    //console.log("màj d'un modèle");
+                    //console.log("màj du modèle terminé");
                   },
                   e => {
                     //console.log(e);

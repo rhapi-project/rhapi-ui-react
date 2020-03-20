@@ -6,6 +6,7 @@ import ListeDocument from "./ListeDocument";
 import TextDocument from "./TextDocument";
 import RenameDocument from "./RenameDocument";
 import PropertiesModele from "./PropertiesModele";
+import RecopieModele from "./RecopieModele";
 import { downloadTextFile, uploadFile } from "../lib/Helpers";
 
 const propDefs = {
@@ -26,9 +27,6 @@ const propDefs = {
 
 export default class DocumentModeles extends React.Component {
   static propTypes = propDefs.propTypes;
-  static defaultProps = {
-    user: ""
-  };
 
   state = {
     modeles: [],
@@ -37,7 +35,8 @@ export default class DocumentModeles extends React.Component {
     modalDelete: false,
     modalCreate: false,
     modalRename: false,
-    modalProperties: false, //
+    modalProperties: false,
+    modalRecopie: false,
     currentDocumentId: null
   };
 
@@ -46,12 +45,15 @@ export default class DocumentModeles extends React.Component {
   }
 
   reload = () => {
+    let params = {
+      _mimeType: "text/x-html-template",
+      exfields: "document"
+    };
+    if (_.isString(this.props.user) && !_.isEmpty(this.props.user)) {
+      params._origine = this.props.user;
+    }
     this.props.client.Documents.readAll(
-      {
-        _mimeType: "text/x-html-template",
-        origine: this.props.user, // Attention : l'utilisation de _origine ne donne pas le bon résultat
-        exfields: "document"
-      },
+      params,
       result => {
         //console.log(result);
         this.setState({
@@ -60,7 +62,8 @@ export default class DocumentModeles extends React.Component {
           currentDocumentId: null,
           modalDelete: false,
           modalCreate: false,
-          modalRename: false
+          modalRename: false,
+          modalRecopie: false
         });
       },
       error => {
@@ -254,7 +257,7 @@ export default class DocumentModeles extends React.Component {
                   this.editionDocument(id);
                 }
               }}
-              //onSelectionChange={modeles => {}}
+              onSelectionChange={modeles => {}}
               onActionClick={this.handleActions}
               actions={[
                 {
@@ -305,6 +308,10 @@ export default class DocumentModeles extends React.Component {
                 onClick={() => {
                   document.getElementById("file").click();
                 }}
+              />
+              <Button
+                content="Recopier un modèle"
+                onClick={() => this.setState({ modalRecopie: true })}
               />
               <input
                 id="file"
@@ -395,11 +402,18 @@ export default class DocumentModeles extends React.Component {
         <PropertiesModele
           client={this.props.client}
           id={this.state.currentDocumentId}
-          user={this.props.user}
+          user={_.isEmpty(this.props.user) ? "" : this.props.user}
           open={this.state.modalProperties}
           onClose={() =>
             this.setState({ modalProperties: false, currentDocumentId: null })
           }
+        />
+
+        {/* modal de recopie d'un modèle */}
+        <RecopieModele
+          client={this.props.client}
+          open={this.state.modalRecopie}
+          onClose={this.reload}
         />
       </React.Fragment>
     );
