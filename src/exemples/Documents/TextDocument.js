@@ -229,6 +229,8 @@ export default class DocumentsTextDocument extends React.Component {
               action: id => this.onActionClick(id, "supprimer")
             }
           ]}
+          showAction={true}
+          showCheckbox={false}
         />
 
         <Divider hidden={true} />

@@ -115,6 +115,8 @@ export default class DocumentsListeDocument extends React.Component {
               action: id => this.onActionClick(id, "supprimer")
             }
           ]}
+          showAction={true}
+          showCheckbox={true}
         />
       </React.Fragment>
     );

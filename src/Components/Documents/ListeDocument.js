@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Icon, Table } from "semantic-ui-react";
+import { Checkbox, Icon, Table } from "semantic-ui-react";
 import _ from "lodash";
 import moment from "moment";
 import Actions from "../Shared/Actions";
@@ -17,14 +17,20 @@ const propDefs = {
     onSelectionChange:
       "Retourne en paramètre la liste des id des documents sélectionnés (multi-sélection possible par CTRL+click)",
     actions:
-      "Tableau d'objet contenant des actions à effectuer (en plus des actions par défaut)"
+      "Tableau d'objet contenant des actions à effectuer (en plus des actions par défaut)",
+    showAction:
+      "Permet d'afficher la colonne des actions. Par défaut, showAction prend la valeur true",
+    showCheckbox:
+      "Permet d'afficher la colonne de sélection (Checkbox). Par défaut, showCheckbox prend la valeur false"
   },
   propTypes: {
     documents: PropTypes.array,
     onDocumentClick: PropTypes.func,
     onDocumentDoubleClick: PropTypes.func,
     onSelectionChange: PropTypes.func,
-    actions: PropTypes.array
+    actions: PropTypes.array,
+    showAction: PropTypes.bool,
+    showCheckbox: PropTypes.bool
   }
 };
 
@@ -37,12 +43,24 @@ export default class ListeDocument extends React.Component {
 
   static propTypes = propDefs.propTypes;
   static defaultProps = {
-    documents: []
+    documents: [],
+    actions: [],
+    showAction: true,
+    showCheckbox: true
   };
 
   state = {
-    documentsSelected: []
+    documentsSelected: [],
+    checkedAll: false
   };
+
+  componentDidUpdate(prevProps) {
+    if (prevProps !== this.props) {
+      this.setState({
+        checkedAll: false
+      });
+    }
+  }
 
   onDocumentClick = (e, document) => {
     let id = document.id;
@@ -89,7 +107,13 @@ export default class ListeDocument extends React.Component {
       this.props.onSelectionChange(documentsSelected);
     }
 
-    this.setState({ documentsSelected: documentsSelected });
+    this.setState({
+      documentsSelected: documentsSelected,
+      checkedAll:
+        _.size(documentsSelected) === _.size(this.props.documents)
+          ? true
+          : false
+    });
   };
 
   onDocumentDoubleClick = (e, document) => {
@@ -106,7 +130,13 @@ export default class ListeDocument extends React.Component {
       this.props.onSelectionChange(documentsSelected);
     }
 
-    this.setState({ documentsSelected: documentsSelected });
+    this.setState({
+      documentsSelected: documentsSelected,
+      checkedAll:
+        _.size(documentsSelected) === _.size(this.props.documents)
+          ? true
+          : false
+    });
   };
 
   render() {
@@ -128,7 +158,44 @@ export default class ListeDocument extends React.Component {
               <Table.HeaderCell collapsing={true}>
                 Dernière modification
               </Table.HeaderCell>
-              <Table.HeaderCell collapsing={true}>Action</Table.HeaderCell>
+              {this.props.showAction ? (
+                <Table.HeaderCell collapsing={true}>Action</Table.HeaderCell>
+              ) : (
+                <React.Fragment />
+              )}
+              {this.props.showCheckbox ? (
+                <Table.HeaderCell collapsing={true}>
+                  <Checkbox
+                    checked={this.state.checkedAll}
+                    onClick={() => {
+                      if (this.state.checkedAll) {
+                        this.setState({
+                          documentsSelected: [],
+                          checkedAll: false
+                        });
+                        return;
+                      }
+
+                      let documentsSelected = [];
+
+                      _.map(this.props.documents, document => {
+                        documentsSelected.push(document.id);
+                      });
+
+                      if (this.props.onSelectionChange) {
+                        this.props.onSelectionChange(documentsSelected);
+                      }
+
+                      this.setState({
+                        documentsSelected: documentsSelected,
+                        checkedAll: true
+                      });
+                    }}
+                  />
+                </Table.HeaderCell>
+              ) : (
+                <React.Fragment />
+              )}
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -204,13 +271,24 @@ export default class ListeDocument extends React.Component {
                       {moment(document.modifiedAt).format("L")}{" "}
                       {moment(document.modifiedAt).format("LT")}
                     </Table.Cell>
-                    <Table.Cell>
-                      <Actions
-                        actions={actions}
-                        id={document.id}
-                        dropdown={dropdown}
-                      />
-                    </Table.Cell>
+                    {this.props.showAction ? (
+                      <Table.Cell>
+                        <Actions
+                          actions={actions}
+                          id={document.id}
+                          dropdown={dropdown}
+                        />
+                      </Table.Cell>
+                    ) : (
+                      <React.Fragment />
+                    )}
+                    {this.props.showCheckbox ? (
+                      <Table.Cell>
+                        <Checkbox checked={rowSelected} />
+                      </Table.Cell>
+                    ) : (
+                      <React.Fragment />
+                    )}
                   </Table.Row>
                 </React.Fragment>
               );
