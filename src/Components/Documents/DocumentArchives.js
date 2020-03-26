@@ -221,6 +221,8 @@ export default class DocumentArchives extends React.Component {
                   action: id => this.onActionClick(id, "autre action")
                 }
               ]}
+              showAction={true}
+              showCheckbox={true}
             />
             <div style={{ textAlign: "center" }}>
               <Button
