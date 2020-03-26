@@ -46,7 +46,7 @@ export default class ListeDocument extends React.Component {
     documents: [],
     actions: [],
     showAction: true,
-    showCheckbox: true
+    showCheckbox: false
   };
 
   state = {

@@ -257,6 +257,7 @@ export default class DocumentModeles extends React.Component {
                   this.editionDocument(id);
                 }
               }}
+              showCheckbox={false}
               onSelectionChange={modeles => {}}
               onActionClick={this.handleActions}
               actions={[

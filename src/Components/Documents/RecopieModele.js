@@ -96,6 +96,8 @@ export default class RecopieModele extends React.Component {
           <Modal.Content>
             <ListeDocument
               documents={this.state.modeles}
+              showAction={false}
+              showCheckbox={true}
               onSelectionChange={mod =>
                 this.setState({ selectedModelesId: mod })
               }
