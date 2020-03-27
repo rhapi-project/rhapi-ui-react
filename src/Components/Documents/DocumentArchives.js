@@ -49,17 +49,6 @@ export default class DocumentArchives extends React.Component {
   }
 
   reload = () => {
-    // let params = {};
-
-    // if (!this.props.idPatient) {
-    //   _.set(params, "q1", "AND,idPatient,Equal,0");
-    //   _.set(params, "q2", "AND,mimeType,NotLike,text/x-html-template");
-    // } else {
-    //   _.set(params, "q1", "AND,idPatient,Equal," + this.props.idPatient);
-    // }
-
-    // _.set(params, "exfields", "document");
-
     this.props.client.Documents.readAll(
       {
         _idPatient: this.props.idPatient, // idPatient est nécessairement > 0 donc il ne peut pas s'agir d'un modèle
@@ -81,6 +70,7 @@ export default class DocumentArchives extends React.Component {
 
   onDocumentClick = id => {
     // l'id du document en paramètre sur un click
+    console.log(id);
   };
 
   onDocumentDoubleClick = id => {
@@ -105,6 +95,7 @@ export default class DocumentArchives extends React.Component {
 
   onSelectionChange = documents => {
     // array des id des documents en paramètre sur une sélection multiple
+    console.log(documents);
   };
 
   onActionClick = (id, action) => {

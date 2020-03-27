@@ -55,7 +55,7 @@ export default class ListeDocument extends React.Component {
   };
 
   componentDidUpdate(prevProps) {
-    if (prevProps !== this.props) {
+    if (prevProps.documents !== this.props.documents) {
       this.setState({
         checkedAll: false
       });
@@ -95,6 +95,12 @@ export default class ListeDocument extends React.Component {
         documentsSelected.push(this.props.documents[i].id);
       }
     } else {
+      // if (_.size(this.state.documentsSelected) === _.size(this.props.documents) || _.size(this.state.documentsSelected) >= 1) {
+      //   documentsSelected = this.state.documentsSelected;
+      //   documentsSelected.splice(_.indexOf(documentsSelected, id), 1);
+      // } else {
+      //   documentsSelected.push(id);
+      // }
       documentsSelected.push(id);
       this.firstClick = id;
     }
