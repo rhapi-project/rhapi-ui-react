@@ -1,5 +1,6 @@
 import _ from "lodash";
-//import jsPDF from "jspdf";
+import jsPDF from "jspdf";
+import html2Canvas from "html2canvas";
 
 // Affichage du tarif au bon format
 // ex : 1250.3 => 1 250,30
@@ -213,11 +214,14 @@ const uploadFile = (event, onSucess, onError) => {
   }
 };
 
-/*const downloadPDF = (content, filename) => {
-  let doc = new jsPDF();
+// TODO : essayer une autre méthode de génération de PDF
+// car le rendu de celle-ci n'est pas joli surtout quand 
+// il y a des tableau dans le HTML
+const downloadPDF = (content, filename) => {
+  let doc = new jsPDF("p", "pt", "a4");
   doc.fromHTML(content, 15, 5, {});
   doc.save(filename + ".pdf");
-};*/
+};
 
 /*const outputPDF = content => {
   let doc = new jsPDF();
@@ -235,26 +239,68 @@ const uploadFile = (event, onSucess, onError) => {
   return doc.output("datauristring");
 };*/
 
-/*const modeleDocument = (client, origine, usage, onSucess, onError) => {
-  let modelesUsage = [];
+// Ici, utilisation de Html2Canvas avec jsPDF car
+// le rendu avec jsPDF seulement ne prend pas en compte
+// le CSS.
+// https://stackoverflow.com/questions/25946275/exporting-pdf-with-jspdf-not-rendering-css
+// TODO : tester ce code sur plusieurs types de documents
+const htmlToPDF = (html, onSuccess, onError) => {
+  let win = window.open("", "Document", "width=300,height=300");
+  win.document.write(html);
+  html2Canvas(win.document.getElementsByTagName("html")[0], { logging: false }).then(canvas => {
+    let img = canvas.toDataURL("image/png");
+    let doc = new jsPDF();
+    doc.addImage(img, "JPEG", 10, 10);
+    win.close();
+    onSuccess(doc.output("datauristring"))
+  }).catch(onError);
+}
+
+// TODO : définir un comportement dans le cas où le résultat
+// du readAll des documents (modèles) contient plusieurs
+// pages.
+// TODO : définir les codes d'erreur à renvoyer en paramètre du 
+// callback 'onError'
+const modeleDocument = (client, origine, usage, onSuccess, onError) => {
   client.Documents.readAll(
     {
       _mimeType: "text/x-html-template",
       origine: origine,
-      exfields: "document"
+      exfields: "document" // comment extraire plusieurs champs ?
     },
     result => {
-      _.forEach(result.results, (modele, index) => {
-        if (modele.infosJO.modele) {
-          if (modele.infosJO.modele.usage === usage) {
-            modelesUsage.push(modele);
-          }
+      let modelesUsage = [];
+      _.forEach(result.results, modele => {
+        if (_.get(modele.infosJO, "modele.usage", "") === usage) {
+          modelesUsage.push(modele);
         }
       });
-      console.log(modelesUsage);
+      if (_.isEmpty(modelesUsage)) {
+        onError(undefined);
+        return;
+      }
+
+      let idModeleDefaut = 
+        _.findIndex(modelesUsage, modele => modele.infosJO.modele.defaut);
+      
+      client.Documents.read(
+        idModeleDefaut === -1 ? modelesUsage[0].id : modelesUsage[idModeleDefaut].id,
+        {},
+        modele => {
+          onSuccess(modele);
+        },
+        error => {
+          //console.log(error);
+          onError(error);
+        }
+      );
+    },
+    error => {
+      //console.log(error);
+      onError(error);
     }
   );
-};*/
+};
 
 const setModeleDocument = (
   client,
@@ -358,6 +404,8 @@ export {
   downloadBinaryFile,
   downloadTextFile,
   uploadFile,
-  //modeleDocument,
-  setModeleDocument
+  modeleDocument,
+  setModeleDocument,
+  downloadPDF,
+  htmlToPDF
 };

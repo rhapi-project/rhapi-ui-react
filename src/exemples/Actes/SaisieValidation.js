@@ -1,6 +1,6 @@
 import React from "react";
 import { Client } from "rhapi-client";
-import { Actes } from "../../Components";
+import { Actes, Documents } from "../../Components";
 import {
   Button,
   Divider,
@@ -36,7 +36,8 @@ export default class ActesSaisieValidation extends React.Component {
     acteToAdd: {}, // acte à ajouter dans une FSE
     fse: {},
     msgSaveFSE: "",
-    typeActe: "#FSE"
+    typeActe: "#FSE",
+    modalCreationDocument: false
   };
 
   componentDidMount() {
@@ -274,6 +275,16 @@ export default class ActesSaisieValidation extends React.Component {
             />
             <span>
               <Button content="Valider" onClick={this.save} />
+              <Button 
+                content="Produire une Facture"
+                onClick={() => {
+                  if (_.isEmpty(this.state.fse.contentJO.actes)) {
+                    //console.log("Pas d'actes");
+                    return;
+                  }
+                  this.setState({ modalCreationDocument: true });
+                }}
+              />
               <Button
                 content="Supprimer"
                 negative={true}
@@ -300,6 +311,17 @@ export default class ActesSaisieValidation extends React.Component {
             />
           </Modal.Actions>
         </Modal>
+
+        {/* modal de chargement à la création d'un document */}
+        <Documents.DocumentFromActes
+          client={client}
+          open={this.state.modalCreationDocument}
+          idPatient={this.state.idPatient}
+          idFse={this.state.fse.id}
+          user=""
+          typeDocument="FACTURE"
+          onClose={() => this.setState({ modalCreationDocument: false })}
+        />
       </React.Fragment>
     );
   }

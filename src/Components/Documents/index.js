@@ -6,6 +6,7 @@ import DocumentArchives from "./DocumentArchives";
 import RenameDocument from "./RenameDocument";
 import PropertiesModele from "./PropertiesModele";
 import RecopieModele from "./RecopieModele";
+import DocumentFromActes from "./DocumentFromActes";
 
 export default class Documents extends React.Component {
   static DocumentModeles = DocumentModeles;
@@ -15,6 +16,7 @@ export default class Documents extends React.Component {
   static RenameDocument = RenameDocument;
   static PropertiesModele = PropertiesModele;
   static RecopieModele = RecopieModele;
+  static DocumentFromActes = DocumentFromActes;
 
   render() {
     const { children } = this.props;
