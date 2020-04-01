@@ -275,7 +275,7 @@ export default class ActesSaisieValidation extends React.Component {
             />
             <span>
               <Button content="Valider" onClick={this.save} />
-              <Button 
+              <Button
                 content="Produire une Facture"
                 onClick={() => {
                   if (_.isEmpty(this.state.fse.contentJO.actes)) {
