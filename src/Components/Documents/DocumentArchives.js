@@ -144,8 +144,6 @@ export default class DocumentArchives extends React.Component {
     );
   };
 
-  // TODO : seuls les documents en lien avec les actes seront renseignés
-  // dans l'historique
   createDocument = (fileName, mimeType, document) => {
     this.props.client.Documents.create(
       {
@@ -155,19 +153,7 @@ export default class DocumentArchives extends React.Component {
         document: document
       },
       result => {
-        this.props.client.Actes.create(
-          {
-            code: "#DOC_" + _.toUpper(result.mimeType.split("/")[1]),
-            etat: 0,
-            idPatient: this.props.idPatient,
-            description: result.fileName,
-            idDocument: result.id
-          },
-          res => {
-            this.reload();
-          },
-          err => {}
-        );
+        this.reload();
       },
       error => {}
     );
