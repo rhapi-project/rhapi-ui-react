@@ -168,28 +168,25 @@ export default class ListeDocument extends React.Component {
                   <Checkbox
                     checked={this.state.checkedAll}
                     onClick={() => {
+                      let documentsSelected = [];
                       if (this.state.checkedAll) {
+                        documentsSelected = [];
                         this.setState({
-                          documentsSelected: [],
+                          documentsSelected: documentsSelected,
                           checkedAll: false
                         });
-                        return;
+                      } else {
+                        _.forEach(this.props.documents, document => {
+                          documentsSelected.push(document.id);
+                        });
+                        this.setState({
+                          documentsSelected: documentsSelected,
+                          checkedAll: true
+                        });
                       }
-
-                      let documentsSelected = [];
-
-                      _.map(this.props.documents, document => {
-                        documentsSelected.push(document.id);
-                      });
-
                       if (this.props.onSelectionChange) {
                         this.props.onSelectionChange(documentsSelected);
                       }
-
-                      this.setState({
-                        documentsSelected: documentsSelected,
-                        checkedAll: true
-                      });
                     }}
                   />
                 </Table.HeaderCell>
@@ -211,6 +208,7 @@ export default class ListeDocument extends React.Component {
                 <React.Fragment key={index}>
                   <Table.Row
                     onClick={e => {
+                      console.log("click on line");
                       e.preventDefault();
                       e.persist();
                       if (this.timeout === null) {
@@ -283,8 +281,27 @@ export default class ListeDocument extends React.Component {
                       <React.Fragment />
                     )}
                     {this.props.showCheckbox ? (
-                      <Table.Cell>
-                        <Checkbox checked={rowSelected} />
+                      <Table.Cell onClick={() => {}}>
+                        <Checkbox
+                          checked={rowSelected}
+                          onChange={(e, d) => {
+                            // ATTENTION : Ici, le clic sur une ligne prend
+                            // le dessus le clic dans la checkbox.
+                            // TODO : Réorganiser cette partie
+                            let ds = this.state.documentsSelected;
+                            if (rowSelected) {
+                              ds.splice(
+                                _.findIndex(ds, id => id === document.id),
+                                1
+                              );
+                              this.setState({ documentsSelected: ds });
+                            } else {
+                              this.setState({
+                                documentsSelected: ds.push(document.id)
+                              });
+                            }
+                          }}
+                        />
                       </Table.Cell>
                     ) : (
                       <React.Fragment />
