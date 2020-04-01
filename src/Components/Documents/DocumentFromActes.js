@@ -1,7 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, Dimmer, Loader, Message, Modal, Segment } from "semantic-ui-react";
+import {
+  Button,
+  Dimmer,
+  Loader,
+  Message,
+  Modal,
+  Segment
+} from "semantic-ui-react";
 import _ from "lodash";
+import Mustache from "mustache";
 import { htmlToPDF, modeleDocument } from "../lib/Helpers";
 
 const propDefs = {
@@ -78,10 +86,15 @@ export default class DocumentFromActes extends React.Component {
                   // TODO : Faire le remplissage des champs dynamiques
                   //    Données à utiliser : patient, fse et praticien s'il y en a
 
+                  // Ici seulement le remplissage des informations du patient ! TODO : À faire évoluer
+                  let data = {
+                    patient: { ...patient }
+                  };
+                  let filledDocument = Mustache.render(modele.document, data);
                   // on crée d'abord le document et on enregistre ensuite
                   // se référence dans l'historique
                   htmlToPDF(
-                    modele.document, // TODO : changer et passer le HTML avec les champs dynamiques remplis
+                    filledDocument,
                     base64PDF => {
                       this.props.client.Documents.create(
                         {
@@ -113,7 +126,8 @@ export default class DocumentFromActes extends React.Component {
                               console.log(error);
                               this.setState({
                                 loading: false,
-                                errorMessage: "Une erreur est survenue lors de la création de l'acte associée au document produit."
+                                errorMessage:
+                                  "Une erreur est survenue lors de la création de l'acte associée au document produit."
                               });
                             }
                           );
@@ -122,7 +136,8 @@ export default class DocumentFromActes extends React.Component {
                           console.log(error);
                           this.setState({
                             loading: false,
-                            errorMessage: "Une erreur est survenue lors de la création du document."
+                            errorMessage:
+                              "Une erreur est survenue lors de la création du document."
                           });
                         }
                       );
@@ -131,8 +146,9 @@ export default class DocumentFromActes extends React.Component {
                       console.log(error);
                       this.setState({
                         loading: false,
-                        errorMessage: "Une erreur est survenue lors de la conversion du HTML vers PDF."
-                      })
+                        errorMessage:
+                          "Une erreur est survenue lors de la conversion du HTML vers PDF."
+                      });
                     }
                   );
                 },
@@ -140,7 +156,8 @@ export default class DocumentFromActes extends React.Component {
                   console.log(error);
                   this.setState({
                     loading: false,
-                    errorMessage: "Une erreur est surnvenue lors de la recherche d'un modèle à utiliser pour produire un document."
+                    errorMessage:
+                      "Une erreur est surnvenue lors de la recherche d'un modèle à utiliser pour produire un document."
                   });
                 }
               );
@@ -150,7 +167,8 @@ export default class DocumentFromActes extends React.Component {
             console.log(error);
             this.setState({
               loading: false,
-              errorMessage: "Une erreur est survenue lors de la lecture des actes."
+              errorMessage:
+                "Une erreur est survenue lors de la lecture des actes."
             });
           }
         );
@@ -159,11 +177,12 @@ export default class DocumentFromActes extends React.Component {
         console.log(error);
         this.setState({
           loading: false,
-          errorMessage: "Une erreur est survenue lors de la lecture des informations sur le patient."
+          errorMessage:
+            "Une erreur est survenue lors de la lecture des informations sur le patient."
         });
       }
     );
-  }
+  };
 
   render() {
     //console.log(this.props.idPatient);
@@ -172,24 +191,26 @@ export default class DocumentFromActes extends React.Component {
         <Modal open={this.props.open} size="mini">
           <Modal.Header>Création d'un document</Modal.Header>
           <Modal.Content>
-            {this.state.loading
-              ? <Segment basic={true}>
-                  <Dimmer active={true} inverted={true}>
-                    <Loader active={true} inline="centered" inverted={true} size="medium">
-                      Chargement...
-                    </Loader>
-                  </Dimmer>
-                </Segment>
-              : <Message
-                  error={!_.isEmpty(this.state.errorMessage)}
-                >
-                  {_.isEmpty(this.state.errorMessage)
-                    ? "La création du document a été effectuée avec succès."
-                    : this.state.errorMessage
-                  }
-                </Message>
-            }
-            
+            {this.state.loading ? (
+              <Segment basic={true}>
+                <Dimmer active={true} inverted={true}>
+                  <Loader
+                    active={true}
+                    inline="centered"
+                    inverted={true}
+                    size="medium"
+                  >
+                    Chargement...
+                  </Loader>
+                </Dimmer>
+              </Segment>
+            ) : (
+              <Message error={!_.isEmpty(this.state.errorMessage)}>
+                {_.isEmpty(this.state.errorMessage)
+                  ? "La création du document a été effectuée avec succès."
+                  : this.state.errorMessage}
+              </Message>
+            )}
           </Modal.Content>
           <Modal.Actions>
             <Button
@@ -204,6 +225,6 @@ export default class DocumentFromActes extends React.Component {
           </Modal.Actions>
         </Modal>
       </React.Fragment>
-    )
+    );
   }
 }
