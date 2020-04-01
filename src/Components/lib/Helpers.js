@@ -215,7 +215,7 @@ const uploadFile = (event, onSucess, onError) => {
 };
 
 // TODO : essayer une autre méthode de génération de PDF
-// car le rendu de celle-ci n'est pas joli surtout quand 
+// car le rendu de celle-ci n'est pas joli surtout quand
 // il y a des tableau dans le HTML
 const downloadPDF = (content, filename) => {
   let doc = new jsPDF("p", "pt", "a4");
@@ -247,19 +247,21 @@ const downloadPDF = (content, filename) => {
 const htmlToPDF = (html, onSuccess, onError) => {
   let win = window.open("", "Document", "width=300,height=300");
   win.document.write(html);
-  html2Canvas(win.document.getElementsByTagName("html")[0], { logging: false }).then(canvas => {
-    let img = canvas.toDataURL("image/png");
-    let doc = new jsPDF();
-    doc.addImage(img, "JPEG", 10, 10);
-    win.close();
-    onSuccess(doc.output("datauristring"))
-  }).catch(onError);
-}
+  html2Canvas(win.document.getElementsByTagName("html")[0], { logging: false })
+    .then(canvas => {
+      let img = canvas.toDataURL("image/png");
+      let doc = new jsPDF();
+      doc.addImage(img, "JPEG", 10, 10);
+      win.close();
+      onSuccess(doc.output("datauristring"));
+    })
+    .catch(onError);
+};
 
 // TODO : définir un comportement dans le cas où le résultat
 // du readAll des documents (modèles) contient plusieurs
 // pages.
-// TODO : définir les codes d'erreur à renvoyer en paramètre du 
+// TODO : définir les codes d'erreur à renvoyer en paramètre du
 // callback 'onError'
 const modeleDocument = (client, origine, usage, onSuccess, onError) => {
   client.Documents.readAll(
@@ -280,11 +282,15 @@ const modeleDocument = (client, origine, usage, onSuccess, onError) => {
         return;
       }
 
-      let idModeleDefaut = 
-        _.findIndex(modelesUsage, modele => modele.infosJO.modele.defaut);
-      
+      let idModeleDefaut = _.findIndex(
+        modelesUsage,
+        modele => modele.infosJO.modele.defaut
+      );
+
       client.Documents.read(
-        idModeleDefaut === -1 ? modelesUsage[0].id : modelesUsage[idModeleDefaut].id,
+        idModeleDefaut === -1
+          ? modelesUsage[0].id
+          : modelesUsage[idModeleDefaut].id,
         {},
         modele => {
           onSuccess(modele);
@@ -312,11 +318,33 @@ const setModeleDocument = (
   onSuccess,
   onError
 ) => {
+  let updateCurrentModele = () => {
+    client.Documents.update(
+      id,
+      {
+        infosJO: {
+          modele: {
+            nom: nom, // TODO : vérifier (utilisation des caractères acceptables pour la nomenclature des fichiers)
+            usage: usage,
+            defaut: defaut
+          }
+        }
+      },
+      res => {
+        onSuccess(res);
+      },
+      err => {
+        onError(err);
+      }
+    );
+  };
+
   client.Documents.read(
     id,
     {},
-    result => {
-      if (result.origine !== origine) {
+    document => {
+      //console.log(document);
+      if (document.origine !== origine) {
         onError(undefined);
         return;
       }
@@ -324,64 +352,58 @@ const setModeleDocument = (
         client.Documents.readAll(
           {
             _mimeType: "text/x-html-template",
-            _origine: origine,
+            // TODO : (peut-être voir côté back-end pour le filtre _origine)
+            _origine: origine, // result.results vide avec le fitre _origine
             exfields: "document"
           },
-          res => {
-            _.forEach(res.results, modele => {
-              if (
-                modele.id !== id &&
-                modele.origine === origine &&
-                _.get(modele.infosJO.modele, "usage", "") === usage &&
-                _.get(modele.infosJO.modele, "defaut", false)
-              ) {
-                client.Documents.update(
-                  modele.id,
-                  {
-                    infosJO: {
-                      modele: {
-                        defaut: false,
-                        nom: _.get(modele.infosJO.modele, "nom", ""),
-                        usage: _.get(modele.infosJO.modele, "usage", "")
+          result => {
+            //console.log(result);
+            let setAllDefautToFalse = arrayModeles => {
+              let m = arrayModeles.shift();
+              if (!_.isUndefined(m)) {
+                if (
+                  m.id !== id &&
+                  m.origine === origine &&
+                  _.get(m.infosJO.modele, "usage", "") === usage &&
+                  _.get(m.infosJO.modele, "defaut", false)
+                ) {
+                  client.Documents.update(
+                    m.id,
+                    {
+                      infosJO: {
+                        modele: {
+                          defaut: false,
+                          nom: _.get(m.infosJO.modele, "nom", ""),
+                          usage: _.get(m.infosJO.modele, "usage", "")
+                        }
                       }
+                    },
+                    r => {
+                      //console.log("màj du modèle terminé");
+                      setAllDefautToFalse(arrayModeles);
+                    },
+                    e => {
+                      //console.log(e);
+                      setAllDefautToFalse(arrayModeles);
                     }
-                  },
-                  r => {
-                    //console.log("màj du modèle terminé");
-                  },
-                  e => {
-                    //console.log(e);
-                  }
-                );
+                  );
+                } else {
+                  setAllDefautToFalse(arrayModeles);
+                }
+              } else {
+                updateCurrentModele();
               }
-            });
+            };
+            setAllDefautToFalse(result.results);
           },
-          err => {
-            onError(err);
-            return;
+          error => {
+            onError(error);
           }
         );
+      } else {
+        // defaut === false
+        updateCurrentModele();
       }
-
-      // màj du modèle courant
-      client.Documents.update(
-        id,
-        {
-          infosJO: {
-            modele: {
-              nom: nom, // vérifier (utilisation des caractères acceptables pour la nomenclature des fichiers)
-              usage: usage,
-              defaut: defaut
-            }
-          }
-        },
-        res => {
-          onSuccess(res);
-        },
-        err => {
-          onError(err);
-        }
-      );
     },
     error => {
       onError(error);
