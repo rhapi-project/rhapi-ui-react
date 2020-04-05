@@ -239,23 +239,36 @@ const downloadPDF = (content, filename) => {
   return doc.output("datauristring");
 };*/
 
-// Ici, utilisation de Html2Canvas avec jsPDF car
-// le rendu avec jsPDF seulement ne prend pas en compte
-// le CSS.
+//
+// Le rendu avec jsPDF seul ne prend pas en compte le CSS.
 // https://stackoverflow.com/questions/25946275/exporting-pdf-with-jspdf-not-rendering-css
-// TODO : tester ce code sur plusieurs types de documents
-const htmlToPDF = (html, onSuccess, onError) => {
-  let win = window.open("", "Document", "width=300,height=300");
+// => une solution consiste à utiliser html2ToPDF pour générer un image intermédiaire
+// https://itnext.io/javascript-convert-html-css-to-pdf-print-supported-very-sharp-and-not-blurry-c5ffe441eb5e
+// TODO : améliorer la gestion du format (A4 par défaut) et la qualité du PDF généré (voir code ci-dessous) :
+// https://gist.github.com/DavidMellul/d01c720ce31aecf99be3a6441255381f#file-htmltopdf_simple-js
+//
+const htmlToPDF = (html, fileNameToDownload, onSuccess, onError) => {
+  let win = window.open("", "Document", "width=300,height=300"); // faire du A4 21/29.7 ?
+  win.document.open();
   win.document.write(html);
-  html2Canvas(win.document.getElementsByTagName("html")[0], { logging: false })
-    .then(canvas => {
-      let img = canvas.toDataURL("image/png");
-      let doc = new jsPDF();
-      doc.addImage(img, "JPEG", 10, 10);
-      win.close();
-      onSuccess(doc.output("datauristring"));
+  win.focus();
+  _.delay(() => {
+    html2Canvas(win.document.documentElement, {
+      logging: false
     })
-    .catch(onError);
+      .then(canvas => {
+        let img = canvas.toDataURL("image/png");
+        let doc = new jsPDF();
+        doc.addImage(img, "JPEG", 10, 10); // faire du A4 21/29.7 ?
+        win.close();
+        let datas = doc.output("datauristring");
+        if (!_.isEmpty(fileNameToDownload)) {
+          downloadBinaryFile(datas, fileNameToDownload);
+        }
+        onSuccess(datas);
+      })
+      .catch(onError);
+  }, 1000); // delay nécessaire à Safari (augmenter cette valeur si nécessaire pour de gros documents ?)
 };
 
 // TODO : définir un comportement dans le cas où le résultat
@@ -268,9 +281,11 @@ const modeleDocument = (client, origine, usage, onSuccess, onError) => {
     {
       _mimeType: "text/x-html-template",
       origine: origine,
-      exfields: "document" // comment extraire plusieurs champs ?
+      fields: "id,infosJO", // pour ne récupérer que les champs id et infosJO
+      limit: 1000 // nombre maximum de modèles
     },
     result => {
+      console.log(result);
       let modelesUsage = [];
       _.forEach(result.results, modele => {
         if (_.get(modele.infosJO, "modele.usage", "") === usage) {
@@ -354,7 +369,8 @@ const setModeleDocument = (
             _mimeType: "text/x-html-template",
             // TODO : (peut-être voir côté back-end pour le filtre _origine)
             _origine: origine, // result.results vide avec le fitre _origine
-            exfields: "document"
+            exfields: "document",
+            limit: 1000 // nombre maximum de modèles
           },
           result => {
             //console.log(result);
