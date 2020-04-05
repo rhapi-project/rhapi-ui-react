@@ -93,14 +93,16 @@ export default class DocumentFromActes extends React.Component {
                   let filledDocument = Mustache.render(modele.document, data);
                   // on crée d'abord le document et on enregistre ensuite
                   // se référence dans l'historique
+                  let fileName = _.isEmpty(modele.infosJO.modele.nom)
+                    ? "Sans titre.pdf"
+                    : modele.infosJO.modele.nom + ".pdf";
                   htmlToPDF(
                     filledDocument,
+                    fileName,
                     base64PDF => {
                       this.props.client.Documents.create(
                         {
-                          fileName: _.isEmpty(modele.infosJO.modele.nom)
-                            ? "Sans titre.pdf"
-                            : modele.infosJO.modele.nom + ".pdf",
+                          fileName: fileName,
                           idPatient: patient.id,
                           mimeType: "application/pdf",
                           document: base64PDF
@@ -121,6 +123,10 @@ export default class DocumentFromActes extends React.Component {
                                 loading: false,
                                 errorMessage: ""
                               });
+                              if (this.props.onClose) {
+                                // la fenêtre se ferme automatiquement
+                                this.props.onClose();
+                              }
                             },
                             error => {
                               console.log(error);
@@ -185,7 +191,6 @@ export default class DocumentFromActes extends React.Component {
   };
 
   render() {
-    //console.log(this.props.idPatient);
     return (
       <React.Fragment>
         <Modal open={this.props.open} size="mini">
@@ -206,9 +211,7 @@ export default class DocumentFromActes extends React.Component {
               </Segment>
             ) : (
               <Message error={!_.isEmpty(this.state.errorMessage)}>
-                {_.isEmpty(this.state.errorMessage)
-                  ? "La création du document a été effectuée avec succès."
-                  : this.state.errorMessage}
+                this.state.errorMessage
               </Message>
             )}
           </Modal.Content>
