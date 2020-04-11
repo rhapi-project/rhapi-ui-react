@@ -24,23 +24,6 @@ Composant de présentation d'une fiche d'un acte. Celui-ci utilise le composant 
 | date | string | Date de la tarification de l'acte, au format ISO. Par défaut la date du jour |
 | modificateurs | string | Modificateurs appliqués à l'acte, par défaut une chaîne de caractères vide |
 
-## Search
-Composant pour la recherche des actes en CCAM (par code CCAM ou mot-clé). Retourne la liste des actes sous forme d'un tableau d'objets JSON. 
-La recherche n'est pas effectuée si la date ou la localisation sont NULL.
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
-| executant | string | Limiter la recherche aux seuls actes d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes) |
-| limit | number | Valeur de pagination |
-| localisation | string | Limiter la recherche aux actes concernant les dents renseignées selon la norme internationale ISO-3950, sans séparateur entre les numéros des dents (par exemple localisation=1121 pour les deux incisives centrales maxillaires ou localisation=18 pour la dent de sagesse maxillaire droite) |
-| onClear | func | Callback d'une ràz |
-| onLoadActes | func | Callback résultat de la recherche |
-| onSelectionChange | func | Callback pour retourner l'acte sélectionné |
-| search | object | Documentation semantic-ui-react [Search](https://react.semantic-ui.com/modules/search) |
-| searchInputLength | number | Nombre minimum de caractères pour déclencher la recherche d'actes |
-
 ## Table
 Composant montrant sous forme d'un tableau les actes obtenus après une recherche par mot clé.
 #### Props du composant
@@ -71,6 +54,23 @@ Composant montrant sous forme d'un tableau les actes obtenus après une recherch
 | btnMore | object | Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}" |
 | mode | string | mode de pagination 'pages' ou 'more', par défaut "pages" |
 
+## Search
+Composant pour la recherche des actes en CCAM (par code CCAM ou mot-clé). Retourne la liste des actes sous forme d'un tableau d'objets JSON. 
+La recherche n'est pas effectuée si la date ou la localisation sont NULL.
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
+| executant | string | Limiter la recherche aux seuls actes d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes) |
+| limit | number | Valeur de pagination |
+| localisation | string | Limiter la recherche aux actes concernant les dents renseignées selon la norme internationale ISO-3950, sans séparateur entre les numéros des dents (par exemple localisation=1121 pour les deux incisives centrales maxillaires ou localisation=18 pour la dent de sagesse maxillaire droite) |
+| onClear | func | Callback d'une ràz |
+| onLoadActes | func | Callback résultat de la recherche |
+| onSelectionChange | func | Callback pour retourner l'acte sélectionné |
+| search | object | Documentation semantic-ui-react [Search](https://react.semantic-ui.com/modules/search) |
+| searchInputLength | number | Nombre minimum de caractères pour déclencher la recherche d'actes |
+
 ## Tarification
 Composant de facturation d'un acte CCAM
 #### Props du composant
@@ -88,55 +88,6 @@ Composant de facturation d'un acte CCAM
 | hidden | bool | Cacher l'interface du composant de tarification |
 | modificateurs | string | Modificateurs appliqués à l'acte, par défaut une chaîne de caractères vide |
 | success | func | Callback succès de la tarification |
-
-## DateRange
-Période, début et fin d'une période
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| open | bool | Ouverture de la modal |
-| startAt | string | Date de début de la période. Par défaut la date du jour. |
-| endAt | string | Date de fin de la période. Par défaut une semaine après la date du jour. |
-| onRangeChange | func | Callback au changement de la période |
-| onClose | func | Callback à la fermeture de la modal |
-
-## Actions
-Menu d'actions à effectuer
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| actions | array | Tableau contenant une liste d'actions |
-| dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
-| id | any | Identifiant de la ligne sur laquelle une action est effectuée |
-
-## Montant
-Input de saisie d'un montant au format français
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| input | object | Documentation semantic-ui-react [Input](https://react.semantic-ui.com/elements/input) |
-| montant | number | Montant affiché |
-| onChange | func | Callback au changement du montant |
-
-## Localisations
-Grille de saisie des localisations dentaires
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| dents | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
-| modal | object | Documentation semantic-ui-react [Modal](https://react.semantic-ui.com/modules/modal) |
-| onSelection | func | Callback à la selection d'une liste de dents |
-
-## Periode
-Période, début et fin d'une période
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| labelDate | string | Label de la période |
-| labelYear | string | Label de l'année de la période |
-| startYear | number | La première année qui sera affichée. Par défaut l'année en cours |
-| onPeriodeChange | func | Callback au changement de la période. C'est une fonction qui prend 2 paramètres, début et fin de la période (inclus).
-Les valeurs de ces paramètres sont NULL si la durée est indéterminée. |
 
 ## Edition
 Edition d'un acte validé pour un patient
@@ -164,6 +115,48 @@ Modal Semantic de lecture et de configuration des actes favoris
 | open | bool | Ouverture de la modal |
 | onClose | func | Callback à la fermeture de la modal |
 | onSelection | func | Callback à la selection et validation d'un acte. Cette fonction prend en 1er paramètre l'indice de la ligne et en 2ème paramètre l'objet acte sélectionné. |
+
+## Historique
+Historique des actes d'un patient
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| idPatient | number | Id du patient, par défaut 0 (Aucun patient) |
+| id | number | Id de l'acte sélectionné par un click, un double click ou par une édition |
+| actions | array | Tableau d'objet contenant des actions à effectuer (en plus des actions par défaut). Exemple [{icon:"add",text:"Ajouter",action:fonction de l'action ajouter}] |
+| startAt | string | Filtre sur le début d'une période (incluse). Par défaut "" |
+| endAt | string | Filtre sur la fin d'une période (incluse). Par défaut "" |
+| localisation | string | Filtre sur une liste de dents sélectionnées, séparées par des espaces. Par défaut "" |
+| table | object | Documentation semantic-ui-react [Table](https://react.semantic-ui.com/collections/table) |
+| limit | number | Valeur de pagination, par défaut 5 |
+| sort | string | Le champs sur lequel le tri va être effectué. Par défaut, le tri se fait sur la date (doneAt) |
+| order | string | Le tri est ascendant (ASC) ou descendant (DESC). Par défaut, le tri est descendant (DESC) |
+| openNoteTodo | bool | Ouvre la modal pour l'édition des notes ou todos. Par défaut openNoteTodo = false |
+| typeNoteTodo | string | Permet de savoir si c'est une note ou todo. Par défaut, typeNoteTodo = "" |
+| onActeClick | func | Retourne en paramètre l'id de l'acte sélectionné sur un click |
+| onActeDoubleClick | func | Retourne en paramètre l'id l'acte sélectionné sur un double click |
+| onSelectionChange | func | Retourne en paramètre la liste des id des actes sélectionnés (multi-sélection possible par CTRL+click) |
+| onEditActeClick | func | Retourne en paramètre l'id d'un #DEVIS ou d'une #FSE lorsque l'on édite |
+| onOpenNoteTodo | func | Callback à l'ouverture de la note |
+| onCloseNoteTodo | func | Callback à la fermeture de la note |
+| showPagination | bool | Affiche les options de paginations, par défaut "true" |
+| btnFirstContent | string | Texte du bouton pour aller à la première page, par défaut "" |
+| btnLastContent | string | Texte du bouton pour aller à la dernière page, par défaut "" |
+| btnMoreContent | string | Texte du bouton pour afficher plus de résutats, par défaut "Plus de résultats" |
+| btnNextContent | string | Texte du bouton pour aller à la page suivante, par défaut "" |
+| btnPrevContent | string | Texte du bouton pour aller à la page précédente, par défaut "" |
+| btnFirstIcon | string | Icon semantic du bouton pour aller à la première page, par défaut "fast backward" |
+| btnLastIcon | string | Icon semantic du bouton pour aller à la dernière page, par défaut "fast forward" |
+| btnMoreIcon | string | Icon semantic du bouton pour afficher plus de résultats, par défaut "" |
+| btnNextIcon | string | Icon semantic du bouton pour aller à la page suivante, par défaut "step forward" |
+| btnPrevIcon | string | Icon semantic du bouton pour aller à la page précédente, par défaut "step backward" |
+| btnFirst | object | Props semantic du bouton pour aller à la première page, par défaut un objet vide "{}" |
+| btnLast | object | Props semantic du bouton pour aller à la dernière page, par défaut un objet vide "{}" |
+| btnNext | object | Props semantic du bouton pour aller à la page suivante, par défaut un objet vide "{}" |
+| btnPrev | object | Props semantic du bouton pour aller à la page précédente, par défaut un objet vide "{}" |
+| btnMore | object | Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}" |
+| mode | string | Mode de pagination "pages" ou "more", par défaut "pages" |
 
 ## ModalSearch
 Ce composant est une modal Semantic de recherche d'un acte. Il intègre un date picker, les composants CCAM.Search, CCAM.Table et Shared.Localisations
@@ -216,48 +209,6 @@ Nouvelle << Note >> ou << Todo >>
 | onUpdate | func | Callback à la mise à jour d'une 'note' ou 'todo'. L'acte modifié est passé en paramètre |
 | onClose | func | Callback à la fermeture de la modal. |
 
-## Historique
-Historique des actes d'un patient
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| idPatient | number | Id du patient, par défaut 0 (Aucun patient) |
-| id | number | Id de l'acte sélectionné par un click, un double click ou par une édition |
-| actions | array | Tableau d'objet contenant des actions à effectuer (en plus des actions par défaut). Exemple [{icon:"add",text:"Ajouter",action:fonction de l'action ajouter}] |
-| startAt | string | Filtre sur le début d'une période (incluse). Par défaut "" |
-| endAt | string | Filtre sur la fin d'une période (incluse). Par défaut "" |
-| localisation | string | Filtre sur une liste de dents sélectionnées, séparées par des espaces. Par défaut "" |
-| table | object | Documentation semantic-ui-react [Table](https://react.semantic-ui.com/collections/table) |
-| limit | number | Valeur de pagination, par défaut 5 |
-| sort | string | Le champs sur lequel le tri va être effectué. Par défaut, le tri se fait sur la date (doneAt) |
-| order | string | Le tri est ascendant (ASC) ou descendant (DESC). Par défaut, le tri est descendant (DESC) |
-| openNoteTodo | bool | Ouvre la modal pour l'édition des notes ou todos. Par défaut openNoteTodo = false |
-| typeNoteTodo | string | Permet de savoir si c'est une note ou todo. Par défaut, typeNoteTodo = "" |
-| onActeClick | func | Retourne en paramètre l'id de l'acte sélectionné sur un click |
-| onActeDoubleClick | func | Retourne en paramètre l'id l'acte sélectionné sur un double click |
-| onSelectionChange | func | Retourne en paramètre la liste des id des actes sélectionnés (multi-sélection possible par CTRL+click) |
-| onEditActeClick | func | Retourne en paramètre l'id d'un #DEVIS ou d'une #FSE lorsque l'on édite |
-| onOpenNoteTodo | func | Callback à l'ouverture de la note |
-| onCloseNoteTodo | func | Callback à la fermeture de la note |
-| showPagination | bool | Affiche les options de paginations, par défaut "true" |
-| btnFirstContent | string | Texte du bouton pour aller à la première page, par défaut "" |
-| btnLastContent | string | Texte du bouton pour aller à la dernière page, par défaut "" |
-| btnMoreContent | string | Texte du bouton pour afficher plus de résutats, par défaut "Plus de résultats" |
-| btnNextContent | string | Texte du bouton pour aller à la page suivante, par défaut "" |
-| btnPrevContent | string | Texte du bouton pour aller à la page précédente, par défaut "" |
-| btnFirstIcon | string | Icon semantic du bouton pour aller à la première page, par défaut "fast backward" |
-| btnLastIcon | string | Icon semantic du bouton pour aller à la dernière page, par défaut "fast forward" |
-| btnMoreIcon | string | Icon semantic du bouton pour afficher plus de résultats, par défaut "" |
-| btnNextIcon | string | Icon semantic du bouton pour aller à la page suivante, par défaut "step forward" |
-| btnPrevIcon | string | Icon semantic du bouton pour aller à la page précédente, par défaut "step backward" |
-| btnFirst | object | Props semantic du bouton pour aller à la première page, par défaut un objet vide "{}" |
-| btnLast | object | Props semantic du bouton pour aller à la dernière page, par défaut un objet vide "{}" |
-| btnNext | object | Props semantic du bouton pour aller à la page suivante, par défaut un objet vide "{}" |
-| btnPrev | object | Props semantic du bouton pour aller à la page précédente, par défaut un objet vide "{}" |
-| btnMore | object | Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}" |
-| mode | string | Mode de pagination "pages" ou "more", par défaut "pages" |
-
 ## Saisie
 Tableau de saisie des actes pour les dentistes
 #### Props du composant
@@ -308,6 +259,55 @@ Composant correspondant à une ligne du tableau de saisie des actes pour les den
 | onSearchFavoris | func | Callback au clic sur la colonne libellé (Recherche d'un acte dans les favoris) |
 | onMoveToFSE | func | Callback déplacement d'un acte de #DEVIS vers #FSE |
 
+## Actions
+Menu d'actions à effectuer
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| actions | array | Tableau contenant une liste d'actions |
+| dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
+| id | any | Identifiant de la ligne sur laquelle une action est effectuée |
+
+## DateRange
+Période, début et fin d'une période
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| open | bool | Ouverture de la modal |
+| startAt | string | Date de début de la période. Par défaut la date du jour. |
+| endAt | string | Date de fin de la période. Par défaut une semaine après la date du jour. |
+| onRangeChange | func | Callback au changement de la période |
+| onClose | func | Callback à la fermeture de la modal |
+
+## Localisations
+Grille de saisie des localisations dentaires
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| dents | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
+| modal | object | Documentation semantic-ui-react [Modal](https://react.semantic-ui.com/modules/modal) |
+| onSelection | func | Callback à la selection d'une liste de dents |
+
+## Montant
+Input de saisie d'un montant au format français
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| input | object | Documentation semantic-ui-react [Input](https://react.semantic-ui.com/elements/input) |
+| montant | number | Montant affiché |
+| onChange | func | Callback au changement du montant |
+
+## Periode
+Période, début et fin d'une période
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| labelDate | string | Label de la période |
+| labelYear | string | Label de l'année de la période |
+| startYear | number | La première année qui sera affichée. Par défaut l'année en cours |
+| onPeriodeChange | func | Callback au changement de la période. C'est une fonction qui prend 2 paramètres, début et fin de la période (inclus).
+Les valeurs de ces paramètres sont NULL si la durée est indéterminée. |
+
 ## DocumentArchives
 Liste des documents d'un patient (archives)
 #### Props du composant
@@ -347,7 +347,7 @@ Liste des documents d'un patient
 | onDocumentDoubleClick | func | Retourne en paramètre l'id d'un document sur un double click |
 | onSelectionChange | func | Retourne en paramètre la liste des id des documents sélectionnés (multi-sélection possible par CTRL+click) |
 | actions | array | Tableau d'objet contenant des actions à effectuer (en plus des actions par défaut) |
-| showAction | bool | Permet d'afficher la colonne des actions. Par défaut, showAction prend la valeur true |
+| showActions | bool | Permet d'afficher la colonne des actions. Par défaut, showAction prend la valeur true |
 | showCheckbox | bool | Permet d'afficher la colonne de sélection (Checkbox). Par défaut, showCheckbox prend la valeur false |
 
 ## PropertiesModele
@@ -387,5 +387,5 @@ Manupulation d'un document sous format texte
 | ---- | ----- | ------ |
 | data | object | un objet qui contient les données à utiliser pour le remplissage automatique des champs dynamiques |
 | document | string | contenu d'un document au format texte |
-| mode | string | mode d'édition du document : html|plain|rtf |
+| mode | string | mode d'édition du document : html|plain |
 | onEdit | func | Callback à la modification du texte |

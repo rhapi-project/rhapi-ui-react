@@ -18,7 +18,7 @@ const propDefs = {
       "Retourne en paramètre la liste des id des documents sélectionnés (multi-sélection possible par CTRL+click)",
     actions:
       "Tableau d'objet contenant des actions à effectuer (en plus des actions par défaut)",
-    showAction:
+    showActions:
       "Permet d'afficher la colonne des actions. Par défaut, showAction prend la valeur true",
     showCheckbox:
       "Permet d'afficher la colonne de sélection (Checkbox). Par défaut, showCheckbox prend la valeur false"
@@ -29,128 +29,92 @@ const propDefs = {
     onDocumentDoubleClick: PropTypes.func,
     onSelectionChange: PropTypes.func,
     actions: PropTypes.array,
-    showAction: PropTypes.bool,
+    showActions: PropTypes.bool,
     showCheckbox: PropTypes.bool
   }
 };
 
 export default class ListeDocument extends React.Component {
-  // variable utilisé pour éviter le click lors d'un double click
-  timeout = null;
-  // variables utilisées pour la multi-sélection avec la touche 'shift'
-  firstClick = "";
-  secondClick = "";
-
   static propTypes = propDefs.propTypes;
   static defaultProps = {
     documents: [],
     actions: [],
-    showAction: true,
+    showActions: true,
     showCheckbox: false
   };
 
   state = {
     documentsSelected: [],
-    checkedAll: false
+    selectedAll: false
   };
 
   componentDidUpdate(prevProps) {
-    if (prevProps !== this.props) {
+    if (!_.isEqual(prevProps.documents, this.props.documents)) {
       this.setState({
-        checkedAll: false
+        selectedAll: false
       });
     }
   }
 
-  onDocumentClick = (e, document) => {
-    let id = document.id;
-    let documentsSelected = [];
-
-    if (e.ctrlKey || e.metaKey) {
-      documentsSelected = this.state.documentsSelected;
-      if (_.includes(documentsSelected, id)) {
-        documentsSelected.splice(_.indexOf(documentsSelected, id), 1);
-      } else {
-        documentsSelected.push(id);
+  onDocumentClick = (e, doc) => {
+    if (_.findIndex(this.state.documentsSelected, id => id === doc.id) === -1) {
+      let ds = [doc.id];
+      this.setState({
+        documentsSelected: ds,
+        selectedAll: false
+      });
+      if (this.props.onDocumentClick) {
+        this.props.onDocumentClick(doc.id);
       }
-    } else if (e.shiftKey) {
-      this.secondClick = id;
-      let first = _.findIndex(
-        this.props.documents,
-        document => document.id === this.firstClick
-      );
-      let last = _.findIndex(
-        this.props.documents,
-        document => document.id === this.secondClick
-      );
-
-      // Permutation entre first et last si le "secondClick" est situé au-dessus du "firstClick"
-      if (first > last) {
-        let tmp = first;
-        first = last;
-        last = tmp;
+      if (this.props.onSelectionChange) {
+        this.props.onSelectionChange(ds);
       }
-
-      for (let i = first; i <= last; i++) {
-        documentsSelected.push(this.props.documents[i].id);
-      }
-    } else {
-      documentsSelected.push(id);
-      this.firstClick = id;
     }
-
-    if (this.props.onDocumentClick) {
-      this.props.onDocumentClick(id);
-    }
-
-    if (this.props.onSelectionChange) {
-      this.props.onSelectionChange(documentsSelected);
-    }
-
-    this.setState({
-      documentsSelected: documentsSelected,
-      checkedAll:
-        _.size(documentsSelected) === _.size(this.props.documents)
-          ? true
-          : false
-    });
   };
 
-  onDocumentDoubleClick = (e, document) => {
-    let documentsSelected = [];
-    let id = document.id;
-
-    documentsSelected.push(id);
-
-    if (this.props.onDocumentDoubleClick) {
-      this.props.onDocumentDoubleClick(id);
-    }
-
-    if (this.props.onSelectionChange) {
-      this.props.onSelectionChange(documentsSelected);
-    }
-
+  onDocumentDoubleClick = (e, doc) => {
     this.setState({
-      documentsSelected: documentsSelected,
-      checkedAll:
-        _.size(documentsSelected) === _.size(this.props.documents)
-          ? true
-          : false
+      documentsSelected: [doc.id],
+      selectedAll: false
     });
+    if (this.props.onDocumentDoubleClick) {
+      this.props.onDocumentDoubleClick(doc.id);
+    }
+    if (this.props.onSelectionChange) {
+      this.props.onSelectionChange([doc.id]);
+    }
+  };
+
+  selectAll = () => {
+    let ds = [];
+    _.forEach(this.props.documents, doc => ds.push(doc.id));
+    this.setState({
+      selectedAll: true,
+      documentsSelected: ds
+    });
+    if (this.props.onSelectionChange) {
+      this.props.onSelectionChange(ds);
+    }
+  };
+
+  unselectAll = () => {
+    this.setState({
+      selectedAll: false,
+      documentsSelected: []
+    });
+    if (this.props.onSelectionChange) {
+      this.props.onSelectionChange([]);
+    }
   };
 
   render() {
-    let dropdown = {
-      direction: "left"
-    };
-
     if (_.isEmpty(this.props.documents)) {
       return null;
     }
 
     return (
       <React.Fragment>
-        <Table celled={true} striped={false} selectable={true} sortable={true}>
+        <Table celled={true} selectable={true}>
           <Table.Header>
             <Table.Row textAlign="center">
               <Table.HeaderCell>Nom</Table.HeaderCell>
@@ -158,160 +122,159 @@ export default class ListeDocument extends React.Component {
               <Table.HeaderCell collapsing={true}>
                 Dernière modification
               </Table.HeaderCell>
-              {this.props.showAction ? (
+              {this.props.showActions ? (
                 <Table.HeaderCell collapsing={true}>Action</Table.HeaderCell>
-              ) : (
-                <React.Fragment />
-              )}
+              ) : null}
               {this.props.showCheckbox ? (
                 <Table.HeaderCell collapsing={true}>
                   <Checkbox
-                    checked={this.state.checkedAll}
+                    checked={this.state.selectedAll}
                     onClick={() => {
-                      let documentsSelected = [];
-                      if (this.state.checkedAll) {
-                        documentsSelected = [];
-                        this.setState({
-                          documentsSelected: documentsSelected,
-                          checkedAll: false
-                        });
+                      if (this.state.selectedAll) {
+                        this.unselectAll();
                       } else {
-                        _.forEach(this.props.documents, document => {
-                          documentsSelected.push(document.id);
-                        });
-                        this.setState({
-                          documentsSelected: documentsSelected,
-                          checkedAll: true
-                        });
-                      }
-                      if (this.props.onSelectionChange) {
-                        this.props.onSelectionChange(documentsSelected);
+                        this.selectAll();
                       }
                     }}
                   />
                 </Table.HeaderCell>
-              ) : (
-                <React.Fragment />
-              )}
+              ) : null}
             </Table.Row>
           </Table.Header>
+
           <Table.Body>
-            {_.map(this.props.documents, (document, index) => {
-              let rowSelected = _.includes(
-                this.state.documentsSelected,
-                document.id
-              );
-
-              let actions = this.props.actions;
-
-              return (
-                <React.Fragment key={index}>
-                  <Table.Row
-                    onClick={e => {
-                      console.log("click on line");
-                      e.preventDefault();
-                      e.persist();
-                      if (this.timeout === null) {
-                        this.timeout = setTimeout(() => {
-                          this.timeout = null;
-                          this.onDocumentClick(e, document);
-                        }, 300);
-                      }
-                    }}
-                    onDoubleClick={e => {
-                      e.preventDefault();
-                      clearTimeout(this.timeout);
-                      this.timeout = null;
-                      this.onDocumentDoubleClick(e, document);
-                    }}
-                    active={rowSelected}
-                  >
-                    <Table.Cell>
-                      <Icon
-                        name={
-                          codesDocs[
-                            _.findIndex(
-                              codesDocs,
-                              i => document.mimeType === i.mimeType
-                            ) !== -1
-                              ? _.findIndex(
-                                  codesDocs,
-                                  i => document.mimeType === i.mimeType
-                                )
-                              : _.findIndex(
-                                  codesDocs,
-                                  i => i.mimeType === "default"
-                                )
-                          ].icon
-                        }
-                      />
-                      {document.fileName}
-                    </Table.Cell>
-                    <Table.Cell style={{ textAlign: "center" }}>
-                      {
-                        codesDocs[
-                          _.findIndex(
-                            codesDocs,
-                            i => document.mimeType === i.mimeType
-                          ) !== -1
-                            ? _.findIndex(
-                                codesDocs,
-                                i => document.mimeType === i.mimeType
-                              )
-                            : _.findIndex(
-                                codesDocs,
-                                i => i.mimeType === "default"
-                              )
-                        ].type
-                      }
-                    </Table.Cell>
-                    <Table.Cell style={{ textAlign: "center" }}>
-                      {moment(document.modifiedAt).format("L")}{" "}
-                      {moment(document.modifiedAt).format("LT")}
-                    </Table.Cell>
-                    {this.props.showAction ? (
-                      <Table.Cell>
-                        <Actions
-                          actions={actions}
-                          id={document.id}
-                          dropdown={dropdown}
-                        />
-                      </Table.Cell>
-                    ) : (
-                      <React.Fragment />
-                    )}
-                    {this.props.showCheckbox ? (
-                      <Table.Cell onClick={() => {}}>
-                        <Checkbox
-                          checked={rowSelected}
-                          onChange={(e, d) => {
-                            // ATTENTION : Ici, le clic sur une ligne prend
-                            // le dessus le clic dans la checkbox.
-                            // TODO : Réorganiser cette partie
-                            let ds = this.state.documentsSelected;
-                            if (rowSelected) {
-                              ds.splice(
-                                _.findIndex(ds, id => id === document.id),
-                                1
-                              );
-                              this.setState({ documentsSelected: ds });
-                            } else {
-                              this.setState({
-                                documentsSelected: ds.push(document.id)
-                              });
-                            }
-                          }}
-                        />
-                      </Table.Cell>
-                    ) : (
-                      <React.Fragment />
-                    )}
-                  </Table.Row>
-                </React.Fragment>
-              );
-            })}
+            {_.map(this.props.documents, (document, index) => (
+              <Ligne
+                key={index}
+                document={document}
+                selected={
+                  _.findIndex(
+                    this.state.documentsSelected,
+                    id => id === document.id
+                  ) !== -1
+                }
+                actions={this.props.actions}
+                showActions={this.props.showActions}
+                showCheckbox={this.props.showCheckbox}
+                onLineClick={this.onDocumentClick}
+                onLineDoubleClick={this.onDocumentDoubleClick}
+                onChangeCheckbox={() => {
+                  let ds = this.state.documentsSelected;
+                  let i = _.findIndex(ds, id => document.id === id);
+                  if (i === -1) {
+                    ds.push(document.id);
+                    this.setState({ documentsSelected: ds });
+                  } else {
+                    ds.splice(i, 1);
+                    this.setState({
+                      selectedAll: false,
+                      documentsSelected: ds
+                    });
+                  }
+                  if (this.props.onSelectionChange) {
+                    this.props.onSelectionChange(ds);
+                  }
+                }}
+              />
+            ))}
           </Table.Body>
         </Table>
+      </React.Fragment>
+    );
+  }
+}
+
+class Ligne extends React.Component {
+  timeout = null; // gestion du double clic
+
+  onLineClick = e => {
+    e.preventDefault();
+    e.persist();
+    if (this.timeout === null) {
+      this.timeout = setTimeout(() => {
+        this.timeout = null;
+        this.props.onLineClick(e, this.props.document);
+      }, 300);
+    }
+  };
+
+  onLineDoubleClick = e => {
+    e.preventDefault();
+    clearTimeout(this.timeout);
+    this.timeout = null;
+    this.props.onLineDoubleClick(e, this.props.document);
+  };
+
+  render() {
+    return (
+      <React.Fragment>
+        <Table.Row active={this.props.selected}>
+          <Table.Cell
+            onClick={this.onLineClick}
+            onDoubleClick={this.onLineDoubleClick}
+          >
+            <Icon
+              name={
+                codesDocs[
+                  _.findIndex(
+                    codesDocs,
+                    i => this.props.document.mimeType === i.mimeType
+                  ) !== -1
+                    ? _.findIndex(
+                        codesDocs,
+                        i => this.props.document.mimeType === i.mimeType
+                      )
+                    : _.findIndex(codesDocs, i => i.mimeType === "default")
+                ].icon
+              }
+            />
+            {this.props.document.fileName}
+          </Table.Cell>
+          <Table.Cell
+            onClick={this.onLineClick}
+            onDoubleClick={this.onLineDoubleClick}
+            style={{ textAlign: "center" }}
+          >
+            {
+              codesDocs[
+                _.findIndex(
+                  codesDocs,
+                  i => this.props.document.mimeType === i.mimeType
+                ) !== -1
+                  ? _.findIndex(
+                      codesDocs,
+                      i => this.props.document.mimeType === i.mimeType
+                    )
+                  : _.findIndex(codesDocs, i => i.mimeType === "default")
+              ].type
+            }
+          </Table.Cell>
+          <Table.Cell
+            onClick={this.onLineClick}
+            onDoubleClick={this.onLineDoubleClick}
+            style={{ textAlign: "center" }}
+          >
+            {moment(this.props.document.modifiedAt).format("L")}{" "}
+            {moment(this.props.document.modifiedAt).format("LT")}
+          </Table.Cell>
+          {this.props.showActions ? (
+            <Table.Cell>
+              <Actions
+                actions={this.props.actions}
+                id={this.props.document.id}
+                dropdown={{ direction: "left" }}
+              />
+            </Table.Cell>
+          ) : null}
+          {this.props.showCheckbox ? (
+            <Table.Cell onClick={() => {}}>
+              <Checkbox
+                checked={this.props.selected}
+                onChange={this.props.onChangeCheckbox}
+              />
+            </Table.Cell>
+          ) : null}
+        </Table.Row>
       </React.Fragment>
     );
   }

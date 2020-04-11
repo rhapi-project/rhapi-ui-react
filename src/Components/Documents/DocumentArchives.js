@@ -89,6 +89,11 @@ export default class DocumentArchives extends React.Component {
       id,
       {},
       result => {
+        if (result.mimeType === "text/rtf") {
+          // cas particulier d'un mimeType text qui sera téléchargé par défaut
+          this.downloadDocument(result);
+          return;
+        }
         if (!_.startsWith(result.mimeType, "text/")) {
           this.downloadDocument(result);
         } else {
@@ -209,7 +214,7 @@ export default class DocumentArchives extends React.Component {
                   action: id => this.onActionClick(id, "autre action")
                 }
               ]}
-              showAction={true}
+              showActions={true}
               showCheckbox={true}
             />
             <div style={{ textAlign: "center" }}>
@@ -229,13 +234,7 @@ export default class DocumentArchives extends React.Component {
             <TextDocument
               data={{}}
               document={this.state.selectedDocument.document}
-              mode={
-                this.state.modeText === "text/html"
-                  ? "html"
-                  : this.state.modeText === "text/rtf"
-                  ? "rtf"
-                  : "plain"
-              }
+              mode={this.state.modeText === "text/html" ? "html" : "plain"}
               onEdit={content => {
                 let sd = this.state.selectedDocument;
                 sd.document = content;
@@ -266,7 +265,7 @@ export default class DocumentArchives extends React.Component {
           </React.Fragment>
         )}
 
-        {/* modal de confirmation - suppression d'un modèle */}
+        {/* modal de confirmation - suppression d'un document */}
         <Modal open={this.state.modalDelete} size="tiny">
           <Modal.Header>Supprimer un document</Modal.Header>
           <Modal.Content>

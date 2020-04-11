@@ -13,7 +13,7 @@ const propDefs = {
     data:
       "un objet qui contient les données à utiliser pour le remplissage automatique des champs dynamiques",
     document: "contenu d'un document au format texte",
-    mode: "mode d'édition du document : html|plain|rtf",
+    mode: "mode d'édition du document : html|plain",
     onEdit: "Callback à la modification du texte"
   },
   propTypes: {
@@ -74,8 +74,6 @@ export default class TextDocument extends React.Component {
               allowedContent: true
             }}
           />
-        ) : this.props.mode === "rtf" ? (
-          <React.Fragment>{this.props.document}</React.Fragment>
         ) : null}
       </React.Fragment>
     );
