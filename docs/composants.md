@@ -24,6 +24,23 @@ Composant de présentation d'une fiche d'un acte. Celui-ci utilise le composant 
 | date | string | Date de la tarification de l'acte, au format ISO. Par défaut la date du jour |
 | modificateurs | string | Modificateurs appliqués à l'acte, par défaut une chaîne de caractères vide |
 
+## Search
+Composant pour la recherche des actes en CCAM (par code CCAM ou mot-clé). Retourne la liste des actes sous forme d'un tableau d'objets JSON. 
+La recherche n'est pas effectuée si la date ou la localisation sont NULL.
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
+| executant | string | Limiter la recherche aux seuls actes d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes) |
+| limit | number | Valeur de pagination |
+| localisation | string | Limiter la recherche aux actes concernant les dents renseignées selon la norme internationale ISO-3950, sans séparateur entre les numéros des dents (par exemple localisation=1121 pour les deux incisives centrales maxillaires ou localisation=18 pour la dent de sagesse maxillaire droite) |
+| onClear | func | Callback d'une ràz |
+| onLoadActes | func | Callback résultat de la recherche |
+| onSelectionChange | func | Callback pour retourner l'acte sélectionné |
+| search | object | Documentation semantic-ui-react [Search](https://react.semantic-ui.com/modules/search) |
+| searchInputLength | number | Nombre minimum de caractères pour déclencher la recherche d'actes |
+
 ## Table
 Composant montrant sous forme d'un tableau les actes obtenus après une recherche par mot clé.
 #### Props du composant
@@ -53,23 +70,6 @@ Composant montrant sous forme d'un tableau les actes obtenus après une recherch
 | btnPrev | object | Props semantic du bouton pour aller à la page précédente, par défaut un objet vide "{}" |
 | btnMore | object | Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}" |
 | mode | string | mode de pagination 'pages' ou 'more', par défaut "pages" |
-
-## Search
-Composant pour la recherche des actes en CCAM (par code CCAM ou mot-clé). Retourne la liste des actes sous forme d'un tableau d'objets JSON. 
-La recherche n'est pas effectuée si la date ou la localisation sont NULL.
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
-| executant | string | Limiter la recherche aux seuls actes d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes) |
-| limit | number | Valeur de pagination |
-| localisation | string | Limiter la recherche aux actes concernant les dents renseignées selon la norme internationale ISO-3950, sans séparateur entre les numéros des dents (par exemple localisation=1121 pour les deux incisives centrales maxillaires ou localisation=18 pour la dent de sagesse maxillaire droite) |
-| onClear | func | Callback d'une ràz |
-| onLoadActes | func | Callback résultat de la recherche |
-| onSelectionChange | func | Callback pour retourner l'acte sélectionné |
-| search | object | Documentation semantic-ui-react [Search](https://react.semantic-ui.com/modules/search) |
-| searchInputLength | number | Nombre minimum de caractères pour déclencher la recherche d'actes |
 
 ## Tarification
 Composant de facturation d'un acte CCAM
@@ -116,6 +116,43 @@ Modal Semantic de lecture et de configuration des actes favoris
 | onClose | func | Callback à la fermeture de la modal |
 | onSelection | func | Callback à la selection et validation d'un acte. Cette fonction prend en 1er paramètre l'indice de la ligne et en 2ème paramètre l'objet acte sélectionné. |
 
+## ModalSearch
+Ce composant est une modal Semantic de recherche d'un acte. Il intègre un date picker, les composants CCAM.Search, CCAM.Table et Shared.Localisations
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| code | string | Code de l'acte CCAM sélectionné. Par défaut "" |
+| codActivite | string | Code de l'activité, par défaut "1" |
+| codDom | number | Code du DOM, par défaut c'est la métropole. Code 0 |
+| codGrille | number | Code grille, par défaut 0 |
+| codPhase | number | Code phase, par défaut 0 |
+| cotation | number | Cotation/coefficient applicable au code (significatif uniquement en NGAP, 0 si non significatif) |
+| date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
+| description | string | Description de l'acte sélectionné. Par défaut "" |
+| localisation | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
+| executant | string | Limiter la recherche aux seuls actes d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes) |
+| specialite | number | Code spécialité du praticien |
+| localisationPicker | bool | Affichage de la grille de saisie des localisations dentaires |
+| open | bool | Ouverture de la modal |
+| onClose | func | Callback à la fermeture de la modal |
+| rowIndex | number | Indice de la ligne sur laquelle on a cliqué dans le tableau de saisie des actes |
+| ngap | array | Liste des codes NGAP |
+| allModificateurs | array | Tous les modificateurs (obtenus avec une requête CCAM contextes) |
+| modificateurs | string | Modificateurs appliqués à l'acte sélectionné. Par défaut "" |
+| qualificatifs | string | Qualificatifs |
+| montant | number | Montant de l'acte sélectionné |
+| onValidation | func | Callback à la validation. Paramètres : 
+- index de la ligne
+ - code de l'acte sélectionné
+ - description de l'acte
+- date au format ISO
+ - localisation
+ - cotation
+ - modificateurs
+ - qualificatifs
+- montant |
+
 ## Historique
 Historique des actes d'un patient
 #### Props du composant
@@ -158,42 +195,16 @@ Historique des actes d'un patient
 | btnMore | object | Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}" |
 | mode | string | Mode de pagination "pages" ou "more", par défaut "pages" |
 
-## ModalSearch
-Ce composant est une modal Semantic de recherche d'un acte. Il intègre un date picker, les composants CCAM.Search, CCAM.Table et Shared.Localisations
+## ModalSelectActes
+Modal de sélection des actes. Ces actes seront utilisés par exemple pour générer un document.
 #### Props du composant
 | Props | Type | Description |
 | ---- | ----- | ------ |
 | client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| code | string | Code de l'acte CCAM sélectionné. Par défaut "" |
-| codActivite | string | Code de l'activité, par défaut "1" |
-| codDom | number | Code du DOM, par défaut c'est la métropole. Code 0 |
-| codGrille | number | Code grille, par défaut 0 |
-| codPhase | number | Code phase, par défaut 0 |
-| cotation | number | Cotation/coefficient applicable au code (significatif uniquement en NGAP, 0 si non significatif) |
-| date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
-| description | string | Description de l'acte sélectionné. Par défaut "" |
-| localisation | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
-| executant | string | Limiter la recherche aux seuls actes d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes) |
-| specialite | number | Code spécialité du praticien |
-| localisationPicker | bool | Affichage de la grille de saisie des localisations dentaires |
-| open | bool | Ouverture de la modal |
-| onClose | func | Callback à la fermeture de la modal |
-| rowIndex | number | Indice de la ligne sur laquelle on a cliqué dans le tableau de saisie des actes |
-| ngap | array | Liste des codes NGAP |
-| allModificateurs | array | Tous les modificateurs (obtenus avec une requête CCAM contextes) |
-| modificateurs | string | Modificateurs appliqués à l'acte sélectionné. Par défaut "" |
-| qualificatifs | string | Qualificatifs |
-| montant | number | Montant de l'acte sélectionné |
-| onValidation | func | Callback à la validation. Paramètres : 
-- index de la ligne
- - code de l'acte sélectionné
- - description de l'acte
-- date au format ISO
- - localisation
- - cotation
- - modificateurs
- - qualificatifs
-- montant |
+| idPatient | number | identifiant du patient |
+| open | bool | ouverture de la modal |
+| onClose | func | callback à la fermeture de la modal |
+| onDocumentGeneration | func | callback de la fin de sélection |
 
 ## Note
 Nouvelle << Note >> ou << Todo >>
@@ -258,6 +269,18 @@ Composant correspondant à une ligne du tableau de saisie des actes pour les den
 | onInsertion | func | Callback à l'insertion d'un nouvel acte |
 | onSearchFavoris | func | Callback au clic sur la colonne libellé (Recherche d'un acte dans les favoris) |
 | onMoveToFSE | func | Callback déplacement d'un acte de #DEVIS vers #FSE |
+
+## ValidationActes
+Modal de confirmation de la validation d'un acte
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| idActe | number | identifiant de l'acte à valider |
+| modeleDocument | string | type de modèle à utiliser pour la génération d'un document |
+| open | bool | ouverture de la modal |
+| onClose | func | callback à la fermeture de la modal |
+| onDocumentGeneration | func | callback à la confirmation de la génération d'un document |
 
 ## Actions
 Menu d'actions à effectuer
@@ -387,5 +410,5 @@ Manupulation d'un document sous format texte
 | ---- | ----- | ------ |
 | data | object | un objet qui contient les données à utiliser pour le remplissage automatique des champs dynamiques |
 | document | string | contenu d'un document au format texte |
-| mode | string | mode d'édition du document : html|plain |
+| mode | string | mode d'édition du document : html ou plain |
 | onEdit | func | Callback à la modification du texte |
