@@ -285,7 +285,6 @@ const modeleDocument = (client, origine, usage, onSuccess, onError) => {
       limit: 1000 // nombre maximum de modèles
     },
     result => {
-      console.log(result);
       let modelesUsage = [];
       _.forEach(result.results, modele => {
         if (_.get(modele.infosJO, "modele.usage", "") === usage) {

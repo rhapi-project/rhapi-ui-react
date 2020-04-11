@@ -7,6 +7,7 @@ import TextDocument from "./TextDocument";
 import RenameDocument from "./RenameDocument";
 import PropertiesModele from "./PropertiesModele";
 import RecopieModele from "./RecopieModele";
+import ModalSelectActes from "../Actes/ModalSelectActes";
 import { downloadTextFile, uploadFile } from "../lib/Helpers";
 
 const propDefs = {
@@ -37,7 +38,8 @@ export default class DocumentModeles extends React.Component {
     modalRename: false,
     modalProperties: false,
     modalRecopie: false,
-    currentDocumentId: null
+    currentDocumentId: null,
+    modalSelectActes: false
   };
 
   componentDidMount() {
@@ -242,6 +244,29 @@ export default class DocumentModeles extends React.Component {
     );
   };
 
+  genererDocument = idDocument => {
+    this.readDocument(
+      idDocument,
+      result => {
+        //console.log(result);
+        let usage = _.get(result.infosJO, "modele.usage", "");
+        if (!_.isEmpty(usage)) {
+          switch (usage) {
+            case "FACTURE":
+              this.setState({ modalSelectActes: true });
+              break;
+            // TODO : ajouter d'autres cas -> DEVIS
+            default:
+              break;
+          }
+        }
+      },
+      error => {
+        console.log(error);
+      }
+    );
+  };
+
   render() {
     return (
       <React.Fragment>
@@ -252,7 +277,7 @@ export default class DocumentModeles extends React.Component {
               //onDocumentClick={id => {}}
               onDocumentDoubleClick={id => {
                 if (this.props.idPatient) {
-                  // TODO : générer un document
+                  this.genererDocument(id);
                 } else {
                   this.editionDocument(id);
                 }
@@ -313,6 +338,8 @@ export default class DocumentModeles extends React.Component {
                 content="Recopier un modèle"
                 onClick={() => this.setState({ modalRecopie: true })}
               />
+              <Button content="Devis" />
+              <Button content="Facture" />
               <input
                 id="file"
                 type="file"
@@ -414,6 +441,17 @@ export default class DocumentModeles extends React.Component {
           client={this.props.client}
           open={this.state.modalRecopie}
           onClose={this.reload}
+        />
+
+        {/* modal de selection des actes */}
+        <ModalSelectActes
+          client={this.props.client}
+          idPatient={this.props.idPatient}
+          open={this.state.modalSelectActes}
+          onClose={() => this.setState({ modalSelectActes: false })}
+          onDocumentGeneration={arrayIdActes => {
+            console.log(arrayIdActes);
+          }}
         />
       </React.Fragment>
     );

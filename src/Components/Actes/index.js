@@ -5,6 +5,8 @@ import ModalSearch from "./ModalSearch";
 import Favoris from "./Favoris";
 import Edition from "./Edition";
 import Note from "./Note";
+import ModalSelectActes from "./ModalSelectActes";
+import ValidationActes from "./ValidationActes";
 
 export default class Actes extends React.Component {
   static Saisie = Saisie;
@@ -13,6 +15,8 @@ export default class Actes extends React.Component {
   static Favoris = Favoris;
   static Edition = Edition;
   static Note = Note;
+  static ModalSelectActes = ModalSelectActes;
+  static ValidationActes = ValidationActes;
 
   render() {
     const { children } = this.props;

@@ -24,7 +24,6 @@ export default class DocumentsTextDocument extends React.Component {
   state = {
     idPatient: null,
     data: {},
-    //autoFilling: false,
     type: 0,
     documents: [],
     selectedDocument: {}
@@ -36,11 +35,9 @@ export default class DocumentsTextDocument extends React.Component {
         id,
         {},
         result => {
-          //console.log(result);
           let d = this.state.data;
           d.patient = result;
           this.setState({ data: d, autoFilling: false });
-          //this.loadActes(id);
         },
         error => {
           console.log(error);
@@ -53,7 +50,7 @@ export default class DocumentsTextDocument extends React.Component {
 
   handleChangeType = type => {
     this.setState({ type: type });
-    // certainement on fait quelque chose après
+    // possibilité de rajouter des traitements supplémentaires
     this.reload(this.state.idPatient, type);
   };
 
@@ -82,36 +79,6 @@ export default class DocumentsTextDocument extends React.Component {
     );
   };
 
-  /*autoFilling = () => {
-    this.loadActes(this.state.idPatient);
-  };*/
-
-  // sur cet exemple on récupère les actes d'un devis (pour un patient donné)
-  /*loadActes = idPatient => {
-    let params = {
-      _code: "#DEVIS",
-      //_etat: 1, // TODO : voir quel type de devis récupérer
-      _idPatient: idPatient
-    };
-    client.Actes.readAll(
-      params,
-      result => {
-        //console.log(result);
-        let d = this.state.data;
-        d.devis = _.isEmpty(result.results) ? {} : result.results[0];
-        this.setState({ data: d, autoFilling: true });
-      },
-      error => {
-        console.log(error);
-      }
-    );
-  };*/
-
-  /*changeDateFormat = dateStr => {
-    let d = new Date(dateStr);
-    return d.toLocaleDateString();
-  };*/
-
   readDocument = id => {
     client.Documents.read(
       id,
@@ -125,24 +92,6 @@ export default class DocumentsTextDocument extends React.Component {
       }
     );
   };
-
-  /*savePDFDocument = base64Content => {
-    client.Documents.create(
-      {
-        fileName: this.state.selectedDocument.fileName + ".pdf",
-        idPatient: this.state.idPatient,
-        mimeType: "application/pdf",
-        document: base64Content
-      },
-      result => {
-        console.log(result);
-        this.setState({ selectedDocument: {} });
-      },
-      error => {
-        console.log(error);
-      }
-    );
-  };*/
 
   updateDocument = () => {
     client.Documents.update(
@@ -266,38 +215,6 @@ export default class DocumentsTextDocument extends React.Component {
               content="Fermer"
               onClick={() => this.setState({ selectedDocument: {} })}
             />
-            {/*!_.isNull(this.state.idPatient) ? (
-              <Button
-                content="Remplissage auto"
-                onClick={() => this.autoFilling()}
-              />
-            ) : null*/}
-            {/*<Button
-              content="Enregistrer"
-              onClick={() => this.updateDocument()}
-            />*/}
-            {/*<Button
-              content="Télécharger (PDF)"
-              onClick={() => {
-                //let func = new Functions();
-                //func.PDF.download(this.state.selectedDocument.document);
-              }}
-            />*/}
-            {/*!_.isNull(this.state.idPatient) ? (
-              <Button
-                content="Enregistrer (PDF)"
-                onClick={() => {
-                  //this.savePDFDocument(base64Content);
-                  //func.PDF.experimentalDownload(this.state.selectedDocument.document, "fichier");
-                }}
-              />
-            ) : null*/}
-            {/*<Button
-              //disabled={true}
-              negative={true}
-              content="Supprimer"
-              onClick={() => this.deleteDocument()}
-            />*/}
           </React.Fragment>
         ) : null}
       </React.Fragment>

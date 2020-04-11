@@ -13,7 +13,7 @@ const propDefs = {
     data:
       "un objet qui contient les données à utiliser pour le remplissage automatique des champs dynamiques",
     document: "contenu d'un document au format texte",
-    mode: "mode d'édition du document : html|plain",
+    mode: "mode d'édition du document : html ou plain",
     onEdit: "Callback à la modification du texte"
   },
   propTypes: {

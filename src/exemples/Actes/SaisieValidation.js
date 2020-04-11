@@ -1,14 +1,7 @@
 import React from "react";
 import { Client } from "rhapi-client";
 import { Actes, Documents } from "../../Components";
-import {
-  Button,
-  Divider,
-  Form,
-  Message,
-  Modal,
-  Radio
-} from "semantic-ui-react";
+import { Button, Divider, Form, Radio } from "semantic-ui-react";
 
 import moment from "moment";
 import _ from "lodash";
@@ -35,9 +28,9 @@ export default class ActesSaisieValidation extends React.Component {
     idPatient: null,
     acteToAdd: {}, // acte à ajouter dans une FSE
     fse: {},
-    msgSaveFSE: "",
     typeActe: "#FSE",
-    modalCreationDocument: false
+    modalCreationDocument: false,
+    modalValidationActes: false
   };
 
   componentDidMount() {
@@ -76,7 +69,7 @@ export default class ActesSaisieValidation extends React.Component {
       params,
       result => {
         //console.log(result);
-        this.setState({ fse: result, msgSaveFSE: "", acteToAdd: acteToAdd });
+        this.setState({ fse: result, acteToAdd: acteToAdd });
       },
       error => {
         console.log(error);
@@ -86,7 +79,11 @@ export default class ActesSaisieValidation extends React.Component {
   };
 
   onPatientChange = (id, typeActe, acteToAdd) => {
-    this.setState({ idPatient: id });
+    this.setState({
+      idPatient: id,
+      modalValidationActes: false,
+      modalCreationDocument: false
+    });
     if (id && id !== 0) {
       let params = {
         _code: typeActe,
@@ -136,42 +133,6 @@ export default class ActesSaisieValidation extends React.Component {
       error => {
         console.log(error);
         console.log("La création d'un acte a échoué");
-      }
-    );
-  };
-
-  save = () => {
-    client.Actes.read(
-      this.state.fse.id,
-      {},
-      result => {
-        if (this.state.fse.code === "#FSE") {
-          let actes = _.filter(
-            _.get(result, "contentJO.actes", []),
-            a => !_.isEmpty(a.code)
-          );
-          _.forEach(actes, acte => {
-            this.createActe(acte, result.id, result.idPatient);
-          });
-        }
-        client.Actes.update(
-          result.id,
-          { etat: 0, doneAt: moment().toISOString() },
-          result => {
-            this.setState({
-              msgSaveFSE: `L'acte ${this.state.typeActe} a été bien enregistré !`
-            });
-            this.onPatientChange(result.idPatient, this.state.typeActe, {});
-          },
-          error => {
-            this.setState({ msgSaveFSE: "Erreur de sauvegarde de l'acte !" });
-          }
-        );
-      },
-      error => {
-        this.setState({
-          msgSaveFSE: `Erreur de sauvegarde de l'acte ${this.state.typeActe} ! Lecture de cet acte impossible`
-        });
       }
     );
   };
@@ -268,21 +229,17 @@ export default class ActesSaisieValidation extends React.Component {
               actions={actions}
               acteToAdd={this.state.acteToAdd}
               addToFSE={acte => {
-                //this.setState({ acteToAdd: acte });
                 this.handleChangeType("#FSE", acte);
-                //console.log(acte);
               }}
             />
             <span>
-              <Button content="Valider" onClick={this.save} />
               <Button
-                content="Produire une Facture"
+                content="Valider"
                 onClick={() => {
                   if (_.isEmpty(this.state.fse.contentJO.actes)) {
-                    //console.log("Pas d'actes");
                     return;
                   }
-                  this.setState({ modalCreationDocument: true });
+                  this.setState({ modalValidationActes: true });
                 }}
               />
               <Button
@@ -292,25 +249,29 @@ export default class ActesSaisieValidation extends React.Component {
               />
             </span>
           </div>
-        ) : (
-          ""
-        )}
-        <Modal
-          size="mini"
-          open={!_.isEmpty(this.state.msgSaveFSE)}
-          onClose={() => this.setState({ msgSaveFSE: "" })}
-        >
-          <Modal.Header>Résultat validation de l'acte</Modal.Header>
-          <Modal.Content>
-            <Message>{this.state.msgSaveFSE}</Message>
-          </Modal.Content>
-          <Modal.Actions>
-            <Button
-              content="OK"
-              onClick={() => this.setState({ msgSaveFSE: "" })}
-            />
-          </Modal.Actions>
-        </Modal>
+        ) : null}
+
+        {/* modal de validation d'un acte */}
+        <Actes.ValidationActes
+          client={client}
+          modeleDocument={
+            this.state.typeActe === "#FSE"
+              ? "FACTURE"
+              : this.state.typeActe === "#DEVIS"
+              ? "DEVIS"
+              : ""
+          }
+          idActe={this.state.fse.id}
+          open={this.state.modalValidationActes}
+          onClose={() =>
+            this.onPatientChange(this.state.idPatient, this.state.typeActe, {})
+          }
+          onDocumentGeneration={() => {
+            this.setState({
+              modalCreationDocument: true
+            });
+          }}
+        />
 
         {/* modal de chargement à la création d'un document */}
         <Documents.DocumentFromActes
@@ -319,8 +280,16 @@ export default class ActesSaisieValidation extends React.Component {
           idPatient={this.state.idPatient}
           idFse={this.state.fse.id}
           user=""
-          typeDocument="FACTURE"
-          onClose={() => this.setState({ modalCreationDocument: false })}
+          typeDocument={
+            this.state.typeActe === "#FSE"
+              ? "FACTURE"
+              : this.state.typeActe === "#DEVIS"
+              ? "DEVIS"
+              : ""
+          }
+          onClose={() =>
+            this.onPatientChange(this.state.idPatient, this.state.typeActe, {})
+          }
         />
       </React.Fragment>
     );
