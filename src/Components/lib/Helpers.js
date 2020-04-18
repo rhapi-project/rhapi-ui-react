@@ -247,8 +247,13 @@ const downloadPDF = (content, filename) => {
 // TODO : améliorer la gestion du format (A4 par défaut) et la qualité du PDF généré (voir code ci-dessous) :
 // https://gist.github.com/DavidMellul/d01c720ce31aecf99be3a6441255381f#file-htmltopdf_simple-js
 //
-const htmlToPDF = (html, fileNameToDownload, onSuccess, onError) => {
-  let win = window.open("", "Document", "width=300,height=300"); // faire du A4 21/29.7 ?
+const htmlToPDF = (html, fileNameToDownload, download, onSuccess, onError) => {
+  let win = window.open("", "Document", "width=600,height=200");
+  if (_.isNull(win)) {
+    // le navigateur n'autorise pas les popups
+    onError("POPUP_ERROR");
+    return;
+  }
   win.document.open();
   win.document.write(html);
   win.focus();
@@ -258,11 +263,11 @@ const htmlToPDF = (html, fileNameToDownload, onSuccess, onError) => {
     })
       .then(canvas => {
         let img = canvas.toDataURL("image/png");
-        let doc = new jsPDF();
-        doc.addImage(img, "JPEG", 10, 10); // faire du A4 21/29.7 ?
+        let doc = new jsPDF("p", "mm", "a4");
+        doc.addImage(img, "JPEG", 10, 10);
         win.close();
         let datas = doc.output("datauristring");
-        if (!_.isEmpty(fileNameToDownload)) {
+        if (!_.isEmpty(fileNameToDownload) && download) {
           downloadBinaryFile(datas, fileNameToDownload);
         }
         onSuccess(datas);
