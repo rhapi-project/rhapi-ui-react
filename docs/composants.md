@@ -116,43 +116,6 @@ Modal Semantic de lecture et de configuration des actes favoris
 | onClose | func | Callback à la fermeture de la modal |
 | onSelection | func | Callback à la selection et validation d'un acte. Cette fonction prend en 1er paramètre l'indice de la ligne et en 2ème paramètre l'objet acte sélectionné. |
 
-## ModalSearch
-Ce composant est une modal Semantic de recherche d'un acte. Il intègre un date picker, les composants CCAM.Search, CCAM.Table et Shared.Localisations
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| code | string | Code de l'acte CCAM sélectionné. Par défaut "" |
-| codActivite | string | Code de l'activité, par défaut "1" |
-| codDom | number | Code du DOM, par défaut c'est la métropole. Code 0 |
-| codGrille | number | Code grille, par défaut 0 |
-| codPhase | number | Code phase, par défaut 0 |
-| cotation | number | Cotation/coefficient applicable au code (significatif uniquement en NGAP, 0 si non significatif) |
-| date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
-| description | string | Description de l'acte sélectionné. Par défaut "" |
-| localisation | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
-| executant | string | Limiter la recherche aux seuls actes d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes) |
-| specialite | number | Code spécialité du praticien |
-| localisationPicker | bool | Affichage de la grille de saisie des localisations dentaires |
-| open | bool | Ouverture de la modal |
-| onClose | func | Callback à la fermeture de la modal |
-| rowIndex | number | Indice de la ligne sur laquelle on a cliqué dans le tableau de saisie des actes |
-| ngap | array | Liste des codes NGAP |
-| allModificateurs | array | Tous les modificateurs (obtenus avec une requête CCAM contextes) |
-| modificateurs | string | Modificateurs appliqués à l'acte sélectionné. Par défaut "" |
-| qualificatifs | string | Qualificatifs |
-| montant | number | Montant de l'acte sélectionné |
-| onValidation | func | Callback à la validation. Paramètres : 
-- index de la ligne
- - code de l'acte sélectionné
- - description de l'acte
-- date au format ISO
- - localisation
- - cotation
- - modificateurs
- - qualificatifs
-- montant |
-
 ## Historique
 Historique des actes d'un patient
 #### Props du composant
@@ -194,6 +157,43 @@ Historique des actes d'un patient
 | btnPrev | object | Props semantic du bouton pour aller à la page précédente, par défaut un objet vide "{}" |
 | btnMore | object | Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}" |
 | mode | string | Mode de pagination "pages" ou "more", par défaut "pages" |
+
+## ModalSearch
+Ce composant est une modal Semantic de recherche d'un acte. Il intègre un date picker, les composants CCAM.Search, CCAM.Table et Shared.Localisations
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| code | string | Code de l'acte CCAM sélectionné. Par défaut "" |
+| codActivite | string | Code de l'activité, par défaut "1" |
+| codDom | number | Code du DOM, par défaut c'est la métropole. Code 0 |
+| codGrille | number | Code grille, par défaut 0 |
+| codPhase | number | Code phase, par défaut 0 |
+| cotation | number | Cotation/coefficient applicable au code (significatif uniquement en NGAP, 0 si non significatif) |
+| date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
+| description | string | Description de l'acte sélectionné. Par défaut "" |
+| localisation | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
+| executant | string | Limiter la recherche aux seuls actes d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes) |
+| specialite | number | Code spécialité du praticien |
+| localisationPicker | bool | Affichage de la grille de saisie des localisations dentaires |
+| open | bool | Ouverture de la modal |
+| onClose | func | Callback à la fermeture de la modal |
+| rowIndex | number | Indice de la ligne sur laquelle on a cliqué dans le tableau de saisie des actes |
+| ngap | array | Liste des codes NGAP |
+| allModificateurs | array | Tous les modificateurs (obtenus avec une requête CCAM contextes) |
+| modificateurs | string | Modificateurs appliqués à l'acte sélectionné. Par défaut "" |
+| qualificatifs | string | Qualificatifs |
+| montant | number | Montant de l'acte sélectionné |
+| onValidation | func | Callback à la validation. Paramètres : 
+- index de la ligne
+ - code de l'acte sélectionné
+ - description de l'acte
+- date au format ISO
+ - localisation
+ - cotation
+ - modificateurs
+ - qualificatifs
+- montant |
 
 ## ModalSelectActes
 Modal de sélection des actes. Ces actes seront utilisés par exemple pour générer un document.
@@ -239,6 +239,7 @@ Tableau de saisie des actes pour les dentistes
 | actions | array | Liste d'actions à effectuer (en plus des actions par défaut) |
 | addToFSE | func | Callback ajout d'un acte dans une FSE (à partir d'un #DEVIS) |
 | acteToAdd | object | Acte à ajouter dans une FSE |
+| onForceReload | func | Callback appelé pour forcer le rechargement |
 
 ## SaisieDentaire
 Composant correspondant à une ligne du tableau de saisie des actes pour les dentistes
@@ -270,6 +271,25 @@ Composant correspondant à une ligne du tableau de saisie des actes pour les den
 | onSearchFavoris | func | Callback au clic sur la colonne libellé (Recherche d'un acte dans les favoris) |
 | onMoveToFSE | func | Callback déplacement d'un acte de #DEVIS vers #FSE |
 
+## SaisieValidation
+Composant de saisie et validation des actes
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| idPatient | number | Identifiant du patient |
+| typeActe | string | Type d'acte à saisir ou à valider : #FSE ou #DEVIS |
+| defaultDescriptionType | string | Type de description par défaut à utiliser pour les actes : court ou long |
+| codActivite | string | Code de l'activité, par défaut "1" |
+| codDom | number | Code du DOM, par défaut c'est la métropole. Code 0 |
+| codGrille | number | Code grille, par défaut 0 |
+| codPhase | number | Code phase, par défaut 0 |
+| executant | string | Code d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes) |
+| specialite | number | Code spécialité du praticien |
+| actions | array | Liste d'actions à effectuer (en plus des actions par défaut) |
+| lignes | number | Nombre de lignes à afficher pour ce tableau. Par défaut 5 |
+| user | string | identifiant du praticien |
+
 ## ValidationActes
 Modal de confirmation de la validation d'un acte
 #### Props du composant
@@ -282,15 +302,6 @@ Modal de confirmation de la validation d'un acte
 | onClose | func | callback à la fermeture de la modal |
 | onDocumentGeneration | func | callback à la confirmation de la génération d'un document |
 
-## Actions
-Menu d'actions à effectuer
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| actions | array | Tableau contenant une liste d'actions |
-| dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
-| id | any | Identifiant de la ligne sur laquelle une action est effectuée |
-
 ## DateRange
 Période, début et fin d'une période
 #### Props du composant
@@ -301,6 +312,15 @@ Période, début et fin d'une période
 | endAt | string | Date de fin de la période. Par défaut une semaine après la date du jour. |
 | onRangeChange | func | Callback au changement de la période |
 | onClose | func | Callback à la fermeture de la modal |
+
+## Actions
+Menu d'actions à effectuer
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| actions | array | Tableau contenant une liste d'actions |
+| dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
+| id | any | Identifiant de la ligne sur laquelle une action est effectuée |
 
 ## Localisations
 Grille de saisie des localisations dentaires
@@ -346,10 +366,13 @@ Modal de chargement à la création d'un document à partir des Actes.
 | ---- | ----- | ------ |
 | client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
 | idPatient | number | identifiant d'un patient |
+| idFse | array | liste d'identifiants d'actes pour lesquels il faut générer des documents |
+| idModele | number | identifiant du modèle à utiliser. Si cette valeur est renseignée, ce sera le document correspondant à cet identifiant qui sera utilisé |
 | open | bool | ouverture de la modal |
 | onClose | func | callback à la fermeture de la modal |
 | user | string | identifiant du praticien |
-| typeDocument | string | type de document à produire |
+| typeDocument | string | type de document à produire : DEVIS ou FACTURE |
+| download | bool | téléchargement du document généré |
 
 ## DocumentModeles
 Composant de gestion des modèles appartenant à un ou plusieurs praticiens
@@ -359,19 +382,6 @@ Composant de gestion des modèles appartenant à un ou plusieurs praticiens
 | client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
 | idPatient | number | identifiant du patient nécessaire si l'on souhaite créer un document à partir d'un modèle |
 | user | string | identifiant du praticien |
-
-## ListeDocument
-Liste des documents d'un patient
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| documents | array | liste de documents |
-| onDocumentClick | func | Retourne en paramètre l'id d'un document sur un click |
-| onDocumentDoubleClick | func | Retourne en paramètre l'id d'un document sur un double click |
-| onSelectionChange | func | Retourne en paramètre la liste des id des documents sélectionnés (multi-sélection possible par CTRL+click) |
-| actions | array | Tableau d'objet contenant des actions à effectuer (en plus des actions par défaut) |
-| showActions | bool | Permet d'afficher la colonne des actions. Par défaut, showAction prend la valeur true |
-| showCheckbox | bool | Permet d'afficher la colonne de sélection (Checkbox). Par défaut, showCheckbox prend la valeur false |
 
 ## PropertiesModele
 Modal de changement des propriétés d'un modèle : usage par défaut du modèle et le nom (ou titre du document généré).
@@ -392,6 +402,19 @@ Modal de sélection des modèles à recopier (modèles partagés ou appartenant 
 | client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
 | open | bool | ouverture de la modal |
 | onClose | func | callback à la fermeture de la modal |
+
+## ListeDocument
+Liste des documents d'un patient
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| documents | array | liste de documents |
+| onDocumentClick | func | Retourne en paramètre l'id d'un document sur un click |
+| onDocumentDoubleClick | func | Retourne en paramètre l'id d'un document sur un double click |
+| onSelectionChange | func | Retourne en paramètre la liste des id des documents sélectionnés (multi-sélection possible par CTRL+click) |
+| actions | array | Tableau d'objet contenant des actions à effectuer (en plus des actions par défaut) |
+| showActions | bool | Permet d'afficher la colonne des actions. Par défaut, showAction prend la valeur true |
+| showCheckbox | bool | Permet d'afficher la colonne de sélection (Checkbox). Par défaut, showCheckbox prend la valeur false |
 
 ## RenameDocument
 Modal de changement de nom de fichier pour un document
