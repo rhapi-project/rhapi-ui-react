@@ -1,9 +1,8 @@
 import React from "react";
 import { Client } from "rhapi-client";
-import { Actes, Documents } from "../../Components";
-import { Button, Divider, Form, Radio } from "semantic-ui-react";
+import { Actes } from "../../Components";
+import { Divider, Form, Radio } from "semantic-ui-react";
 
-import moment from "moment";
 import _ from "lodash";
 
 // Instanciation du client RHAPI sans authentification
@@ -26,11 +25,8 @@ const descriptionType = [
 export default class ActesSaisieValidation extends React.Component {
   state = {
     idPatient: null,
-    acteToAdd: {}, // acte à ajouter dans une FSE
-    fse: {},
     typeActe: "#FSE",
-    modalCreationDocument: false,
-    modalValidationActes: false
+    defaultDescriptionType: "court"
   };
 
   componentDidMount() {
@@ -58,107 +54,6 @@ export default class ActesSaisieValidation extends React.Component {
     }
   };
 
-  createFSE = (idPatient, typeActe, acteToAdd) => {
-    let params = {
-      code: typeActe,
-      etat: 1,
-      idPatient: idPatient,
-      description: "Nouvel acte du patient d'id " + idPatient
-    };
-    client.Actes.create(
-      params,
-      result => {
-        //console.log(result);
-        this.setState({ fse: result, acteToAdd: acteToAdd });
-      },
-      error => {
-        console.log(error);
-        this.setState({ fse: {} });
-      }
-    );
-  };
-
-  onPatientChange = (id, typeActe, acteToAdd) => {
-    this.setState({
-      idPatient: id,
-      modalValidationActes: false,
-      modalCreationDocument: false
-    });
-    if (id && id !== 0) {
-      let params = {
-        _code: typeActe,
-        _etat: 1,
-        _idPatient: id
-      };
-      client.Actes.readAll(
-        params,
-        result => {
-          let actes = result.results;
-          if (_.isEmpty(actes)) {
-            this.createFSE(id, typeActe, acteToAdd);
-          } else if (actes.length > 1) {
-            let recent = _.maxBy(actes, a => moment.max(moment(a.modifiedAt)));
-            this.setState({ fse: recent, acteToAdd: acteToAdd });
-          } else {
-            this.setState({ fse: actes[0], acteToAdd: acteToAdd });
-          }
-        },
-        error => {
-          console.log(error);
-          this.setState({ fse: {} });
-        }
-      );
-    } else {
-      this.setState({ fse: {} });
-    }
-  };
-
-  createActe = (acte, idDocument, idPatient) => {
-    let params = {
-      code: acte.code,
-      doneAt: acte.date,
-      localisation: acte.localisation,
-      cotation: acte.cotation,
-      description: acte.description,
-      montant: acte.montant,
-      idPatient: idPatient,
-      idDocument: idDocument,
-      etat: 0
-    };
-    client.Actes.create(
-      params,
-      result => {
-        //console.log(result);
-      },
-      error => {
-        console.log(error);
-        console.log("La création d'un acte a échoué");
-      }
-    );
-  };
-
-  destroy = () => {
-    client.Actes.destroy(
-      this.state.fse.id,
-      result => {
-        this.setState({ fse: {} });
-        this.onPatientChange(this.state.idPatient, this.state.typeActe, {});
-      },
-      error => {
-        console.log(error);
-      }
-    );
-  };
-
-  onError = () => {
-    this.setState({ fse: {} });
-  };
-
-  handleChangeType = (type, acteToAdd) => {
-    this.setState({ typeActe: type });
-    this.onPatientChange(this.state.idPatient, type, acteToAdd);
-  };
-
   render() {
     let actions = [
       { text: "Exemple action", icon: "check", action: il => console.log(il) }
@@ -176,9 +71,7 @@ export default class ActesSaisieValidation extends React.Component {
               placeholder="Sélectionner un patient"
               selection={true}
               options={patients}
-              onChange={(e, d) =>
-                this.onPatientChange(d.value, this.state.typeActe, {})
-              }
+              onChange={(e, d) => this.setState({ idPatient: d.value })}
               value={this.state.idPatient}
             />
             <Form.Dropdown
@@ -204,92 +97,32 @@ export default class ActesSaisieValidation extends React.Component {
               label="FSE"
               value="#FSE"
               checked={this.state.typeActe === "#FSE"}
-              onChange={(e, d) => this.handleChangeType(d.value, {})}
+              onChange={(e, d) => this.setState({ typeActe: d.value })}
             />
             <Radio
               style={{ marginLeft: "20px" }}
               label="PROJET"
               value="#DEVIS"
               checked={this.state.typeActe === "#DEVIS"}
-              onChange={(e, d) => this.handleChangeType(d.value, {})}
+              onChange={(e, d) => this.setState({ typeActe: d.value })}
             />
           </Form.Input>
         </Form>
+
         <Divider hidden={true} />
-        {!_.isEmpty(this.state.fse) ? (
-          <div>
-            <Actes.Saisie
-              client={client}
-              idActe={this.state.fse.id}
-              codGrille={13}
-              executant="D1"
-              specialite={19} // new
-              onError={this.onError}
-              lignes={10}
-              actions={actions}
-              acteToAdd={this.state.acteToAdd}
-              addToFSE={acte => {
-                this.handleChangeType("#FSE", acte);
-              }}
-            />
-            <span>
-              <Button
-                content="Valider"
-                onClick={() => {
-                  if (_.isEmpty(this.state.fse.contentJO.actes)) {
-                    return;
-                  }
-                  this.setState({ modalValidationActes: true });
-                }}
-              />
-              <Button
-                content="Supprimer"
-                negative={true}
-                onClick={this.destroy}
-              />
-            </span>
-          </div>
-        ) : null}
 
-        {/* modal de validation d'un acte */}
-        <Actes.ValidationActes
+        {/* saisie et validation des actes */}
+        <Actes.SaisieValidation
           client={client}
-          modeleDocument={
-            this.state.typeActe === "#FSE"
-              ? "FACTURE"
-              : this.state.typeActe === "#DEVIS"
-              ? "DEVIS"
-              : ""
-          }
-          idActe={this.state.fse.id}
-          open={this.state.modalValidationActes}
-          onClose={() =>
-            this.onPatientChange(this.state.idPatient, this.state.typeActe, {})
-          }
-          onDocumentGeneration={() => {
-            this.setState({
-              modalCreationDocument: true
-            });
-          }}
-        />
-
-        {/* modal de chargement à la création d'un document */}
-        <Documents.DocumentFromActes
-          client={client}
-          open={this.state.modalCreationDocument}
           idPatient={this.state.idPatient}
-          idFse={this.state.fse.id}
-          user=""
-          typeDocument={
-            this.state.typeActe === "#FSE"
-              ? "FACTURE"
-              : this.state.typeActe === "#DEVIS"
-              ? "DEVIS"
-              : ""
-          }
-          onClose={() =>
-            this.onPatientChange(this.state.idPatient, this.state.typeActe, {})
-          }
+          typeActe={this.state.typeActe}
+          defaultDescriptionType={this.state.defaultDescriptionType}
+          codGrille={13}
+          executant="D1"
+          specialite={19}
+          lignes={10}
+          actions={actions}
+          onForceChangeType={type => this.setState({ typeActe: type })}
         />
       </React.Fragment>
     );

@@ -32,7 +32,8 @@ const propDefs = {
     onError: "Callback en cas d'erreur",
     actions: "Liste d'actions à effectuer (en plus des actions par défaut)",
     addToFSE: "Callback ajout d'un acte dans une FSE (à partir d'un #DEVIS)",
-    acteToAdd: "Acte à ajouter dans une FSE"
+    acteToAdd: "Acte à ajouter dans une FSE",
+    onForceReload: "Callback appelé pour forcer le rechargement"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
@@ -48,7 +49,8 @@ const propDefs = {
     onError: PropTypes.func,
     actions: PropTypes.array,
     addToFSE: PropTypes.func,
-    acteToAdd: PropTypes.object // new
+    acteToAdd: PropTypes.object,
+    onForceReload: PropTypes.func
   }
 };
 
@@ -178,6 +180,10 @@ export default class Saisie extends React.Component {
           activeRow: _.get(result, "contentJO.actes", []).length,
           error: 0
         });
+        // notifier le parent de la mise à jour
+        if (this.props.onForceReload) {
+          this.props.onForceReload();
+        }
       },
       error => {
         console.log(error);
