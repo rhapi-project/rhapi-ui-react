@@ -7,6 +7,7 @@ import TextDocument from "./TextDocument";
 import RenameDocument from "./RenameDocument";
 import PropertiesModele from "./PropertiesModele";
 import RecopieModele from "./RecopieModele";
+import DocumentFromActes from "./DocumentFromActes";
 import ModalSelectActes from "../Actes/ModalSelectActes";
 import { downloadTextFile, uploadFile } from "../lib/Helpers";
 
@@ -39,7 +40,10 @@ export default class DocumentModeles extends React.Component {
     modalProperties: false,
     modalRecopie: false,
     currentDocumentId: null,
-    modalSelectActes: false
+    modalCreationDocument: false,
+    modalSelectActes: false,
+    selectedActes: [],
+    typeDocumentToGenerate: ""
   };
 
   componentDidMount() {
@@ -65,7 +69,11 @@ export default class DocumentModeles extends React.Component {
           modalDelete: false,
           modalCreate: false,
           modalRename: false,
-          modalRecopie: false
+          modalRecopie: false,
+          modalCreationDocument: false,
+          selectedActes: [],
+          typeDocumentToGenerate: "",
+          modalSelectActes: false
         });
       },
       error => {
@@ -182,9 +190,6 @@ export default class DocumentModeles extends React.Component {
       case "edit":
         this.editionDocument(id);
         break;
-      case "generate":
-        // implémenter la génération d'un document si un idPatient est défini
-        break;
       case "properties":
         this.setState({ modalProperties: true, currentDocumentId: id });
         break;
@@ -249,10 +254,16 @@ export default class DocumentModeles extends React.Component {
       idDocument,
       result => {
         //console.log(result);
+        this.setState({
+          currentDocumentId: result.id
+        });
         let usage = _.get(result.infosJO, "modele.usage", "");
         if (!_.isEmpty(usage)) {
           switch (usage) {
             case "FACTURE":
+              this.setState({ modalSelectActes: true });
+              break;
+            case "DEVIS":
               this.setState({ modalSelectActes: true });
               break;
             // TODO : ajouter d'autres cas -> DEVIS
@@ -301,11 +312,6 @@ export default class DocumentModeles extends React.Component {
                   action: id => this.handleActions(id, "rename")
                 },
                 {
-                  icon: "file alternate outline",
-                  text: "Générer un document",
-                  action: id => this.handleActions(id, "generate")
-                },
-                {
                   icon: "download",
                   text: "Télécharger",
                   action: id => this.handleActions(id, "download")
@@ -338,8 +344,26 @@ export default class DocumentModeles extends React.Component {
                 content="Recopier un modèle"
                 onClick={() => this.setState({ modalRecopie: true })}
               />
-              <Button content="Devis" />
-              <Button content="Facture" />
+              <Button
+                content="Devis"
+                disabled={!_.isNumber(this.props.idPatient)}
+                onClick={() => {
+                  this.setState({
+                    modalSelectActes: true,
+                    typeDocumentToGenerate: "DEVIS"
+                  });
+                }}
+              />
+              <Button
+                content="Facture"
+                disabled={!_.isNumber(this.props.idPatient)}
+                onClick={() => {
+                  this.setState({
+                    modalSelectActes: true,
+                    typeDocumentToGenerate: "FACTURE"
+                  });
+                }}
+              />
               <input
                 id="file"
                 type="file"
@@ -450,8 +474,24 @@ export default class DocumentModeles extends React.Component {
           open={this.state.modalSelectActes}
           onClose={() => this.setState({ modalSelectActes: false })}
           onDocumentGeneration={arrayIdActes => {
-            console.log(arrayIdActes);
+            this.setState({
+              selectedActes: arrayIdActes,
+              modalCreationDocument: true
+            });
           }}
+        />
+
+        {/* modal de chargement - création des documents */}
+        <DocumentFromActes
+          client={this.props.client}
+          open={this.state.modalCreationDocument}
+          idPatient={this.props.idPatient}
+          idFse={this.state.selectedActes}
+          idModele={this.state.currentDocumentId}
+          user={this.props.user}
+          typeDocument={this.state.typeDocumentToGenerate}
+          download={false}
+          onClose={this.reload}
         />
       </React.Fragment>
     );
