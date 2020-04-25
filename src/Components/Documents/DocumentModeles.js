@@ -253,23 +253,15 @@ export default class DocumentModeles extends React.Component {
     this.readDocument(
       idDocument,
       result => {
-        //console.log(result);
         this.setState({
           currentDocumentId: result.id
         });
         let usage = _.get(result.infosJO, "modele.usage", "");
-        if (!_.isEmpty(usage)) {
-          switch (usage) {
-            case "FACTURE":
-              this.setState({ modalSelectActes: true });
-              break;
-            case "DEVIS":
-              this.setState({ modalSelectActes: true });
-              break;
-            // TODO : ajouter d'autres cas -> DEVIS
-            default:
-              break;
-          }
+        if (usage === "FACTURE") {
+          this.setState({
+            modalSelectActes: true,
+            typeDocumentToGenerate: "FACTURE"
+          });
         }
       },
       error => {
@@ -343,16 +335,6 @@ export default class DocumentModeles extends React.Component {
               <Button
                 content="Recopier un modèle"
                 onClick={() => this.setState({ modalRecopie: true })}
-              />
-              <Button
-                content="Devis"
-                disabled={!_.isNumber(this.props.idPatient)}
-                onClick={() => {
-                  this.setState({
-                    modalSelectActes: true,
-                    typeDocumentToGenerate: "DEVIS"
-                  });
-                }}
               />
               <Button
                 content="Facture"
@@ -486,7 +468,7 @@ export default class DocumentModeles extends React.Component {
           client={this.props.client}
           open={this.state.modalCreationDocument}
           idPatient={this.props.idPatient}
-          idFse={this.state.selectedActes}
+          arrayIdActes={this.state.selectedActes}
           idModele={this.state.currentDocumentId}
           user={this.props.user}
           typeDocument={this.state.typeDocumentToGenerate}

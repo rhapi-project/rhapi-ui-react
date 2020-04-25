@@ -31,70 +31,96 @@ export default class ValidationActes extends React.Component {
 
   state = {
     error: false,
-    messageValidation: ""
+    messageValidation: "",
+    createdActes: []
   };
 
   componentDidUpdate(prevProps) {
     if (this.props.open && this.props.open !== prevProps.open) {
+      this.setState({
+        error: false,
+        messageValidation: "",
+        createdActes: []
+      });
       this.validation();
     }
   }
-
-  createActe = (acte, idDocument, idPatient) => {
-    let params = {
-      code: acte.code,
-      doneAt: acte.date,
-      localisation: acte.localisation,
-      cotation: acte.cotation,
-      description: acte.description,
-      montant: acte.montant,
-      idPatient: idPatient,
-      idDocument: idDocument,
-      etat: 0
-    };
-    this.props.client.Actes.create(
-      params,
-      result => {
-        //console.log(result);
-      },
-      error => {
-        console.log(error);
-        console.log("La création d'un acte a échoué");
-      }
-    );
-  };
 
   validation = () => {
     this.props.client.Actes.read(
       this.props.idActe,
       {},
       result => {
-        if (result.code === "#FSE") {
+        let updateEtatActe = acte => {
+          this.props.client.Actes.update(
+            acte.id,
+            { etat: 0, doneAt: moment().toISOString() },
+            acte => {
+              this.setState({
+                messageValidation: `L'acte "${acte.description}" a été bien enregistré.`,
+                error: false
+              });
+            },
+            error => {
+              this.setState({
+                messageValidation:
+                  "Une erreur est survenue lors de la validation de l'acte.",
+                error: true
+              });
+            }
+          );
+        };
+
+        if (result.code === "#DEVIS") {
+          this.setState({ createdActes: [result.id] });
+          updateEtatActe(result);
+        } else if (result.code === "#FSE") {
+          let createActes = arrayActes => {
+            if (_.isEmpty(arrayActes)) {
+              updateEtatActe(result);
+            } else {
+              let acte = arrayActes.shift();
+              let params = {
+                code: acte.code,
+                doneAt: acte.date,
+                localisation: acte.localisation,
+                cotation: acte.cotation,
+                description: acte.description,
+                montant: acte.montant,
+                idPatient: result.idPatient,
+                idDocument: result.id,
+                etat: 0
+              };
+              this.props.client.Actes.create(
+                params,
+                result => {
+                  //console.log(result);
+                  let crActes = this.state.createdActes;
+                  crActes.push(result.id);
+                  this.setState({
+                    createdActes: crActes
+                  });
+                  createActes(arrayActes);
+                },
+                error => {
+                  console.log(error);
+                  this.setState({
+                    messageValidation:
+                      "Une erreur est survenue lors de la création des actes associés à cet acte.",
+                    error: true
+                  });
+                }
+              );
+            }
+          };
+
           let actes = _.filter(
             _.get(result, "contentJO.actes", []),
             a => !_.isEmpty(a.code)
           );
-          _.forEach(actes, acte => {
-            this.createActe(acte, result.id, result.idPatient);
-          });
+
+          createActes(_.cloneDeepWith(actes));
         }
-        this.props.client.Actes.update(
-          result.id,
-          { etat: 0, doneAt: moment().toISOString() },
-          acte => {
-            this.setState({
-              messageValidation: `L'acte "${result.description}" a été bien enregistré.`,
-              error: false
-            });
-          },
-          error => {
-            this.setState({
-              messageValidation:
-                "Une erreur est survenue lors de la validation de l'acte.",
-              error: true
-            });
-          }
-        );
       },
       error => {
         this.setState({
@@ -152,7 +178,7 @@ export default class ValidationActes extends React.Component {
                   content="Oui"
                   onClick={() => {
                     if (this.props.onDocumentGeneration) {
-                      this.props.onDocumentGeneration();
+                      this.props.onDocumentGeneration(this.state.createdActes);
                     }
                   }}
                 />

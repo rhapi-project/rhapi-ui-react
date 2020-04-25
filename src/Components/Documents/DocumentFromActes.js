@@ -1,6 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, Message, Modal, Progress } from "semantic-ui-react";
+import {
+  Button,
+  Dimmer,
+  Loader,
+  Message,
+  Modal,
+  Segment
+} from "semantic-ui-react";
 import _ from "lodash";
 import Mustache from "mustache";
 import { htmlToPDF, modeleDocument } from "../lib/Helpers";
@@ -11,7 +18,7 @@ const propDefs = {
   example: "",
   propDocs: {
     idPatient: "identifiant d'un patient",
-    idFse:
+    arrayIdActes:
       "liste d'identifiants d'actes pour lesquels il faut générer des documents",
     idModele:
       "identifiant du modèle à utiliser. Si cette valeur est renseignée, ce sera le document correspondant à cet identifiant qui sera utilisé",
@@ -24,7 +31,7 @@ const propDefs = {
   propTypes: {
     client: PropTypes.any.isRequired,
     idPatient: PropTypes.number,
-    idFse: PropTypes.array,
+    arrayIdActes: PropTypes.array,
     idModele: PropTypes.number,
     open: PropTypes.bool,
     onClose: PropTypes.func,
@@ -37,14 +44,13 @@ const propDefs = {
 export default class DocumentFromActes extends React.Component {
   static propTypes = propDefs.propTypes;
   state = {
-    errorMessages: [],
-    treatedActes: 0,
-    generatedDocuments: 0
+    errorMessage: "",
+    loading: true
   };
 
   componentDidUpdate(prevProps) {
     if (this.props.open && this.props.open !== prevProps.open) {
-      this.createDocuments();
+      this.createDocument();
     }
   }
 
@@ -52,20 +58,17 @@ export default class DocumentFromActes extends React.Component {
   // est renseigné. Il faudra faire un read du profil Praticien,
   // informations qui pourraient bien être utilisées plus tard
   // dans la création du document
-  createDocuments = () => {
+  createDocument = () => {
     if (_.isEmpty(this.props.typeDocument) && !this.props.idModele) {
-      let m = this.state.errorMessages;
-      m.push("Le type de document à produire n'est pas défini.");
       this.setState({
-        treatedActes: this.props.idFse.length,
-        errorMessages: m
+        errorMessage: "Le type de document à produire n'est pas défini.",
+        loading: false
       });
       return;
     }
     this.setState({
-      treatedActes: 0,
-      generatedDocuments: 0,
-      errorMessages: []
+      errorMessage: "",
+      loading: true
     });
     this.props.client.Patients.read(
       this.props.idPatient,
@@ -76,17 +79,14 @@ export default class DocumentFromActes extends React.Component {
             this.props.idModele,
             {},
             modele => {
-              this.generateDocuments(patient, modele);
+              this.generateDocument(patient, modele);
             },
             error => {
               console.log(error);
-              let m = _.clone(this.state.errorMessages);
-              m.push(
-                "Une erreur est surnvenue lors de la recherche d'un modèle à utiliser pour produire un document."
-              );
               this.setState({
-                treatedActes: this.props.idFse.length,
-                errorMessages: m
+                errorMessage:
+                  "Une erreur est surnvenue lors de la recherche d'un modèle à utiliser pour produire un document.",
+                loading: false
               });
             }
           );
@@ -97,162 +97,127 @@ export default class DocumentFromActes extends React.Component {
             this.props.user,
             this.props.typeDocument,
             modele => {
-              this.generateDocuments(patient, modele);
+              this.generateDocument(patient, modele);
             },
             error => {
               console.log(error);
-              let m = _.clone(this.state.errorMessages);
-              m.push(
-                "Une erreur est surnvenue lors de la recherche d'un modèle à utiliser pour produire un document."
-              );
               this.setState({
-                treatedActes: this.props.idFse.length,
-                errorMessages: m
+                errorMessage:
+                  "Une erreur est surnvenue lors de la recherche d'un modèle à utiliser pour produire un document.",
+                loading: false
               });
             }
           );
         }
       },
       error => {
-        let m = _.clone(this.state.errorMessages);
-        m.push(
-          "Une erreur est survenue lors de la lecture des informations sur le patient."
-        );
+        console.log(error);
         this.setState({
-          treatedActes: this.props.idFse.length,
-          errorMessages: m
+          errorMessage:
+            "Une erreur est survenue lors de la lecture des informations sur le patient.",
+          loading: false
         });
       }
     );
   };
 
-  generateDocuments = (patient, modele) => {
-    let generateDoc = arrayIdActe => {
-      if (_.isEmpty(arrayIdActe)) {
-        if (_.isEmpty(this.state.errorMessages) && this.props.onClose) {
-          // la fenêtre se ferme automatiquement s'il n'y a pas d'erreurs
-          this.props.onClose();
-        }
-        return;
-      }
-      this.props.client.Actes.read(
-        arrayIdActe.shift(),
-        {},
-        fse => {
-          if (_.isEmpty(fse.contentJO.actes)) {
-            this.setState({
-              treatedActes: this.state.treatedActes + 1
-            });
-            generateDoc(arrayIdActe);
-          } else {
-            //console.log(patient);
-            //console.log(fse);
-            //console.log(modele);
+  generateDocument = (patient, modele) => {
+    let actes = [];
+    let readActe = arrayIdActes => {
+      if (_.isEmpty(arrayIdActes)) {
+        // procéder à la création d'un document ICI
+        let data = {
+          patient: { ...patient },
+          actes:
+            this.props.typeDocument === "FACTURE"
+              ? actes
+              : _.get(actes[0], "contentJO.actes", [])
+        }; // Si DEVIS, actes contient un seul acte de type #DEVIS
 
-            // TODO : Faire le remplissage des champs dynamiques
-            //    Données à utiliser : patient, fse et praticien s'il y en a
-
-            // Ici seulement le remplissage des informations du patient ! TODO : À faire évoluer
-            let data = {
-              patient: { ...patient }
-            };
-
-            let filledDocument = Mustache.render(modele.document, data);
+        let filledDocument = Mustache.render(modele.document, data);
+        let fileName = _.isEmpty(modele.infosJO.modele.nom)
+          ? "Sans titre.pdf"
+          : modele.infosJO.modele.nom + ".pdf";
+        htmlToPDF(
+          filledDocument,
+          fileName,
+          this.props.download,
+          base64PDF => {
             // on crée d'abord le document et on enregistre ensuite
             // se référence dans l'historique
-            let fileName = _.isEmpty(modele.infosJO.modele.nom)
-              ? "Sans titre.pdf"
-              : modele.infosJO.modele.nom + ".pdf";
-            htmlToPDF(
-              filledDocument,
-              fileName,
-              this.props.download,
-              base64PDF => {
-                this.props.client.Documents.create(
+            this.props.client.Documents.create(
+              {
+                fileName: fileName,
+                idPatient: patient.id,
+                mimeType: "application/pdf",
+                document: base64PDF
+              },
+              result => {
+                this.props.client.Actes.create(
                   {
-                    fileName: fileName,
+                    code: "#DOC_PDF",
+                    etat: 0,
                     idPatient: patient.id,
-                    mimeType: "application/pdf",
-                    document: base64PDF
+                    description: result.fileName,
+                    idDocument: result.id
                   },
-                  result => {
-                    this.props.client.Actes.create(
-                      {
-                        code: "#DOC_PDF",
-                        etat: 0,
-                        idPatient: patient.id,
-                        description: result.fileName,
-                        idDocument: result.id
-                      },
-                      acte => {
-                        this.setState({
-                          treatedActes: this.state.treatedActes + 1,
-                          generatedDocuments: this.state.generatedDocuments + 1
-                        });
-                        generateDoc(arrayIdActe);
-                      },
-                      error => {
-                        console.log(error);
-                        let m = this.state.errorMessages;
-                        m.push(
-                          "Une erreur est survenue lors de la création de l'acte associée au document produit."
-                        );
-                        this.setState({
-                          treatedActes: this.state.treatedActes + 1,
-                          errorMessages: m
-                        });
-                        generateDoc(arrayIdActe);
-                      }
-                    );
+                  acte => {
+                    if (this.props.onClose) {
+                      this.props.onClose();
+                    }
                   },
                   error => {
                     console.log(error);
-                    let m = this.state.errorMessages;
-                    m.push(
-                      "Une erreur est survenue lors de la création du document."
-                    );
                     this.setState({
-                      treatedActes: this.state.treatedActes + 1,
-                      errorMessages: m
+                      errorMessage:
+                        "Une erreur est survenue lors de la création de l'acte associée au document produit.",
+                      loading: false
                     });
-                    generateDoc(arrayIdActe);
                   }
                 );
               },
               error => {
                 console.log(error);
-                let m = this.state.errorMessages;
-                if (error === "POPUP_ERROR") {
-                  m.push(
-                    "Votre navigateur a empêché cette application d'ouvrir une fenêtre popup."
-                  );
-                  this.setState({
-                    treatedActes: this.state.treatedActes + 1,
-                    errorMessages: m
-                  });
-                } else {
-                  m.push(
-                    "Une erreur est survenue lors de la conversion du HTML vers PDF."
-                  );
-                  this.setState({
-                    treatedActes: this.state.treatedActes + 1,
-                    errorMessages: m
-                  });
-                }
-                generateDoc(arrayIdActe);
+                this.setState({
+                  errorMessage:
+                    "Une erreur est survenue lors de la création du document.",
+                  loading: false
+                });
               }
             );
+          },
+          error => {
+            console.log(error);
+            this.setState({
+              errorMessage:
+                error === "POPUP_ERROR"
+                  ? "Votre navigateur a empêché cette application d'ouvrir une fenêtre popup. " +
+                    "Veuillez autoriser les popups et renouvelez cette opération."
+                  : "Une erreur est survenue lors de la conversion du HTML vers PDF.",
+              loading: false
+            });
           }
-        },
-        error => {
-          this.setState({
-            treatedActes: this.state.treatedActes + 1
-          });
-          generateDoc(arrayIdActe);
-        }
-      );
+        );
+      } else {
+        this.props.client.Actes.read(
+          arrayIdActes.shift(),
+          {},
+          acte => {
+            actes.push(acte);
+            readActe(arrayIdActes);
+          },
+          error => {
+            console.log(error);
+            this.setState({
+              errorMessage:
+                "Une erreur est survenue lors de la lecture des informations d'un acte",
+              loading: false
+            });
+          }
+        );
+      }
     };
-    generateDoc(_.clone(this.props.idFse));
+    readActe(_.clone(this.props.arrayIdActes));
   };
 
   render() {
@@ -261,31 +226,26 @@ export default class DocumentFromActes extends React.Component {
         <Modal open={this.props.open} size="mini">
           <Modal.Header>Création d'un document</Modal.Header>
           <Modal.Content>
-            {!_.isEmpty(this.state.errorMessages) ? (
-              <React.Fragment>
-                {_.map(this.state.errorMessages, (errorMessage, index) => (
-                  <Message error={true} key={index}>
-                    {errorMessage}
-                  </Message>
-                ))}
-              </React.Fragment>
-            ) : null}
-            <Progress
-              active={true}
-              color="blue"
-              size="small"
-              total={this.props.idFse.length}
-              value={this.state.treatedActes}
-            >
-              {this.state.generatedDocuments +
-                " / " +
-                this.props.idFse.length +
-                " documents générés..."}
-            </Progress>
+            {this.state.loading ? (
+              <Segment basic={true}>
+                <Dimmer active={true} inverted={true}>
+                  <Loader
+                    active={true}
+                    inline="centered"
+                    inverted={true}
+                    size="medium"
+                  >
+                    Chargement...
+                  </Loader>
+                </Dimmer>
+              </Segment>
+            ) : (
+              <Message error={true}>{this.state.errorMessage}</Message>
+            )}
           </Modal.Content>
           <Modal.Actions>
             <Button
-              disabled={this.state.treatedActes !== this.props.idFse.length}
+              disabled={this.state.loading}
               content="OK"
               onClick={() => {
                 if (this.props.onClose) {

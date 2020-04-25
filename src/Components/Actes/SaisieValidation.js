@@ -61,6 +61,7 @@ export default class SaisieValidation extends React.Component {
   state = {
     fse: {},
     acteToAdd: {},
+    createdActes: [],
     modalCreationDocument: false,
     modalValidationActes: false
   };
@@ -78,7 +79,8 @@ export default class SaisieValidation extends React.Component {
   reload = (typeActe, acteToAdd) => {
     this.setState({
       modalCreationDocument: false,
-      modalValidationActes: false
+      modalValidationActes: false,
+      createdActes: []
     });
     if (_.isNull(this.props.idPatient)) {
       this.setState({ fse: {}, acteToAdd: {} });
@@ -194,9 +196,10 @@ export default class SaisieValidation extends React.Component {
           idActe={this.state.fse.id}
           open={this.state.modalValidationActes}
           onClose={() => this.reload(this.props.typeActe, {})}
-          onDocumentGeneration={() => {
+          onDocumentGeneration={createdActes => {
             this.setState({
-              modalCreationDocument: true
+              modalCreationDocument: true,
+              createdActes: createdActes
             });
           }}
         />
@@ -206,7 +209,7 @@ export default class SaisieValidation extends React.Component {
           client={this.props.client}
           open={this.state.modalCreationDocument}
           idPatient={this.props.idPatient}
-          idFse={[this.state.fse.id]}
+          arrayIdActes={this.state.createdActes}
           user={this.props.user}
           typeDocument={
             this.props.typeActe === "#FSE"

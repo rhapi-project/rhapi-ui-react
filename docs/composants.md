@@ -116,6 +116,17 @@ Modal Semantic de lecture et de configuration des actes favoris
 | onClose | func | Callback à la fermeture de la modal |
 | onSelection | func | Callback à la selection et validation d'un acte. Cette fonction prend en 1er paramètre l'indice de la ligne et en 2ème paramètre l'objet acte sélectionné. |
 
+## ModalSelectActes
+Modal de sélection des actes. Ces actes seront utilisés par exemple pour générer un document.
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| idPatient | number | identifiant du patient |
+| open | bool | ouverture de la modal |
+| onClose | func | callback à la fermeture de la modal |
+| onDocumentGeneration | func | callback de la fin de sélection |
+
 ## Historique
 Historique des actes d'un patient
 #### Props du composant
@@ -194,17 +205,6 @@ Ce composant est une modal Semantic de recherche d'un acte. Il intègre un date 
  - modificateurs
  - qualificatifs
 - montant |
-
-## ModalSelectActes
-Modal de sélection des actes. Ces actes seront utilisés par exemple pour générer un document.
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| idPatient | number | identifiant du patient |
-| open | bool | ouverture de la modal |
-| onClose | func | callback à la fermeture de la modal |
-| onDocumentGeneration | func | callback de la fin de sélection |
 
 ## Note
 Nouvelle << Note >> ou << Todo >>
@@ -302,6 +302,15 @@ Modal de confirmation de la validation d'un acte
 | onClose | func | callback à la fermeture de la modal |
 | onDocumentGeneration | func | callback à la confirmation de la génération d'un document |
 
+## Actions
+Menu d'actions à effectuer
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| actions | array | Tableau contenant une liste d'actions |
+| dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
+| id | any | Identifiant de la ligne sur laquelle une action est effectuée |
+
 ## DateRange
 Période, début et fin d'une période
 #### Props du composant
@@ -312,15 +321,6 @@ Période, début et fin d'une période
 | endAt | string | Date de fin de la période. Par défaut une semaine après la date du jour. |
 | onRangeChange | func | Callback au changement de la période |
 | onClose | func | Callback à la fermeture de la modal |
-
-## Actions
-Menu d'actions à effectuer
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| actions | array | Tableau contenant une liste d'actions |
-| dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
-| id | any | Identifiant de la ligne sur laquelle une action est effectuée |
 
 ## Localisations
 Grille de saisie des localisations dentaires
@@ -366,7 +366,7 @@ Modal de chargement à la création d'un document à partir des Actes.
 | ---- | ----- | ------ |
 | client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
 | idPatient | number | identifiant d'un patient |
-| idFse | array | liste d'identifiants d'actes pour lesquels il faut générer des documents |
+| arrayIdActes | array | liste d'identifiants d'actes pour lesquels il faut générer des documents |
 | idModele | number | identifiant du modèle à utiliser. Si cette valeur est renseignée, ce sera le document correspondant à cet identifiant qui sera utilisé |
 | open | bool | ouverture de la modal |
 | onClose | func | callback à la fermeture de la modal |
@@ -383,26 +383,6 @@ Composant de gestion des modèles appartenant à un ou plusieurs praticiens
 | idPatient | number | identifiant du patient nécessaire si l'on souhaite créer un document à partir d'un modèle |
 | user | string | identifiant du praticien |
 
-## PropertiesModele
-Modal de changement des propriétés d'un modèle : usage par défaut du modèle et le nom (ou titre du document généré).
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| id | number | identifiant du modèle |
-| user | string | identifiant du praticien |
-| open | bool | ouverture de la modal |
-| onClose | func | callback à la fermeture de la modal |
-
-## RecopieModele
-Modal de sélection des modèles à recopier (modèles partagés ou appartenant à un autre praticien).
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| open | bool | ouverture de la modal |
-| onClose | func | callback à la fermeture de la modal |
-
 ## ListeDocument
 Liste des documents d'un patient
 #### Props du composant
@@ -415,6 +395,26 @@ Liste des documents d'un patient
 | actions | array | Tableau d'objet contenant des actions à effectuer (en plus des actions par défaut) |
 | showActions | bool | Permet d'afficher la colonne des actions. Par défaut, showAction prend la valeur true |
 | showCheckbox | bool | Permet d'afficher la colonne de sélection (Checkbox). Par défaut, showCheckbox prend la valeur false |
+
+## RecopieModele
+Modal de sélection des modèles à recopier (modèles partagés ou appartenant à un autre praticien).
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| open | bool | ouverture de la modal |
+| onClose | func | callback à la fermeture de la modal |
+
+## PropertiesModele
+Modal de changement des propriétés d'un modèle : usage par défaut du modèle et le nom (ou titre du document généré).
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| id | number | identifiant du modèle |
+| user | string | identifiant du praticien |
+| open | bool | ouverture de la modal |
+| onClose | func | callback à la fermeture de la modal |
 
 ## RenameDocument
 Modal de changement de nom de fichier pour un document

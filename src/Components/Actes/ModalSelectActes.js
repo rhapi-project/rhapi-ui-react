@@ -42,14 +42,30 @@ export default class ModalSelectActes extends React.Component {
     this.props.client.Actes.readAll(
       {
         q1: "AND,idPatient,Equal," + this.props.idPatient,
-        q2: "AND,code,Equal,#FSE",
-        q3: "AND,etat,Equal,0" // actes en historique
+        q2: "AND,code,NotLike,#*",
+        q3: "AND,etat,Equal,0", // actes en historique
+        limit: 1000,
+        sort: "modifiedAt",
+        order: "DESC"
       },
       actes => {
+        let selectedActes = [];
+        if (!_.isEmpty(actes.results)) {
+          let recentDay = moment(actes.results[0].modifiedAt);
+          _.forEach(actes.results, acte => {
+            if (
+              moment(acte.modifiedAt).get("date") === recentDay.get("date") &&
+              moment(acte.modifiedAt).get("month") === recentDay.get("month") &&
+              moment(acte.modifiedAt).get("year") === recentDay.get("year")
+            ) {
+              selectedActes.push(acte.id);
+            }
+          });
+        }
         this.setState({
           actes: actes.results,
           selectedAll: false,
-          selectedActes: []
+          selectedActes: selectedActes
         });
       },
       error => {
@@ -69,71 +85,73 @@ export default class ModalSelectActes extends React.Component {
           <Modal.Header>Sélection des actes</Modal.Header>
           <Modal.Content>
             {!_.isEmpty(this.state.actes) ? (
-              <Table celled={true} selectable={true}>
-                <Table.Header>
-                  <Table.Row textAlign="center">
-                    <Table.HeaderCell>Description</Table.HeaderCell>
-                    <Table.HeaderCell collapsing={true}>
-                      Dernière modification
-                    </Table.HeaderCell>
-                    <Table.HeaderCell collapsing={true}>
-                      <Checkbox
-                        checked={this.state.selectedAll}
-                        onChange={() => {
-                          if (this.state.selectedAll) {
-                            this.setState({
-                              selectedActes: [],
-                              selectedAll: false
-                            });
-                          } else {
-                            let selectedActes = [];
-                            _.forEach(this.state.actes, acte =>
-                              selectedActes.push(acte.id)
-                            );
-                            this.setState({
-                              selectedActes: selectedActes,
-                              selectedAll: true
-                            });
-                          }
-                        }}
-                      />
-                    </Table.HeaderCell>
-                  </Table.Row>
-                </Table.Header>
-
-                <Table.Body>
-                  {_.map(this.state.actes, (acte, index) => (
-                    <Table.Row
-                      key={index}
-                      active={this.indexOfSelectedActe(acte.id) !== -1}
-                    >
-                      <Table.Cell>{acte.description}</Table.Cell>
-                      <Table.Cell textAlign="center">
-                        {moment(acte.modifiedAt).format("L")}{" "}
-                        {moment(acte.modifiedAt).format("LT")}
-                      </Table.Cell>
-                      <Table.Cell>
+              <div style={{ overflowY: "auto", height: "400px" }}>
+                <Table celled={true} selectable={true}>
+                  <Table.Header>
+                    <Table.Row textAlign="center">
+                      <Table.HeaderCell>Description</Table.HeaderCell>
+                      <Table.HeaderCell collapsing={true}>
+                        Dernière modification
+                      </Table.HeaderCell>
+                      <Table.HeaderCell collapsing={true}>
                         <Checkbox
-                          checked={this.indexOfSelectedActe(acte.id) !== -1}
+                          checked={this.state.selectedAll}
                           onChange={() => {
-                            let selectedActes = this.state.selectedActes;
-                            let i = this.indexOfSelectedActe(acte.id);
-                            if (i === -1) {
-                              selectedActes.push(acte.id);
+                            if (this.state.selectedAll) {
+                              this.setState({
+                                selectedActes: [],
+                                selectedAll: false
+                              });
                             } else {
-                              selectedActes.splice(i, 1);
+                              let selectedActes = [];
+                              _.forEach(this.state.actes, acte =>
+                                selectedActes.push(acte.id)
+                              );
+                              this.setState({
+                                selectedActes: selectedActes,
+                                selectedAll: true
+                              });
                             }
-                            this.setState({
-                              selectedActes: selectedActes,
-                              selectedAll: false
-                            });
                           }}
                         />
-                      </Table.Cell>
+                      </Table.HeaderCell>
                     </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table>
+                  </Table.Header>
+
+                  <Table.Body>
+                    {_.map(this.state.actes, (acte, index) => (
+                      <Table.Row
+                        key={index}
+                        active={this.indexOfSelectedActe(acte.id) !== -1}
+                      >
+                        <Table.Cell>{acte.description}</Table.Cell>
+                        <Table.Cell textAlign="center">
+                          {moment(acte.modifiedAt).format("L")}{" "}
+                          {moment(acte.modifiedAt).format("LT")}
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Checkbox
+                            checked={this.indexOfSelectedActe(acte.id) !== -1}
+                            onChange={() => {
+                              let selectedActes = this.state.selectedActes;
+                              let i = this.indexOfSelectedActe(acte.id);
+                              if (i === -1) {
+                                selectedActes.push(acte.id);
+                              } else {
+                                selectedActes.splice(i, 1);
+                              }
+                              this.setState({
+                                selectedActes: selectedActes,
+                                selectedAll: false
+                              });
+                            }}
+                          />
+                        </Table.Cell>
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table>
+              </div>
             ) : (
               <div style={{ textAlign: "center" }}>Aucun acte</div>
             )}
