@@ -1,6 +1,4 @@
 import _ from "lodash";
-import jsPDF from "jspdf";
-import html2Canvas from "html2canvas";
 
 // Affichage du tarif au bon format
 // ex : 1250.3 => 1 250,30
@@ -214,68 +212,6 @@ const uploadFile = (event, onSucess, onError) => {
   }
 };
 
-// TODO : essayer une autre méthode de génération de PDF
-// car le rendu de celle-ci n'est pas joli surtout quand
-// il y a des tableau dans le HTML
-const downloadPDF = (content, filename) => {
-  let doc = new jsPDF("p", "pt", "a4");
-  doc.fromHTML(content, 15, 5, {});
-  doc.save(filename + ".pdf");
-};
-
-/*const outputPDF = content => {
-  let doc = new jsPDF();
-  doc.fromHTML(content, 15, 5, {});
-  let base64 = doc.output("datauristring", { filename: "output.pdf" });
-  let pdfWindow = window.open("#", "_blank");
-  pdfWindow.document.write(
-    "<iframe width='100%' height='100%' src='" + base64 + "'></iframe>"
-  );
-};*/
-
-/*const contentToBase64PDF = content => {
-  let doc = new jsPDF();
-  doc.fromHTML(content, 15, 5, {});
-  return doc.output("datauristring");
-};*/
-
-//
-// Le rendu avec jsPDF seul ne prend pas en compte le CSS.
-// https://stackoverflow.com/questions/25946275/exporting-pdf-with-jspdf-not-rendering-css
-// => une solution consiste à utiliser html2ToPDF pour générer un image intermédiaire
-// https://itnext.io/javascript-convert-html-css-to-pdf-print-supported-very-sharp-and-not-blurry-c5ffe441eb5e
-// TODO : améliorer la gestion du format (A4 par défaut) et la qualité du PDF généré (voir code ci-dessous) :
-// https://gist.github.com/DavidMellul/d01c720ce31aecf99be3a6441255381f#file-htmltopdf_simple-js
-//
-const htmlToPDF = (html, fileNameToDownload, download, onSuccess, onError) => {
-  let win = window.open("", "Document", "width=600,height=200");
-  if (_.isNull(win)) {
-    // le navigateur n'autorise pas les popups
-    onError("POPUP_ERROR");
-    return;
-  }
-  win.document.open();
-  win.document.write(html);
-  win.focus();
-  _.delay(() => {
-    html2Canvas(win.document.documentElement, {
-      logging: false
-    })
-      .then(canvas => {
-        let img = canvas.toDataURL("image/png");
-        let doc = new jsPDF("p", "mm", "a4");
-        doc.addImage(img, "JPEG", 10, 10);
-        win.close();
-        let datas = doc.output("datauristring");
-        if (!_.isEmpty(fileNameToDownload) && download) {
-          downloadBinaryFile(datas, fileNameToDownload);
-        }
-        onSuccess(datas);
-      })
-      .catch(onError);
-  }, 1000); // delay nécessaire à Safari (augmenter cette valeur si nécessaire pour de gros documents ?)
-};
-
 // TODO : définir un comportement dans le cas où le résultat
 // du readAll des documents (modèles) contient plusieurs
 // pages.
@@ -447,7 +383,5 @@ export {
   downloadTextFile,
   uploadFile,
   modeleDocument,
-  setModeleDocument,
-  downloadPDF,
-  htmlToPDF
+  setModeleDocument
 };
