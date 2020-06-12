@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import _ from "lodash";
 import ListeDocument from "./ListeDocument";
 import TextDocument from "./TextDocument";
+import ModalSelectActes from "../Actes/ModalSelectActes";
+import DocumentFromActes from "./DocumentFromActes";
 import { Button, Divider, Modal } from "semantic-ui-react";
 import {
   downloadBinaryFile,
@@ -35,7 +37,11 @@ export default class DocumentArchives extends React.Component {
     currentDocumentId: null,
     disabledBtnSave: true,
     modalDelete: false,
-    modeText: ""
+    modeText: "",
+    modalSelectActes: false,
+    modalCreationDocument: false,
+    typeDocumentToGenerate: "",
+    selectedActes: []
   };
 
   componentDidMount() {
@@ -72,7 +78,11 @@ export default class DocumentArchives extends React.Component {
           currentDocumentId: null,
           modalDelete: false,
           modalCreate: false,
-          modeText: ""
+          modeText: "",
+          modalSelectActes: false,
+          modalCreationDocument: false,
+          typeDocumentToGenerate: "",
+          selectedActes: []
         });
       },
       error => {}
@@ -112,28 +122,46 @@ export default class DocumentArchives extends React.Component {
     // array des id des documents en paramètre sur une sélection multiple
   };
 
-  onActionClick = (id, action) => {
-    if (action === "supprimer") {
-      this.props.client.Documents.destroy(
-        id,
-        result => {
-          this.reload();
-        },
-        error => {}
-      );
+  handleActions = (id, action) => {
+    switch (action) {
+      case "delete":
+        this.props.client.Documents.destroy(
+          id,
+          result => {
+            this.reload();
+          },
+          error => {
+            console.log(error);
+          }
+        );
+        break;
+      case "download":
+        this.props.client.Documents.read(
+          id,
+          {},
+          result => {
+            this.downloadDocument(result);
+          },
+          error => {
+            console.log(error);
+          }
+        );
+        break;
+      default:
+        break;
     }
   };
 
   downloadDocument = resultDoc => {
     // objet du document passé en paramètre
-    if (!_.startsWith(resultDoc.mimeType, "text/")) {
-      downloadBinaryFile(resultDoc.document, resultDoc.fileName);
-    } else {
+    if (_.startsWith(resultDoc.mimeType, "text/")) {
       downloadTextFile(
         resultDoc.document,
         resultDoc.fileName,
         resultDoc.mimeType
       );
+    } else {
+      downloadBinaryFile(resultDoc.document, resultDoc.fileName);
     }
   };
 
@@ -204,14 +232,14 @@ export default class DocumentArchives extends React.Component {
               onSelectionChange={this.onSelectionChange}
               actions={[
                 {
-                  icon: "trash",
-                  text: "Supprimer",
-                  action: id => this.onActionClick(id, "supprimer")
+                  icon: "download",
+                  text: "Télécharger",
+                  action: id => this.handleActions(id, "download")
                 },
                 {
-                  icon: "question circle",
-                  text: "Autre action",
-                  action: id => this.onActionClick(id, "autre action")
+                  icon: "trash",
+                  text: "Supprimer",
+                  action: id => this.handleActions(id, "delete")
                 }
               ]}
               showActions={true}
@@ -222,6 +250,16 @@ export default class DocumentArchives extends React.Component {
                 content="Importer"
                 onClick={() => {
                   document.getElementById("file").click();
+                }}
+              />
+              <Button
+                disabled={!_.isNumber(this.props.idPatient)}
+                content="Facture"
+                onClick={() => {
+                  this.setState({
+                    modalSelectActes: true,
+                    typeDocumentToGenerate: "FACTURE"
+                  });
                 }}
               />
             </div>
@@ -290,6 +328,37 @@ export default class DocumentArchives extends React.Component {
           type="file"
           hidden={true}
           onChange={this.uploadDocument}
+        />
+
+        {/* modal de selection des actes */}
+        <ModalSelectActes
+          client={this.props.client}
+          open={this.state.modalSelectActes}
+          idPatient={this.props.idPatient}
+          onClose={() =>
+            this.setState({
+              modalSelectActes: false,
+              typeDocumentToGenerate: ""
+            })
+          }
+          onDocumentGeneration={arrayIdActes => {
+            this.setState({
+              selectedActes: arrayIdActes,
+              modalCreationDocument: true
+            });
+          }}
+        />
+
+        {/* modal de création d'un document à partir des actes*/}
+        <DocumentFromActes
+          client={this.props.client}
+          open={this.state.modalCreationDocument}
+          idPatient={this.props.idPatient}
+          arrayIdActes={this.state.selectedActes}
+          //user={this.props.user}
+          typeDocument={this.state.typeDocumentToGenerate}
+          download={true}
+          onClose={this.reload}
         />
       </React.Fragment>
     );

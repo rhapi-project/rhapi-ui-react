@@ -10,7 +10,7 @@ import {
 } from "semantic-ui-react";
 import _ from "lodash";
 import Mustache from "mustache";
-import { htmlToPDF, modeleDocument } from "../lib/Helpers";
+import { downloadTextFile, modeleDocument } from "../lib/Helpers";
 
 const propDefs = {
   description:
@@ -121,6 +121,8 @@ export default class DocumentFromActes extends React.Component {
     );
   };
 
+  // TODO : ajouter une visualisation du document qui vient d'être
+  // créé
   generateDocument = (patient, modele) => {
     let actes = [];
     let readActe = arrayIdActes => {
@@ -136,51 +138,42 @@ export default class DocumentFromActes extends React.Component {
 
         let filledDocument = Mustache.render(modele.document, data);
         let fileName = _.isEmpty(modele.infosJO.modele.nom)
-          ? "Sans titre.pdf"
-          : modele.infosJO.modele.nom + ".pdf";
-        htmlToPDF(
-          filledDocument,
-          fileName,
-          this.props.download,
-          base64PDF => {
-            // on crée d'abord le document et on enregistre ensuite
-            // se référence dans l'historique
-            this.props.client.Documents.create(
+          ? "Sans titre"
+          : modele.infosJO.modele.nom;
+
+        this.props.client.Documents.create(
+          {
+            fileName: fileName,
+            idPatient: patient.id,
+            mimeType: "text/html",
+            document: filledDocument
+          },
+          result => {
+            this.props.client.Actes.create(
               {
-                fileName: fileName,
+                code: "#DOC_HTML",
+                etat: 0,
                 idPatient: patient.id,
-                mimeType: "application/pdf",
-                document: base64PDF
+                description: result.fileName,
+                idDocument: result.id
               },
-              result => {
-                this.props.client.Actes.create(
-                  {
-                    code: "#DOC_PDF",
-                    etat: 0,
-                    idPatient: patient.id,
-                    description: result.fileName,
-                    idDocument: result.id
-                  },
-                  acte => {
-                    if (this.props.onClose) {
-                      this.props.onClose();
-                    }
-                  },
-                  error => {
-                    console.log(error);
-                    this.setState({
-                      errorMessage:
-                        "Une erreur est survenue lors de la création de l'acte associée au document produit.",
-                      loading: false
-                    });
-                  }
-                );
+              acte => {
+                if (this.props.download) {
+                  downloadTextFile(
+                    result.document,
+                    result.fileName,
+                    result.mimeType
+                  );
+                }
+                if (this.props.onClose) {
+                  this.props.onClose();
+                }
               },
               error => {
                 console.log(error);
                 this.setState({
                   errorMessage:
-                    "Une erreur est survenue lors de la création du document.",
+                    "Une erreur est survenue lors de la création de l'acte associée au document produit.",
                   loading: false
                 });
               }
@@ -190,10 +183,7 @@ export default class DocumentFromActes extends React.Component {
             console.log(error);
             this.setState({
               errorMessage:
-                error === "POPUP_ERROR"
-                  ? "Votre navigateur a empêché cette application d'ouvrir une fenêtre popup. " +
-                    "Veuillez autoriser les popups et renouvelez cette opération."
-                  : "Une erreur est survenue lors de la conversion du HTML vers PDF.",
+                "Une erreur est survenue lors de la création du document.",
               loading: false
             });
           }

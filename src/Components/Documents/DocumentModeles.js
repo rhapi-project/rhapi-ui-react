@@ -336,16 +336,6 @@ export default class DocumentModeles extends React.Component {
                 content="Recopier un modèle"
                 onClick={() => this.setState({ modalRecopie: true })}
               />
-              <Button
-                content="Facture"
-                disabled={!_.isNumber(this.props.idPatient)}
-                onClick={() => {
-                  this.setState({
-                    modalSelectActes: true,
-                    typeDocumentToGenerate: "FACTURE"
-                  });
-                }}
-              />
               <input
                 id="file"
                 type="file"
@@ -472,7 +462,7 @@ export default class DocumentModeles extends React.Component {
           idModele={this.state.currentDocumentId}
           user={this.props.user}
           typeDocument={this.state.typeDocumentToGenerate}
-          download={false}
+          download={true}
           onClose={this.reload}
         />
       </React.Fragment>

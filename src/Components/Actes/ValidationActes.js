@@ -142,14 +142,9 @@ export default class ValidationActes extends React.Component {
               <React.Fragment>
                 <br />
                 {this.props.modeleDocument === "FACTURE" ? (
-                  <span>
-                    Souhaitez-vous établir une facture (document PDF) ?
-                  </span>
+                  <span>Souhaitez-vous établir une facture ?</span>
                 ) : this.props.modeleDocument === "DEVIS" ? (
-                  <span>
-                    Souhaitez-vous établir un devis (document PDF) pour ce
-                    projet ?
-                  </span>
+                  <span>Souhaitez-vous établir un devis pour ce projet ?</span>
                 ) : null}
               </React.Fragment>
             ) : null}
