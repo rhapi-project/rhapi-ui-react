@@ -69,7 +69,9 @@ export default class DocumentArchives extends React.Component {
     this.props.client.Documents.readAll(
       {
         _idPatient: this.props.idPatient, // idPatient est nécessairement > 0 donc il ne peut pas s'agir d'un modèle
-        exfields: "document"
+        exfields: "document",
+        sort: "modifiedAt",
+        order: "DESC"
       },
       result => {
         this.setState({
@@ -357,7 +359,7 @@ export default class DocumentArchives extends React.Component {
           arrayIdActes={this.state.selectedActes}
           //user={this.props.user}
           typeDocument={this.state.typeDocumentToGenerate}
-          download={true}
+          visualisation={true}
           onClose={this.reload}
         />
       </React.Fragment>

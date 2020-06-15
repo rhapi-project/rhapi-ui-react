@@ -10,7 +10,7 @@ import {
 } from "semantic-ui-react";
 import _ from "lodash";
 import Mustache from "mustache";
-import { downloadTextFile, modeleDocument } from "../lib/Helpers";
+import { modeleDocument } from "../lib/Helpers";
 
 const propDefs = {
   description:
@@ -26,7 +26,7 @@ const propDefs = {
     onClose: "callback à la fermeture de la modal",
     user: "identifiant du praticien",
     typeDocument: "type de document à produire : DEVIS ou FACTURE",
-    download: "téléchargement du document généré"
+    visualisation: "visualisation du document généré"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
@@ -37,7 +37,7 @@ const propDefs = {
     onClose: PropTypes.func,
     user: PropTypes.string,
     typeDocument: PropTypes.string,
-    download: PropTypes.bool
+    visualisation: PropTypes.bool
   }
 };
 
@@ -139,7 +139,7 @@ export default class DocumentFromActes extends React.Component {
         let filledDocument = Mustache.render(modele.document, data);
         let fileName = _.isEmpty(modele.infosJO.modele.nom)
           ? "Sans titre"
-          : modele.infosJO.modele.nom;
+          : modele.infosJO.modele.nom + ".html";
 
         this.props.client.Documents.create(
           {
@@ -158,12 +158,26 @@ export default class DocumentFromActes extends React.Component {
                 idDocument: result.id
               },
               acte => {
-                if (this.props.download) {
-                  downloadTextFile(
-                    result.document,
-                    result.fileName,
-                    result.mimeType
-                  );
+                if (this.props.visualisation) {
+                  if (window.qWebChannel) {
+                    // *******************************************
+                    // TODO : Gestion de la conversion en PDF (Qt)
+                    // *******************************************
+                  } else {
+                    let win = window.open("", result.fileName);
+                    if (_.isNull(win)) {
+                      this.setState({
+                        errorMessage: "Votre navigateur a empêché cette application d'ouvrir une fenêtre popup. " +
+                          "Veuillez autoriser les popups pour une visualisation des documents générés.",
+                        loading: false
+                      });
+                      return;
+                    } else {
+                      win.document.open();
+                      win.document.write(result.document);
+                      win.stop();
+                    }
+                  }
                 }
                 if (this.props.onClose) {
                   this.props.onClose();
@@ -230,7 +244,7 @@ export default class DocumentFromActes extends React.Component {
                 </Dimmer>
               </Segment>
             ) : (
-              <Message error={true}>{this.state.errorMessage}</Message>
+              <Message>{this.state.errorMessage}</Message>
             )}
           </Modal.Content>
           <Modal.Actions>

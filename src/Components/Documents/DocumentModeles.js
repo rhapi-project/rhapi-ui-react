@@ -53,7 +53,9 @@ export default class DocumentModeles extends React.Component {
   reload = () => {
     let params = {
       _mimeType: "text/x-html-template",
-      exfields: "document"
+      exfields: "document",
+      sort: "modifiedAt",
+      order: "DESC"
     };
     if (_.isString(this.props.user) && !_.isEmpty(this.props.user)) {
       params._origine = this.props.user;
@@ -462,7 +464,7 @@ export default class DocumentModeles extends React.Component {
           idModele={this.state.currentDocumentId}
           user={this.props.user}
           typeDocument={this.state.typeDocumentToGenerate}
-          download={true}
+          visualisation={true}
           onClose={this.reload}
         />
       </React.Fragment>

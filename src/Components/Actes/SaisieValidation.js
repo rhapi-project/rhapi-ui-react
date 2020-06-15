@@ -218,7 +218,7 @@ export default class SaisieValidation extends React.Component {
               ? "DEVIS"
               : ""
           }
-          download={true}
+          visualisation={true}
           onClose={() => this.reload(this.props.typeActe, {})}
         />
       </React.Fragment>
