@@ -1,12 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, Divider, Form, Modal } from "semantic-ui-react";
+import { Button, Form, Modal } from "semantic-ui-react";
 import _ from "lodash";
 import ListeDocument from "./ListeDocument";
-import TextDocument from "./TextDocument";
 import RenameDocument from "./RenameDocument";
 import PropertiesModele from "./PropertiesModele";
 import RecopieModele from "./RecopieModele";
+import DocumentEditor from "./DocumentEditor";
 import DocumentFromActes from "./DocumentFromActes";
 import ModalSelectActes from "../Actes/ModalSelectActes";
 import { downloadTextFile, uploadFile } from "../lib/Helpers";
@@ -33,7 +33,6 @@ export default class DocumentModeles extends React.Component {
   state = {
     modeles: [],
     selectedDocument: {},
-    disabledBtnSave: true,
     modalDelete: false,
     modalCreate: false,
     modalRename: false,
@@ -120,7 +119,7 @@ export default class DocumentModeles extends React.Component {
       result => {
         this.setState({
           selectedDocument: result,
-          disabledBtnSave: true,
+          //disabledBtnSave: true,
           currentDocumentId: result.id
         });
       },
@@ -349,34 +348,16 @@ export default class DocumentModeles extends React.Component {
           </React.Fragment>
         ) : (
           <React.Fragment>
-            <div style={{ textAlign: "center" }}>
-              <strong>{this.state.selectedDocument.fileName}</strong>
-            </div>
-            <TextDocument
-              data={{}}
-              document={this.state.selectedDocument.document}
-              mode="html"
-              onEdit={content => {
+            <DocumentEditor
+              client={this.props.client}
+              document={this.state.selectedDocument}
+              onClose={this.reload}
+              onEditDocument={content => {
                 let sd = this.state.selectedDocument;
                 sd.document = content;
-                this.setState({ selectedDocument: sd, disabledBtnSave: false });
+                this.setState({ selectedDocument: sd });
               }}
             />
-
-            <Divider hidden={true} />
-            <div style={{ textAlign: "center" }}>
-              <Button content="Fermer" onClick={this.reload} />
-              <Button
-                disabled={this.state.disabledBtnSave}
-                content="Enregistrer"
-                onClick={this.save}
-              />
-              <Button
-                negative={true}
-                content="Supprimer"
-                onClick={() => this.setState({ modalDelete: true })}
-              />
-            </div>
           </React.Fragment>
         )}
 
@@ -466,6 +447,13 @@ export default class DocumentModeles extends React.Component {
           typeDocument={this.state.typeDocumentToGenerate}
           visualisation={true}
           onClose={this.reload}
+          onDocumentGeneration={document => {
+            this.setState({
+              modalCreationDocument: false,
+              modalSelectActes: false,
+              selectedDocument: document
+            });
+          }}
         />
       </React.Fragment>
     );

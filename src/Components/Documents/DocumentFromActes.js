@@ -24,6 +24,8 @@ const propDefs = {
       "identifiant du modèle à utiliser. Si cette valeur est renseignée, ce sera le document correspondant à cet identifiant qui sera utilisé",
     open: "ouverture de la modal",
     onClose: "callback à la fermeture de la modal",
+    onDocumentGeneration:
+      "Callback à la fin de la génération d'un document. Prend en paramètre l'identifiant du document qui vient d'être généré.",
     user: "identifiant du praticien",
     typeDocument: "type de document à produire : DEVIS ou FACTURE",
     visualisation: "visualisation du document généré"
@@ -35,6 +37,7 @@ const propDefs = {
     idModele: PropTypes.number,
     open: PropTypes.bool,
     onClose: PropTypes.func,
+    onDocumentGeneration: PropTypes.func,
     user: PropTypes.string,
     typeDocument: PropTypes.string,
     visualisation: PropTypes.bool
@@ -49,6 +52,9 @@ export default class DocumentFromActes extends React.Component {
   };
 
   componentDidUpdate(prevProps) {
+    /*if (!_.isEmpty(this.state.generatedDocument)) {
+      this.set
+    }*/
     if (this.props.open && this.props.open !== prevProps.open) {
       this.createDocument();
     }
@@ -121,8 +127,6 @@ export default class DocumentFromActes extends React.Component {
     );
   };
 
-  // TODO : ajouter une visualisation du document qui vient d'être
-  // créé
   generateDocument = (patient, modele) => {
     let actes = [];
     let readActe = arrayIdActes => {
@@ -159,7 +163,12 @@ export default class DocumentFromActes extends React.Component {
               },
               acte => {
                 if (this.props.visualisation) {
-                  if (window.qWebChannel) {
+                  if (this.props.onDocumentGeneration) {
+                    this.props.onDocumentGeneration(result);
+                  }
+                  // on doit quitter pour aller afficher le document généré
+
+                  /*if (window.qWebChannel) {
                     // *******************************************
                     // TODO : Gestion de la conversion en PDF (Qt)
                     // *******************************************
@@ -177,9 +186,8 @@ export default class DocumentFromActes extends React.Component {
                       win.document.write(result.document);
                       win.stop();
                     }
-                  }
-                }
-                if (this.props.onClose) {
+                  }*/
+                } else if (this.props.onClose) {
                   this.props.onClose();
                 }
               },

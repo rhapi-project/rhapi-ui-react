@@ -2,10 +2,10 @@ import React from "react";
 import PropTypes from "prop-types";
 import _ from "lodash";
 import ListeDocument from "./ListeDocument";
-import TextDocument from "./TextDocument";
 import ModalSelectActes from "../Actes/ModalSelectActes";
 import DocumentFromActes from "./DocumentFromActes";
-import { Button, Divider, Modal } from "semantic-ui-react";
+import DocumentEditor from "./DocumentEditor";
+import { Button } from "semantic-ui-react";
 import {
   downloadBinaryFile,
   downloadTextFile,
@@ -35,9 +35,6 @@ export default class DocumentArchives extends React.Component {
     documents: [],
     selectedDocument: {},
     currentDocumentId: null,
-    disabledBtnSave: true,
-    modalDelete: false,
-    modeText: "",
     modalSelectActes: false,
     modalCreationDocument: false,
     typeDocumentToGenerate: "",
@@ -55,17 +52,6 @@ export default class DocumentArchives extends React.Component {
   }
 
   reload = () => {
-    // let params = {};
-
-    // if (!this.props.idPatient) {
-    //   _.set(params, "q1", "AND,idPatient,Equal,0");
-    //   _.set(params, "q2", "AND,mimeType,NotLike,text/x-html-template");
-    // } else {
-    //   _.set(params, "q1", "AND,idPatient,Equal," + this.props.idPatient);
-    // }
-
-    // _.set(params, "exfields", "document");
-
     this.props.client.Documents.readAll(
       {
         _idPatient: this.props.idPatient, // idPatient est nécessairement > 0 donc il ne peut pas s'agir d'un modèle
@@ -78,9 +64,7 @@ export default class DocumentArchives extends React.Component {
           documents: result.results,
           selectedDocument: {},
           currentDocumentId: null,
-          modalDelete: false,
           modalCreate: false,
-          modeText: "",
           modalSelectActes: false,
           modalCreationDocument: false,
           typeDocumentToGenerate: "",
@@ -111,8 +95,7 @@ export default class DocumentArchives extends React.Component {
         } else {
           this.setState({
             selectedDocument: result,
-            currentDocumentId: result.id,
-            modeText: result.mimeType
+            currentDocumentId: result.id
           });
         }
       },
@@ -194,34 +177,6 @@ export default class DocumentArchives extends React.Component {
     );
   };
 
-  updateDocument = () => {
-    this.props.client.Documents.update(
-      this.state.selectedDocument.id,
-      {
-        document: this.state.selectedDocument.document,
-        lockRevision: this.state.selectedDocument.lockRevision
-      },
-      result => {
-        this.setState({
-          selectedDocument: result,
-          disabledBtnSave: true,
-          currentDocumentId: result.id
-        });
-      },
-      error => {}
-    );
-  };
-
-  deleteDocument = id => {
-    this.props.client.Documents.destroy(
-      id,
-      result => {
-        this.reload();
-      },
-      error => {}
-    );
-  };
-
   render() {
     return (
       <React.Fragment>
@@ -249,6 +204,7 @@ export default class DocumentArchives extends React.Component {
             />
             <div style={{ textAlign: "center" }}>
               <Button
+                disabled={!_.isNumber(this.props.idPatient)}
                 content="Importer"
                 onClick={() => {
                   document.getElementById("file").click();
@@ -268,61 +224,18 @@ export default class DocumentArchives extends React.Component {
           </React.Fragment>
         ) : (
           <React.Fragment>
-            <div style={{ textAlign: "center" }}>
-              <strong>{this.state.selectedDocument.fileName}</strong>
-            </div>
-            <TextDocument
-              data={{}}
-              document={this.state.selectedDocument.document}
-              mode={this.state.modeText === "text/html" ? "html" : "plain"}
-              onEdit={content => {
+            <DocumentEditor
+              client={this.props.client}
+              document={this.state.selectedDocument}
+              onClose={this.reload}
+              onEditDocument={content => {
                 let sd = this.state.selectedDocument;
                 sd.document = content;
-                this.setState({ selectedDocument: sd, disabledBtnSave: false });
+                this.setState({ selectedDocument: sd });
               }}
             />
-
-            <Divider hidden={true} />
-            <div style={{ textAlign: "center" }}>
-              <Button content="Fermer" onClick={this.reload} />
-              <Button
-                disabled={this.state.disabledBtnSave}
-                content="Enregistrer"
-                onClick={this.updateDocument}
-              />
-              <Button
-                content="Télécharger"
-                onClick={() =>
-                  this.downloadDocument(this.state.selectedDocument)
-                }
-              />
-              <Button
-                negative={true}
-                content="Supprimer"
-                onClick={() => this.setState({ modalDelete: true })}
-              />
-            </div>
           </React.Fragment>
         )}
-
-        {/* modal de confirmation - suppression d'un document */}
-        <Modal open={this.state.modalDelete} size="tiny">
-          <Modal.Header>Supprimer un document</Modal.Header>
-          <Modal.Content>
-            Vous confirmez la suppression de ce document ?
-          </Modal.Content>
-          <Modal.Actions>
-            <Button
-              content="Annuler"
-              onClick={() => this.setState({ modalDelete: false })}
-            />
-            <Button
-              negative={true}
-              content="Supprimer"
-              onClick={() => this.deleteDocument(this.state.currentDocumentId)}
-            />
-          </Modal.Actions>
-        </Modal>
 
         {/* upload d'un document */}
         <input
@@ -361,6 +274,14 @@ export default class DocumentArchives extends React.Component {
           typeDocument={this.state.typeDocumentToGenerate}
           visualisation={true}
           onClose={this.reload}
+          onDocumentGeneration={document => {
+            this.setState({
+              modalCreationDocument: false,
+              modalSelectActes: false,
+              selectedDocument: document,
+              currentDocumentId: document.id
+            });
+          }}
         />
       </React.Fragment>
     );

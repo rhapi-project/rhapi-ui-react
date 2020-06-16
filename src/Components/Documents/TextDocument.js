@@ -7,7 +7,7 @@ import React from "react";
 import { Form, TextArea } from "semantic-ui-react";
 
 const propDefs = {
-  description: "Manupulation d'un document sous format texte",
+  description: "Visualiseur d'un document sous format texte",
   example: "",
   propDocs: {
     data:
@@ -32,10 +32,6 @@ export default class TextDocument extends React.Component {
   static defaultProps = {
     data: {}
   };
-
-  componentDidMount() {
-    this.setState({ document: this.props.document });
-  }
 
   render() {
     return (
@@ -68,6 +64,7 @@ export default class TextDocument extends React.Component {
                 this.props.onEdit(e.editor.getData());
               }
             }}
+            type="full"
             config={{
               //toolbar: toolbarConfig
               // https://ckeditor.com/docs/ckeditor4/latest/guide/dev_acf.html

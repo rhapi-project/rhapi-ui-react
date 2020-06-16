@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Button } from "semantic-ui-react";
+import DocumentEditor from "../Documents/DocumentEditor";
 import DocumentFromActes from "../Documents/DocumentFromActes";
 import ValidationActes from "./ValidationActes";
 import Saisie from "./Saisie";
@@ -63,7 +64,8 @@ export default class SaisieValidation extends React.Component {
     acteToAdd: {},
     createdActes: [],
     modalCreationDocument: false,
-    modalValidationActes: false
+    modalValidationActes: false,
+    generatedDocument: {}
   };
 
   componentDidUpdate(prevProps) {
@@ -80,7 +82,8 @@ export default class SaisieValidation extends React.Component {
     this.setState({
       modalCreationDocument: false,
       modalValidationActes: false,
-      createdActes: []
+      createdActes: [],
+      generatedDocument: {}
     });
     if (_.isNull(this.props.idPatient)) {
       this.setState({ fse: {}, acteToAdd: {} });
@@ -142,7 +145,18 @@ export default class SaisieValidation extends React.Component {
   render() {
     return (
       <React.Fragment>
-        {!_.isEmpty(this.state.fse) ? (
+        {!_.isEmpty(this.state.generatedDocument) ? (
+          <DocumentEditor
+            client={this.props.client}
+            document={this.state.generatedDocument}
+            onClose={() => this.reload(this.props.typeActe, {})}
+            onEditDocument={content => {
+              let gd = this.state.generatedDocument;
+              gd.document = content;
+              this.setState({ generatedDocument: gd });
+            }}
+          />
+        ) : !_.isEmpty(this.state.fse) ? (
           <React.Fragment>
             <Saisie
               client={this.props.client}
@@ -220,6 +234,13 @@ export default class SaisieValidation extends React.Component {
           }
           visualisation={true}
           onClose={() => this.reload(this.props.typeActe, {})}
+          onDocumentGeneration={document => {
+            this.setState({
+              modalCreationDocument: false,
+              modalValidationActes: false,
+              generatedDocument: document
+            });
+          }}
         />
       </React.Fragment>
     );
