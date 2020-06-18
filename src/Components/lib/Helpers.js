@@ -1,4 +1,5 @@
 import _ from "lodash";
+import moment from "moment";
 
 // Affichage du tarif au bon format
 // ex : 1250.3 => 1 250,30
@@ -367,6 +368,64 @@ const setModeleDocument = (
   );
 };
 
+const remplissageDevis = (praticienObj, patientObj, devisObj) => {
+  let data = {};
+  data.praticien = {};
+  data.patient = {
+    nom: patientObj.nom,
+    prenom: patientObj.prenom,
+    naissance: moment(patientObj.naissance).format("L"),
+    nir: patientObj.nir
+  };
+  data.devis = {
+    date: moment().format("L"),
+    expiration: "",
+    numberOfPages: "",
+    description: devisObj.description,
+    lieuFabrication: "",
+    sousTraitance: "",
+    contentJO: {
+      actes: devisObj.actes
+    }
+  };
+  return data;
+};
+
+const remplissageFacture = (praticienObj, patientObj, arrayActes) => {
+  let data = {};
+  let actes = [];
+  let montantTotal = 0;
+  data.praticien = {};
+  data.patient = {
+    denomination: patientObj.nom + " " + patientObj.prenom,
+    adresse:
+      patientObj.adresse1 + !_.isEmpty(patientObj.adresse2)
+        ? ", " + patientObj.adresse2
+        : "" + !_.isEmpty(patientObj.adresse3)
+        ? ", " + patientObj.adresse3
+        : "",
+    codePostal: patientObj.codePostal,
+    ville: patientObj.ville
+  };
+  data.idDocument = "";
+  data.dateToday = moment().format("L");
+  _.forEach(arrayActes, acte => {
+    let a = {};
+    a.date = moment(acte.doneAt).format("L");
+    a.localisation = acte.localisation;
+    a.lettre = acte.code;
+    a.cotation = acte.cotation;
+    a.description = acte.description;
+    a.tarif = "";
+    a.montant = tarif(acte.montant);
+    montantTotal += acte.montant;
+    actes.push(a);
+  });
+  data.actes = actes;
+  data.montantTotal = montantTotal;
+  return data;
+};
+
 export {
   spacedLocalisation,
   tarif,
@@ -383,5 +442,7 @@ export {
   downloadTextFile,
   uploadFile,
   modeleDocument,
-  setModeleDocument
+  setModeleDocument,
+  remplissageDevis,
+  remplissageFacture
 };
