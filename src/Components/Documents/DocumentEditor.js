@@ -95,7 +95,11 @@ export default class DocumentEditor extends React.Component {
           <Button
             content="Imprimer"
             onClick={() => {
-              let win = window.open("", "Impression", "height=600,width=800");
+              let win = window.open(
+                "",
+                "Impression",
+                "height='100%',width='100%'"
+              );
               win.document.open();
               win.document.write(this.props.document.document);
               win.document.close();

@@ -10,7 +10,11 @@ import {
 } from "semantic-ui-react";
 import _ from "lodash";
 import Mustache from "mustache";
-import { modeleDocument } from "../lib/Helpers";
+import {
+  modeleDocument,
+  remplissageDevis,
+  remplissageFacture
+} from "../lib/Helpers";
 
 const propDefs = {
   description:
@@ -132,13 +136,16 @@ export default class DocumentFromActes extends React.Component {
     let readActe = arrayIdActes => {
       if (_.isEmpty(arrayIdActes)) {
         // procéder à la création d'un document ICI
-        let data = {
-          patient: { ...patient },
-          actes:
-            this.props.typeDocument === "FACTURE"
-              ? actes
-              : _.get(actes[0], "contentJO.actes", [])
-        }; // Si DEVIS, actes contient un seul acte de type #DEVIS
+        let data = {};
+        if (this.props.typeDocument === "DEVIS") {
+          let devisObj = {
+            description: actes[0].description,
+            actes: _.get(actes[0], "contentJO.actes", [])
+          };
+          data = remplissageDevis(undefined, patient, devisObj);
+        } else if (this.props.typeDocument === "FACTURE") {
+          data = remplissageFacture(undefined, patient, actes);
+        }
 
         let filledDocument = Mustache.render(modele.document, data);
         let fileName = _.isEmpty(modele.infosJO.modele.nom)
@@ -166,27 +173,6 @@ export default class DocumentFromActes extends React.Component {
                   if (this.props.onDocumentGeneration) {
                     this.props.onDocumentGeneration(result);
                   }
-                  // on doit quitter pour aller afficher le document généré
-
-                  /*if (window.qWebChannel) {
-                    // *******************************************
-                    // TODO : Gestion de la conversion en PDF (Qt)
-                    // *******************************************
-                  } else {
-                    let win = window.open("", result.fileName);
-                    if (_.isNull(win)) {
-                      this.setState({
-                        errorMessage: "Votre navigateur a empêché cette application d'ouvrir une fenêtre popup. " +
-                          "Veuillez autoriser les popups pour une visualisation des documents générés.",
-                        loading: false
-                      });
-                      return;
-                    } else {
-                      win.document.open();
-                      win.document.write(result.document);
-                      win.stop();
-                    }
-                  }*/
                 } else if (this.props.onClose) {
                   this.props.onClose();
                 }
