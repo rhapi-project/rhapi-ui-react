@@ -1,0 +1,560 @@
+<!-- Document modèle d'un devis -->
+<body>
+  <!-- Chargement de la police -->
+  <div style="font-family: Arial, Helvetica, sans-serif; font-size: 100%;">
+    <!-- Tableau contenant le titre du devis -->
+    <table style="width: 90%;" align="center">
+      <tbody>
+        <tr>
+          <td align="center" style="width: 20%; visibility: hidden;" />
+          <td style="width: 60%; border : 1px solid; text-align: center;">
+            DEVIS POUR LES TRAITEMENTS ET ACTES BUCCO-DENTAIRES FAISANT L'OBJET D'UNE ENTENTE DIRECTE
+            <br />
+            conformément aux dispositions de la convention nationale des chirurgiens-dentistes (publiée au JO du 25 août 2018)
+          </td>
+          <td align="center" style="width: 20%; visibility: hidden;" />
+        </tr>
+      </tbody>
+    </table>
+
+    <br />
+
+    <!-- Tableau contenant le sous-titre du devis -->
+    <table style="width: 80%;" align="center">
+      <tbody>
+        <tr>
+          <td>
+            Ce devis est la propriété du patient ou de son représentant légal. La communication de ce document à un tiers se fait sous sa seule responsabilité.
+            Ce devis est informatif, les montants des honoraires et prises en charge sont définis selon les droits effectifs à la date de réalisation de l'acte.
+            Les soins à tarifs opposables ne sont pas compris dans ce devis.
+            <br />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Tableau contenant les infos liées au praticien -->
+    <table style="width: 90%" align="center" cellpadding="10" cellspacing="10">
+      <tbody>
+        <tr>
+          <td width="50%" style="border: 1px solid; border-radius: 20px; vertical-align: top; padding: 10px">
+            <b>Identification du chirurgien-dentiste traitant</b>
+            <br />
+            <br />
+            Nom et prénom : {{praticien.currentName}}
+            <br />
+            Identification du praticien : RPPS {{praticien.rpps}} &nbsp;&nbsp;&nbsp; N° Adeli {{praticien.adeli}}
+            <br/>
+            N° de l'établissement (FINESS) : {{praticien.finess}}
+            <br />
+            Raison sociale et adresse : {{praticien.organisation}}
+            <br />
+            {{praticien.account.adresse1}} &nbsp;
+            {{#praticien.account.adresse2}}
+              , {{praticien.account.adresse2}}
+            {{/praticien.account.adresse2}} &nbsp;
+            {{praticien.account.adresse3}} <br />
+            {{praticien.account.codePostal}} {{praticien.account.ville}}&nbsp;
+            {{#praticien.account.pays}}
+            , {{praticien.account.pays}}
+            {{/praticien.account.pays}}
+          </td>
+
+          <!-- Tableau contenant les infos liées au patient -->
+          <td width="50%" style="border : 1px solid; border-radius: 20px; vertical-align: top; padding: 10px" rowspan="2" align="left">
+            <b>Identification du patient</b> <br /><br />
+            Nom et prénom : {{patient.nom}} {{patient.prenom}} &nbsp;&nbsp; Date de naissance : {{patient.naissance}}
+            <br />
+            N° de Sécurité sociale du patient : {{patient.nir}}
+            <br />
+            <br />
+              <!-- Tableau contenant les infos à remplir par le patient-->
+              <table width="90%" cellpadding="10" align="center">
+                <tr>
+                  <td style="border-radius: 20px;" bgcolor="#f3e1fc" cellpadding="10">
+                      À remplir par l'assuré si celui-ci souhaite envoyer ce devis à son organisme complémentaire
+                      pour connaître son éventuel reste à charge selon son contrat :
+                    <br /><br />
+                      Nom de l'organisme complémentaire :
+                    <br /><br /><br />
+                      N° de contrat ou d'adhérent :
+                    <br /><br /><br />
+                      Référence dossier (à remplir par l'organisme complémentaire) :
+                    <br /><br /><br />
+                    <br />
+                  </td>
+                </tr>
+              </table>
+          </td>
+        </tr>
+
+        <!-- Tableau contenant la date du devis et date de validité + description du traitement -->
+        <tr>
+          <td width="50%" style="border : 1px solid; border-radius: 20px;">
+            Date du devis : {{devis.date}}
+            <br />
+              Valable jusqu'au (sous réserve de modification réglementaire) : {{devis.expiration}}
+            <br /><br />
+              Ce devis contient {{devis.numberOfPages}} pages indissociables
+            <br /><br />
+              Description du traitement proposé : {{devis.description}}
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+
+    <!-- Tableau contenant les infos liées au lieu de fabrication du DM -->
+    <table style="width: 90%;" align="center" cellpadding="10" cellspacing="10">
+      <tbody>
+        <tr>
+          <td width="100%" style="border : 1px solid; border-radius: 20px;">
+            <b>Lieu de fabrication du dispositif médical : </b>{{devis.lieuFabrication}}
+            <br />
+            <b>Sous-traitance : </b>{{devis.sousTraitance}}
+            <br /><br />
+            <div style="font-size: smaller;">
+              À l'issue du traitement, il vous sera remis une fiche de traçabilité et la déclaration de conformité du dispositif médical
+              (document rempli par le fabricant ou son mandataire et sous sa seule responsabilité)
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Tableau contenant les infos liées aux matériaux et normes du DM -->
+    <table style="width: 89%; border: 1px solid; border-radius: 20px;" align="center" cellpadding="15">
+      <tbody>
+        <tr>
+          <td style="border : 0px solid">
+            <table style="width: 100%;" cellpadding="10" cellspacing="0">
+              <tbody>
+                <b>Légende explicative du devis</b>
+                <tr>
+                  <td style="vertical-align: top;" width="18%" rowspan="2" align="left">
+                      * HN : Hors Nomenclature
+                  </td>
+                  <td width="9%" rowspan="2" align="left" style="border : 1px solid; vertical-align: top;" bgcolor="#e0e0e0">
+                    ** Matériaux et normes
+                  </td>
+                  <td width="1%" style="border : 1px solid">
+                    1
+                  </td>
+                  <td width="19%" style="border : 1px solid">
+                    Alliage précieux NF EN ISO 22674 2016
+                  </td>
+                  <td width="1%" style="border : 1px solid">
+                    2
+                  </td>
+                  <td width="19%" style="border : 1px solid">
+                    Alliage non précieux ISO 22674 2016
+                  </td>
+                  <td width="1%" style="border : 1px solid">
+                    3
+                  </td>
+                  <td width="19%" style="border : 1px solid">
+                    Céramo-céramique NF EN ISO 9693 2016
+                  </td>
+                </tr>
+                <tr>
+                  <td width="1%" style="border : 1px solid">
+                    4
+                  </td>
+                  <td width="19%" style="border : 1px solid">
+                    Céramique céramo-métallique NF EN ISO 6872 2015
+                  </td>
+                  <td width="1%" style="border : 1px solid">
+                    5
+                  </td>
+                  <td width="19%" style="border : 1px solid">
+                    Polymères de base NF EN ISO 20795:1:2103
+                  </td>
+                  <td width="1%" style="border : 1px solid">
+                    6
+                  </td>
+                  <td width="19%" style="border : 1px solid">
+                    Dents artificielles NF EN ISO 22112 2017
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Tableau contenant les infos liées aux types de remboursements et paniers de soins -->
+        <tr>
+          <td style="border : 0px solid">
+            <table style="width: 100%;" align="top" cellpadding="10" cellspacing="0">
+              <tbody>
+                <tr>
+                  <td style="vertical-align: top;" width="19%" rowspan="5" align="left">
+                      *** Les montants remboursés et non remboursés du régime obligatoire sont informatifs, la prise en charge définitive est définie à la date de réalisation de l'acte.
+                  </td>
+                  <td width="11%" rowspan="4" align="left" style="border : 1px solid; vertical-align: top;" bgcolor="#e0e0e0">
+                      **** Paniers
+                  </td>
+                  <td width="1%" style="border : 1px solid" bgcolor="#e0e0e0" align="center">
+                    Codes
+                  </td>
+                  <td width="10%" style="border : 1px solid" bgcolor="#e0e0e0" align="center">
+                    Libellés
+                  </td>
+                  <td width="20%" style="border : 1px solid" bgcolor="#e0e0e0" align="center">
+                    Conditions tarifaires
+                  </td>
+                  <td width="30%" style="border : 1px solid" bgcolor="#e0e0e0" align="center">
+                    Prise en charge complémentaire
+                  </td>
+                </tr>
+                <tr>
+                  <td width="1%" style="border : 1px solid" align="center">
+                    1
+                  </td>
+                  <td width="10%" style="border : 1px solid" align="center">
+                    100% Santé
+                  </td>
+                  <td width="20%" style="border : 1px solid" align="center">
+                    soumis à honoraires limites de facturation
+                  </td>
+                  <td width="30%" style="border : 1px solid" align="center">
+                      sans reste à charge,
+                    <br>
+                      si le patient bénéficie d'un contrat dit responsable
+                  </td>
+                </tr>
+                <tr>
+                  <td width="1%" style="border : 1px solid" align="center">
+                    2
+                  </td>
+                  <td width="10%" style="border : 1px solid" align="center">
+                    Modéré
+                  </td>
+                  <td width="20%" style="border : 1px solid" align="center">
+                    soumis à honoraires limites de facturation
+                  </td>
+                  <td width="30%" style="border : 1px solid" align="center">
+                    selon le contrat du patient
+                  </td>
+                </tr>
+                <tr>
+                  <td width="1%" style="border : 1px solid" align="center">
+                    3
+                  </td>
+                  <td width="10%" style="border : 1px solid" align="center">
+                    Libre
+                  </td>
+                  <td width="20%" style="border : 1px solid" align="center">
+                    honoraires libres
+                  </td>
+                  <td width="30%" style="border : 1px solid" align="center">
+                    selon le contrat du patient
+                  </td>
+                </tr>
+                <tr>
+                  <td width="11%" style="border : 1px solid" bgcolor="#e0e0e0" align="center">
+                    Panier Complémentaire santé solidaire
+                  </td>
+                  <td width="1%" style="border : 1px solid" align="center">
+                    4
+                  </td>
+                  <td width="10%" style="border : 1px solid" align="center">
+                    Complémentaire Santé Solidaire
+                  </td>
+                  <td width="20%" style="border : 1px solid" align="center">
+                    soumis à honoraires limites de facturation
+                  </td>
+                  <td width="30%" style="border : 1px solid" align="center">
+                    pour les assurés bénéficaires de la Complémentaire Santé Solidaire
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Saut de page -->
+    <div style="page-break-before: always;"/>
+
+    <!-- Page 2 du devis -->
+
+    <!-- Tableau contenant les identifications du praticien et du patient-->
+    <table style="width: 90%;" align="center" cellpadding="10" cellspacing="10">
+      <tbody>
+        <tr>
+          <td align="left" style="border : 1px solid; border-radius: 20px; width: 50%;">
+            <b>Identification du chirurgien-dentiste traitant</b>
+            <br />
+              N° identifiant du praticien &nbsp;&nbsp;&nbsp; RPPS : {{praticien.rpps}} &nbsp;&nbsp;&nbsp; N° Adeli : {{praticien.adeli}} &nbsp;&nbsp;&nbsp; ou
+            <br />
+              N° de l'établissement (FINESS) : {{praticien.finess}}
+            <br />
+          </td>
+          <td align="left" style="border: 1px solid; border-radius: 20px; width: 50%;">
+            <b>Identification du patient</b>
+            <br />
+              Nom et prénom : {{patient.nom}} {{patient.prenom}} &nbsp;&nbsp;&nbsp; Date de naissance : {{patient.naissance}}
+            <br />
+              N° de Sécurité sociale : {{patient.nir}}
+            <br />
+          </td>
+          <td align="center" style="width: 6%;">
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Tableau contenant les actes du devis -->
+    <table style="width: 100%; border: 1px solid;" align="center" cellpadding="5" cellspacing="0">
+      <tbody>
+        <tr>
+          <td align="left" colspan="11" style="border: 1px solid;">
+            <b><font size="4">
+              Traitement proposé -
+            </b></font>
+              Description précise et détaillée des actes
+          </td>
+        </tr>
+
+        <!-- titres des colonnes-->
+        <!-- Attention sur ce bloc, le module PDF plante -->
+        <tr>
+          <td width="4%" style="border: 1px solid;">
+            N° de traitement
+          </td>
+          <td width="10%" style="border: 1px solid;">
+            N° de dent ou Localisation
+          </td>
+          <td width="8%" style="border: 1px solid;">
+            Cotation CCAM, NGAP ou acte HN
+          </td>
+          <td style="border: 1px solid;">
+            Nature de l'acte
+          </td>
+          <td width="4%" style="border: 1px solid;">
+            Matériaux utilisés (**)
+          </td>
+          <td width="4%" style="border: 1px solid;">
+            Panier (****)
+          </td>
+          <td width="6%" style="border: 1px solid;">
+            Honoraires limites de facturation
+          </td>
+          <td width="6%" style="border: 1px solid;">
+            Honoraire dont prix de vente du dispositif médical
+          </td>
+          <td width="6%" style="border: 1px solid;">
+            Base de remboursement Assurance Maladie obligatoire
+          </td>
+          <td width="6%" style="border: 1px solid;">
+            Montant remboursé Assurance Maladie obligatoire (***)
+          </td>
+          <td width="6%" style="border: 1px solid;">
+            Montant non remboursé Assurance Maladie obligatoire
+          </td>
+        </tr>
+
+        <!-- liste des actes -->
+        {{#devis.contentJO.actes}}
+        <tr>
+          <td width="4%" style="border: 1px solid;">
+            <!-- TODO : rajouter un numéro : index + 1 -->
+            &nbsp;
+          </td>
+          <td width="10%" style="border: 1px solid;">
+            {{localisation}}
+          </td>
+          <td width="8%" style="border: 1px solid;">
+            {{code}}
+          </td>
+          <td style="border: 1px solid;">
+            {{description}}
+          </td>
+          <td width="4%" style="border: 1px solid;">
+            &nbsp;
+          </td>
+          <td width="4%" style="border: 1px solid;">
+            <!-- panier -->
+            &nbsp;
+          </td>
+          <td width="6%" style="border: 1px solid;">
+            <!-- Honoraires limites de facturation -->
+            &nbsp;
+          </td>
+          <td width="6%" style="border: 1px solid;">
+            <!--Honoraire dont prix de vente du dispositif médical-->
+            &nbsp;
+          </td>
+          <td width="6%" style="border: 1px solid;">
+            <!--Base de remboursement Assurance Maladie obligatoire-->
+            &nbsp;
+          </td>
+          <td width="6%" style="border: 1px solid;">
+            <!--Montant remboursé Assurance Maladie obligatoire (***)-->
+            &nbsp;
+          </td>
+          <td width="6%" style="border: 1px solid;">
+            <!--Montant non remboursé Assurance Maladie obligatoire-->
+            &nbsp;
+          </td>
+        </tr>
+        {{/devis.contentJO.actes}}
+      </tbody>
+    </table>
+
+
+    <!-- TODO : adapter cette suite -->
+    #DEVIS_BREAK_SUITE
+
+    <!-- Tableau cadre, regroupant les tableaux d'informations alternatives thérapeutiques, des actes sans reste à charge et des acte en reste à charge modéré-->
+    <table style="width: 100%;" bordercolor="DarkGray" bgcolor="WhiteSmoke" align="center" cellpadding="3">
+      <tbody>
+        <tr>
+          <td align="center" style="text-align: left; font-size: smaller;">
+            <b>Information alternative thérapeutique : </b>
+            en cas de reste à charge éventuel, une information sur des alternatives thérapeutiques 100% Santé ou à défaut, à entente directe modérée est donnée par le praticien.
+            Sur demande du patient, elle peut donner lieu à une nouvelle proposition de plan de traitement complet, dans un devis distinct.
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <!-- Tableau contenant les actes sans reste à charge -->
+            <table style="width: 100%; border: 1px solid;"  bgcolor="white" align="center" cellpadding="5" cellspacing="0">
+              <tbody>
+                <tr>
+                  <td align="left" colspan="11" style="border : 1px solid; font-size: smaller;">
+                    <b>
+                      Acte sans reste à charge
+                    </b>
+                  </td>
+                </tr>
+
+                <!-- Ligne avec titres des colonnes-->
+                <tr>
+                  <td width="4%" style="border-top : 1px solid; border-left : 1px solid;">
+                      N° de traitement
+                  </td>
+                  <td width="10%" style="border-top : 1px solid; border-left : 1px solid;">
+                    N° de dent ou Localisation
+                  </td>
+                  <td width="8%" style="border-top : 1px solid; border-left : 1px solid;">
+                    Cotation CCAM, NGAP ou acte HN
+                  </td>
+                  <td style="border-top : 1px solid; border-left : 1px solid;">
+                    Nature de l'acte
+                  </td>
+                  <td width="4%" style="border-top : 1px solid; border-left : 1px solid;">
+                    Matériaux utilisés (**)
+                  </td>
+                  <td width="4%" style="border-top : 1px solid; border-left : 1px solid;">
+                    Panier (****)
+                  </td>
+                  <td width="6%" style="border-top : 1px solid; border-left : 1px solid;">
+                    Honoraires limites de facturation
+                  </td>
+                  <td width="6%" style="border-top : 1px solid; border-left : 1px solid;">
+                    Honoraire dont prix de vente du dispositif médical
+                  </td>
+                  <td width="6%" style="border-top : 1px solid; border-left : 1px solid;">
+                    Base de remboursement Assurance Maladie obligatoire
+                  </td>
+                  <td width="6%" style="border-top : 1px solid; border-left : 1px solid;">
+                    Montant remboursé Assurance Maladie obligatoire (***)
+                  </td>
+                  <td width="6%" style="border-top : 1px solid; border-left : 1px solid;border-right: 1px solid;">
+                    Montant non remboursé Assurance Maladie obligatoire
+                  </td>
+                </tr>
+                #DEVIS_TRAITEMENTS_SANS_RAC
+              </tbody>
+            </table>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <!-- Tableau contenant les actes en reste à charge modéré -->
+            <table style="width: 100%; border: 1px solid;"  bgcolor="white" align="center" cellpadding="5" cellspacing="0">
+              <tbody>
+                <tr>
+                  <td align="left" colspan="11" style="border: 1px solid; font-size: smaller;">
+                    <b>
+                      Acte en reste à charge modéré
+                    </b>
+                  </td>
+                </tr>
+
+                <!-- Ligne avec titres des colonnes-->
+                <tr>
+                  <td width="4%" style="border-top: 1px solid; border-left : 1px solid;">
+                      N° de traitement
+                  </td>
+                  <td width="10%" style="border-top: 1px solid; border-left : 1px solid;">
+                    N° de dent ou Localisation
+                  </td>
+                  <td width="8%" style="border-top: 1px solid; border-left : 1px solid;">
+                    Cotation CCAM, NGAP ou acte HN
+                  </td>
+                  <td style="border-top: 1px solid; border-left : 1px solid;">
+                    Nature de l'acte
+                  </td>
+                  <td width="4%" style="border-top : 1px solid; border-left : 1px solid;">
+                    Matériaux utilisés (**)
+                  </td>
+                  <td width="4%" style="border-top : 1px solid; border-left : 1px solid;">
+                    Panier (****)
+                  </td>
+                  <td width="6%" style="border-top : 1px solid; border-left : 1px solid;">
+                    Honoraires limites de facturation
+                  </td>
+                  <td width="6%" style="border-top : 1px solid; border-left : 1px solid;">
+                    Honoraire dont prix de vente du dispositif médical
+                  </td>
+                  <td width="6%" style="border-top : 1px solid; border-left : 1px solid;">
+                    Base de remboursement Assurance Maladie obligatoire
+                  </td>
+                  <td width="6%" style="border-top : 1px solid; border-left : 1px solid;">
+                    Montant remboursé Assurance Maladie obligatoire (***)
+                  </td>
+                  <td width="6%" style="border-top : 1px solid; border-left : 1px solid;border-right: 1px solid;">
+                    Montant non remboursé Assurance Maladie obligatoire
+                  </td>
+                </tr>
+                #DEVIS_TRAITEMENTS_RAC_MODERE
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <br />
+
+    <!-- Tableau contenant les encarts de signatures du patient et du praticien-->
+    <table style="width: 90%;" align="center" cellpadding="10">
+      <tbody>
+        <tr>
+          <td align="left" style="width: 58%; border : 1px solid; border-radius: 15px; vertical-align: top;">
+              Le patient ou son représentant légal reconnaît avoir eu la possibilité du choix de son traitement
+            <br />
+              Date et signature du patient ou du(ou des) responsable(s) légal(légaux)
+            <br />
+            <br />
+            <br />
+            <br />
+          </td>
+          <td align="left" style="width: 12%">
+          </td>
+          <td align="left" style="width: 30%; border : 1px solid; border-radius: 15px; vertical-align: top;">
+            Signature du Chirurgien-dentiste
+            <div style="width: 100%;" align="center">
+              <img style="display:block; max-height:70px;max-width:100%;" src="data:image/png;base64, #PRATICIEN_SIGNATURE" />
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>

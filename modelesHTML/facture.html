@@ -1,0 +1,214 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE></TITLE>
+	<META NAME="GENERATOR" CONTENT="LibreOffice 4.1.6.2 (Linux)">
+	<META NAME="AUTHOR" CONTENT="Jordan">
+	<META NAME="CREATED" CONTENT="20130805;154800000000000">
+	<META NAME="CHANGEDBY" CONTENT="fabrice">
+	<META NAME="CHANGED" CONTENT="20130829;65900000000000">
+	<STYLE TYPE="text/css">
+	<!--
+		@page { size: 8.5in 11in; margin-right: 0.5in; margin-bottom: 0.51in }
+		P { margin-bottom: 0.08in; direction: ltr; color: #000000 }
+		P.western { font-family: "Calibri"; font-size: 12pt; so-language: fr-FR }
+		P.cjk { font-family: "Calibri"; font-size: 12pt }
+		P.ctl { font-family: "Calibri"; font-size: 12pt; so-language: ar-SA }
+		H1 { margin-top: 0in; margin-bottom: 0in; direction: ltr; color: #7f7f7f; line-height: 110%; text-align: right; page-break-after: auto }
+		H1.western { font-family: "Calibri"; font-size: 20pt; so-language: fr-FR }
+		H1.cjk { font-family: "Times New Roman", serif; font-size: 20pt }
+		H1.ctl { font-family: "Times New Roman", serif; font-size: 9pt; so-language: ar-SA; font-weight: normal }
+		H3 { margin-top: 0.14in; margin-bottom: 0in; direction: ltr; color: #4f81bd; page-break-inside: avoid }
+		H3.western { font-family: "Calibri"; font-size: 12pt; so-language: fr-FR }
+		H3.cjk { font-family: "ＭＳ ゴシック", monospace; font-size: 12pt }
+		H3.ctl { font-family: "Times New Roman", serif; font-size: 12pt; so-language: ar-SA }
+		H3.column-heading-western { margin-top: 0in; text-transform: uppercase; color: #000000; font-family: "Calibri"; font-size: 9pt; so-language: fr-FR; line-height: 110%; page-break-inside: auto; page-break-after: auto }
+		H3.column-heading-cjk { margin-top: 0in; text-transform: uppercase; color: #000000; font-family: "Times New Roman", serif; font-size: 9pt; line-height: 110%; page-break-inside: auto; page-break-after: auto }
+		H3.column-heading-ctl { margin-top: 0in; text-transform: uppercase; color: #000000; font-family: "Times New Roman", serif; font-size: 8pt; so-language: ar-SA; font-weight: normal; line-height: 110%; page-break-inside: auto; page-break-after: auto }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-US" TEXT="#000000" DIR="LTR">
+<P LANG="fr-FR" CLASS="western" ALIGN=CENTER STYLE="margin-bottom: 0in">
+<BR>
+</P>
+<CENTER>
+	<TABLE WIDTH=720 CELLPADDING=7 CELLSPACING=0>
+		<COL WIDTH=347>
+		<COL WIDTH=345>
+		<TR VALIGN=TOP>
+			<TD ROWSPAN=2 WIDTH=347 HEIGHT=23 STYLE="border: none; padding: 0in">
+				<H3 LANG="fr-FR" CLASS="column-heading-western">Identification du
+				PRATICIEN :</H3>
+				<P LANG="fr-FR" STYLE="margin-bottom: 0in"><FONT SIZE=2 STYLE="font-size: 9pt">{{praticien.denomination}}</FONT></P>
+				<P LANG="fr-FR" STYLE="margin-bottom: 0in"><FONT SIZE=2 STYLE="font-size: 9pt">{{praticien.specialite}}</FONT></P>
+				<P LANG="fr-FR" STYLE="margin-bottom: 0in"><FONT SIZE=2 STYLE="font-size: 9pt">{{praticien.titres}}</P>
+				<P LANG="fr-FR" STYLE="margin-bottom: 0in"><FONT SIZE=2 STYLE="font-size: 9pt">{{praticien.adresse}}</FONT></P>
+				<P LANG="fr-FR" STYLE="margin-bottom: 0in"><FONT SIZE=2 STYLE="font-size: 9pt">{{praticien.codePostal}} {{praticien.ville}}</FONT></P>
+				<P LANG="fr-FR" STYLE="margin-bottom: 0in"><FONT SIZE=2 STYLE="font-size: 9pt">Tél.
+				{{praticien.telephone}}</FONT></P>
+				<P LANG="fr-FR" STYLE="margin-bottom: 0in"><FONT SIZE=2 STYLE="font-size: 9pt">ADELI
+				: {{praticien.adeli}}</FONT></P>
+				<P LANG="fr-FR"><FONT SIZE=2 STYLE="font-size: 9pt">RPPS  :
+				{{praticien.rpps}}</FONT></P>
+			</TD>
+			<TD WIDTH=345 STYLE="border: none; padding: 0in">
+				<H1 LANG="fr-FR" CLASS="western">RELEVÉ D'HONORAIRES</H1>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=345 VALIGN=BOTTOM STYLE="border: none; padding: 0in">
+				<P LANG="fr-FR" CLASS="western" ALIGN=RIGHT STYLE="margin-bottom: 0.17in; widows: 0; orphans: 0">
+				<FONT SIZE=2 STYLE="font-size: 9pt">{{praticien.ville}},
+				 le </FONT><FONT SIZE=2 STYLE="font-size: 9pt">{{dateToday}}</FONT></P>
+				<P LANG="fr-FR" CLASS="western" ALIGN=RIGHT STYLE="margin-bottom: 0.17in; widows: 0; orphans: 0">
+				<FONT SIZE=2 STYLE="font-size: 9pt">Relevé n°&nbsp;:
+				</FONT><FONT SIZE=2 STYLE="font-size: 9pt">{{idDocument}}</FONT></P>
+				<P LANG="fr-FR" ALIGN=RIGHT STYLE="text-transform: uppercase"><BR>
+				</P>
+			</TD>
+		</TR>
+	</TABLE>
+</CENTER>
+<P LANG="fr-FR" CLASS="western" STYLE="margin-bottom: 0in"><BR>
+</P>
+<CENTER>
+	<TABLE WIDTH=720 CELLPADDING=7 CELLSPACING=0>
+		<COL WIDTH=346>
+		<COL WIDTH=346>
+		<TR VALIGN=TOP>
+			<TD WIDTH=346 HEIGHT=57 STYLE="border: none; padding: 0in">
+				<H3 LANG="fr-FR" CLASS="column-heading-western">Identification du
+				patient&nbsp;:</H3>
+				<P LANG="fr-FR" STYLE="margin-bottom: 0in"><FONT SIZE=2 STYLE="font-size: 9pt">{{patient.denomination}}</FONT></P>
+				<P LANG="fr-FR" STYLE="margin-bottom: 0in"><FONT SIZE=2 STYLE="font-size: 9pt">{{patient.adresse}}</FONT></P>
+				<P LANG="fr-FR"><FONT SIZE=2 STYLE="font-size: 9pt">{{patient.codePostal}} {{patient.ville}}</FONT></P>
+			</TD>
+			<TD WIDTH=346 STYLE="border: none; padding: 0in">
+				<P LANG="fr-FR" STYLE="margin-bottom: 0in"><BR>
+				</P>
+				<P LANG="fr-FR" STYLE="margin-bottom: 0in"><BR>
+				</P>
+				<P LANG="fr-FR" STYLE="margin-bottom: 0in"><BR>
+				</P>
+				<P LANG="fr-FR"><BR>
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=2 WIDTH=706 HEIGHT=8 VALIGN=TOP STYLE="border: none; padding: 0in">
+				<P LANG="fr-FR" STYLE="margin-bottom: 0in; text-transform: uppercase">
+				<BR>
+				</P>
+				<P LANG="fr-FR" CLASS="western" STYLE="margin-bottom: 0in"><BR>
+				</P>
+				<P LANG="fr-FR" CLASS="western"><BR>
+				</P>
+			</TD>
+		</TR>
+	</TABLE>
+</CENTER>
+<P LANG="fr-FR" CLASS="western" STYLE="margin-bottom: 0in"><BR>
+</P>
+<TABLE WIDTH=707 CELLPADDING=7 CELLSPACING=0>
+	<COL WIDTH=75>
+	<COL WIDTH=75>
+	<COL WIDTH=52>
+	<COL WIDTH=52>
+	<COL WIDTH=232>
+	<COL WIDTH=62>
+	<COL WIDTH=61>
+	<TBODY>
+		<TR VALIGN=TOP>
+			<TD WIDTH=75 STYLE="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0in; padding-left: 0.08in; padding-right: 0in">
+				<P LANG="fr-FR" CLASS="western" ALIGN=CENTER><FONT SIZE=2><B>Date</B></FONT></P>
+			</TD>
+			<TD WIDTH=75 STYLE="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0in; padding-left: 0.08in; padding-right: 0in">
+				<P LANG="fr-FR" CLASS="western" ALIGN=CENTER><FONT SIZE=2><B>Localisation</B></FONT></P>
+			</TD>
+			<TD WIDTH=52 STYLE="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0in; padding-left: 0.08in; padding-right: 0in">
+				<P LANG="fr-FR" CLASS="western" ALIGN=CENTER><FONT SIZE=2><B>Lettre</B></FONT></P>
+			</TD>
+			<TD WIDTH=52 STYLE="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0in; padding-left: 0.08in; padding-right: 0in">
+				<P LANG="fr-FR" CLASS="western" ALIGN=CENTER><FONT SIZE=2><B>Cotation</B></FONT></P>
+			</TD>
+			<TD WIDTH=232 STYLE="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0in; padding-left: 0.08in; padding-right: 0in">
+				<P LANG="fr-FR" CLASS="western" ALIGN=CENTER><FONT SIZE=2><B>Description</B></FONT></P>
+			</TD>
+			<TD WIDTH=62 STYLE="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0in; padding-left: 0.08in; padding-right: 0in">
+				<P LANG="fr-FR" CLASS="western" ALIGN=CENTER><FONT SIZE=2><B>Tarif
+				S.S. </B></FONT>
+				</P>
+			</TD>
+			<TD WIDTH=61 STYLE="border: 1px solid #000000; padding: 0in 0.08in">
+				<P LANG="fr-FR" CLASS="western" ALIGN=CENTER><FONT SIZE=2><B>Montant</B></FONT></P>
+			</TD>
+		</TR>
+	</TBODY>
+	<TBODY>
+		{{#actes}}
+		<TR VALIGN=TOP>
+			<TD WIDTH=75 STYLE="border-top: 1px solid #000000; border-bottom: none; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0in; padding-left: 0.08in; padding-right: 0in">
+				<P LANG="fr-FR" CLASS="western" ALIGN=CENTER><FONT SIZE=2 STYLE="font-size: 9pt">{{date}}</FONT></P>
+			</TD>
+			<TD WIDTH=75 STYLE="border-top: 1px solid #000000; border-bottom: none; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0in; padding-left: 0.08in; padding-right: 0in">
+				<P LANG="fr-FR" CLASS="western" ALIGN=CENTER><FONT SIZE=2 STYLE="font-size: 9pt">{{localisation}}</FONT></P>
+			</TD>
+			<TD WIDTH=52 STYLE="border-top: 1px solid #000000; border-bottom: none; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0in; padding-left: 0.08in; padding-right: 0in">
+				<P LANG="fr-FR" CLASS="western" ALIGN=CENTER><FONT SIZE=2 STYLE="font-size: 9pt">{{lettre}}</FONT></P>
+			</TD>
+			<TD WIDTH=52 STYLE="border-top: 1px solid #000000; border-bottom: none; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0in; padding-left: 0.08in; padding-right: 0in">
+				<P LANG="fr-FR" CLASS="western" ALIGN=CENTER><FONT SIZE=2 STYLE="font-size: 9pt">{{cotation}}</FONT></P>
+			</TD>
+			<TD WIDTH=232 STYLE="border-top: 1px solid #000000; border-bottom: none; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0in; padding-left: 0.08in; padding-right: 0in">
+				<P LANG="fr-FR" CLASS="western"><FONT SIZE=2 STYLE="font-size: 9pt">{{description}}</FONT></P>
+			</TD>
+			<TD WIDTH=62 STYLE="border-top: 1px solid #000000; border-bottom: none; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0in; padding-left: 0.08in; padding-right: 0in">
+				<P LANG="fr-FR" CLASS="western" ALIGN=RIGHT><FONT SIZE=2 STYLE="font-size: 9pt">{{tarif}}</FONT></P>
+			</TD>
+			<TD WIDTH=61 STYLE="border-top: 1px solid #000000; border-bottom: none; border-left: 1px solid #000000; border-right: 1px solid #000000; padding: 0in 0.08in">
+				<P LANG="fr-FR" CLASS="western" ALIGN=RIGHT><FONT SIZE=2 STYLE="font-size: 9pt">{{montant}}</FONT></P>
+			</TD>
+		</TR>
+		{{/actes}}
+	</TBODY>
+	<TBODY>
+		<TR VALIGN=TOP>
+			<TD COLSPAN=5 WIDTH=541 STYLE="border-top: 1px solid #000000; border-bottom: none; border-left: none; border-right: none; padding: 0in">
+				<P LANG="fr-FR" CLASS="western" ALIGN=RIGHT><FONT SIZE=2 STYLE="font-size: 9pt"><B>TOTAL
+				:</B></FONT></P>
+			</TD>
+			<TD WIDTH=62 STYLE="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0in; padding-left: 0.08in; padding-right: 0in">
+				<P LANG="fr-FR" CLASS="western" ALIGN=CENTER><FONT SIZE=2 STYLE="font-size: 9pt">{{tarifTotal}}
+				€</FONT></P>
+			</TD>
+			<TD WIDTH=61 STYLE="border: 1px solid #000000; padding: 0in 0.08in">
+				<P LANG="fr-FR" CLASS="western" ALIGN=CENTER><FONT SIZE=2 STYLE="font-size: 9pt"><B>{{montantTotal}}
+				€</B></FONT></P>
+			</TD>
+		</TR>
+	</TBODY>
+</TABLE>
+<P LANG="fr-FR" CLASS="western" STYLE="margin-bottom: 0in"><BR>
+</P>
+<P LANG="fr-FR" ALIGN=LEFT STYLE="margin-bottom: 0in; border-top: 1px solid #000000; border-bottom: none; border-left: none; border-right: none; padding-top: 0.01in; padding-bottom: 0in; padding-left: 0in; padding-right: 0in; display: none">
+<FONT FACE="Arial, sans-serif"><FONT SIZE=1 STYLE="font-size: 8pt">B<SPAN ID="Frame2" DIR="LTR" STYLE="float: left; width: 2.88in; height: 1in; border: none; padding: 0in; background: #ffffff">
+	<P LANG="fr-FR" CLASS="western" STYLE="margin-bottom: 0in"><FONT FACE="Arial, sans-serif"><FONT SIZE=2><B>Le
+	praticien certifie avoir exécuté l'intégralité du traitement.&nbsp;</B></FONT></FONT></P>
+	<P LANG="fr-FR" CLASS="western" STYLE="margin-bottom: 0in"><FONT FACE="Arial, sans-serif"><FONT SIZE=2>Signature
+	du chirurgien-dentiste :</FONT></FONT></P>
+</SPAN>
+<SPAN ID="Frame1" DIR="LTR" STYLE="float: left; width: 2.88in; height: 1in; border: none; padding: 0in; background: #ffffff">
+	<P LANG="fr-FR" STYLE="margin-bottom: 0in"><FONT FACE="Times"><FONT SIZE=2><FONT COLOR="#000000"><FONT FACE="Arial, sans-serif"><B>Le
+	praticien atteste le paiement des honoraires ce jour.</B></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Arial, sans-serif"><B>&nbsp;</B></FONT></FONT></FONT></FONT></P>
+	<P LANG="fr-FR" STYLE="margin-bottom: 0in"><FONT FACE="Arial, sans-serif"><FONT SIZE=2>Signature
+	du chirurgien-dentiste :</FONT></FONT></P>
+	<P LANG="fr-FR" CLASS="western" STYLE="margin-bottom: 0in"><BR>
+	</P>
+</SPAN>as du formulaire</FONT></FONT>
+</P>
+<P LANG="fr-FR" CLASS="western" STYLE="margin-bottom: 0in"><BR>
+</P>
+</BODY>
+</HTML>
