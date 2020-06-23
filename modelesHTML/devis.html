@@ -91,13 +91,13 @@
         <!-- Tableau contenant la date du devis et date de validité + description du traitement -->
         <tr>
           <td width="50%" style="border : 1px solid; border-radius: 20px;">
-            Date du devis : {{devis.date}}
+            Date du devis : {{date.jour}}
             <br />
-              Valable jusqu'au (sous réserve de modification réglementaire) : {{devis.expiration}}
+              Valable jusqu'au (sous réserve de modification réglementaire) : {{devisExpiration}}
             <br /><br />
-              Ce devis contient {{devis.numberOfPages}} pages indissociables
+              Ce devis contient {{devisTotalPages}} pages indissociables
             <br /><br />
-              Description du traitement proposé : {{devis.description}}
+              Description du traitement proposé : {{devisDescription}}
           </td>
         </tr>
 
@@ -109,9 +109,9 @@
       <tbody>
         <tr>
           <td width="100%" style="border : 1px solid; border-radius: 20px;">
-            <b>Lieu de fabrication du dispositif médical : </b>{{devis.lieuFabrication}}
+            <b>Lieu de fabrication du dispositif médical : </b>{{devisLieuFabrication}}
             <br />
-            <b>Sous-traitance : </b>{{devis.sousTraitance}}
+            <b>Sous-traitance : </b>{{devisSousTraitance}}
             <br /><br />
             <div style="font-size: smaller;">
               À l'issue du traitement, il vous sera remis une fiche de traçabilité et la déclaration de conformité du dispositif médical
@@ -356,7 +356,7 @@
         </tr>
 
         <!-- liste des actes -->
-        {{#devis.contentJO.actes}}
+        {{#saisies}}
         <tr>
           <td width="4%" style="border: 1px solid;">
             <!-- TODO : rajouter un numéro : index + 1 -->
@@ -399,7 +399,7 @@
             &nbsp;
           </td>
         </tr>
-        {{/devis.contentJO.actes}}
+        {{/saisies}}
       </tbody>
     </table>
 
