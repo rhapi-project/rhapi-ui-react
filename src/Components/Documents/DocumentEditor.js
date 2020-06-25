@@ -51,7 +51,6 @@ export default class DocumentEditor extends React.Component {
           <strong>{this.props.document.fileName}</strong>
         </div>
         <TextDocument
-          data={{}}
           document={this.props.document.document}
           mode={
             this.props.document.mimeType === "text/plain" ? "plain" : "html"
@@ -64,7 +63,7 @@ export default class DocumentEditor extends React.Component {
           }}
         />
         <Divider hidden={true} />
-        <div style={{ textAlign: "center" }}>
+        <div style={{ textAlign: "center", float: "bottom" }}>
           <Button
             content="Fermer"
             onClick={() => {

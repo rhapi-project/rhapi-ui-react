@@ -86,19 +86,33 @@ const readSaisies = (client, arrayIdActes, callback) => {
   if (_.isEmpty(arrayIdActes)) {
     callback(result);
   }
+  let blocTraitements = [];
   let saisies = [];
   result.saisiesExpiration = "";
   result.saisiesTotalPages = "";
+
   client.Actes.read(
     arrayIdActes[0],
     {},
     devis => {
       result.saisiesDescription = devis.description;
       if (_.startsWith(devis.code, "#")) {
+        let maxItemsPerPage = 2;
+        let currentPageItems = 0;
+        let obj = {};
+        obj.saisies = [];
         _.forEach(devis.contentJO.actes, acte => {
-          // TODO : Traiter chaque ligne
           saisies.push(acte);
+          obj.saisies.push(acte);
+          currentPageItems += 1;
+          if (currentPageItems === maxItemsPerPage) {
+            blocTraitements.push(_.cloneDeepWith(obj));
+            obj.saisies = [];
+            currentPageItems = 0;
+          }
         });
+        blocTraitements.push(_.cloneDeepWith(obj));
+        result.blocTraitements = blocTraitements;
         result.saisies = saisies;
       }
       callback(result);
@@ -166,6 +180,7 @@ const remplissage = (client, modeleObj, idPatient, arrayIdActes, callback) => {
         lectureSaisies = true;
         readSaisies(client, arrayIdActes, result => {
           data.saisies = _.get(result, "saisies", []);
+          data.blocTraitements = _.get(result, "blocTraitements", []);
           data.saisiesDescription = _.get(result, "saisiesDescription", "");
           data.saisiesExpiration = _.get(result, "saisiesExpiration", "");
           data.saisiesTotalPages = _.get(result, "saisiesTotalPages", "");
