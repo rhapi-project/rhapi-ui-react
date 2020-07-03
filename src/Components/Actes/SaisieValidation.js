@@ -13,6 +13,9 @@ const propDefs = {
   example: "",
   propDocs: {
     idPatient: "Identifiant du patient",
+    idActe: "Identifiant de l'acte à lire. Par défaut cette valeur est à NULL.",
+    acteCopy: "Si cette propriété est à TRUE, une copie de l'acte d'identifiant 'idActe' sera créée.",
+    editable: "Ouverture de la saisie des actes en écriture",
     typeActe: "Type d'acte à saisir ou à valider : #FSE ou #DEVIS",
     acteTitre: "Titre de l'acte qui sera créé",
     codActivite: 'Code de l\'activité, par défaut "1"',
@@ -28,7 +31,10 @@ const propDefs = {
   },
   propTypes: {
     client: PropTypes.any.isRequired,
+    editable: PropTypes.bool,
     idPatient: PropTypes.number,
+    idActe: PropTypes.number,
+    acteCopy: PropTypes.bool,
     typeActe: PropTypes.string,
     acteTitre: PropTypes.string,
     codActivite: PropTypes.string,
@@ -47,6 +53,7 @@ export default class SaisieValidation extends React.Component {
   static propTypes = propDefs.propTypes;
 
   static defaultProps = {
+    acteCopy: false,
     acteTitre: "",
     actions: [],
     codActivite: "1",
@@ -54,6 +61,7 @@ export default class SaisieValidation extends React.Component {
     codGrille: 0,
     codPhase: 0,
     executant: "",
+    idActe: null,
     lignes: 5,
     editable: true,
     user: ""
@@ -71,9 +79,26 @@ export default class SaisieValidation extends React.Component {
   componentDidUpdate(prevProps) {
     if (
       prevProps.idPatient !== this.props.idPatient ||
-      prevProps.typeActe !== this.props.typeActe
+      prevProps.typeActe !== this.props.typeActe ||
+      prevProps.idActe !== this.props.idActe || //
+      prevProps.acteCopy !== this.props.acteCopy //
     ) {
-      this.reload(this.props.typeActe, {});
+      //this.reload(this.props.typeActe, {});
+      if (!_.isNull(this.props.idActe) && !this.props.acteCopy) {
+        this.readActe(
+          this.props.idActe,
+          result => {
+            this.setState({ fse: result });
+          },
+          error => {
+            this.setState({ fse: {} });
+          }
+        );
+      } else if (!_.isNull(this.props.idActe) && this.props.acteCopy) {
+        this.copyActe(this.props.idActe);
+      } else {
+        this.reload(this.props.typeActe, {});
+      }
     }
   }
 
@@ -131,6 +156,19 @@ export default class SaisieValidation extends React.Component {
     );
   };
 
+  readActe = (idActe, onSuccess, onError) => {
+    this.props.client.Actes.read(
+      idActe,
+      {},
+      result => {
+        onSuccess(result);
+      },
+      error => {
+        onError(error);
+      }
+    );
+  };
+
   destroy = () => {
     this.props.client.Actes.destroy(
       this.state.fse.id,
@@ -139,6 +177,43 @@ export default class SaisieValidation extends React.Component {
       },
       error => {
         console.log(error);
+      }
+    );
+  };
+
+  copyActe = idActe => {
+    this.readActe(
+      idActe,
+      result => {
+        this.props.client.Actes.create(
+          this.props.idPatient,
+          result.code,
+          res => {
+            let params = { ...result };
+            _.unset(params, "etat");
+            _.unset(params, "lockRevision");
+            _.set(params, "doneAt", moment().toISOString());
+            this.props.client.Actes.update(
+              res.id,
+              params,
+              r => {
+                this.setState({ fse: r });
+              },
+              e => {
+                console.log(e);
+                this.setState({ fse: {} });
+              }
+            );
+          },
+          err => {
+            console.log(err);
+            this.setState({ fse: {} });
+          }
+        );
+      },
+      error => {
+        console.log(error);
+        this.setState({ fse: {} });
       }
     );
   };
@@ -162,6 +237,7 @@ export default class SaisieValidation extends React.Component {
             <Saisie
               client={this.props.client}
               idActe={this.state.fse.id}
+              editable={this.props.editable}
               codGrille={this.props.codGrille}
               codActivite={this.props.codActivite}
               codDom={this.props.codDom}
@@ -181,6 +257,7 @@ export default class SaisieValidation extends React.Component {
             />
             <div>
               <Button
+                disabled={!this.props.editable}
                 content="Valider"
                 onClick={() => {
                   if (_.isEmpty(this.state.fse.contentJO.actes)) {
@@ -190,6 +267,7 @@ export default class SaisieValidation extends React.Component {
                 }}
               />
               <Button
+                disabled={!this.props.editable}
                 content="Supprimer"
                 negative={true}
                 onClick={this.destroy}
