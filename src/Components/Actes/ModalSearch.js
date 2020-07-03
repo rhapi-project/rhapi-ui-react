@@ -47,14 +47,14 @@ const propDefs = {
     executant:
       "Limiter la recherche aux seuls actes d'une profession de santé. " +
       "Exemple : D1(dentistes), SF(sages-femmes)",
-    specialite: "Code spécialité du praticien", // new
+    specialite: "Code spécialité du praticien",
     localisationPicker:
       "Affichage de la grille de saisie des localisations dentaires",
     open: "Ouverture de la modal",
     onClose: "Callback à la fermeture de la modal",
     rowIndex:
       "Indice de la ligne sur laquelle on a cliqué dans le tableau de saisie des actes",
-    ngap: "Liste des codes NGAP", // new
+    ngap: "Liste des codes NGAP",
     allModificateurs:
       "Tous les modificateurs (obtenus avec une requête CCAM contextes)",
     modificateurs:
@@ -79,12 +79,12 @@ const propDefs = {
     description: PropTypes.string,
     localisation: PropTypes.string,
     executant: PropTypes.string,
-    specialite: PropTypes.number, // new
+    specialite: PropTypes.number,
     localisationPicker: PropTypes.bool,
     open: PropTypes.bool,
     onClose: PropTypes.func,
     rowIndex: PropTypes.number,
-    ngap: PropTypes.array, // new
+    ngap: PropTypes.array,
     allModificateurs: PropTypes.array,
     modificateurs: PropTypes.string,
     qualificatifs: PropTypes.string,
@@ -137,23 +137,6 @@ export default class ModalSearch extends React.Component {
     descriptionType: 1
   };
 
-  /*componentWillMount() {
-    this.setState({
-      acte: {},
-      code: this.props.code,
-      cotation: this.props.cotation,
-      date: this.props.date,
-      localisation: this.props.localisation,
-      modificateurs: this.props.modificateurs,
-      qualificatifs: this.props.qualificatifs,
-      description: this.props.description,
-      montant: this.props.montant,
-      openLocalisation: false,
-      openModificateurs: false,
-      descriptionType: 1
-    });
-  }*/
-
   componentDidUpdate(prevProps, prevState) {
     if (this.props.open && this.props.open !== prevProps.open) {
       if (this.props.code) {
@@ -189,7 +172,22 @@ export default class ModalSearch extends React.Component {
     }
   }
 
+  // on cherche le type de description dans
+  // localStorage > localPreferences > defaultDescriptionType
+  // -> c'est soit "court" ou "long"
   getDescriptionType = () => {
+    let pref = JSON.parse(localStorage.getItem("localPreferences"));
+    if (pref) {
+      if (_.isUndefined(pref.defaultDescriptionType)) {
+        pref.defaultDescriptionType = "long";
+      }
+      localStorage.setItem("localPreferences", JSON.stringify(pref));
+    } else {
+      let obj = {
+        defaultDescriptionType: "long"
+      };
+      localStorage.setItem("localPreferences", JSON.stringify(obj));
+    }
     return _.get(
       JSON.parse(localStorage.getItem("localPreferences")),
       "defaultDescriptionType",
@@ -294,6 +292,16 @@ export default class ModalSearch extends React.Component {
   };
 
   descriptionTypeChange = value => {
+    if (_.includes([0, 1], value)) {
+      // mise à jour des préférences en localStorage
+      let pref = JSON.parse(localStorage.getItem("localPreferences"));
+      if (pref) {
+        pref.defaultDescriptionType = value === 0 ? "court" : "long";
+      } else {
+        pref = { defaultDescriptionType: value === 0 ? "court" : "long" };
+      }
+      localStorage.setItem("localPreferences", JSON.stringify(pref));
+    }
     if (value === 0) {
       this.setState({
         description: this.state.acte.nomCourt,
