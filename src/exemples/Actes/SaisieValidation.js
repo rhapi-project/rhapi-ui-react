@@ -17,41 +17,10 @@ const patients = [
   { text: "8", value: 8 }
 ];
 
-const descriptionType = [
-  { text: "Nom court", value: "court" },
-  { text: "Nom long", value: "long" }
-];
-
 export default class ActesSaisieValidation extends React.Component {
   state = {
     idPatient: null,
-    typeActe: "#FSE",
-    defaultDescriptionType: "court"
-  };
-
-  componentDidMount() {
-    this.getPreferences();
-  }
-
-  getPreferences = () => {
-    let pref = JSON.parse(localStorage.getItem("localPreferences"));
-    if (pref) {
-      if (_.isUndefined(pref.defaultDescriptionType)) {
-        pref.defaultDescriptionType = "long";
-      }
-      localStorage.setItem("localPreferences", JSON.stringify(pref));
-      this.setState({
-        defaultDescriptionType: pref.defaultDescriptionType
-      });
-    } else {
-      let obj = {
-        defaultDescriptionType: "long"
-      };
-      localStorage.setItem("localPreferences", JSON.stringify(obj));
-      this.setState({
-        defaultDescriptionType: obj.defaultDescriptionType
-      });
-    }
+    typeActe: "#FSE"
   };
 
   render() {
@@ -73,23 +42,6 @@ export default class ActesSaisieValidation extends React.Component {
               options={patients}
               onChange={(e, d) => this.setState({ idPatient: d.value })}
               value={this.state.idPatient}
-            />
-            <Form.Dropdown
-              label="Type de description par défaut"
-              placeholder="Sélectionner le type"
-              selection={true}
-              options={descriptionType}
-              value={this.state.defaultDescriptionType}
-              onChange={(e, d) => {
-                let pref = JSON.parse(localStorage.getItem("localPreferences"));
-                if (pref) {
-                  pref.defaultDescriptionType = d.value;
-                } else {
-                  pref = { defaultDescriptionType: d.value };
-                }
-                localStorage.setItem("localPreferences", JSON.stringify(pref));
-                this.setState({ defaultDescriptionType: d.value });
-              }}
             />
           </Form.Group>
           <Form.Input label="Type d'actes">
@@ -116,7 +68,13 @@ export default class ActesSaisieValidation extends React.Component {
           client={client}
           idPatient={this.state.idPatient}
           typeActe={this.state.typeActe}
-          defaultDescriptionType={this.state.defaultDescriptionType}
+          acteTitre={
+            this.state.typeActe === "#FSE"
+              ? "Nouvelle FSE"
+              : this.state.typeActe === "#DEVIS"
+              ? "Plan de traitement"
+              : ""
+          }
           codGrille={13}
           executant="D1"
           specialite={19}

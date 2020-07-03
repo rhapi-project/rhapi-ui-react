@@ -14,8 +14,7 @@ const propDefs = {
   propDocs: {
     idPatient: "Identifiant du patient",
     typeActe: "Type d'acte à saisir ou à valider : #FSE ou #DEVIS",
-    defaultDescriptionType:
-      "Type de description par défaut à utiliser pour les actes : court ou long",
+    acteTitre: "Titre de l'acte qui sera créé",
     codActivite: 'Code de l\'activité, par défaut "1"',
     codDom: "Code du DOM, par défaut c'est la métropole. Code 0",
     codGrille: "Code grille, par défaut 0",
@@ -31,7 +30,7 @@ const propDefs = {
     client: PropTypes.any.isRequired,
     idPatient: PropTypes.number,
     typeActe: PropTypes.string,
-    defaultDescriptionType: PropTypes.string,
+    acteTitre: PropTypes.string,
     codActivite: PropTypes.string,
     codDom: PropTypes.number,
     codGrille: PropTypes.number,
@@ -48,6 +47,7 @@ export default class SaisieValidation extends React.Component {
   static propTypes = propDefs.propTypes;
 
   static defaultProps = {
+    acteTitre: "",
     actions: [],
     codActivite: "1",
     codDom: 0,
@@ -71,8 +71,7 @@ export default class SaisieValidation extends React.Component {
   componentDidUpdate(prevProps) {
     if (
       prevProps.idPatient !== this.props.idPatient ||
-      prevProps.typeActe !== this.props.typeActe ||
-      prevProps.defaultDescriptionType !== this.props.defaultDescriptionType
+      prevProps.typeActe !== this.props.typeActe
     ) {
       this.reload(this.props.typeActe, {});
     }
@@ -119,7 +118,9 @@ export default class SaisieValidation extends React.Component {
         code: typeActe,
         etat: 1,
         idPatient: this.props.idPatient,
-        description: "Nouvel acte du patient d'id " + this.props.idPatient
+        description: _.isEmpty(this.props.acteTitre)
+          ? "Nouvel acte du patient d'id " + this.props.idPatient
+          : this.props.acteTitre
       },
       result => {
         this.setState({ fse: result, acteToAdd: acteToAdd });
