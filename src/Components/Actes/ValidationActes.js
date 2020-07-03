@@ -9,6 +9,7 @@ const propDefs = {
   example: "",
   propDocs: {
     idActe: "identifiant de l'acte à valider",
+    acteTitre: "titre de l'acte à valider",
     modeleDocument:
       "type de modèle à utiliser pour la génération d'un document",
     open: "ouverture de la modal",
@@ -19,6 +20,7 @@ const propDefs = {
   propTypes: {
     client: PropTypes.any.isRequired,
     idActe: PropTypes.number,
+    acteTitre: PropTypes.string,
     modeleDocument: PropTypes.string,
     open: PropTypes.bool,
     onClose: PropTypes.func,
@@ -54,7 +56,11 @@ export default class ValidationActes extends React.Component {
         let updateEtatActe = acte => {
           this.props.client.Actes.update(
             acte.id,
-            { etat: 0, doneAt: moment().toISOString() },
+            {
+              etat: 0,
+              doneAt: moment().toISOString(),
+              description: this.props.acteTitre
+            },
             acte => {
               this.setState({
                 messageValidation: `L'acte "${acte.description}" a été bien enregistré.`,

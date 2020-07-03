@@ -1,9 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button } from "semantic-ui-react";
+import { Button, Message } from "semantic-ui-react";
 import DocumentEditor from "../Documents/DocumentEditor";
 import DocumentFromActes from "../Documents/DocumentFromActes";
 import ValidationActes from "./ValidationActes";
+import ModalActeTitre from "./ModalActeTitre";
 import Saisie from "./Saisie";
 import _ from "lodash";
 import moment from "moment";
@@ -14,8 +15,9 @@ const propDefs = {
   propDocs: {
     idPatient: "Identifiant du patient",
     idActe: "Identifiant de l'acte à lire. Par défaut cette valeur est à NULL.",
-    acteCopy: "Si cette propriété est à TRUE, une copie de l'acte d'identifiant 'idActe' sera créée.",
-    editable: "Ouverture de la saisie des actes en écriture",
+    acteCopy:
+      "Si cette propriété est à TRUE, une copie de l'acte d'identifiant 'idActe' sera créée.",
+    //editable: "Ouverture de la saisie des actes en écriture",
     typeActe: "Type d'acte à saisir ou à valider : #FSE ou #DEVIS",
     acteTitre: "Titre de l'acte qui sera créé",
     codActivite: 'Code de l\'activité, par défaut "1"',
@@ -31,7 +33,7 @@ const propDefs = {
   },
   propTypes: {
     client: PropTypes.any.isRequired,
-    editable: PropTypes.bool,
+    //editable: PropTypes.bool,
     idPatient: PropTypes.number,
     idActe: PropTypes.number,
     acteCopy: PropTypes.bool,
@@ -63,32 +65,50 @@ export default class SaisieValidation extends React.Component {
     executant: "",
     idActe: null,
     lignes: 5,
-    editable: true,
+    //editable: true,
     user: ""
   };
 
   state = {
     fse: {},
+    editable: true,
     acteToAdd: {},
     createdActes: [],
     modalCreationDocument: false,
     modalValidationActes: false,
-    generatedDocument: {}
+    generatedDocument: {},
+    messageTitle: "",
+    messageContent: "",
+    messageColor: "",
+    modalChangeActeTitre: false,
+    acteTitre: ""
   };
 
   componentDidUpdate(prevProps) {
     if (
       prevProps.idPatient !== this.props.idPatient ||
-      prevProps.typeActe !== this.props.typeActe ||
-      prevProps.idActe !== this.props.idActe || //
-      prevProps.acteCopy !== this.props.acteCopy //
+      prevProps.typeActe !== this.props.typeActe // ||
+      //prevProps.idActe !== this.props.idActe ||
+      //prevProps.acteCopy !== this.props.acteCopy
     ) {
-      //this.reload(this.props.typeActe, {});
-      if (!_.isNull(this.props.idActe) && !this.props.acteCopy) {
+      if (
+        !_.isNull(this.props.idActe) &&
+        prevProps.idActe !== this.props.idActe &&
+        !this.props.acteCopy
+      ) {
         this.readActe(
           this.props.idActe,
           result => {
-            this.setState({ fse: result });
+            this.setState({
+              fse: result,
+              editable: result.code !== "#FSE",
+              messageTitle:
+                result.code === "#FSE"
+                  ? "Duplicata d'une feuille de soins"
+                  : "Modification d'une série d'actes",
+              messageColor: result.code === "#DEVIS" ? "warning" : "",
+              acteTitre: result.description
+            });
           },
           error => {
             this.setState({ fse: {} });
@@ -125,9 +145,31 @@ export default class SaisieValidation extends React.Component {
           this.createFSE(typeActe, acteToAdd);
         } else if (actes.length > 1) {
           let recent = _.maxBy(actes, a => moment.max(moment(a.modifiedAt)));
-          this.setState({ fse: recent, acteToAdd: acteToAdd });
+          this.setState({
+            fse: recent,
+            acteToAdd: acteToAdd,
+            editable: true,
+            messageTitle: recent.description,
+            messageContent:
+              recent.code === "#FSE"
+                ? "Nouvelle feuille de soins"
+                : "Nouvelle série d'actes",
+            messageColor: recent.code === "#DEVIS" ? "warning" : "",
+            acteTitre: recent.description
+          });
         } else {
-          this.setState({ fse: actes[0], acteToAdd: acteToAdd });
+          this.setState({
+            fse: actes[0],
+            acteToAdd: acteToAdd,
+            editable: true,
+            messageTitle: actes[0].description,
+            messageContent:
+              actes[0].code === "#FSE"
+                ? "Nouvelle feuille de soins"
+                : "Nouvelle série d'actes",
+            messageColor: actes[0].code === "#DEVIS" ? "warning" : "",
+            acteTitre: actes[0].description
+          });
         }
       },
       error => {
@@ -148,7 +190,18 @@ export default class SaisieValidation extends React.Component {
           : this.props.acteTitre
       },
       result => {
-        this.setState({ fse: result, acteToAdd: acteToAdd });
+        this.setState({
+          fse: result,
+          acteToAdd: acteToAdd,
+          editable: true,
+          messageTitle: result.description,
+          messageContent:
+            result.code === "#FSE"
+              ? "Nouvelle feuille de soins"
+              : "Nouvelle série d'actes",
+          messageColor: result.code === "#DEVIS" ? "warning" : "",
+          acteTitre: result.description
+        });
       },
       error => {
         this.setState({ fse: {}, acteToAdd: {} });
@@ -190,14 +243,22 @@ export default class SaisieValidation extends React.Component {
           result.code,
           res => {
             let params = { ...result };
-            _.unset(params, "etat");
+            _.set(params, "etat", 1);
             _.unset(params, "lockRevision");
             _.set(params, "doneAt", moment().toISOString());
             this.props.client.Actes.update(
               res.id,
               params,
               r => {
-                this.setState({ fse: r });
+                this.setState({
+                  fse: r,
+                  editable: true,
+                  messageTitle:
+                    r.code === "#FSE"
+                      ? "Nouvelle feuille de soins"
+                      : "Nouvelle série d'actes",
+                  messageContent: r.code === "#DEVIS" ? "warning" : ""
+                });
               },
               e => {
                 console.log(e);
@@ -234,10 +295,18 @@ export default class SaisieValidation extends React.Component {
           />
         ) : !_.isEmpty(this.state.fse) ? (
           <React.Fragment>
+            <Message
+              positive={this.state.fse.code === "#FSE"}
+              warning={this.state.messageColor === "warning"}
+              info={this.state.messageColor === "info"}
+            >
+              <Message.Header>{this.state.messageTitle}</Message.Header>
+              <Message.Content>{this.state.messageContent}</Message.Content>
+            </Message>
             <Saisie
               client={this.props.client}
               idActe={this.state.fse.id}
-              editable={this.props.editable}
+              editable={this.state.editable}
               codGrille={this.props.codGrille}
               codActivite={this.props.codActivite}
               codDom={this.props.codDom}
@@ -257,17 +326,21 @@ export default class SaisieValidation extends React.Component {
             />
             <div>
               <Button
-                disabled={!this.props.editable}
+                disabled={!this.state.editable}
                 content="Valider"
                 onClick={() => {
                   if (_.isEmpty(this.state.fse.contentJO.actes)) {
                     return;
                   }
-                  this.setState({ modalValidationActes: true });
+                  if (this.state.fse.code === "#DEVIS") {
+                    this.setState({ modalChangeActeTitre: true });
+                  } else {
+                    this.setState({ modalValidationActes: true });
+                  }
                 }}
               />
               <Button
-                disabled={!this.props.editable}
+                disabled={!this.state.editable}
                 content="Supprimer"
                 negative={true}
                 onClick={this.destroy}
@@ -275,6 +348,20 @@ export default class SaisieValidation extends React.Component {
             </div>
           </React.Fragment>
         ) : null}
+
+        {/* modal de changement de titre pour un devis */}
+        <ModalActeTitre
+          open={this.state.modalChangeActeTitre}
+          titre={this.state.acteTitre}
+          onClose={() => this.setState({ modalChangeActeTitre: false })}
+          onChangeTitre={titre => {
+            this.setState({
+              acteTitre: titre,
+              modalValidationActes: true,
+              modalChangeActeTitre: false
+            });
+          }}
+        />
 
         {/* modal de validation d'un acte */}
         <ValidationActes
@@ -287,6 +374,7 @@ export default class SaisieValidation extends React.Component {
               : ""
           }
           idActe={this.state.fse.id}
+          acteTitre={this.state.acteTitre}
           open={this.state.modalValidationActes}
           onClose={() => this.reload(this.props.typeActe, {})}
           onDocumentGeneration={createdActes => {

@@ -66,7 +66,7 @@ export default class ActesSaisieValidation extends React.Component {
         {/* saisie et validation des actes */}
         <Actes.SaisieValidation
           client={client}
-          editable={true}
+          //editable={true}
           idPatient={this.state.idPatient}
           typeActe={this.state.typeActe}
           acteTitre={

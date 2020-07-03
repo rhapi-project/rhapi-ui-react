@@ -8,6 +8,7 @@ import Note from "./Note";
 import ModalSelectActes from "./ModalSelectActes";
 import ValidationActes from "./ValidationActes";
 import SaisieValidation from "./SaisieValidation";
+import ModalActeTitre from "./ModalActeTitre";
 
 export default class Actes extends React.Component {
   static Saisie = Saisie;
@@ -19,6 +20,7 @@ export default class Actes extends React.Component {
   static ModalSelectActes = ModalSelectActes;
   static ValidationActes = ValidationActes;
   static SaisieValidation = SaisieValidation;
+  static ModalActeTitre = ModalActeTitre;
 
   render() {
     const { children } = this.props;
