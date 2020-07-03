@@ -1,6 +1,6 @@
 {
   "name": "rhapi-ui-react",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "description": "",
