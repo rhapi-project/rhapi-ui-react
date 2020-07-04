@@ -9,7 +9,7 @@ export default class DocumentsDocumentModeles extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <Documents.DocumentModeles client={client} />
+        <Documents.DocumentModeles client={client} idPatient={3}/>
       </React.Fragment>
     );
   }

@@ -41,7 +41,7 @@
             <b>Identification du chirurgien-dentiste traitant</b>
             <br />
             <br />
-            Nom et prénom : {{praticien.currentName}}
+            Nom et prénom : {{praticien.denomination}}
             <br />
             Identification du praticien : RPPS {{praticien.rpps}} &nbsp;&nbsp;&nbsp; N° Adeli {{praticien.adeli}}
             <br/>
@@ -49,15 +49,15 @@
             <br />
             Raison sociale et adresse : {{praticien.organisation}}
             <br />
-            {{praticien.account.adresse1}} &nbsp;
-            {{#praticien.account.adresse2}}
-              , {{praticien.account.adresse2}}
-            {{/praticien.account.adresse2}} &nbsp;
-            {{praticien.account.adresse3}} <br />
-            {{praticien.account.codePostal}} {{praticien.account.ville}}&nbsp;
-            {{#praticien.account.pays}}
-            , {{praticien.account.pays}}
-            {{/praticien.account.pays}}
+            {{praticien.adresse1}} &nbsp;
+            {{#praticien.adresse2}}
+              , {{praticien.adresse2}}
+            {{/praticien.adresse2}} &nbsp;
+            {{praticien.adresse3}} <br />
+            {{praticien.codePostal}} {{praticien.ville}}&nbsp;
+            {{#praticien.pays}}
+            , {{praticien.pays}}
+            {{/praticien.pays}}
           </td>
 
           <!-- Tableau contenant les infos liées au patient -->

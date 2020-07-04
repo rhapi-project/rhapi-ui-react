@@ -3,6 +3,41 @@ import moment from "moment";
 import Mustache from "mustache";
 import { tarif } from "./Helpers";
 
+const readPraticien = (client, onSuccess, onError) => {
+  client.MonCompte.read(
+    result => {
+      let praticien = {};
+      praticien.nom = _.get(result, "account.nom", "");
+      praticien.prenom = _.get(result, "account.prenom", "");
+      //praticien.specialite
+      //praticien.titres
+      praticien.denomination = _.get(result, "currentName", "");
+      praticien.adresse1 = _.get(result, "account.adresse1", "");
+      praticien.adresse2 = _.get(result, "account.adresse2", "");
+      praticien.adresse3 = _.get(result, "account.adresse3", "");
+      praticien.adresse = praticien.adresse1 +
+        (praticien.adresse2 ? " - " + praticien.adresse2 : "") +
+        (praticien.adresse3 ? " - " + praticien.adresse3 : "");
+      praticien.codePostal = _.get(result, "account.codePostal", "");
+      praticien.ville = _.get(result, "account.ville", "");
+      praticien.telephone = _.get(result, "account.telBureau", "");
+      praticien.telBureau = _.get(result, "account.telBureau", "");
+      praticien.telDomicile = _.get(result, "account.telDomicile", "");
+      praticien.telMobile = _.get(result, "account.telMobile", "");
+      praticien.email = _.get(result, "account.email", "");
+      praticien.organisation = _.get(result, "organisation", "");
+      //praticien.adeli
+      //praticien.rpps
+      //praticien.siret
+      //praticien.finess
+      onSuccess(praticien);
+    },
+    error => {
+      onError({});
+    }
+  );
+};
+
 const readPatient = (client, idPatient, onSuccess, onError) => {
   client.Patients.read(
     idPatient,
@@ -44,6 +79,7 @@ const readPatient = (client, idPatient, onSuccess, onError) => {
   );
 };
 
+// TODO : gérer les sous-totaux
 const readActes = (client, arrayIdActes, callback) => {
   let actes = [];
   let montantTotal = 0;
@@ -81,6 +117,7 @@ const readActes = (client, arrayIdActes, callback) => {
   readActe(arrayIdActes);
 };
 
+// TODO : gérér les sous-totaux
 const readSaisies = (client, arrayIdActes, callback) => {
   let result = {};
   if (_.isEmpty(arrayIdActes)) {
@@ -97,7 +134,7 @@ const readSaisies = (client, arrayIdActes, callback) => {
     devis => {
       result.saisiesDescription = devis.description;
       if (_.startsWith(devis.code, "#")) {
-        let maxItemsPerPage = 2;
+        let maxItemsPerPage = 8;
         let currentPageItems = 0;
         let obj = {};
         obj.saisies = [];
@@ -123,6 +160,9 @@ const readSaisies = (client, arrayIdActes, callback) => {
   );
 };
 
+// TODO : gérer le traitement des champs
+// "correspondant"
+// champs "idDocument"
 const remplissage = (client, modeleObj, idPatient, arrayIdActes, callback) => {
   let data = {};
   let lecturePraticien = false;
@@ -142,9 +182,17 @@ const remplissage = (client, modeleObj, idPatient, arrayIdActes, callback) => {
       let champ = champs.shift();
       if (_.startsWith(champ, "{{praticien") && !lecturePraticien) {
         lecturePraticien = true;
-        data.praticien = {};
-        // TODO : tester la lecture + remplissage des infos praticien
-        // sur un utilisateur authentifié
+        readPraticien(
+          client,
+          praticien => {
+            data.praticien = praticien;
+            traitementChamps(champs);
+          },
+          () => {
+            data.praticien = {};
+            traitementChamps(champs);
+          }
+        );
         traitementChamps(champs);
       } else if (_.startsWith(champ, "{{patient") && !lecturePatient) {
         lecturePatient = true;
