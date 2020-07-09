@@ -69,6 +69,61 @@ export default App;
 
 Cet exemple montre une utilisation simple du composant **CCAM.Search** pour la recherche d'un acte en CCAM.
 
+Ci-dessous un exemple de recherche d'actes en CCAM et affichage du résultat à l'aide du composant **CCAM.Table** :
+```jsx
+import React from "react";
+import { Client } from "rhapi-client";
+import { CCAM } from "rhapi-ui-react";
+import { Divider } from "semantic-ui-react";
+
+// Instanciation du client RHAPI sans authentification
+const client = new Client("https://demo.rhapi.net/demo01");
+
+class App extends React.Component {
+  state = {
+    actes: [],
+    informations: {}
+  };
+
+  onClearSearch = () => {
+    this.setState({ actes: [], informations: {} });
+  };
+
+  onLoadActes = obj => {
+    this.setState({ actes: obj.results, informations: obj.informations });
+  };
+
+  onPageSelect = result => {
+    this.setState({
+      actes: result.actes,
+      informations: result.informations
+    });
+  };
+
+  render() {
+    return (
+      <React.Fragment>
+        <CCAM.Search
+          client={client}
+          onClear={this.onClearSearch}
+          onLoadActes={this.onLoadActes}
+        />
+        <Divider hidden={true} />
+        <CCAM.Table
+          client={client}
+          actes={this.state.actes}
+          informations={this.state.informations}
+          onPageSelect={result => this.onPageSelect(result)}
+          showPagination={true}
+        />
+      </React.Fragment>
+    );
+  }
+}
+
+export default App;
+```
+
 Voir plus d'exemples d'utilisation [rhapi-ui-react/exemples](https://github.com/rhapi-project/rhapi-ui-react/tree/master/src/exemples).
 
 ## License
