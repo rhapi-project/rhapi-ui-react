@@ -49,16 +49,15 @@ const readPatient = (client, idPatient, onSuccess, onError) => {
       p.nomMinus = _.toLower(patient.nom);
       p.prenom = patient.prenom;
       p.prenomMinus = _.toLower(patient.prenom);
+      p.denomination = patient.nom + " " + patient.prenom;
       p.civilite = patient.civilite;
       p.adresse1 = patient.adresse1;
       p.adresse2 = patient.adresse2;
       p.adresse3 = patient.adresse3;
       p.adresse =
-        patient.adresse1 + !_.isEmpty(patient.adresse2)
-          ? " - " + patient.adresse2
-          : "" + !_.isEmpty(patient.adresse3)
-          ? " - " + patient.adresse3
-          : "";
+        patient.adresse1 +
+        (patient.adresse2 ? " - " + patient.adresse2 : "") +
+        (patient.adresse3 ? " - " + patient.adresse3 : "");
       p.codePostal = patient.codePostal;
       p.ville = patient.ville;
       p.ipp1 = patient.id;
@@ -71,7 +70,14 @@ const readPatient = (client, idPatient, onSuccess, onError) => {
       p.telDomicile = patient.telDomicile;
       p.telMobile = patient.telMobile;
       // TODO : rajouter les champs qui ne sont pas encore traités
-      // se référer sur l'aide des modèles
+      // se référer sur l'Aide des modèles
+      // p.solde
+      // p.dernierRdv
+      // p.dernierRdvEnLettres
+      // p.prochainRdv
+      // p.prochainRdvEnLettres
+      // p.dernierActe
+      // p.dernierActeEnLettres
       onSuccess(p);
     },
     () => {
@@ -80,7 +86,8 @@ const readPatient = (client, idPatient, onSuccess, onError) => {
   );
 };
 
-// TODO : gérer les sous-totaux
+// TODO : voir les champs qui ne sont pas encore
+// gérés en commentaire
 const readActes = (client, arrayIdActes, callback) => {
   let actes = [];
   let montantTotal = 0;
@@ -105,6 +112,9 @@ const readActes = (client, arrayIdActes, callback) => {
             a.description = acte.description;
             a.montant = tarif(acte.montant);
             montantTotal += acte.montant;
+            // a.tarif
+            // a.remboursement
+            // + les sous-totaux
             actes.push(a);
           }
           readActe(arrayIdActes);
@@ -181,6 +191,7 @@ const remplissage = (client, modeleObj, idPatient, arrayIdActes, callback) => {
       callback(filledDocument);
     } else {
       let champ = champs.shift();
+      // Gestion des champs praticien
       if (_.startsWith(champ, "{{praticien") && !lecturePraticien) {
         lecturePraticien = true;
         readPraticien(
@@ -195,7 +206,9 @@ const remplissage = (client, modeleObj, idPatient, arrayIdActes, callback) => {
           }
         );
         traitementChamps(champs);
-      } else if (_.startsWith(champ, "{{patient") && !lecturePatient) {
+      }
+      // Gestion des champs
+      else if (_.startsWith(champ, "{{patient") && !lecturePatient) {
         lecturePatient = true;
         readPatient(
           client,
@@ -209,14 +222,18 @@ const remplissage = (client, modeleObj, idPatient, arrayIdActes, callback) => {
             traitementChamps(champs);
           }
         );
-      } else if (_.startsWith(champ, "{{date") && !lectureDate) {
+      }
+      // Gestion des champs dates
+      else if (_.startsWith(champ, "{{date") && !lectureDate) {
         lectureDate = true;
         let dateObj = {};
         dateObj.jour = moment().format("L");
         dateObj.jourLettres = moment().format("dddd D MMMM YYYY");
         data.date = dateObj;
         traitementChamps(champs);
-      } else if (_.startsWith(champ, "{{#actes") && !lectureActes) {
+      }
+      // Gestion des champs actes
+      else if (_.startsWith(champ, "{{#actes") && !lectureActes) {
         // boucle sur les lignes d'actes de l'historique (arrayIdActes)
         lectureActes = true;
         readActes(client, arrayIdActes, result => {
@@ -224,7 +241,9 @@ const remplissage = (client, modeleObj, idPatient, arrayIdActes, callback) => {
           data.actesTotal = result.montantTotal;
           traitementChamps(champs);
         });
-      } else if (_.startsWith(champ, "{{#saisies") && !lectureSaisies) {
+      }
+      // Gestion des champs saisies
+      else if (_.startsWith(champ, "{{#saisies") && !lectureSaisies) {
         // lignes d'actes (devis)
         lectureSaisies = true;
         readSaisies(client, arrayIdActes, result => {
@@ -235,8 +254,9 @@ const remplissage = (client, modeleObj, idPatient, arrayIdActes, callback) => {
           data.saisiesTotalPages = _.get(result, "saisiesTotalPages", "");
           traitementChamps(champs);
         });
-      } else {
-        // pas de traitement particulier pour les autres champs
+      }
+      // pas de traitement particulier pour les autres champs
+      else {
         traitementChamps(champs);
       }
     }

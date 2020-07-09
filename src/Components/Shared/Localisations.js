@@ -84,10 +84,8 @@ export default class Localisations extends React.Component {
           icon={true}
           onClick={(e, d) => {
             if (_.isEmpty(this.state.selected)) {
-              //console.log("finish");
               this.finish(this.state.selected);
             } else {
-              //console.log("clean");
               if (this.props.modal) {
                 this.setState({ selected: [] });
               } else {
@@ -138,24 +136,6 @@ export default class Localisations extends React.Component {
     let grille = (
       <Grid>
         {/* 1ère ligne */}
-        {/*<Grid.Row stretched={true} centered={true} style={{ padding: padding }}>
-          <span
-            style={{
-              position: "absolute",
-              paddingRight: "60%"
-            }}
-          >
-            {clean}{check}
-          </span>
-          <Grid.Column>
-            <Localisation
-              content="01"
-              isSelected={this.isSelected("01")}
-              onClick={d => this.selection(d)}
-            />
-          </Grid.Column>
-        </Grid.Row>*/}
-
         {/* Quadrant */}
         <Grid.Row
           //divided={true}
