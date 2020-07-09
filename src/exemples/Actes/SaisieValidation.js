@@ -30,7 +30,19 @@ export default class ActesSaisieValidation extends React.Component {
     return (
       <React.Fragment>
         <p>
-          Saisie et validation d'un acte #FSE ou #DEVIS pour un patient donné.
+          Utilisation du composant <b>Actes.SaisieValidation</b> pour la saisie
+          et la validation d'un acte #FSE ou #DEVIS pour un patient donné.
+        </p>
+        <p>
+          Voir la documentation du composant{" "}
+          <a
+            href="https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md#saisievalidation"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <b>Actes.SaisieValidation</b>
+          </a>
+          .
         </p>
         <Divider hidden={true} />
         <Form>

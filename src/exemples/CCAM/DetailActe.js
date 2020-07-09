@@ -32,6 +32,17 @@ export default class CCAMDetailActe extends React.Component {
           Utilisation de <b>CCAM.Detail</b> pour l'aperçu du détail d'un acte
           tarifé.
         </p>
+        <p>
+          Voir la documentation du composant{" "}
+          <a
+            href="https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md#detail"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <b>CCAM.Detail</b>
+          </a>
+          .
+        </p>
         <Divider hidden={true} />
         <CCAM.Search client={client} onLoadActes={this.onLoadActes} />
         <Divider hidden={true} />

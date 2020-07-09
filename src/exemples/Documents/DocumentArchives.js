@@ -30,11 +30,21 @@ export default class DocumentsDocumentArchives extends React.Component {
     return (
       <React.Fragment>
         <p>
-          Composant <b>Documents.DocumentArchives</b> listant les documents du
-          patient
+          Utilisation du composant <b>Documents.DocumentArchives</b> pour
+          afficher la liste des documents du patient.
+        </p>
+        <p>
+          Voir la documentation du composant{" "}
+          <a
+            href="https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md#documentarchives"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <b>Documents.DocumentArchives</b>
+          </a>
+          .
         </p>
         <Divider hidden={true} />
-
         <Form>
           <Form.Group>
             <Form.Dropdown
@@ -47,7 +57,6 @@ export default class DocumentsDocumentArchives extends React.Component {
             />
           </Form.Group>
         </Form>
-
         <Documents.DocumentArchives
           client={client}
           idPatient={this.state.idPatient}

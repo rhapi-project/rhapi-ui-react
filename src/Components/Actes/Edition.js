@@ -86,7 +86,7 @@ const optionsTag = [
 ];
 
 export default class Edition extends React.Component {
-  /*state = {
+  state = {
     id: this.props.id,
     date: null,
     localisation: "",
@@ -99,7 +99,7 @@ export default class Edition extends React.Component {
     showConfirmation: false,
     openLocalisation: false,
     showReload: false
-  };*/
+  };
 
   componentDidMount() {
     this.props.client.Actes.read(
@@ -121,26 +121,6 @@ export default class Edition extends React.Component {
     );
   }
 
-  /*componentWillMount() {
-    this.props.client.Actes.read(
-      this.props.id,
-      {},
-      acte => {
-        this.setState({
-          date: moment(acte.doneAt).toDate(),
-          localisation: acte.localisation,
-          code: acte.code,
-          cotation: acte.cotation,
-          description: acte.description,
-          couleurTag: acte.couleur,
-          montant: acte.montant,
-          lockRevision: acte.lockRevision
-        });
-      },
-      error => {}
-    );
-  }*/
-
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.id !== this.state.id) {
       this.props.client.Actes.read(
@@ -161,37 +141,8 @@ export default class Edition extends React.Component {
         },
         error => {}
       );
-    } /*else {
-
-    }*/
-  }
-
-  /*componentWillReceiveProps(next) {
-    if (next.id !== this.state.id) {
-      this.props.client.Actes.read(
-        next.id,
-        {},
-        acte => {
-          this.setState({
-            id: next.id,
-            date: moment(acte.doneAt).toDate(),
-            localisation: acte.localisation,
-            code: acte.code,
-            cotation: acte.cotation,
-            description: acte.description,
-            couleurTag: acte.couleur,
-            montant: acte.montant,
-            lockRevision: acte.lockRevision
-          });
-        },
-        error => {}
-      );
-    } else {
-      this.setState({
-        id: next.id
-      });
     }
-  }*/
+  }
 
   onClose = () => {
     if (this.props.onCloseEdit) {
@@ -320,8 +271,10 @@ export default class Edition extends React.Component {
                 <Form.Input label="Date" width={9}>
                   <Ref
                     innerRef={node => {
-                      let input = node.firstChild.firstChild;
-                      input.style.width = "100%";
+                      if (!_.isNull(node)) {
+                        let input = node.firstChild.firstChild;
+                        input.style.width = "100%";
+                      }
                     }}
                   >
                     <DatePicker

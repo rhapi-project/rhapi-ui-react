@@ -19,7 +19,7 @@ import { tarif } from "../lib/Helpers";
 
 const propDefs = {
   description:
-    "Modal Semantic de lecture et de configuration des actes favoris",
+    "Modal semantic de lecture et de configuration des actes en favoris",
   example: "Favoris",
   propDocs: {
     codActivite: "Code de l'activité, par défaut '1'",

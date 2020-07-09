@@ -4,7 +4,7 @@ import _ from "lodash";
 import { Button, Input, Modal } from "semantic-ui-react";
 
 const propDefs = {
-  description: "Modal de changement de titre d'un devis",
+  description: "Modal de changement de titre d'un devis avant sa validation",
   example: "",
   propDocs: {
     open: "Ouverture de la modal",

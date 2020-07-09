@@ -113,7 +113,18 @@ export default class ActesNote extends React.Component {
       <React.Fragment>
         <p>
           Utilisation du composant <b>Actes.Note</b> pour ajouter de nouvelles
-          notes ou "Todo".
+          <b>notes</b> ou <b>todo</b> dans l'historique des actes d'un patient.
+        </p>
+        <p>
+          Voir la documentation du composant{" "}
+          <a
+            href="https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md#note"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <b>Actes.Note</b>
+          </a>
+          .
         </p>
         <Divider hidden={true} />
         <Button

@@ -84,8 +84,20 @@ export default class DocumentsListeDocument extends React.Component {
     return (
       <React.Fragment>
         <p>
-          Composant <b>Documents.ListeDocument</b> listant les documents du
-          patient.
+          Utilisation du composant <b>Documents.ListeDocument</b> pour afficher
+          la liste les documents d'un patient (ou la liste des modèles de
+          documents).
+        </p>
+        <p>
+          Voir la documentation du composant{" "}
+          <a
+            href="https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md#listedocument"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <b>Documents.ListeDocument</b>
+          </a>
+          .
         </p>
         <Divider hidden={true} />
 

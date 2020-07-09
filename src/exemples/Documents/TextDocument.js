@@ -142,7 +142,31 @@ export default class DocumentsTextDocument extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <p>Traitement de documents (exemple modèle Devis)</p>
+        <p>
+          Utilisation du composant <b>Documents.TextDocument</b> pour le
+          traitement de documents HTML ou PLAIN TEXT.
+        </p>
+        <p>
+          La liste des documents est affichée par le composant{" "}
+          <a
+            href="https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md#listedocument"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <b>Documents.ListeDocument</b>
+          </a>
+        </p>
+        <p>
+          Voir la documentation du composant{" "}
+          <a
+            href="https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md#textdocument"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <b>Documents.TextDocument</b>
+          </a>
+          .
+        </p>
         <Divider hidden={true} />
         <Form>
           <Form.Group>

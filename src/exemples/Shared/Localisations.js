@@ -19,6 +19,17 @@ export default class SharedLocalisations extends React.Component {
           Utilisation du composant <b>Shared.Localisations</b> pour la grille de
           saisie des localisations dentaires.
         </p>
+        <p>
+          Voir la documentation du composant{" "}
+          <a
+            href="https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md#localisations"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <b>Shared.Localisations</b>
+          </a>
+          .
+        </p>
         <Divider hidden={true} />
         Liste des dents sélectionnées : &nbsp;
         <Input

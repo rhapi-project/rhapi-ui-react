@@ -15,7 +15,8 @@ const readPraticien = (client, onSuccess, onError) => {
       praticien.adresse1 = _.get(result, "account.adresse1", "");
       praticien.adresse2 = _.get(result, "account.adresse2", "");
       praticien.adresse3 = _.get(result, "account.adresse3", "");
-      praticien.adresse = praticien.adresse1 +
+      praticien.adresse =
+        praticien.adresse1 +
         (praticien.adresse2 ? " - " + praticien.adresse2 : "") +
         (praticien.adresse3 ? " - " + praticien.adresse3 : "");
       praticien.codePostal = _.get(result, "account.codePostal", "");

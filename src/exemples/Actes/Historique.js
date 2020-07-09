@@ -83,8 +83,19 @@ export default class ActesHistorique extends React.Component {
     return (
       <React.Fragment>
         <p>
-          Utilisation du composant <b>Actes.Historique</b> pour l'historique des
-          actes d'un patient.
+          Utilisation du composant <b>Actes.Historique</b> pour afficher
+          l'historique des actes d'un patient.
+        </p>
+        <p>
+          Voir la documentation du composant{" "}
+          <a
+            href="https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md#historique"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <b>Actes.Historique</b>
+          </a>
+          .
         </p>
         <Divider hidden={true} />
         <Form>

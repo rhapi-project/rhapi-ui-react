@@ -62,10 +62,10 @@ const propDefs = {
     montant: "Montant de l'acte sélectionné",
     qualificatifs: "Qualificatifs",
     onValidation:
-      "Callback à la validation. Paramètres : \n" +
-      "- index de la ligne\n - code de l'acte sélectionné\n - description de l'acte\n" +
-      "- date au format ISO\n - localisation\n - cotation\n - modificateurs\n - qualificatifs\n" +
-      "- montant"
+      "Callback à la validation. Paramètres : " +
+      "index de la ligne; code de l'acte sélectionné; description de l'acte;" +
+      "date au format ISO; localisation; cotation; modificateurs; qualificatifs; " +
+      "montant"
   },
   propTypes: {
     client: PropTypes.any.isRequired,

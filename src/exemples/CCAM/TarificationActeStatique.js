@@ -27,6 +27,17 @@ export default class CCAMTarificationStatique extends React.Component {
           Utilisation de <b>CCAM.Tarification</b>, composant de tarification
           d'un acte CCAM.
         </p>
+        <p>
+          Voir la documentation du composant{" "}
+          <a
+            href="https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md#tarification"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <b>CCAM.Tarification</b>
+          </a>
+          .
+        </p>
         <Divider hidden={true} />
         <CCAM.Search client={client} onLoadActes={this.onLoadActes} />
         <Divider hidden={true} />

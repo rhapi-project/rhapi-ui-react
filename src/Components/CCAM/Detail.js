@@ -5,7 +5,7 @@ import { Header, Table } from "semantic-ui-react";
 import _ from "lodash";
 
 const propDefs = {
-  description: "Détail d'un acte tarifé",
+  description: "Aperçu du détail d'un acte tarifé",
   example: "Détail",
   propDocs: {
     detail:

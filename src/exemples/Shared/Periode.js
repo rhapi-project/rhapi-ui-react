@@ -19,12 +19,23 @@ export default class SharedPeriode extends React.Component {
     return (
       <React.Fragment>
         <p>
-          Ce composant peut être utilisé pour déterminer les périodes, une date
-          de début et une date de fin.
+          Utilisation du composant <b>Shared.Periode</b> pour déterminer une
+          période, une date de début et une date de fin.
         </p>
         <p>
           Le <b>react-datepicker</b> est utilisé ici à la manière de cet{" "}
           {datepickerlink}
+        </p>
+        <p>
+          Voir la documentation du composant{" "}
+          <a
+            href="https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md#periode"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <b>Shared.Periode</b>
+          </a>
+          .
         </p>
         <Divider hidden={true} />
         <Form>

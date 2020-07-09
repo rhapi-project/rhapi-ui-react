@@ -178,19 +178,6 @@ export default class SaisieDentaire extends React.Component {
                 : moment(this.props.date).format("L")}
             </Table.Cell>
           )}
-          {/* <Table.Cell
-            collapsing={true}
-            style={{ minWidth: "100px" }}
-            onClick={() => {
-              if (this.props.onClickDate) {
-                this.props.onClickDate(this.props.index);
-              }
-            }}
-          >
-            {_.isEmpty(this.props.acte)
-              ? ""
-              : moment(this.props.date).format("L")}
-          </Table.Cell> */}
           <Table.Cell
             collapsing={true}
             onClick={() => {

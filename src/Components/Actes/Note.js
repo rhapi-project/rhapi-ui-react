@@ -23,7 +23,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import { spacedLocalisation, toISOLocalisation } from "../lib/Helpers";
 
 const propDefs = {
-  description: "Nouvelle << Note >> ou << Todo >>",
+  description:
+    "Ajout d'une nouvelle << Note >> ou << Todo >> dans l'historique des actes d'un patient",
   example: "Modal",
   propDocs: {
     id: "id de l'acte sélectionné. Par défaut, id = 0",
@@ -109,17 +110,6 @@ export default class Note extends React.Component {
     couleurTag: "",
     description: ""
   };
-
-  /*componentWillMount() {
-    this.setState({
-      id: this.props.id,
-      idPatient: this.props.idPatient,
-      date: moment().toISOString(),
-      localisation: "",
-      couleurTag: "",
-      description: ""
-    });
-  }*/
 
   componentDidUpdate(prevProps, prevState) {
     if (this.props.open && this.props.open !== prevProps.open) {

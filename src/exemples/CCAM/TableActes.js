@@ -50,9 +50,8 @@ export default class CCAMSearchTable extends React.Component {
         <div>
           <p>
             Utilisation du composant <b>CCAM.Search</b> pour la recherche
-            d'actes CCAM. <br />
-            Le résultat de la recherche est affiché par le composant{" "}
-            <b>CCAM.Table</b>.
+            d'actes CCAM. Le résultat de la recherche est affiché par le
+            composant <b>CCAM.Table</b>.
           </p>
           <p>
             <b>CCAM.Table</b> est base sur le composant <b>Table</b> de&nbsp;
@@ -63,6 +62,17 @@ export default class CCAMSearchTable extends React.Component {
             >
               Semantic-ui-react
             </a>
+          </p>
+          <p>
+            Voir la documentation du composant{" "}
+            <a
+              href="https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md#table"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <b>CCAM.Table</b>
+            </a>
+            .
           </p>
         </div>
         <Divider hidden={true} />

@@ -38,7 +38,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { toISOLocalisation } from "../lib/Helpers";
 
 const propDefs = {
-  description: "Historique des actes d'un patient",
+  description: "Affichage de l'historique des actes d'un patient",
   example: "Tableau",
   propDocs: {
     idPatient: "Id du patient, par défaut 0 (Aucun patient)",

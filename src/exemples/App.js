@@ -5,7 +5,6 @@ import { Divider, Grid, Header, Icon, Menu } from "semantic-ui-react";
 
 // Exemples CCAM
 import CCAMDetailActe from "./CCAM/DetailActe";
-import CCAMFicheActe from "./CCAM/FicheActe";
 import CCAMSearchBasic from "./CCAM/RechercheActe";
 import CCAMSearchTable from "./CCAM/TableActes";
 import CCAMPaginationPages from "./CCAM/TableAvecPagination";
@@ -121,13 +120,6 @@ export default class App extends React.Component {
             name="DetailActe"
             active={
               this.state.group === "CCAM" && this.state.name === "DetailActe"
-            }
-            onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
-          />
-          <Menu.Item
-            name="FicheActe"
-            active={
-              this.state.group === "CCAM" && this.state.name === "FicheActe"
             }
             onClick={(e, d) => this.handleClickItem("CCAM", d.name)}
           />
@@ -364,8 +356,6 @@ class ViewExample extends React.Component {
         return <CCAMTarificationStatique />;
       } else if (name === "DetailActe") {
         return <CCAMDetailActe />;
-      } else if (name === "FicheActe") {
-        return <CCAMFicheActe />;
       } else {
         return "";
       }

@@ -17,7 +17,21 @@ export default class ActesFavoris extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <p>Lecture et configuration des actes stockés dans les favoris</p>
+        <p>
+          Utilisation du composant <b>Actes.Favoris</b> pour la lecture et la
+          configuration des actes stockés dans les favoris
+        </p>
+        <p>
+          Voir la documentation du composant{" "}
+          <a
+            href="https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md#favoris"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <b>Actes.Favoris</b>
+          </a>
+          .
+        </p>
         <Divider hidden={true} />
         <Button
           content="Ouvrir les favoris"

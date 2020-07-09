@@ -7,7 +7,8 @@ import Actions from "../Shared/Actions";
 import { codesDocs } from "../lib/Helpers";
 
 const propDefs = {
-  description: "Liste des documents d'un patient",
+  description:
+    "Tableau contenant la liste des documents d'un patient (ou modèles de documents)",
   example: "Tableau",
   propDocs: {
     documents: "liste de documents",

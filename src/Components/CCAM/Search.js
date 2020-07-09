@@ -6,7 +6,7 @@ import moment from "moment";
 
 const propDefs = {
   description:
-    "Composant pour la recherche des actes en CCAM (par code CCAM ou mot-clé). Retourne la liste des actes sous forme d'un tableau " +
+    "Composant pour la recherche des actes en CCAM (par code CCAM ou mot-clé). Le résultat de la recherche est une liste des actes sous forme d'un tableau " +
     "d'objets JSON. \nLa recherche n'est pas effectuée si la date ou la localisation sont NULL.",
   example: "SearchBasic",
   propDocs: {

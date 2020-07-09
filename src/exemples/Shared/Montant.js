@@ -20,11 +20,22 @@ export default class SharedMontant extends React.Component {
     return (
       <React.Fragment>
         <p>
-          <b>Shared.Montant</b> est un composant facilitant la saisie et
+          Utilisation du composant <b>Shared.Montant</b> pour la saisie et
           l'affichage d'un montant au format français.
         </p>
         <p>
-          Il se base sur le composant <b>Input</b> de {semanticInput}
+          Ce composant se base sur le composant <b>Input</b> de {semanticInput}.
+        </p>
+        <p>
+          Voir la documentation du composant{" "}
+          <a
+            href="https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md#montant"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <b>Shared.Montant</b>
+          </a>
+          .
         </p>
         <Divider hidden={true} />
         <Shared.Montant
@@ -33,7 +44,7 @@ export default class SharedMontant extends React.Component {
           onChange={montant => this.setState({ montant: montant })}
         />
         <Divider hidden={true} />
-        <p>Montant obtenu en sortie : {this.state.montant}</p>
+        <p>Affichage obtenu en sortie : {this.state.montant}</p>
       </React.Fragment>
     );
   }

@@ -8,7 +8,7 @@ import moment from "moment";
 import { tarif } from "../lib/Helpers";
 
 const propDefs = {
-  description: "Composant de facturation d'un acte CCAM",
+  description: "Tarification d'un acte CCAM",
   example: "Tarification",
   propDocs: {
     codActe: "Code de l'acte CCAM",

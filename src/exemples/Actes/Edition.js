@@ -134,8 +134,19 @@ export default class ActesEdition extends React.Component {
       return (
         <React.Fragment>
           <p>
-            Le composant <b>Actes.Edition</b> permet d'éditer un acte validé
-            pour un patient.
+            Utilisation du composant <b>Actes.Edition</b> pour éditer un acte
+            validé pour un patient.
+          </p>
+          <p>
+            Voir la documentation du composant{" "}
+            <a
+              href="https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md#edition"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <b>Actes.Edition</b>
+            </a>
+            .
           </p>
           <Divider hidden={true} />
           <Input
@@ -220,10 +231,20 @@ export default class ActesEdition extends React.Component {
       return (
         <React.Fragment>
           <p>
-            Le composant <b>Actes.Edition</b> permet d'éditer un acte validé
-            pour un patient.
+            Utilisation du composant <b>Actes.Edition</b> pour éditer un acte
+            validé pour un patient.
           </p>
-          <Divider hidden={true} />
+          <p>
+            Voir la documentation du composant{" "}
+            <a
+              href="https://github.com/rhapi-project/rhapi-ui-react/blob/master/docs/composants.md#edition"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <b>Actes.Edition</b>
+            </a>
+            .
+          </p>
           <Input
             focus={true}
             placeholder="Saisir l'id d'un acte"
