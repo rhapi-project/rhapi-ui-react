@@ -1,5 +1,7 @@
 # rhapi-ui-react
 
+>
+
 [![NPM](https://img.shields.io/npm/v/rhapi-ui-react?color=brightgreen&logo=npm)](https://www.npmjs.com/package/rhapi-ui-react)
 
 ## Organisation du projet
@@ -11,6 +13,7 @@ rhapi-ui-react
 |        # C'est ce répertoire qui est mis sur la registry NPM.
 ├── docs
 |   └── composants.md # Résultat de la documentation automatique des composants
+├── modelesHTML # Exemples de modèles de documents
 ├── public
 |   ├── ...
 |   └── index.html
@@ -85,18 +88,18 @@ Chaque groupe devra systématiquement comporter un fichier `index.js`.
 ### Babel
 
 [Babel](https://babeljs.io/docs/en/) est un outil qui permet de compiler un code Javascript `ECMAScript2015+` en code Javascript standard interprété par les navigateurs.
-Le code **JSX** des composants sera compilé en Javascript standard par **Babel**.
+Le code **JSX** des composants sera compilé en Javascript standard par **Babel** et le résultat de cette compilation sera dans le répertoire `dist`.
 
 `.babelrc` est le fichier (par défaut) de configuration de **Babel**.
 
-### win-node-env (dépendance optionnelle)
+### win-node-env (dépendance optionnelle dans package.json)
 
 Par défaut la variable d'environnement `NODE_ENV` n'est pas reconnue sur **Windows** (voir dans `package.json` le script *build*).
 Cette dépendence ne sera installée que si l'on se trouve sur un Système d'exploitation Windows pour pallier le problème.
 
-Plus sur cet outil : [win-node-env](https://github.com/laggingreflex/win-node-env).
+En savoir plus sur cet outil : [win-node-env](https://github.com/laggingreflex/win-node-env).
 
-## Publication sur NPM
+## Publication sur la registry NPM
 
 ```bash
 cd rhapi-ui-react-master
