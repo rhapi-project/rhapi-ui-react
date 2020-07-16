@@ -3,8 +3,6 @@ import { Client } from "rhapi-client";
 import { Actes } from "../../Components";
 import { Divider, Form, Radio } from "semantic-ui-react";
 
-//import _ from "lodash";
-
 // Instanciation du client RHAPI sans authentification
 const client = new Client("https://demo.rhapi.net/demo01");
 
@@ -78,7 +76,6 @@ export default class ActesSaisieValidation extends React.Component {
         {/* saisie et validation des actes */}
         <Actes.SaisieValidation
           client={client}
-          //editable={true}
           idPatient={this.state.idPatient}
           typeActe={this.state.typeActe}
           acteTitre={

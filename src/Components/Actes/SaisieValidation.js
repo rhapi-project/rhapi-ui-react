@@ -17,7 +17,6 @@ const propDefs = {
     idActe: "Identifiant de l'acte à lire. Par défaut cette valeur est à NULL.",
     acteCopy:
       "Si cette propriété est à TRUE, une copie de l'acte d'identifiant 'idActe' sera créée.",
-    //editable: "Ouverture de la saisie des actes en écriture",
     typeActe: "Type d'acte à saisir ou à valider : #FSE ou #DEVIS",
     acteTitre: "Titre de l'acte qui sera créé",
     codActivite: 'Code de l\'activité, par défaut "1"',
@@ -33,7 +32,6 @@ const propDefs = {
   },
   propTypes: {
     client: PropTypes.any.isRequired,
-    //editable: PropTypes.bool,
     idPatient: PropTypes.number,
     idActe: PropTypes.number,
     acteCopy: PropTypes.bool,
@@ -65,7 +63,6 @@ export default class SaisieValidation extends React.Component {
     executant: "",
     idActe: null,
     lignes: 5,
-    //editable: true,
     user: ""
   };
 
@@ -87,33 +84,14 @@ export default class SaisieValidation extends React.Component {
   componentDidUpdate(prevProps) {
     if (
       prevProps.idPatient !== this.props.idPatient ||
-      prevProps.typeActe !== this.props.typeActe // ||
-      //prevProps.idActe !== this.props.idActe ||
-      //prevProps.acteCopy !== this.props.acteCopy
+      prevProps.typeActe !== this.props.typeActe
     ) {
       if (
         !_.isNull(this.props.idActe) &&
-        prevProps.idActe !== this.props.idActe &&
+        //prevProps.idActe !== this.props.idActe &&
         !this.props.acteCopy
       ) {
-        this.readActe(
-          this.props.idActe,
-          result => {
-            this.setState({
-              fse: result,
-              editable: result.code !== "#FSE",
-              messageTitle:
-                result.code === "#FSE"
-                  ? "Duplicata d'une feuille de soins"
-                  : "Modification d'une série d'actes",
-              messageColor: result.code === "#DEVIS" ? "warning" : "",
-              acteTitre: result.description
-            });
-          },
-          error => {
-            this.setState({ fse: {} });
-          }
-        );
+        this.relectureActe(this.props.idActe);
       } else if (!_.isNull(this.props.idActe) && this.props.acteCopy) {
         this.copyActe(this.props.idActe);
       } else {
@@ -179,6 +157,27 @@ export default class SaisieValidation extends React.Component {
     );
   };
 
+  relectureActe = idActe => {
+    this.readActe(
+      idActe,
+      result => {
+        this.setState({
+          fse: result,
+          editable: result.code !== "#FSE",
+          messageTitle:
+            result.code === "#FSE"
+              ? "Duplicata d'une feuille de soins"
+              : "Modification d'une série d'actes",
+          messageColor: result.code === "#DEVIS" ? "warning" : "",
+          acteTitre: result.description
+        });
+      },
+      error => {
+        this.setState({ fse: {} });
+      }
+    );
+  };
+
   createFSE = (typeActe, acteToAdd) => {
     this.props.client.Actes.create(
       {
@@ -239,8 +238,14 @@ export default class SaisieValidation extends React.Component {
       idActe,
       result => {
         this.props.client.Actes.create(
-          this.props.idPatient,
-          result.code,
+          {
+            code: result.code,
+            etat: 1,
+            idPatient: result.idPatient,
+            description: _.isEmpty(this.props.acteTitre)
+              ? "Nouvel acte du patient d'id " + this.props.idPatient
+              : this.props.acteTitre
+          },
           res => {
             let params = { ...result };
             _.set(params, "etat", 1);

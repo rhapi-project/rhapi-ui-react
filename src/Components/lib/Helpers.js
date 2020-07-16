@@ -1,4 +1,5 @@
 import _ from "lodash";
+import moment from "moment";
 
 // Affichage du tarif au bon format
 // ex : 1250.3 => 1 250,30
@@ -367,6 +368,10 @@ const setModeleDocument = (
   );
 };
 
+const dateEnLettres = dateStr => {
+  return moment(dateStr).format("dddd D MMMM YYYY à HH:mm");
+};
+
 export {
   spacedLocalisation,
   tarif,
@@ -383,5 +388,6 @@ export {
   downloadTextFile,
   uploadFile,
   modeleDocument,
-  setModeleDocument
+  setModeleDocument,
+  dateEnLettres
 };
