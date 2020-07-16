@@ -262,7 +262,7 @@ export default class SaisieValidation extends React.Component {
                     r.code === "#FSE"
                       ? "Nouvelle feuille de soins"
                       : "Nouvelle série d'actes",
-                  messageContent: r.code === "#DEVIS" ? "warning" : ""
+                  messageContent: ""
                 });
               },
               e => {
