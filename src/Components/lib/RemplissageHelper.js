@@ -1,7 +1,7 @@
 import _ from "lodash";
 import moment from "moment";
 import Mustache from "mustache";
-import { tarif } from "./Helpers";
+import { dateEnLettres, tarif } from "./Helpers";
 
 const readPraticien = (client, onSuccess, onError) => {
   client.MonCompte.read(
@@ -128,6 +128,59 @@ const readActes = (client, arrayIdActes, callback) => {
   readActe(arrayIdActes);
 };
 
+const readRdv = (client, idPatient, callback) => {
+  let rdv = {};
+  client.RendezVous.readAll(
+    {
+      limit: 1000, // tous les rendez-vous
+      q1: "idPatient,Equal," + idPatient
+    },
+    result => {
+      let precRdv = [];
+      let precedentsRdvEnLettres = [];
+      let prochRdv = [];
+      let prochainsRdvEnLettres = [];
+      rdv.precedentRdv = result.results[0].startAt;
+      // tri des rendez-vous sur le champ startAt
+      let sortedRdv = _.orderBy(
+        result.results,
+        r => {
+          return moment(r.startAt);
+        },
+        ["asc"]
+      );
+
+      _.forEach(sortedRdv, r => {
+        if (moment(r.startAt).isBefore(moment())) {
+          precRdv.push(moment(r.startAt).format("DD/MM/YYYY à HH:mm"));
+          precedentsRdvEnLettres.push(dateEnLettres(r.startAt));
+        }
+        if (moment(r.startAt).isSameOrAfter(moment())) {
+          prochRdv.push(moment(r.startAt).format("DD/MM/YYYY à HH:mm"));
+          prochainsRdvEnLettres.push(dateEnLettres(r.startAt));
+        }
+      });
+      rdv.precedentRdv = _.isEmpty(precRdv) ? "" : precRdv[precRdv.length - 1];
+      rdv.precedentRdvEnLettres = _.isEmpty(precedentsRdvEnLettres)
+        ? ""
+        : precedentsRdvEnLettres[precedentsRdvEnLettres.length - 1];
+      rdv.prochainRdv = _.isEmpty(prochRdv) ? "" : prochRdv[0];
+      rdv.prochainRdvEnLettres = _.isEmpty(prochainsRdvEnLettres)
+        ? ""
+        : prochainsRdvEnLettres[prochainsRdvEnLettres.length - 1];
+      rdv.precedentsRdv = precRdv;
+      rdv.prochainsRdv = prochRdv;
+      rdv.precedentsRdvEnLettres = precedentsRdvEnLettres;
+      rdv.prochainsRdvEnLettres = prochainsRdvEnLettres;
+      callback(rdv);
+    },
+    error => {
+      console.log(error);
+      callback(rdv);
+    }
+  );
+};
+
 // TODO : gérér les sous-totaux
 const readSaisies = (client, arrayIdActes, callback) => {
   let result = {};
@@ -181,6 +234,7 @@ const remplissage = (client, modeleObj, idPatient, arrayIdActes, callback) => {
   let lectureDate = false;
   let lectureActes = false;
   let lectureSaisies = false;
+  let lectureRdv = false;
 
   let regex = /{{(#)?[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*}}/g;
   let champs = modeleObj.document.match(regex);
@@ -252,6 +306,14 @@ const remplissage = (client, modeleObj, idPatient, arrayIdActes, callback) => {
           data.saisiesDescription = _.get(result, "saisiesDescription", "");
           data.saisiesExpiration = _.get(result, "saisiesExpiration", "");
           data.saisiesTotalPages = _.get(result, "saisiesTotalPages", "");
+          traitementChamps(champs);
+        });
+      }
+      // Gestion des champs des rendez-vous
+      else if (_.startsWith(champ, "{{patientRdv") && !lectureRdv) {
+        lectureRdv = true;
+        readRdv(client, idPatient, result => {
+          data.patientRdv = result;
           traitementChamps(champs);
         });
       }
