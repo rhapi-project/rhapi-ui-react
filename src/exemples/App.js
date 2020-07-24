@@ -31,6 +31,10 @@ import DocumentsListeDocument from "./Documents/ListeDocument";
 import DocumentsDocumentModeles from "./Documents/DocumentModeles";
 import DocumentsDocumentArchives from "./Documents/DocumentArchives";
 
+// Exemples Images
+import ImagesImportation from "./Images/Importation";
+import ImagesGallerie from "./Images/Gallerie";
+
 // CSS
 //import "rhapi-ui-react/dist/index.css";
 
@@ -250,6 +254,28 @@ export default class App extends React.Component {
       </Menu.Item>
     );
 
+    let images = (
+      <Menu.Item>
+        <Menu.Header>Images</Menu.Header>
+        <Menu.Menu>
+          <Menu.Item
+            name="Importation"
+            active={
+              this.state.group === "Images" && this.state.name === "Importation"
+            }
+            onClick={(e, d) => this.handleClickItem("Images", d.name)}
+          />
+          <Menu.Item
+            name="Gallerie"
+            active={
+              this.state.group === "Images" && this.state.name === "Gallerie"
+            }
+            onClick={(e, d) => this.handleClickItem("Images", d.name)}
+          />
+        </Menu.Menu>
+      </Menu.Item>
+    );
+
     let shared = (
       <Menu.Item>
         <Menu.Header>Shared</Menu.Header>
@@ -301,6 +327,7 @@ export default class App extends React.Component {
             {plannings}
             {actes}
             {documents}
+            {images}
             {shared}
           </Menu>
         </Grid.Column>
@@ -398,6 +425,14 @@ class ViewExample extends React.Component {
         return <DocumentsDocumentModeles />;
       } else if (name === "DocumentArchives") {
         return <DocumentsDocumentArchives />;
+      }
+    }
+
+    if (group === "Images") {
+      if (name === "Importation") {
+        return <ImagesImportation />;
+      } else if (name === "Gallerie") {
+        return <ImagesGallerie />
       }
     }
   };

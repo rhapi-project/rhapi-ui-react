@@ -10,6 +10,23 @@ Aperçu du détail d'un acte tarifé
 | ---- | ----- | ------ |
 | detail | object | Objet contenant le détail d'un acte. Toutes les informations sur un acte tarifé, la date, l'activité, la grille de tarification, les modificateurs appliqués, la phase et le tarif. |
 
+## Search
+Composant pour la recherche des actes en CCAM (par code CCAM ou mot-clé). Le résultat de la recherche est une liste des actes sous forme d'un tableau d'objets JSON. 
+La recherche n'est pas effectuée si la date ou la localisation sont NULL.
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
+| executant | string | Limiter la recherche aux seuls actes d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes) |
+| limit | number | Valeur de pagination |
+| localisation | string | Limiter la recherche aux actes concernant les dents renseignées selon la norme internationale ISO-3950, sans séparateur entre les numéros des dents (par exemple localisation=1121 pour les deux incisives centrales maxillaires ou localisation=18 pour la dent de sagesse maxillaire droite) |
+| onClear | func | Callback d'une ràz |
+| onLoadActes | func | Callback résultat de la recherche |
+| onSelectionChange | func | Callback pour retourner l'acte sélectionné |
+| search | object | Documentation semantic-ui-react [Search](https://react.semantic-ui.com/modules/search) |
+| searchInputLength | number | Nombre minimum de caractères pour déclencher la recherche d'actes |
+
 ## Table
 Composant montrant sous forme d'un tableau les actes obtenus après une recherche par mot clé.
 #### Props du composant
@@ -39,23 +56,6 @@ Composant montrant sous forme d'un tableau les actes obtenus après une recherch
 | btnPrev | object | Props semantic du bouton pour aller à la page précédente, par défaut un objet vide "{}" |
 | btnMore | object | Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}" |
 | mode | string | mode de pagination 'pages' ou 'more', par défaut "pages" |
-
-## Search
-Composant pour la recherche des actes en CCAM (par code CCAM ou mot-clé). Le résultat de la recherche est une liste des actes sous forme d'un tableau d'objets JSON. 
-La recherche n'est pas effectuée si la date ou la localisation sont NULL.
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| date | string | Date effective de l'acte au format ISO. Par défaut date du jour |
-| executant | string | Limiter la recherche aux seuls actes d'une profession de santé. Exemple : D1(dentistes), SF(sages-femmes) |
-| limit | number | Valeur de pagination |
-| localisation | string | Limiter la recherche aux actes concernant les dents renseignées selon la norme internationale ISO-3950, sans séparateur entre les numéros des dents (par exemple localisation=1121 pour les deux incisives centrales maxillaires ou localisation=18 pour la dent de sagesse maxillaire droite) |
-| onClear | func | Callback d'une ràz |
-| onLoadActes | func | Callback résultat de la recherche |
-| onSelectionChange | func | Callback pour retourner l'acte sélectionné |
-| search | object | Documentation semantic-ui-react [Search](https://react.semantic-ui.com/modules/search) |
-| searchInputLength | number | Nombre minimum de caractères pour déclencher la recherche d'actes |
 
 ## Tarification
 Tarification d'un acte CCAM
@@ -182,17 +182,6 @@ Ce composant est une modal Semantic de recherche d'un acte. Il intègre un date 
 | montant | number | Montant de l'acte sélectionné |
 | onValidation | func | Callback à la validation. Paramètres : index de la ligne; code de l'acte sélectionné; description de l'acte;date au format ISO; localisation; cotation; modificateurs; qualificatifs; montant |
 
-## ModalSelectActes
-Modal de sélection des actes. Ces actes seront utilisés par exemple pour générer un document.
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| idPatient | number | identifiant du patient |
-| open | bool | ouverture de la modal |
-| onClose | func | callback à la fermeture de la modal |
-| onDocumentGeneration | func | callback de la fin de sélection |
-
 ## Note
 Ajout d'une nouvelle << Note >> ou << Todo >> dans l'historique des actes d'un patient
 #### Props du composant
@@ -206,6 +195,17 @@ Ajout d'une nouvelle << Note >> ou << Todo >> dans l'historique des actes d'un p
 | onCreate | func | Callback à la création de la nouvelle 'note' ou 'todo'. L'acte créé est passé en paramètre |
 | onUpdate | func | Callback à la mise à jour d'une 'note' ou 'todo'. L'acte modifié est passé en paramètre |
 | onClose | func | Callback à la fermeture de la modal. |
+
+## ModalSelectActes
+Modal de sélection des actes. Ces actes seront utilisés par exemple pour générer un document.
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| idPatient | number | identifiant du patient |
+| open | bool | ouverture de la modal |
+| onClose | func | callback à la fermeture de la modal |
+| onDocumentGeneration | func | callback de la fin de sélection |
 
 ## Saisie
 Tableau de saisie des actes pour les dentistes
@@ -291,15 +291,6 @@ Modal de confirmation de la validation d'un acte
 | open | bool | ouverture de la modal |
 | onClose | func | callback à la fermeture de la modal |
 | onDocumentGeneration | func | callback à la confirmation de la génération d'un document |
-
-## Actions
-Menu d'actions à effectuer
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| actions | array | Tableau contenant une liste d'actions |
-| dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
-| id | any | Identifiant de la ligne sur laquelle une action est effectuée |
 
 ## DateRange
 Période, début et fin d'une période
@@ -426,6 +417,15 @@ Modal de changement de nom de fichier pour un document
 | open | bool | ouverture de la modal |
 | onClose | func | callback à la fermeture de la modal |
 | onRename | func | callback au changement du nom du document |
+
+## Actions
+Menu d'actions à effectuer
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| actions | array | Tableau contenant une liste d'actions |
+| dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
+| id | any | Identifiant de la ligne sur laquelle une action est effectuée |
 
 ## TextDocument
 Visualiseur d'un document sous format texte
