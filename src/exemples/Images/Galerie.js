@@ -15,7 +15,7 @@ const patients = [
   { text: "8", value: 8 }
 ];
 
-export default class ImagesGallerie extends React.Component {
+export default class ImagesGalerie extends React.Component {
   state = {
     idPatient: null
   };
@@ -36,7 +36,7 @@ export default class ImagesGallerie extends React.Component {
             />
           </Form.Group>
         </Form>
-        <Images.Gallerie client={client} idPatient={this.state.idPatient} />
+        <Images.Galerie client={client} idPatient={this.state.idPatient} />
       </React.Fragment>
     );
   }

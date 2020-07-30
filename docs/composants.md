@@ -102,16 +102,6 @@ Modal semantic de lecture et de configuration des actes en favoris
 | onClose | func | Callback à la fermeture de la modal |
 | onSelection | func | Callback à la selection et validation d'un acte. Cette fonction prend en 1er paramètre l'indice de la ligne et en 2ème paramètre l'objet acte sélectionné. |
 
-## ModalActeTitre
-Modal de changement de titre d'un devis avant sa validation
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| open | bool | Ouverture de la modal |
-| titre | string | Titre de l'acte |
-| onClose | func | Callback à la fermeture de la modal |
-| onChangeTitre | func | Callback au changement du titre. Ce callback prend en paramètre le nouveau titre. |
-
 ## Historique
 Affichage de l'historique des actes d'un patient
 #### Props du composant
@@ -154,6 +144,16 @@ Affichage de l'historique des actes d'un patient
 | btnMore | object | Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}" |
 | mode | string | Mode de pagination "pages" ou "more", par défaut "pages" |
 
+## ModalActeTitre
+Modal de changement de titre d'un devis avant sa validation
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| open | bool | Ouverture de la modal |
+| titre | string | Titre de l'acte |
+| onClose | func | Callback à la fermeture de la modal |
+| onChangeTitre | func | Callback au changement du titre. Ce callback prend en paramètre le nouveau titre. |
+
 ## ModalSearch
 Ce composant est une modal Semantic de recherche d'un acte. Il intègre un date picker, les composants CCAM.Search, CCAM.Table et Shared.Localisations
 #### Props du composant
@@ -182,6 +182,17 @@ Ce composant est une modal Semantic de recherche d'un acte. Il intègre un date 
 | montant | number | Montant de l'acte sélectionné |
 | onValidation | func | Callback à la validation. Paramètres : index de la ligne; code de l'acte sélectionné; description de l'acte;date au format ISO; localisation; cotation; modificateurs; qualificatifs; montant |
 
+## ModalSelectActes
+Modal de sélection des actes. Ces actes seront utilisés par exemple pour générer un document.
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| idPatient | number | identifiant du patient |
+| open | bool | ouverture de la modal |
+| onClose | func | callback à la fermeture de la modal |
+| onDocumentGeneration | func | callback de la fin de sélection |
+
 ## Note
 Ajout d'une nouvelle << Note >> ou << Todo >> dans l'historique des actes d'un patient
 #### Props du composant
@@ -195,17 +206,6 @@ Ajout d'une nouvelle << Note >> ou << Todo >> dans l'historique des actes d'un p
 | onCreate | func | Callback à la création de la nouvelle 'note' ou 'todo'. L'acte créé est passé en paramètre |
 | onUpdate | func | Callback à la mise à jour d'une 'note' ou 'todo'. L'acte modifié est passé en paramètre |
 | onClose | func | Callback à la fermeture de la modal. |
-
-## ModalSelectActes
-Modal de sélection des actes. Ces actes seront utilisés par exemple pour générer un document.
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| idPatient | number | identifiant du patient |
-| open | bool | ouverture de la modal |
-| onClose | func | callback à la fermeture de la modal |
-| onDocumentGeneration | func | callback de la fin de sélection |
 
 ## Saisie
 Tableau de saisie des actes pour les dentistes
@@ -291,6 +291,15 @@ Modal de confirmation de la validation d'un acte
 | open | bool | ouverture de la modal |
 | onClose | func | callback à la fermeture de la modal |
 | onDocumentGeneration | func | callback à la confirmation de la génération d'un document |
+
+## Actions
+Menu d'actions à effectuer
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| actions | array | Tableau contenant une liste d'actions |
+| dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
+| id | any | Identifiant de la ligne sur laquelle une action est effectuée |
 
 ## DateRange
 Période, début et fin d'une période
@@ -417,15 +426,6 @@ Modal de changement de nom de fichier pour un document
 | open | bool | ouverture de la modal |
 | onClose | func | callback à la fermeture de la modal |
 | onRename | func | callback au changement du nom du document |
-
-## Actions
-Menu d'actions à effectuer
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| actions | array | Tableau contenant une liste d'actions |
-| dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
-| id | any | Identifiant de la ligne sur laquelle une action est effectuée |
 
 ## TextDocument
 Visualiseur d'un document sous format texte

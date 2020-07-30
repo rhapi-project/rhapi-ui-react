@@ -13,6 +13,8 @@ import {
 } from "semantic-ui-react";
 
 import Importation from "./Importation";
+import ImageLecteur from "./ImageLecteur";
+//import Periode from "../Shared/Periode";
 
 const propDefs = {
   description: "Liste d'images appartenant à un patient (sous forme de grille)",
@@ -26,7 +28,7 @@ const propDefs = {
   }
 };
 
-export default class Gallerie extends React.Component {
+export default class Galerie extends React.Component {
   static propTypes = propDefs.propTypes;
 
   state = {
@@ -34,23 +36,28 @@ export default class Gallerie extends React.Component {
     loadingDelete: false,
     modalImportation: false,
     images: [],
+    hasNextPage: false,
     selectedImages: [],
     allImagesSelected: false,
-    itemsPerRow: 6,
-    modalDeleteImage: false
+    itemsPerRow: parseInt(_.get(localStorage, "galerieItemsPerRow", 6)),
+    modalDeleteImage: false,
+    idImageToOpen: null
   };
 
+  defaultLimit = 20;
+  defaultOffset = 0;
+
   componentDidMount() {
-    this.reload();
+    this.reload(this.defaultLimit, this.defaultOffset);
   }
 
   componentDidUpdate(prevProps) {
     if (prevProps.idPatient !== this.props.idPatient) {
-      this.reload();
+      this.reload(this.defaultLimit, this.defaultOffset);
     }
   }
 
-  reload = () => {
+  reload = (limit, offset) => {
     if (!_.isNumber(this.props.idPatient)) {
       return;
     }
@@ -58,18 +65,24 @@ export default class Gallerie extends React.Component {
     this.props.client.Images.readAll(
       {
         q1: "idPatient,Equal," + this.props.idPatient,
-        limit: 1000 // toutes les images
+        limit: limit,
+        offset: offset
       },
       result => {
         //console.log(result);
         this.setState({
           loading: false,
           loadingDelete: false,
-          images: result.results,
+          images:
+            offset === 0
+              ? result.results
+              : this.state.images.concat(result.results),
+          hasNextPage: !_.isUndefined(result.informations.queries.next),
           selectedImages: [],
           modalImportation: false,
           modalDeleteImage: false,
-          allImagesSelected: false
+          allImagesSelected: false,
+          idImageToOpen: null
         });
       },
       error => {
@@ -80,7 +93,9 @@ export default class Gallerie extends React.Component {
           modalImportation: false,
           modalDeleteImage: false,
           selectedImages: [],
-          allImagesSelected: false
+          allImagesSelected: false,
+          hasNextPage: false,
+          idImageToOpen: null
         });
       }
     );
@@ -91,7 +106,7 @@ export default class Gallerie extends React.Component {
     let selectedImages = this.state.selectedImages;
     let deleteImage = () => {
       if (_.isEmpty(selectedImages)) {
-        this.reload();
+        this.reload(this.defaultLimit, this.defaultOffset);
       } else {
         this.props.client.Images.destroy(
           selectedImages.shift(),
@@ -109,6 +124,17 @@ export default class Gallerie extends React.Component {
   };
 
   render() {
+    if (_.isNumber(this.state.idImageToOpen)) {
+      return (
+        <ImageLecteur
+          client={this.props.client}
+          idImage={this.state.idImageToOpen}
+          onClose={() => {
+            this.setState({ idImageToOpen: null });
+          }}
+        />
+      );
+    }
     return (
       <React.Fragment>
         <Segment color="grey">
@@ -141,6 +167,19 @@ export default class Gallerie extends React.Component {
               size="mini"
             />
 
+            {/*<Periode
+              labelDate="&nbsp;"
+              labelYear="&nbsp;"
+              startYear={2015}
+              onPeriodeChange={(startAt, endAt) => {
+                if (startAt && endAt) {
+                  console.log("changer période");
+                } else {
+                  console.log("période indeterminée")
+                }
+              }}
+            />*/}
+
             <div style={{ float: "right" }}>
               <Button
                 basic={true}
@@ -150,7 +189,15 @@ export default class Gallerie extends React.Component {
                 }
                 icon="zoom-out"
                 onClick={() => {
-                  this.setState({ itemsPerRow: this.state.itemsPerRow + 1 });
+                  localStorage.setItem(
+                    "galerieItemsPerRow",
+                    this.state.itemsPerRow + 1
+                  );
+                  this.setState({
+                    itemsPerRow: parseInt(
+                      localStorage.getItem("galerieItemsPerRow")
+                    )
+                  });
                 }}
               />
               <Button
@@ -161,7 +208,15 @@ export default class Gallerie extends React.Component {
                 }
                 icon="zoom-in"
                 onClick={() => {
-                  this.setState({ itemsPerRow: this.state.itemsPerRow - 1 });
+                  localStorage.setItem(
+                    "galerieItemsPerRow",
+                    this.state.itemsPerRow - 1
+                  );
+                  this.setState({
+                    itemsPerRow: parseInt(
+                      localStorage.getItem("galerieItemsPerRow")
+                    )
+                  });
                 }}
               />
               <Popup
@@ -197,17 +252,19 @@ export default class Gallerie extends React.Component {
           </div>
         </Segment>
 
-        {/* loader de chargement */}
-        {this.state.loading ? (
-          <Loader style={{ marginTop: "25px" }} active={true} inline="centered">
-            Chargement des images...
-          </Loader>
-        ) : null}
-
         <Divider hidden={true} />
 
         <div
+          id="galerieScrollable"
           style={{ height: "700px", overflowY: "auto", overflowX: "hidden" }}
+          onScroll={() => {
+            let el = document.getElementById("galerieScrollable");
+            if (el.offsetHeight + el.scrollTop === el.scrollHeight) {
+              if (this.state.hasNextPage) {
+                this.reload(this.defaultLimit, this.state.images.length);
+              }
+            }
+          }}
         >
           <Card.Group itemsPerRow={this.state.itemsPerRow}>
             {_.map(this.state.images, (image, index) => (
@@ -235,9 +292,23 @@ export default class Gallerie extends React.Component {
                     });
                   }
                 }}
+                onOpenImage={idImage => {
+                  this.setState({ idImageToOpen: idImage });
+                }}
               />
             ))}
           </Card.Group>
+
+          {/* loader de chargement */}
+          {this.state.loading ? (
+            <Loader
+              style={{ marginTop: "25px" }}
+              active={true}
+              inline="centered"
+            >
+              Chargement des images...
+            </Loader>
+          ) : null}
         </div>
 
         {/* modal d'importation d'une image */}
@@ -248,7 +319,7 @@ export default class Gallerie extends React.Component {
               client={this.props.client}
               idPatient={this.props.idPatient}
               onImportation={() => {
-                this.reload();
+                this.reload(this.defaultLimit, this.defaultOffset);
               }}
             />
           </Modal.Content>
@@ -287,13 +358,34 @@ export default class Gallerie extends React.Component {
 }
 
 class ImageCard extends React.Component {
+  timeout = null; // gestion du double clic
+
+  onImageClick = e => {
+    e.preventDefault();
+    e.persist();
+    if (this.timeout === null) {
+      this.timeout = setTimeout(() => {
+        this.timeout = null;
+        this.props.onSelectionChange(this.props.image.id);
+      }, 300);
+    }
+  };
+
+  onImageDoubleClick = e => {
+    e.preventDefault();
+    clearTimeout(this.timeout);
+    this.timeout = null;
+    this.props.onOpenImage(this.props.image.id);
+  };
+
   render() {
     return (
       <React.Fragment>
         <Dimmer.Dimmable
           as={Card}
           dimmed={this.props.selected}
-          onClick={() => this.props.onSelectionChange(this.props.image.id)}
+          onClick={this.onImageClick}
+          onDoubleClick={this.onImageDoubleClick}
         >
           <div>
             <img

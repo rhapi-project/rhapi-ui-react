@@ -33,7 +33,7 @@ import DocumentsDocumentArchives from "./Documents/DocumentArchives";
 
 // Exemples Images
 import ImagesImportation from "./Images/Importation";
-import ImagesGallerie from "./Images/Gallerie";
+import ImagesGalerie from "./Images/Galerie";
 
 // CSS
 //import "rhapi-ui-react/dist/index.css";
@@ -266,9 +266,9 @@ export default class App extends React.Component {
             onClick={(e, d) => this.handleClickItem("Images", d.name)}
           />
           <Menu.Item
-            name="Gallerie"
+            name="Galerie"
             active={
-              this.state.group === "Images" && this.state.name === "Gallerie"
+              this.state.group === "Images" && this.state.name === "Galerie"
             }
             onClick={(e, d) => this.handleClickItem("Images", d.name)}
           />
@@ -431,8 +431,8 @@ class ViewExample extends React.Component {
     if (group === "Images") {
       if (name === "Importation") {
         return <ImagesImportation />;
-      } else if (name === "Gallerie") {
-        return <ImagesGallerie />
+      } else if (name === "Galerie") {
+        return <ImagesGalerie />
       }
     }
   };
