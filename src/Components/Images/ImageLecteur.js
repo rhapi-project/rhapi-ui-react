@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, Dimmer, Loader, Segment } from "semantic-ui-react";
+import { Button, Dimmer, Loader, Popup, Segment } from "semantic-ui-react";
 import _ from "lodash";
 
 const propDefs = {
@@ -27,14 +27,19 @@ export default class ImageLecteur extends React.Component {
   state = {
     image: {},
     loading: false,
+    loadingZoomIn: false,
+    loadingZoomOut: false,
+    loadingRotationLeft: false,
+    loadingRotationRight: false,
     params: {}
   };
 
   zoomFacteurDefaut = 1.5;
+  rotationDegreDefaut = 90;
 
   componentDidMount() {
     let params = {};
-    params.echelle = _.max([this.props.height, this.props.width]) + "l";
+    params.echelle = this.calculEchelle(this.props.height, this.props.width);
     this.setState({ loading: true, params: params });
     this.readImage(
       params, // uniquement mise à l'echelle
@@ -47,6 +52,14 @@ export default class ImageLecteur extends React.Component {
       }
     );
   }
+
+  calculEchelle = (height, width) => {
+    if (height >= width) {
+      return window.innerHeight + "l";
+    } else {
+      return window.innerWidth + "l";
+    }
+  };
 
   readImage = (params, onSuccess, onError) => {
     this.props.client.Images.read(
@@ -62,8 +75,15 @@ export default class ImageLecteur extends React.Component {
   };
 
   handleZoom = facteur => {
+    if (this.state.loadingZoomIn || this.state.loadingZoomOut) {
+      return;
+    }
+    if (facteur > 0) {
+      this.setState({ loadingZoomIn: true });
+    } else {
+      this.setState({ loadingZoomOut: true });
+    }
     let params = this.state.params;
-    //_.unset(params, "echelle");
     params.zoom = params.zoom
       ? params.zoom + facteur * 100 <= 0
         ? 100
@@ -79,15 +99,66 @@ export default class ImageLecteur extends React.Component {
     this.readImage(
       params,
       result => {
-        params.echelle =
-          _.max([result.imageSize.height, result.imageSize.width]) + "l";
+        params.echelle = this.calculEchelle(
+          result.imageSize.height,
+          result.imageSize.width
+        );
         this.readImage(
           params,
           res => {
-            this.setState({ image: res, params: params });
+            this.setState({
+              image: res,
+              params: params,
+              loadingZoomIn: false,
+              loadingZoomOut: false
+            });
           },
           err => {
             console.log(err);
+            this.setState({ loadingZoomIn: false, loadingZoomOut: false });
+          }
+        );
+      },
+      error => {
+        console.log(error);
+      }
+    );
+  };
+
+  handleRotation = angle => {
+    if (this.state.loadingRotationLeft || this.state.loadingRotationRight) {
+      return;
+    }
+    if (angle > 0) {
+      this.setState({ loadingRotationRight: true });
+    } else {
+      this.setState({ loadingRotationLeft: true });
+    }
+    let params = this.state.params;
+    params.rotation = params.rotation ? params.rotation + angle : angle;
+    this.readImage(
+      params,
+      result => {
+        params.echelle = this.calculEchelle(
+          result.imageSize.height,
+          result.imageSize.width
+        );
+        this.readImage(
+          params,
+          res => {
+            this.setState({
+              image: res,
+              params: params,
+              loadingRotationLeft: false,
+              loadingRotationRight: false
+            });
+          },
+          err => {
+            console.log(err);
+            this.setState({
+              loadingRotationLeft: false,
+              loadingRotationRight: false
+            });
           }
         );
       },
@@ -112,12 +183,7 @@ export default class ImageLecteur extends React.Component {
             {this.state.loading ? (
               <Segment basic={true} style={{ paddingTop: "40%" }}>
                 <Dimmer active={true} inverted={true}>
-                  <Loader
-                    active={true}
-                    inline="centered"
-                    //style={{ color: "black" }}
-                    //inverted={true}
-                  >
+                  <Loader active={true} inline="centered">
                     Chargement de l'image...
                   </Loader>
                 </Dimmer>
@@ -140,41 +206,78 @@ export default class ImageLecteur extends React.Component {
                   src={this.state.image.image}
                   style={{
                     margin: "auto",
-                    maxHeight: window.innerHeight * 2,
-                    maxWidth: window.innerWidth * 2
+                    maxHeight: window.innerHeight - 10,
+                    maxWidth: window.innerWidth - 10
                   }}
                   //style={{ maxHeight: "800px", maxWidth: "800px" }}
-                  /*onWheel={e => {
+                  onWheel={e => {
                     if (e.deltaY > 0) {
-                      this.handleZoom(2);
+                      this.handleZoom(this.zoomFacteurDefaut);
                     } else {
-                      this.handleZoom(-2)
+                      if (
+                        !this.state.params.zoom ||
+                        this.state.params.zoom < this.zoomFacteurDefaut * 100
+                      ) {
+                        return;
+                      }
+                      this.handleZoom(-1 * this.zoomFacteurDefaut);
                     }
-                  }}*/
+                  }}
                 />
               </div>
             ) : null}
             <div
               style={{
                 textAlign: "center",
-                float: "bottom",
-                position: "absolute",
+                position: "fixed",
                 bottom: 0,
                 right: 0,
                 left: 0,
                 marginBottom: "15px"
               }}
             >
+              <Popup
+                trigger={
+                  <Button
+                    icon="undo"
+                    loading={this.state.loadingRotationLeft}
+                    onClick={() =>
+                      this.handleRotation(-1 * this.rotationDegreDefaut)
+                    }
+                  />
+                }
+                content="Rotation -90°"
+                inverted={true}
+                size="mini"
+              />
+
+              <Popup
+                trigger={
+                  <Button
+                    icon="redo"
+                    loading={this.state.loadingRotationRight}
+                    onClick={() =>
+                      this.handleRotation(this.rotationDegreDefaut)
+                    }
+                  />
+                }
+                content="Rotation 90°"
+                inverted={true}
+                size="mini"
+              />
+
               <Button
                 disabled={
                   !this.state.params.zoom ||
                   this.state.params.zoom < this.zoomFacteurDefaut * 100
                 }
+                loading={this.state.loadingZoomOut}
                 icon="zoom-out"
                 onClick={() => this.handleZoom(-1 * this.zoomFacteurDefaut)}
               />
               <Button
                 icon="zoom-in"
+                loading={this.state.loadingZoomIn}
                 onClick={() => this.handleZoom(this.zoomFacteurDefaut)}
               />
               <Button

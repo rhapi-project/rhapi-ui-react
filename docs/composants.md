@@ -102,6 +102,16 @@ Modal semantic de lecture et de configuration des actes en favoris
 | onClose | func | Callback à la fermeture de la modal |
 | onSelection | func | Callback à la selection et validation d'un acte. Cette fonction prend en 1er paramètre l'indice de la ligne et en 2ème paramètre l'objet acte sélectionné. |
 
+## ModalActeTitre
+Modal de changement de titre d'un devis avant sa validation
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| open | bool | Ouverture de la modal |
+| titre | string | Titre de l'acte |
+| onClose | func | Callback à la fermeture de la modal |
+| onChangeTitre | func | Callback au changement du titre. Ce callback prend en paramètre le nouveau titre. |
+
 ## Historique
 Affichage de l'historique des actes d'un patient
 #### Props du composant
@@ -143,16 +153,6 @@ Affichage de l'historique des actes d'un patient
 | btnPrev | object | Props semantic du bouton pour aller à la page précédente, par défaut un objet vide "{}" |
 | btnMore | object | Props semantic du bouton pour afficher plus de résultats, par défaut un objet vide "{}" |
 | mode | string | Mode de pagination "pages" ou "more", par défaut "pages" |
-
-## ModalActeTitre
-Modal de changement de titre d'un devis avant sa validation
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| open | bool | Ouverture de la modal |
-| titre | string | Titre de l'acte |
-| onClose | func | Callback à la fermeture de la modal |
-| onChangeTitre | func | Callback au changement du titre. Ce callback prend en paramètre le nouveau titre. |
 
 ## ModalSearch
 Ce composant est une modal Semantic de recherche d'un acte. Il intègre un date picker, les composants CCAM.Search, CCAM.Table et Shared.Localisations
@@ -341,14 +341,6 @@ Période, début et fin d'une période
 | onPeriodeChange | func | Callback au changement de la période. C'est une fonction qui prend 2 paramètres, début et fin de la période (inclus).
 Les valeurs de ces paramètres sont NULL si la durée est indéterminée. |
 
-## DocumentArchives
-Liste des documents d'un patient (archives)
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| idPatient | number | ID du patient. Si idPatient = 0, le document est partagé par tous les patients (ex. un modèle de document) |
-
 ## DocumentEditor
 Composant d'édition d'un document texte
 #### Props du composant
@@ -358,6 +350,14 @@ Composant d'édition d'un document texte
 | document | object | Objet document à manipuler |
 | onClose | func | Callback à la fermeture de l'édition |
 | onEditDocument | func | Callback à l'édition du contenu d'un document. Ce callback prend en paramètre le nouveau contenu du document |
+
+## DocumentArchives
+Liste des documents d'un patient (archives)
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| idPatient | number | ID du patient. Si idPatient = 0, le document est partagé par tous les patients (ex. un modèle de document) |
 
 ## DocumentFromActes
 Modal de chargement à la création d'un document à partir des Actes.
