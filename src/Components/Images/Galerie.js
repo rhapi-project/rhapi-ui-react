@@ -41,7 +41,7 @@ export default class Galerie extends React.Component {
     allImagesSelected: false,
     itemsPerRow: parseInt(_.get(localStorage, "galerieItemsPerRow", 6)),
     modalDeleteImage: false,
-    idImageToOpen: null
+    imageToOpen: {}
   };
 
   defaultLimit = 20;
@@ -82,7 +82,7 @@ export default class Galerie extends React.Component {
           modalImportation: false,
           modalDeleteImage: false,
           allImagesSelected: false,
-          idImageToOpen: null
+          imageToOpen: {}
         });
       },
       error => {
@@ -95,7 +95,7 @@ export default class Galerie extends React.Component {
           selectedImages: [],
           allImagesSelected: false,
           hasNextPage: false,
-          idImageToOpen: null
+          imageToOpen: {}
         });
       }
     );
@@ -124,13 +124,15 @@ export default class Galerie extends React.Component {
   };
 
   render() {
-    if (_.isNumber(this.state.idImageToOpen)) {
+    if (!_.isEmpty(this.state.imageToOpen)) {
       return (
         <ImageLecteur
           client={this.props.client}
-          idImage={this.state.idImageToOpen}
+          idImage={this.state.imageToOpen.id}
+          height={this.state.imageToOpen.imageSize.height}
+          width={this.state.imageToOpen.imageSize.width}
           onClose={() => {
-            this.setState({ idImageToOpen: null });
+            this.setState({ imageToOpen: {} });
           }}
         />
       );
@@ -292,8 +294,8 @@ export default class Galerie extends React.Component {
                     });
                   }
                 }}
-                onOpenImage={idImage => {
-                  this.setState({ idImageToOpen: idImage });
+                onOpenImage={() => {
+                  this.setState({ imageToOpen: image });
                 }}
               />
             ))}
@@ -375,7 +377,7 @@ class ImageCard extends React.Component {
     e.preventDefault();
     clearTimeout(this.timeout);
     this.timeout = null;
-    this.props.onOpenImage(this.props.image.id);
+    this.props.onOpenImage();
   };
 
   render() {

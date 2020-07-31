@@ -8,11 +8,15 @@ const propDefs = {
   example: "",
   propDocs: {
     idImage: "identifiant de l'image à charger",
+    height: "hauteur de l'image à charger",
+    width: "largeur de l'image à charger",
     onClose: "callback à la fermeture du lecteur d'images"
   },
   propTypes: {
     client: PropTypes.any.isRequired,
     idImage: PropTypes.number,
+    height: PropTypes.number,
+    width: PropTypes.number,
     onClose: PropTypes.func
   }
 };
@@ -29,27 +33,37 @@ export default class ImageLecteur extends React.Component {
   zoomFacteurDefaut = 1.5;
 
   componentDidMount() {
-    this.setState({ loading: true });
-    this.readImage({});
-  }
-
-  readImage = params => {
-    this.props.client.Images.read(
-      this.props.idImage,
-      params,
+    let params = {};
+    params.echelle = _.max([this.props.height, this.props.width]) + "l";
+    this.setState({ loading: true, params: params });
+    this.readImage(
+      params, // uniquement mise à l'echelle
       result => {
         this.setState({ image: result, loading: false });
-        //console.log(result);
       },
       error => {
         console.log(error);
         this.setState({ loading: false });
       }
     );
+  }
+
+  readImage = (params, onSuccess, onError) => {
+    this.props.client.Images.read(
+      this.props.idImage,
+      params,
+      result => {
+        onSuccess(result);
+      },
+      error => {
+        onError(error);
+      }
+    );
   };
 
   handleZoom = facteur => {
     let params = this.state.params;
+    //_.unset(params, "echelle");
     params.zoom = params.zoom
       ? params.zoom + facteur * 100 <= 0
         ? 100
@@ -60,8 +74,27 @@ export default class ImageLecteur extends React.Component {
     //console.log(params.zoom);
     // TODO : si params.zoom === 100, alors la prochaine valeur
     // => this.zoomFacteurDefaut * 100
-    this.readImage(params);
-    this.setState({ params: params });
+    //this.readImage(params);
+    //this.setState({ params: params });
+    this.readImage(
+      params,
+      result => {
+        params.echelle =
+          _.max([result.imageSize.height, result.imageSize.width]) + "l";
+        this.readImage(
+          params,
+          res => {
+            this.setState({ image: res, params: params });
+          },
+          err => {
+            console.log(err);
+          }
+        );
+      },
+      error => {
+        console.log(error);
+      }
+    );
   };
 
   render() {
@@ -107,8 +140,8 @@ export default class ImageLecteur extends React.Component {
                   src={this.state.image.image}
                   style={{
                     margin: "auto",
-                    maxHeight: window.innerHeight,
-                    maxWidth: window.innerWidth
+                    maxHeight: window.innerHeight * 2,
+                    maxWidth: window.innerWidth * 2
                   }}
                   //style={{ maxHeight: "800px", maxWidth: "800px" }}
                   /*onWheel={e => {
