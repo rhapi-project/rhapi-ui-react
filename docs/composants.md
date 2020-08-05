@@ -292,54 +292,13 @@ Modal de confirmation de la validation d'un acte
 | onClose | func | callback à la fermeture de la modal |
 | onDocumentGeneration | func | callback à la confirmation de la génération d'un document |
 
-## Actions
-Menu d'actions à effectuer
+## DocumentArchives
+Liste des documents d'un patient (archives)
 #### Props du composant
 | Props | Type | Description |
 | ---- | ----- | ------ |
-| actions | array | Tableau contenant une liste d'actions |
-| dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
-| id | any | Identifiant de la ligne sur laquelle une action est effectuée |
-
-## DateRange
-Période, début et fin d'une période
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| open | bool | Ouverture de la modal |
-| startAt | string | Date de début de la période. Par défaut la date du jour. |
-| endAt | string | Date de fin de la période. Par défaut une semaine après la date du jour. |
-| onRangeChange | func | Callback au changement de la période |
-| onClose | func | Callback à la fermeture de la modal |
-
-## Localisations
-Grille de saisie des localisations dentaires
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| dents | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
-| modal | object | Documentation semantic-ui-react [Modal](https://react.semantic-ui.com/modules/modal) |
-| onSelection | func | Callback à la selection d'une liste de dents |
-
-## Montant
-Input de saisie d'un montant au format français
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| input | object | Documentation semantic-ui-react [Input](https://react.semantic-ui.com/elements/input) |
-| montant | number | Montant affiché |
-| onChange | func | Callback au changement du montant |
-
-## Periode
-Période, début et fin d'une période
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| labelDate | string | Label de la période |
-| labelYear | string | Label de l'année de la période |
-| startYear | number | La première année qui sera affichée. Par défaut l'année en cours |
-| onPeriodeChange | func | Callback au changement de la période. C'est une fonction qui prend 2 paramètres, début et fin de la période (inclus).
-Les valeurs de ces paramètres sont NULL si la durée est indéterminée. |
+| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
+| idPatient | number | ID du patient. Si idPatient = 0, le document est partagé par tous les patients (ex. un modèle de document) |
 
 ## DocumentEditor
 Composant d'édition d'un document texte
@@ -350,14 +309,6 @@ Composant d'édition d'un document texte
 | document | object | Objet document à manipuler |
 | onClose | func | Callback à la fermeture de l'édition |
 | onEditDocument | func | Callback à l'édition du contenu d'un document. Ce callback prend en paramètre le nouveau contenu du document |
-
-## DocumentArchives
-Liste des documents d'un patient (archives)
-#### Props du composant
-| Props | Type | Description |
-| ---- | ----- | ------ |
-| client | any, isRequired | [Documentation générale du client RHAPI](https://github.com/rhapi-project/rhapi-client) |
-| idPatient | number | ID du patient. Si idPatient = 0, le document est partagé par tous les patients (ex. un modèle de document) |
 
 ## DocumentFromActes
 Modal de chargement à la création d'un document à partir des Actes.
@@ -435,3 +386,52 @@ Visualiseur d'un document sous format texte
 | document | string | contenu d'un document au format texte |
 | mode | string | mode d'édition du document : html ou plain |
 | onEdit | func | Callback à la modification du texte |
+
+## Actions
+Menu d'actions à effectuer
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| actions | array | Tableau contenant une liste d'actions |
+| dropdown | object | Documentation semantic-ui-react [Dropdown](https://react.semantic-ui.com/modules/dropdown) |
+| id | any | Identifiant de la ligne sur laquelle une action est effectuée |
+
+## DateRange
+Période, début et fin d'une période
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| open | bool | Ouverture de la modal |
+| startAt | string | Date de début de la période. Par défaut la date du jour. |
+| endAt | string | Date de fin de la période. Par défaut une semaine après la date du jour. |
+| onRangeChange | func | Callback au changement de la période |
+| onClose | func | Callback à la fermeture de la modal |
+
+## Localisations
+Grille de saisie des localisations dentaires
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| dents | string | Liste des dents sélectionnées, séparées par des espaces. Par défaut "" |
+| modal | object | Documentation semantic-ui-react [Modal](https://react.semantic-ui.com/modules/modal) |
+| onSelection | func | Callback à la selection d'une liste de dents |
+
+## Montant
+Input de saisie d'un montant au format français
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| input | object | Documentation semantic-ui-react [Input](https://react.semantic-ui.com/elements/input) |
+| montant | number | Montant affiché |
+| onChange | func | Callback au changement du montant |
+
+## Periode
+Période, début et fin d'une période
+#### Props du composant
+| Props | Type | Description |
+| ---- | ----- | ------ |
+| labelDate | string | Label de la période |
+| labelYear | string | Label de l'année de la période |
+| startYear | number | La première année qui sera affichée. Par défaut l'année en cours |
+| onPeriodeChange | func | Callback au changement de la période. C'est une fonction qui prend 2 paramètres, début et fin de la période (inclus).
+Les valeurs de ces paramètres sont NULL si la durée est indéterminée. |

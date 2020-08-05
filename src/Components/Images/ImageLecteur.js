@@ -31,7 +31,14 @@ export default class ImageLecteur extends React.Component {
     loadingZoomOut: false,
     loadingRotationLeft: false,
     loadingRotationRight: false,
-    params: {}
+    loadingRetournementH: false,
+    loadingRetournementV: false,
+    loadingContraste: false,
+    loadingLuminosite: false,
+    loadingCancelModifications: false,
+    params: {},
+    contraste: 0,
+    luminosite: 0
   };
 
   zoomFacteurDefaut = 1.5;
@@ -61,6 +68,20 @@ export default class ImageLecteur extends React.Component {
     }
   };
 
+  isLoadingModification = () => {
+    return (
+      this.state.loadingZoomIn ||
+      this.state.loadingZoomOut ||
+      this.state.loadingRotationLeft ||
+      this.state.loadingRotationRight ||
+      this.state.loadingRetournementH ||
+      this.state.loadingRetournementV ||
+      this.state.loadingContraste ||
+      this.state.loadingLuminosite ||
+      this.state.loadingCancelModifications
+    );
+  };
+
   readImage = (params, onSuccess, onError) => {
     this.props.client.Images.read(
       this.props.idImage,
@@ -74,15 +95,51 @@ export default class ImageLecteur extends React.Component {
     );
   };
 
+  resetEchelle = (imageParams, height, width) => {
+    let params = imageParams;
+    params.echelle = this.calculEchelle(height, width);
+    this.readImage(
+      params,
+      result => {
+        this.setState({
+          image: result,
+          params: params,
+          loadingZoomIn: false,
+          loadingZoomOut: false,
+          loadingRotationLeft: false,
+          loadingRotationRight: false,
+          loadingRetournementH: false,
+          loadingRetournementV: false,
+          loadingContraste: false,
+          loadingLuminosite: false,
+          loadingCancelModifications: false
+        });
+      },
+      error => {
+        console.log(error);
+        this.setState({
+          loadingZoomIn: false,
+          loadingZoomOut: false,
+          loadingRotationLeft: false,
+          loadingRotationRight: false,
+          loadingRetournementH: false,
+          loadingRetournementV: false,
+          loadingContraste: false,
+          loadingLuminosite: false,
+          loadingCancelModifications: false
+        });
+      }
+    );
+  };
+
   handleZoom = facteur => {
-    if (this.state.loadingZoomIn || this.state.loadingZoomOut) {
+    if (this.isLoadingModification()) {
       return;
     }
-    if (facteur > 0) {
-      this.setState({ loadingZoomIn: true });
-    } else {
-      this.setState({ loadingZoomOut: true });
-    }
+    this.setState({
+      loadingZoomIn: facteur > 0,
+      loadingZoomOut: facteur <= 0
+    });
     let params = this.state.params;
     params.zoom = params.zoom
       ? params.zoom + facteur * 100 <= 0
@@ -99,24 +156,10 @@ export default class ImageLecteur extends React.Component {
     this.readImage(
       params,
       result => {
-        params.echelle = this.calculEchelle(
+        this.resetEchelle(
+          params,
           result.imageSize.height,
           result.imageSize.width
-        );
-        this.readImage(
-          params,
-          res => {
-            this.setState({
-              image: res,
-              params: params,
-              loadingZoomIn: false,
-              loadingZoomOut: false
-            });
-          },
-          err => {
-            console.log(err);
-            this.setState({ loadingZoomIn: false, loadingZoomOut: false });
-          }
         );
       },
       error => {
@@ -126,40 +169,101 @@ export default class ImageLecteur extends React.Component {
   };
 
   handleRotation = angle => {
-    if (this.state.loadingRotationLeft || this.state.loadingRotationRight) {
+    if (this.isLoadingModification()) {
       return;
     }
-    if (angle > 0) {
-      this.setState({ loadingRotationRight: true });
-    } else {
-      this.setState({ loadingRotationLeft: true });
-    }
+    this.setState({
+      loadingRotationRight: angle > 0,
+      loadingRotationLeft: angle <= 0
+    });
     let params = this.state.params;
     params.rotation = params.rotation ? params.rotation + angle : angle;
     this.readImage(
       params,
       result => {
-        params.echelle = this.calculEchelle(
+        this.resetEchelle(
+          params,
           result.imageSize.height,
           result.imageSize.width
         );
-        this.readImage(
+      },
+      error => {
+        console.log(error);
+      }
+    );
+  };
+
+  handleRetournement = sens => {
+    if (this.isLoadingModification()) {
+      return;
+    }
+    this.setState({
+      loadingRetournementH: sens === "h",
+      loadingRetournementV: sens === "v"
+    });
+    let params = this.state.params;
+    if (params.retournement === sens) {
+      _.unset(params, "retournement");
+    } else {
+      params.retournement = sens;
+    }
+    this.readImage(
+      params,
+      result => {
+        this.resetEchelle(
           params,
-          res => {
-            this.setState({
-              image: res,
-              params: params,
-              loadingRotationLeft: false,
-              loadingRotationRight: false
-            });
-          },
-          err => {
-            console.log(err);
-            this.setState({
-              loadingRotationLeft: false,
-              loadingRotationRight: false
-            });
-          }
+          result.imageSize.height,
+          result.imageSize.width
+        );
+      },
+      error => {
+        console.log(error);
+      }
+    );
+  };
+
+  handleChangeContraste = value => {
+    if (this.isLoadingModification()) {
+      return;
+    }
+    this.setState({ loadingContraste: true });
+    let params = this.state.params;
+    params.contraste = value === 0 ? 100 : value * 100;
+    this.readImage(
+      params,
+      result => {
+        this.setState({ contraste: value });
+        this.resetEchelle(
+          params,
+          result.imageSize.height,
+          result.imageSize.width
+        );
+      },
+      error => {
+        console.log(error);
+      }
+    );
+  };
+
+  handleChangeLuminosite = value => {
+    if (this.isLoadingModification()) {
+      return;
+    }
+    this.setState({ loadingLuminosite: true });
+    let params = this.state.params;
+    if (value === 0) {
+      _.unset(params, "luminosite");
+    } else {
+      params.luminosite = value * 100;
+    }
+    this.readImage(
+      params,
+      result => {
+        this.setState({ luminosite: value });
+        this.resetEchelle(
+          params,
+          result.imageSize.height,
+          result.imageSize.width
         );
       },
       error => {
@@ -209,7 +313,6 @@ export default class ImageLecteur extends React.Component {
                     maxHeight: window.innerHeight - 10,
                     maxWidth: window.innerWidth - 10
                   }}
-                  //style={{ maxHeight: "800px", maxWidth: "800px" }}
                   onWheel={e => {
                     if (e.deltaY > 0) {
                       this.handleZoom(this.zoomFacteurDefaut);
@@ -239,6 +342,30 @@ export default class ImageLecteur extends React.Component {
               <Popup
                 trigger={
                   <Button
+                    icon="resize horizontal"
+                    loading={this.state.loadingRetournementH}
+                    onClick={() => this.handleRetournement("h")}
+                  />
+                }
+                content="Retournement horizontal"
+                inverted={true}
+                size="mini"
+              />
+              <Popup
+                trigger={
+                  <Button
+                    icon="resize vertical"
+                    loading={this.state.loadingRetournementV}
+                    onClick={() => this.handleRetournement("v")}
+                  />
+                }
+                content="Retournement vertical"
+                inverted={true}
+                size="mini"
+              />
+              <Popup
+                trigger={
+                  <Button
                     icon="undo"
                     loading={this.state.loadingRotationLeft}
                     onClick={() =>
@@ -250,7 +377,6 @@ export default class ImageLecteur extends React.Component {
                 inverted={true}
                 size="mini"
               />
-
               <Popup
                 trigger={
                   <Button
@@ -265,20 +391,96 @@ export default class ImageLecteur extends React.Component {
                 inverted={true}
                 size="mini"
               />
-
-              <Button
-                disabled={
-                  !this.state.params.zoom ||
-                  this.state.params.zoom < this.zoomFacteurDefaut * 100
+              <Popup
+                trigger={
+                  <Button
+                    disabled={
+                      !this.state.params.zoom ||
+                      this.state.params.zoom < this.zoomFacteurDefaut * 100
+                    }
+                    loading={this.state.loadingZoomOut}
+                    icon="zoom-out"
+                    onClick={() => this.handleZoom(-1 * this.zoomFacteurDefaut)}
+                  />
                 }
-                loading={this.state.loadingZoomOut}
-                icon="zoom-out"
-                onClick={() => this.handleZoom(-1 * this.zoomFacteurDefaut)}
+                content="Zoom arrière"
+                inverted={true}
+                size="mini"
               />
-              <Button
-                icon="zoom-in"
-                loading={this.state.loadingZoomIn}
-                onClick={() => this.handleZoom(this.zoomFacteurDefaut)}
+              <Popup
+                trigger={
+                  <Button
+                    icon="zoom-in"
+                    loading={this.state.loadingZoomIn}
+                    onClick={() => this.handleZoom(this.zoomFacteurDefaut)}
+                  />
+                }
+                content="Zoom avant"
+                inverted={true}
+                size="mini"
+              />
+              <Popup
+                trigger={
+                  <Button icon="sun" loading={this.state.loadingLuminosite} />
+                }
+                on="click"
+                pinned={true}
+                inverted={true}
+                size="mini"
+              >
+                <input
+                  type="range"
+                  min={-1}
+                  max={1}
+                  step={0.2}
+                  value={this.state.luminosite}
+                  onChange={e =>
+                    this.handleChangeLuminosite(parseFloat(e.target.value))
+                  }
+                />
+              </Popup>
+              <Popup
+                trigger={
+                  <Button icon="adjust" loading={this.state.loadingContraste} />
+                }
+                on="click"
+                pinned={true}
+                inverted={true}
+                size="mini"
+              >
+                <input
+                  type="range"
+                  min={-1}
+                  max={1}
+                  step={0.2}
+                  value={this.state.contraste}
+                  onChange={e =>
+                    this.handleChangeContraste(parseFloat(e.target.value))
+                  }
+                />
+              </Popup>
+              <Popup
+                trigger={
+                  <Button
+                    loading={this.state.loadingCancelModifications}
+                    icon="erase"
+                    onClick={() => {
+                      this.setState({
+                        loadingCancelModifications: true,
+                        luminosite: 0,
+                        contraste: 0
+                      });
+                      this.resetEchelle(
+                        {},
+                        this.props.height,
+                        this.props.width
+                      );
+                    }}
+                  />
+                }
+                content="Annuler les modifications"
+                inverted={true}
+                size="mini"
               />
               <Button
                 content="Fermer"

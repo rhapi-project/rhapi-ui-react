@@ -6,6 +6,7 @@ import {
   Card,
   Dimmer,
   Divider,
+  Form,
   Loader,
   Modal,
   Popup,
@@ -14,7 +15,7 @@ import {
 
 import Importation from "./Importation";
 import ImageLecteur from "./ImageLecteur";
-//import Periode from "../Shared/Periode";
+import Periode from "../Shared/Periode";
 
 const propDefs = {
   description: "Liste d'images appartenant à un patient (sous forme de grille)",
@@ -41,7 +42,9 @@ export default class Galerie extends React.Component {
     allImagesSelected: false,
     itemsPerRow: parseInt(_.get(localStorage, "galerieItemsPerRow", 6)),
     modalDeleteImage: false,
-    imageToOpen: {}
+    imageToOpen: {},
+    periodeStartAt: "",
+    periodeEndAt: ""
   };
 
   defaultLimit = 20;
@@ -51,8 +54,12 @@ export default class Galerie extends React.Component {
     this.reload(this.defaultLimit, this.defaultOffset);
   }
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.idPatient !== this.props.idPatient) {
+  componentDidUpdate(prevProps, prevState) {
+    if (
+      prevProps.idPatient !== this.props.idPatient ||
+      prevState.periodeStartAt !== this.state.periodeStartAt ||
+      prevState.periodeEndAt !== this.state.periodeEndAt
+    ) {
       this.reload(this.defaultLimit, this.defaultOffset);
     }
   }
@@ -62,12 +69,19 @@ export default class Galerie extends React.Component {
       return;
     }
     this.setState({ loading: true });
+    let params = {};
+    params.q1 = "idPatient,Equal," + this.props.idPatient;
+    params.limit = limit;
+    params.offset = limit;
+    if (this.state.periodeStartAt && this.state.periodeEndAt) {
+      params.q2 =
+        "AND,createdAt,Between," +
+        this.state.periodeStartAt +
+        "," +
+        this.state.periodeEndAt;
+    }
     this.props.client.Images.readAll(
-      {
-        q1: "idPatient,Equal," + this.props.idPatient,
-        limit: limit,
-        offset: offset
-      },
+      params,
       result => {
         //console.log(result);
         this.setState({
@@ -132,7 +146,7 @@ export default class Galerie extends React.Component {
           height={this.state.imageToOpen.imageSize.height}
           width={this.state.imageToOpen.imageSize.width}
           onClose={() => {
-            this.setState({ imageToOpen: {} });
+            this.reload(this.defaultLimit, this.defaultOffset);
           }}
         />
       );
@@ -168,19 +182,6 @@ export default class Galerie extends React.Component {
               inverted={true}
               size="mini"
             />
-
-            {/*<Periode
-              labelDate="&nbsp;"
-              labelYear="&nbsp;"
-              startYear={2015}
-              onPeriodeChange={(startAt, endAt) => {
-                if (startAt && endAt) {
-                  console.log("changer période");
-                } else {
-                  console.log("période indeterminée")
-                }
-              }}
-            />*/}
 
             <div style={{ float: "right" }}>
               <Button
@@ -252,13 +253,45 @@ export default class Galerie extends React.Component {
               />
             </div>
           </div>
+
+          <Divider />
+
+          <div>
+            <Form>
+              <Form.Group>
+                <Periode
+                  labelDate="Période"
+                  labelYear="&nbsp;"
+                  startYear={2015}
+                  onPeriodeChange={(startAt, endAt) => {
+                    if (startAt && endAt) {
+                      this.setState({
+                        periodeStartAt: startAt,
+                        periodeEndAt: endAt
+                      });
+                    } else {
+                      this.setState({ periodeStartAt: "", periodeEndAt: "" });
+                    }
+                  }}
+                />
+                <Form.Input
+                  label="Localisation"
+                  width={5}
+                  placeholder="Localisation"
+                  onChange={() => {}}
+                  //onClick={() => this.setState({ openLocalisations: true })}
+                  value={""}
+                />
+              </Form.Group>
+            </Form>
+          </div>
         </Segment>
 
         <Divider hidden={true} />
 
         <div
           id="galerieScrollable"
-          style={{ height: "700px", overflowY: "auto", overflowX: "hidden" }}
+          style={{ height: "650px", overflowY: "auto", overflowX: "hidden" }}
           onScroll={() => {
             let el = document.getElementById("galerieScrollable");
             if (el.offsetHeight + el.scrollTop === el.scrollHeight) {
