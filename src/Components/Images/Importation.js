@@ -21,6 +21,10 @@ const propDefs = {
 export default class Importation extends React.Component {
   static propTypes = propDefs.propTypes;
 
+  state = {
+    isDragging: false
+  };
+
   // La création des images avec la l'option base64 ne fonctionne pas,
   // une erreur est retournée systématiquement par le serveur
   // - le fichier ne correspond pas à un fichier image
@@ -53,16 +57,60 @@ export default class Importation extends React.Component {
     );
   };*/
 
+  handleDrop = event => {
+    event.preventDefault();
+    event.stopPropagation();
+    console.log("test drop file");
+  };
+
+  // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/File_drag_and_drop
+  /*handleDrop2 = event => {
+    console.log("drop handler");
+    event.stopPropagation();
+    event.preventDefault();
+    if (event.dataTransfer.items) {
+      // Use DataTransferItemList interface to access the file(s)
+      for (let i = 0; i < event.dataTransfer.items.length; i++) {
+        // If dropped items aren't files, reject them
+        if (event.dataTransfer.items[i].kind === 'file') {
+          let file = event.dataTransfer.items[i].getAsFile();
+          console.log('... file[' + i + '].name = ' + file.name);
+          console.log(file);
+        }
+      }
+    } else {
+      // Use DataTransfer interface to access the file(s)
+      for (var i = 0; i < event.dataTransfer.files.length; i++) {
+        console.log('... file[' + i + '].name = ' + event.dataTransfer.files[i].name);
+      }
+    }
+  };*/
+
   render() {
     return (
       <React.Fragment>
-        <Segment placeholder={true}>
+        <Segment
+          placeholder={true}
+          onDragOver={e => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.setState({ isDragging: true });
+          }}
+          onDragLeave={e => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.setState({ isDragging: false });
+          }}
+          onDrop={this.handleDrop}
+        >
           <Header icon={true}>
-            <Icon name="photo" />
+            <Icon name={this.state.isDragging ? "upload" : "photo"} />
             Déposez une image ici ou utilisez le bouton "Ajouter"
           </Header>
           <Button
-            disabled={!_.isNumber(this.props.idPatient)}
+            disabled={
+              !_.isNumber(this.props.idPatient) || this.state.isDragging
+            }
             content="Ajouter"
             onClick={() => document.getElementById("imageToUpload").click()}
             //onClick={this.uploadImage}

@@ -1,6 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, Dimmer, Loader, Popup, Segment } from "semantic-ui-react";
+import {
+  Button,
+  Dimmer,
+  Divider,
+  Loader,
+  Popup,
+  Segment
+} from "semantic-ui-react";
 import _ from "lodash";
 
 const propDefs = {
@@ -36,9 +43,13 @@ export default class ImageLecteur extends React.Component {
     loadingContraste: false,
     loadingLuminosite: false,
     loadingCancelModifications: false,
+    loadingInversion: false,
+    lodaingNormalisation: false,
     params: {},
     contraste: 0,
-    luminosite: 0
+    luminosite: 0,
+    inversion: false,
+    normalisation: false
   };
 
   zoomFacteurDefaut = 1.5;
@@ -78,7 +89,9 @@ export default class ImageLecteur extends React.Component {
       this.state.loadingRetournementV ||
       this.state.loadingContraste ||
       this.state.loadingLuminosite ||
-      this.state.loadingCancelModifications
+      this.state.loadingCancelModifications ||
+      this.state.loadingInversion ||
+      this.state.loadingNormalisation
     );
   };
 
@@ -112,7 +125,9 @@ export default class ImageLecteur extends React.Component {
           loadingRetournementV: false,
           loadingContraste: false,
           loadingLuminosite: false,
-          loadingCancelModifications: false
+          loadingCancelModifications: false,
+          loadingInversion: false,
+          loadingNormalisation: false
         });
       },
       error => {
@@ -126,7 +141,9 @@ export default class ImageLecteur extends React.Component {
           loadingRetournementV: false,
           loadingContraste: false,
           loadingLuminosite: false,
-          loadingCancelModifications: false
+          loadingCancelModifications: false,
+          loadingInversion: false,
+          loadingNormalisation: false
         });
       }
     );
@@ -272,6 +289,60 @@ export default class ImageLecteur extends React.Component {
     );
   };
 
+  handleInversion = bool => {
+    if (this.isLoadingModification()) {
+      return;
+    }
+    this.setState({ loadingInversion: true });
+    let params = this.state.params;
+    if (!bool) {
+      _.unset(params, "inversion");
+    } else {
+      params.inversion = bool;
+    }
+    this.readImage(
+      params,
+      result => {
+        this.setState({ inversion: bool });
+        this.resetEchelle(
+          params,
+          result.imageSize.height,
+          result.imageSize.width
+        );
+      },
+      error => {
+        console.log(error);
+      }
+    );
+  };
+
+  handleNormalisation = bool => {
+    if (this.isLoadingModification()) {
+      return;
+    }
+    this.setState({ loadingNormalisation: true });
+    let params = this.state.params;
+    if (!bool) {
+      _.unset(params, "normalisation");
+    } else {
+      params.normalisation = bool;
+    }
+    this.readImage(
+      params,
+      result => {
+        this.setState({ normalisation: bool });
+        this.resetEchelle(
+          params,
+          result.imageSize.height,
+          result.imageSize.width
+        );
+      },
+      error => {
+        console.log(error);
+      }
+    );
+  };
+
   render() {
     return (
       <React.Fragment>
@@ -339,6 +410,28 @@ export default class ImageLecteur extends React.Component {
                 marginBottom: "15px"
               }}
             >
+              <Popup
+                trigger={<Button icon="magic" />}
+                on="click"
+                pinned={true}
+                inverted={true}
+                wide={true}
+                //size="mini"
+              >
+                <Button
+                  loading={this.state.loadingNormalisation}
+                  content="Normalisation"
+                  onClick={() =>
+                    this.handleNormalisation(!this.state.normalisation)
+                  }
+                />
+                <Divider hidden={true} vertical={true} />
+                <Button
+                  loading={this.state.loadingInversion}
+                  content="Inversion"
+                  onClick={() => this.handleInversion(!this.state.inversion)}
+                />
+              </Popup>
               <Popup
                 trigger={
                   <Button

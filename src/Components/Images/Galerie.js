@@ -47,7 +47,7 @@ export default class Galerie extends React.Component {
     periodeEndAt: ""
   };
 
-  defaultLimit = 20;
+  defaultLimit = 40;
   defaultOffset = 0;
 
   componentDidMount() {
@@ -72,7 +72,7 @@ export default class Galerie extends React.Component {
     let params = {};
     params.q1 = "idPatient,Equal," + this.props.idPatient;
     params.limit = limit;
-    params.offset = limit;
+    params.offset = offset;
     if (this.state.periodeStartAt && this.state.periodeEndAt) {
       params.q2 =
         "AND,createdAt,Between," +
@@ -188,7 +188,7 @@ export default class Galerie extends React.Component {
                 basic={true}
                 disabled={
                   !_.isNumber(this.props.idPatient) ||
-                  this.state.itemsPerRow === 10
+                  this.state.itemsPerRow === 8
                 }
                 icon="zoom-out"
                 onClick={() => {
@@ -416,21 +416,34 @@ class ImageCard extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <Dimmer.Dimmable
-          as={Card}
-          dimmed={this.props.selected}
+        <Card
           onClick={this.onImageClick}
           onDoubleClick={this.onImageDoubleClick}
         >
-          <div>
-            <img
-              alt={"Image " + this.props.image.id}
-              src={this.props.image.image}
-              style={{ height: "100%", width: "100%" }}
-            />
-          </div>
-          <Dimmer inverted={true} active={this.props.selected} />
-        </Dimmer.Dimmable>
+          <Dimmer.Dimmable
+            //as={Card}
+            dimmed={this.props.selected}
+            //onClick={this.onImageClick}
+            //onDoubleClick={this.onImageDoubleClick}
+          >
+            <div style={{ display: "flex" }}>
+              <img
+                alt={"Image " + this.props.image.id}
+                src={this.props.image.image}
+                style={{ height: "100%", width: "100%", margin: "auto" }}
+              />
+            </div>
+            <Dimmer inverted={true} active={this.props.selected} />
+            {/*<div style={{ float: "bottom", paddingBottom: 0 }}>
+              coucou
+            </div>*/}
+          </Dimmer.Dimmable>
+          {/*<Card.Content extra={true}>
+            <div style={{ float: "bottom", paddingBottom: 0 }}>
+              coucou
+            </div>
+          </Card.Content>*/}
+        </Card>
       </React.Fragment>
     );
   }
