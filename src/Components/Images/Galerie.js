@@ -3,10 +3,10 @@ import PropTypes from "prop-types";
 import _ from "lodash";
 import {
   Button,
-  Card,
   Dimmer,
   Divider,
   Form,
+  Grid,
   Loader,
   Modal,
   Popup,
@@ -151,6 +151,20 @@ export default class Galerie extends React.Component {
         />
       );
     }
+
+    let galerieLignes = [];
+    let ligne = [];
+    _.forEach(this.state.images, (image, index) => {
+      ligne.push(image);
+      if (
+        ligne.length === this.state.itemsPerRow ||
+        index === this.state.images.length - 1
+      ) {
+        galerieLignes.push(ligne);
+        ligne = [];
+      }
+    });
+
     return (
       <React.Fragment>
         <Segment color="grey">
@@ -301,38 +315,54 @@ export default class Galerie extends React.Component {
             }
           }}
         >
-          <Card.Group itemsPerRow={this.state.itemsPerRow}>
-            {_.map(this.state.images, (image, index) => (
-              <ImageCard
-                key={index}
-                image={image}
-                selected={
-                  _.findIndex(
-                    this.state.selectedImages,
-                    id => id === image.id
-                  ) !== -1
-                }
-                onSelectionChange={idImage => {
-                  let selectedImages = this.state.selectedImages;
-                  let indexSelection = _.findIndex(
-                    selectedImages,
-                    id => id === idImage
-                  );
-                  if (indexSelection === -1) {
-                    selectedImages.push(idImage);
-                    this.setState({
-                      allImagesSelected:
-                        selectedImages.length === this.state.images.length,
-                      selectedImages: selectedImages
-                    });
-                  }
-                }}
-                onOpenImage={() => {
-                  this.setState({ imageToOpen: image });
-                }}
-              />
-            ))}
-          </Card.Group>
+          {!_.isEmpty(galerieLignes) ? (
+            <Grid container={true}>
+              {_.map(galerieLignes, (ligne, indexLigne) => (
+                <Grid.Row
+                  key={indexLigne}
+                  columns={this.state.itemsPerRow}
+                  stretched={true}
+                >
+                  {_.map(ligne, (image, indexImage) => (
+                    <Grid.Column
+                      key={indexImage}
+                      textAlign="center"
+                      verticalAlign="middle"
+                    >
+                      <ImageView
+                        image={image}
+                        selected={
+                          _.findIndex(
+                            this.state.selectedImages,
+                            id => id === image.id
+                          ) !== -1
+                        }
+                        onSelectionChange={idImage => {
+                          let selectedImages = this.state.selectedImages;
+                          let indexSelection = _.findIndex(
+                            selectedImages,
+                            id => id === idImage
+                          );
+                          if (indexSelection === -1) {
+                            selectedImages.push(idImage);
+                            this.setState({
+                              allImagesSelected:
+                                selectedImages.length ===
+                                this.state.images.length,
+                              selectedImages: selectedImages
+                            });
+                          }
+                        }}
+                        onOpenImage={() => {
+                          this.setState({ imageToOpen: image });
+                        }}
+                      />
+                    </Grid.Column>
+                  ))}
+                </Grid.Row>
+              ))}
+            </Grid>
+          ) : null}
 
           {/* loader de chargement */}
           {this.state.loading ? (
@@ -392,7 +422,7 @@ export default class Galerie extends React.Component {
   }
 }
 
-class ImageCard extends React.Component {
+class ImageView extends React.Component {
   timeout = null; // gestion du double clic
 
   onImageClick = e => {
@@ -415,36 +445,18 @@ class ImageCard extends React.Component {
 
   render() {
     return (
-      <React.Fragment>
-        <Card
-          onClick={this.onImageClick}
-          onDoubleClick={this.onImageDoubleClick}
-        >
-          <Dimmer.Dimmable
-            //as={Card}
-            dimmed={this.props.selected}
-            //onClick={this.onImageClick}
-            //onDoubleClick={this.onImageDoubleClick}
-          >
-            <div style={{ display: "flex" }}>
-              <img
-                alt={"Image " + this.props.image.id}
-                src={this.props.image.image}
-                style={{ height: "100%", width: "100%", margin: "auto" }}
-              />
-            </div>
-            <Dimmer inverted={true} active={this.props.selected} />
-            {/*<div style={{ float: "bottom", paddingBottom: 0 }}>
-              coucou
-            </div>*/}
-          </Dimmer.Dimmable>
-          {/*<Card.Content extra={true}>
-            <div style={{ float: "bottom", paddingBottom: 0 }}>
-              coucou
-            </div>
-          </Card.Content>*/}
-        </Card>
-      </React.Fragment>
+      <div onClick={this.onImageClick} onDoubleClick={this.onImageDoubleClick}>
+        <Dimmer.Dimmable dimmed={this.props.selected}>
+          <div>
+            <img
+              alt={"Image " + this.props.image.id}
+              src={this.props.image.image}
+              style={{ height: "100%", width: "100%" }}
+            />
+          </div>
+          <Dimmer inverted={true} active={this.props.selected} />
+        </Dimmer.Dimmable>
+      </div>
     );
   }
 }

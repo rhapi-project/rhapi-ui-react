@@ -4,11 +4,18 @@ import {
   Button,
   Dimmer,
   Divider,
+  Form,
   Loader,
   Popup,
+  Ref,
   Segment
 } from "semantic-ui-react";
+import DatePicker from "react-datepicker";
+import fr from "date-fns/locale/fr";
 import _ from "lodash";
+import moment from "moment";
+
+import Localisations from "../Shared/Localisations";
 
 const propDefs = {
   description: "Composant de lecture et transformations d'une image",
@@ -49,7 +56,8 @@ export default class ImageLecteur extends React.Component {
     contraste: 0,
     luminosite: 0,
     inversion: false,
-    normalisation: false
+    normalisation: false,
+    modalLocalisation: false
   };
 
   zoomFacteurDefaut = 1.5;
@@ -149,30 +157,76 @@ export default class ImageLecteur extends React.Component {
     );
   };
 
-  handleZoom = facteur => {
+  handleModificationImage = (transformation, valeur) => {
     if (this.isLoadingModification()) {
       return;
     }
-    this.setState({
-      loadingZoomIn: facteur > 0,
-      loadingZoomOut: facteur <= 0
-    });
     let params = this.state.params;
-    params.zoom = params.zoom
-      ? params.zoom + facteur * 100 <= 0
+    if (transformation === "zoom") {
+      this.setState({ loadingZoomIn: valeur > 0, loadingZoomOut: valeur <= 0 });
+      params.zoom = params.zoom
+        ? params.zoom + valeur * 100 <= 0
+          ? 100
+          : params.zoom + valeur * 100
+        : valeur * 100 <= 0
         ? 100
-        : params.zoom + facteur * 100
-      : facteur * 100 <= 0
-      ? 100
-      : facteur * 100;
-    //console.log(params.zoom);
-    // TODO : si params.zoom === 100, alors la prochaine valeur
-    // => this.zoomFacteurDefaut * 100
-    //this.readImage(params);
-    //this.setState({ params: params });
+        : valeur * 100;
+      // TODO : si params.zoom === 100, alors la prochaine valeur
+      // => this.zoomFacteurDefaut * 100
+    } else if (transformation === "rotation") {
+      this.setState({
+        loadingRotationRight: valeur > 0,
+        loadingRotationLeft: valeur <= 0
+      });
+      params.rotation = params.rotation ? params.rotation + valeur : valeur;
+    } else if (transformation === "retournement") {
+      this.setState({
+        loadingRetournementH: valeur === "h",
+        loadingRetournementV: valeur === "v"
+      });
+      if (params.retournement === valeur) {
+        _.unset(params, "retournement");
+      } else {
+        params.retournement = valeur;
+      }
+    } else if (transformation === "contraste") {
+      this.setState({ loadingContraste: true });
+      params.contraste = valeur === 0 ? 100 : valeur * 100;
+    } else if (transformation === "luminosite") {
+      this.setState({ loadingLuminosite: true });
+      if (valeur === 0) {
+        _.unset(params, "luminosite");
+      } else {
+        params.luminosite = valeur * 100;
+      }
+    } else if (transformation === "inversion") {
+      this.setState({ loadingInversion: true });
+      if (!valeur) {
+        _.unset(params, "inversion");
+      } else {
+        params.inversion = valeur;
+      }
+    } else if (transformation === "normalisation") {
+      this.setState({ loadingNormalisation: true });
+      if (!valeur) {
+        _.unset(params, "normalisation");
+      } else {
+        params.normalisation = valeur;
+      }
+    }
+
     this.readImage(
       params,
       result => {
+        if (transformation === "contraste") {
+          this.setState({ contraste: valeur });
+        } else if (transformation === "luminosite") {
+          this.setState({ luminosite: valeur });
+        } else if (transformation === "inversion") {
+          this.setState({ inversion: valeur });
+        } else if (transformation === "normalisation") {
+          this.setState({ normalisation: valeur });
+        }
         this.resetEchelle(
           params,
           result.imageSize.height,
@@ -185,157 +239,22 @@ export default class ImageLecteur extends React.Component {
     );
   };
 
-  handleRotation = angle => {
-    if (this.isLoadingModification()) {
-      return;
+  updateFields = (dateObj, localisation) => {
+    let precHeight = this.state.image.imageSize.height;
+    let precWidth = this.state.image.imageSize.width;
+    let params = {};
+    if (!_.isUndefined(dateObj)) {
+      params.createdAt = dateObj.toISOString(true);
     }
-    this.setState({
-      loadingRotationRight: angle > 0,
-      loadingRotationLeft: angle <= 0
-    });
-    let params = this.state.params;
-    params.rotation = params.rotation ? params.rotation + angle : angle;
-    this.readImage(
+    if (!_.isUndefined(localisation)) {
+      params.localisation = localisation;
+    }
+    this.props.client.Images.update(
+      this.state.image.id,
       params,
       result => {
-        this.resetEchelle(
-          params,
-          result.imageSize.height,
-          result.imageSize.width
-        );
-      },
-      error => {
-        console.log(error);
-      }
-    );
-  };
-
-  handleRetournement = sens => {
-    if (this.isLoadingModification()) {
-      return;
-    }
-    this.setState({
-      loadingRetournementH: sens === "h",
-      loadingRetournementV: sens === "v"
-    });
-    let params = this.state.params;
-    if (params.retournement === sens) {
-      _.unset(params, "retournement");
-    } else {
-      params.retournement = sens;
-    }
-    this.readImage(
-      params,
-      result => {
-        this.resetEchelle(
-          params,
-          result.imageSize.height,
-          result.imageSize.width
-        );
-      },
-      error => {
-        console.log(error);
-      }
-    );
-  };
-
-  handleChangeContraste = value => {
-    if (this.isLoadingModification()) {
-      return;
-    }
-    this.setState({ loadingContraste: true });
-    let params = this.state.params;
-    params.contraste = value === 0 ? 100 : value * 100;
-    this.readImage(
-      params,
-      result => {
-        this.setState({ contraste: value });
-        this.resetEchelle(
-          params,
-          result.imageSize.height,
-          result.imageSize.width
-        );
-      },
-      error => {
-        console.log(error);
-      }
-    );
-  };
-
-  handleChangeLuminosite = value => {
-    if (this.isLoadingModification()) {
-      return;
-    }
-    this.setState({ loadingLuminosite: true });
-    let params = this.state.params;
-    if (value === 0) {
-      _.unset(params, "luminosite");
-    } else {
-      params.luminosite = value * 100;
-    }
-    this.readImage(
-      params,
-      result => {
-        this.setState({ luminosite: value });
-        this.resetEchelle(
-          params,
-          result.imageSize.height,
-          result.imageSize.width
-        );
-      },
-      error => {
-        console.log(error);
-      }
-    );
-  };
-
-  handleInversion = bool => {
-    if (this.isLoadingModification()) {
-      return;
-    }
-    this.setState({ loadingInversion: true });
-    let params = this.state.params;
-    if (!bool) {
-      _.unset(params, "inversion");
-    } else {
-      params.inversion = bool;
-    }
-    this.readImage(
-      params,
-      result => {
-        this.setState({ inversion: bool });
-        this.resetEchelle(
-          params,
-          result.imageSize.height,
-          result.imageSize.width
-        );
-      },
-      error => {
-        console.log(error);
-      }
-    );
-  };
-
-  handleNormalisation = bool => {
-    if (this.isLoadingModification()) {
-      return;
-    }
-    this.setState({ loadingNormalisation: true });
-    let params = this.state.params;
-    if (!bool) {
-      _.unset(params, "normalisation");
-    } else {
-      params.normalisation = bool;
-    }
-    this.readImage(
-      params,
-      result => {
-        this.setState({ normalisation: bool });
-        this.resetEchelle(
-          params,
-          result.imageSize.height,
-          result.imageSize.width
-        );
+        //console.log(result);
+        this.resetEchelle(this.state.params, precHeight, precWidth);
       },
       error => {
         console.log(error);
@@ -410,26 +329,76 @@ export default class ImageLecteur extends React.Component {
                 marginBottom: "15px"
               }}
             >
+              <div
+                style={{
+                  textAlign: "left",
+                  position: "fixed",
+                  bottom: 0,
+                  left: 10
+                }}
+              >
+                <Form>
+                  <Form.Group>
+                    <Form.Input
+                      label="Localisation"
+                      value={
+                        _.isEmpty(this.state.image)
+                          ? ""
+                          : this.state.image.localisation
+                      }
+                      onClick={() => this.setState({ modalLocalisation: true })}
+                    />
+                    <Form.Input label="Date">
+                      <Ref
+                        innerRef={node => {
+                          if (node) {
+                            let input = node.firstChild.firstChild;
+                            input.style.width = "100%";
+                          }
+                        }}
+                      >
+                        <DatePicker
+                          dateFormat="dd/MM/yyyy"
+                          selected={moment(this.state.image.createdAt).toDate()}
+                          onChange={date => {
+                            if (date) {
+                              this.updateFields(date, undefined);
+                            }
+                          }}
+                          locale={fr}
+                        />
+                      </Ref>
+                    </Form.Input>
+                  </Form.Group>
+                </Form>
+              </div>
               <Popup
                 trigger={<Button icon="magic" />}
                 on="click"
                 pinned={true}
                 inverted={true}
                 wide={true}
-                //size="mini"
               >
                 <Button
                   loading={this.state.loadingNormalisation}
                   content="Normalisation"
                   onClick={() =>
-                    this.handleNormalisation(!this.state.normalisation)
+                    this.handleModificationImage(
+                      "normalisation",
+                      !this.state.normalisation
+                    )
                   }
                 />
                 <Divider hidden={true} vertical={true} />
                 <Button
                   loading={this.state.loadingInversion}
                   content="Inversion"
-                  onClick={() => this.handleInversion(!this.state.inversion)}
+                  onClick={() =>
+                    this.handleModificationImage(
+                      "inversion",
+                      !this.state.inversion
+                    )
+                  }
                 />
               </Popup>
               <Popup
@@ -437,7 +406,9 @@ export default class ImageLecteur extends React.Component {
                   <Button
                     icon="resize horizontal"
                     loading={this.state.loadingRetournementH}
-                    onClick={() => this.handleRetournement("h")}
+                    onClick={() =>
+                      this.handleModificationImage("retournement", "h")
+                    }
                   />
                 }
                 content="Retournement horizontal"
@@ -449,7 +420,9 @@ export default class ImageLecteur extends React.Component {
                   <Button
                     icon="resize vertical"
                     loading={this.state.loadingRetournementV}
-                    onClick={() => this.handleRetournement("v")}
+                    onClick={() =>
+                      this.handleModificationImage("retournement", "v")
+                    }
                   />
                 }
                 content="Retournement vertical"
@@ -462,7 +435,10 @@ export default class ImageLecteur extends React.Component {
                     icon="undo"
                     loading={this.state.loadingRotationLeft}
                     onClick={() =>
-                      this.handleRotation(-1 * this.rotationDegreDefaut)
+                      this.handleModificationImage(
+                        "rotation",
+                        -1 * this.rotationDegreDefaut
+                      )
                     }
                   />
                 }
@@ -476,7 +452,10 @@ export default class ImageLecteur extends React.Component {
                     icon="redo"
                     loading={this.state.loadingRotationRight}
                     onClick={() =>
-                      this.handleRotation(this.rotationDegreDefaut)
+                      this.handleModificationImage(
+                        "rotation",
+                        this.rotationDegreDefaut
+                      )
                     }
                   />
                 }
@@ -493,7 +472,12 @@ export default class ImageLecteur extends React.Component {
                     }
                     loading={this.state.loadingZoomOut}
                     icon="zoom-out"
-                    onClick={() => this.handleZoom(-1 * this.zoomFacteurDefaut)}
+                    onClick={() =>
+                      this.handleModificationImage(
+                        "zoom",
+                        -1 * this.zoomFacteurDefaut
+                      )
+                    }
                   />
                 }
                 content="Zoom arrière"
@@ -505,7 +489,12 @@ export default class ImageLecteur extends React.Component {
                   <Button
                     icon="zoom-in"
                     loading={this.state.loadingZoomIn}
-                    onClick={() => this.handleZoom(this.zoomFacteurDefaut)}
+                    onClick={() =>
+                      this.handleModificationImage(
+                        "zoom",
+                        this.zoomFacteurDefaut
+                      )
+                    }
                   />
                 }
                 content="Zoom avant"
@@ -528,7 +517,10 @@ export default class ImageLecteur extends React.Component {
                   step={0.2}
                   value={this.state.luminosite}
                   onChange={e =>
-                    this.handleChangeLuminosite(parseFloat(e.target.value))
+                    this.handleModificationImage(
+                      "luminosite",
+                      parseFloat(e.target.value)
+                    )
                   }
                 />
               </Popup>
@@ -548,7 +540,10 @@ export default class ImageLecteur extends React.Component {
                   step={0.2}
                   value={this.state.contraste}
                   onChange={e =>
-                    this.handleChangeContraste(parseFloat(e.target.value))
+                    this.handleModificationImage(
+                      "contraste",
+                      parseFloat(e.target.value)
+                    )
                   }
                 />
               </Popup>
@@ -586,6 +581,23 @@ export default class ImageLecteur extends React.Component {
             </div>
           </div>
         </Dimmer>
+
+        {/* Modal Localisations */}
+        <Localisations
+          dents={this.state.image.localisation}
+          onSelection={dents => {
+            if (dents !== this.state.image.localisation) {
+              this.updateFields(undefined, dents);
+            }
+          }}
+          modal={{
+            size: "large",
+            open: this.state.modalLocalisation,
+            onClose: () => {
+              this.setState({ modalLocalisation: false });
+            }
+          }}
+        />
       </React.Fragment>
     );
   }
