@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import _ from "lodash";
+import moment from "moment";
 import {
   Button,
   Dimmer,
@@ -16,6 +17,10 @@ import {
 import Importation from "./Importation";
 import ImageLecteur from "./ImageLecteur";
 import Periode from "../Shared/Periode";
+import Patients from "../Patients";
+import Localisations from "../Shared/Localisations";
+
+import { queriesLocalisation } from "../lib/LocalisationFilterHelper";
 
 const propDefs = {
   description: "Liste d'images appartenant à un patient (sous forme de grille)",
@@ -44,7 +49,11 @@ export default class Galerie extends React.Component {
     modalDeleteImage: false,
     imageToOpen: {},
     periodeStartAt: "",
-    periodeEndAt: ""
+    periodeEndAt: "",
+    modalSelectionPatient: false,
+    modalImagesAttribution: false,
+    modalLocalisation: false,
+    localisation: ""
   };
 
   defaultLimit = 40;
@@ -58,7 +67,8 @@ export default class Galerie extends React.Component {
     if (
       prevProps.idPatient !== this.props.idPatient ||
       prevState.periodeStartAt !== this.state.periodeStartAt ||
-      prevState.periodeEndAt !== this.state.periodeEndAt
+      prevState.periodeEndAt !== this.state.periodeEndAt ||
+      prevState.localisation !== this.state.localisation
     ) {
       this.reload(this.defaultLimit, this.defaultOffset);
     }
@@ -70,16 +80,27 @@ export default class Galerie extends React.Component {
     }
     this.setState({ loading: true });
     let params = {};
+    let queriesLoc = queriesLocalisation(this.state.localisation);
     params.q1 = "idPatient,Equal," + this.props.idPatient;
     params.limit = limit;
     params.offset = offset;
+    let numeroQuery = 2;
     if (this.state.periodeStartAt && this.state.periodeEndAt) {
-      params.q2 =
+      _.set(
+        params,
+        "q" + numeroQuery++,
         "AND,createdAt,Between," +
-        this.state.periodeStartAt +
-        "," +
-        this.state.periodeEndAt;
+          this.state.periodeStartAt +
+          "," +
+          this.state.periodeEndAt
+      );
     }
+    if (this.state.localisation) {
+      _.forEach(queriesLoc, query => {
+        _.set(params, "q" + numeroQuery++, query);
+      });
+    }
+
     this.props.client.Images.readAll(
       params,
       result => {
@@ -135,6 +156,71 @@ export default class Galerie extends React.Component {
       }
     };
     deleteImage();
+  };
+
+  attributionImages = idPatient => {
+    let selectedImages = this.state.selectedImages;
+    let attribImage = () => {
+      if (_.isEmpty(selectedImages)) {
+        this.reload(this.defaultLimit, this.defaultOffset);
+      } else {
+        this.props.client.Images.update(
+          selectedImages.shift(),
+          { idPatient: idPatient },
+          () => {
+            attribImage();
+          },
+          error => {
+            console.log(error);
+            return;
+          }
+        );
+      }
+    };
+    attribImage();
+  };
+
+  telechargementImages = () => {
+    this.props.client.Patients.read(
+      this.props.idPatient,
+      {},
+      patient => {
+        //console.log(patient);
+        let selectedImages = this.state.selectedImages;
+        let telechargement = () => {
+          if (_.isEmpty(selectedImages)) {
+            console.log("TODO : implémenter les téléchargements");
+          } else {
+            this.props.client.Images.read(
+              selectedImages.shift(),
+              {},
+              result => {
+                //console.log(result);
+
+                telechargement();
+
+                /*let a = document.createElement("a");
+                a.href = result.image;
+                a.download = result.fileName; // format : NOM_PRENOM_JJ_MM_AAAA[ID].png (ou autre extension)
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);*/
+
+                //telechargement();
+              },
+              error => {
+                console.log(error);
+                return;
+              }
+            );
+          }
+        };
+        telechargement();
+      },
+      error => {
+        console.log(error);
+      }
+    );
   };
 
   render() {
@@ -193,6 +279,36 @@ export default class Galerie extends React.Component {
                 />
               }
               content="Supprimer les images sélectionnées"
+              inverted={true}
+              size="mini"
+            />
+
+            <Popup
+              trigger={
+                <Button
+                  disabled={_.isEmpty(this.state.selectedImages)}
+                  basic={true}
+                  icon="user"
+                  onClick={() =>
+                    this.setState({ modalImagesAttribution: true })
+                  }
+                />
+              }
+              content="Attribution des images sélectionnées à un autre patient"
+              inverted={true}
+              size="mini"
+            />
+
+            <Popup
+              trigger={
+                <Button
+                  disabled={_.isEmpty(this.state.selectedImages)}
+                  basic={true}
+                  icon="download"
+                  onClick={this.telechargementImages}
+                />
+              }
+              content="Exporter les images sélectionnées"
               inverted={true}
               size="mini"
             />
@@ -292,9 +408,8 @@ export default class Galerie extends React.Component {
                   label="Localisation"
                   width={5}
                   placeholder="Localisation"
-                  onChange={() => {}}
-                  //onClick={() => this.setState({ openLocalisations: true })}
-                  value={""}
+                  onClick={() => this.setState({ modalLocalisation: true })}
+                  value={this.state.localisation}
                 />
               </Form.Group>
             </Form>
@@ -316,50 +431,82 @@ export default class Galerie extends React.Component {
           }}
         >
           {!_.isEmpty(galerieLignes) ? (
-            <Grid container={true}>
+            <Grid container={true} padded={false}>
               {_.map(galerieLignes, (ligne, indexLigne) => (
-                <Grid.Row
-                  key={indexLigne}
-                  columns={this.state.itemsPerRow}
-                  stretched={true}
-                >
-                  {_.map(ligne, (image, indexImage) => (
-                    <Grid.Column
-                      key={indexImage}
-                      textAlign="center"
-                      verticalAlign="middle"
-                    >
-                      <ImageView
-                        image={image}
-                        selected={
-                          _.findIndex(
-                            this.state.selectedImages,
-                            id => id === image.id
-                          ) !== -1
-                        }
-                        onSelectionChange={idImage => {
-                          let selectedImages = this.state.selectedImages;
-                          let indexSelection = _.findIndex(
-                            selectedImages,
-                            id => id === idImage
-                          );
-                          if (indexSelection === -1) {
-                            selectedImages.push(idImage);
-                            this.setState({
-                              allImagesSelected:
-                                selectedImages.length ===
-                                this.state.images.length,
-                              selectedImages: selectedImages
-                            });
+                <React.Fragment key={indexLigne}>
+                  <Grid.Row
+                    columns={this.state.itemsPerRow}
+                    stretched={true}
+                    style={{ padding: 0 }}
+                  >
+                    {_.map(ligne, (image, indexImage) => (
+                      <Grid.Column
+                        key={indexImage}
+                        textAlign="center"
+                        verticalAlign="middle"
+                        style={{
+                          paddingTop: 0,
+                          paddingBottom: 0,
+                          paddingLeft: 2,
+                          paddingRight: 2
+                        }}
+                      >
+                        <ImageView
+                          image={image}
+                          selected={
+                            _.findIndex(
+                              this.state.selectedImages,
+                              id => id === image.id
+                            ) !== -1
                           }
-                        }}
-                        onOpenImage={() => {
-                          this.setState({ imageToOpen: image });
-                        }}
-                      />
-                    </Grid.Column>
-                  ))}
-                </Grid.Row>
+                          onSelectionChange={idImage => {
+                            let selectedImages = this.state.selectedImages;
+                            let indexSelection = _.findIndex(
+                              selectedImages,
+                              id => id === idImage
+                            );
+                            if (indexSelection === -1) {
+                              selectedImages.push(idImage);
+                              this.setState({
+                                allImagesSelected:
+                                  selectedImages.length ===
+                                  this.state.images.length,
+                                selectedImages: selectedImages
+                              });
+                            }
+                          }}
+                          onOpenImage={() => {
+                            this.setState({ imageToOpen: image });
+                          }}
+                        />
+                      </Grid.Column>
+                    ))}
+                  </Grid.Row>
+
+                  <Grid.Row
+                    columns={this.state.itemsPerRow}
+                    style={{ marginBottom: "15px" }}
+                  >
+                    {_.map(ligne, (image, indexImage) => (
+                      <Grid.Column
+                        key={indexImage}
+                        //textAlign="center"
+                        style={{ padding: 0 }}
+                      >
+                        <span style={{ marginLeft: "10px" }}>
+                          {moment(image.createdAt).format("DD/MM/yyyy")}
+                          &nbsp;
+                          <span style={{ float: "right", marginRight: "10px" }}>
+                            {image.localisation}
+                          </span>
+                        </span>
+                      </Grid.Column>
+                    ))}
+                  </Grid.Row>
+                  {indexLigne === galerieLignes.length - 1 ? null : (
+                    <Divider style={{ padding: 0 }} />
+                  )}
+                </React.Fragment>
               ))}
             </Grid>
           ) : null}
@@ -417,6 +564,62 @@ export default class Galerie extends React.Component {
             />
           </Modal.Actions>
         </Modal>
+
+        {/* modal de recherche élargie d'un patient */}
+        <Patients.Search
+          client={this.props.client}
+          open={this.state.modalSelectionPatient}
+          onClose={() => this.setState({ modalSelectionPatient: false })}
+          onPatientSelection={(idPatient, patientDenomination) => {
+            if (this.props.idPatient === idPatient) {
+              this.setState({ modalSelectionPatient: false });
+            } else {
+              // faire appel aux trucs
+              this.setState({ modalSelectionPatient: false });
+              this.attributionImages(idPatient);
+            }
+          }}
+        />
+
+        {/* modal de confirmation - attribution des images à un autre patient */}
+        <Modal open={this.state.modalImagesAttribution} size="tiny">
+          <Modal.Header>Attribution des images</Modal.Header>
+          <Modal.Content>
+            Suite à une erreur lors de l'aquisition, des images peuvent avoir
+            été attribuées à un mauvais patient. <br />
+            Vous avez la possibilité ici, d'attribuer les images sélectionnées à
+            un autre patient de votre choix.
+          </Modal.Content>
+          <Modal.Actions>
+            <Button
+              content="Annuler"
+              onClick={() => this.setState({ modalImagesAttribution: false })}
+            />
+            <Button
+              content="OK"
+              primary={true}
+              onClick={() =>
+                this.setState({
+                  modalSelectionPatient: true,
+                  modalImagesAttribution: false
+                })
+              }
+            />
+          </Modal.Actions>
+        </Modal>
+
+        {/* modal localisations */}
+        <Localisations
+          dents={this.state.localisation}
+          onSelection={dents =>
+            this.setState({ modalLocalisation: false, localisation: dents })
+          }
+          modal={{
+            size: "large",
+            open: this.state.modalLocalisation,
+            onClose: () => this.setState({ modalLocalisation: false })
+          }}
+        />
       </React.Fragment>
     );
   }

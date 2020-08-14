@@ -305,7 +305,10 @@ export default class ImageLecteur extends React.Component {
                   }}
                   onWheel={e => {
                     if (e.deltaY > 0) {
-                      this.handleZoom(this.zoomFacteurDefaut);
+                      this.handleModificationImage(
+                        "zoom",
+                        this.zoomFacteurDefaut
+                      );
                     } else {
                       if (
                         !this.state.params.zoom ||
@@ -313,7 +316,10 @@ export default class ImageLecteur extends React.Component {
                       ) {
                         return;
                       }
-                      this.handleZoom(-1 * this.zoomFacteurDefaut);
+                      this.handleModificationImage(
+                        "zoom",
+                        -1 * this.zoomFacteurDefaut
+                      );
                     }
                   }}
                 />
