@@ -31,6 +31,13 @@ import DocumentsListeDocument from "./Documents/ListeDocument";
 import DocumentsDocumentModeles from "./Documents/DocumentModeles";
 import DocumentsDocumentArchives from "./Documents/DocumentArchives";
 
+// Exemples Images
+import ImagesImportation from "./Images/Importation";
+import ImagesGalerie from "./Images/Galerie";
+
+// Exemples Patients
+import PatientSearch from "./Patients/PatientSearch";
+
 // CSS
 //import "rhapi-ui-react/dist/index.css";
 
@@ -132,14 +139,11 @@ export default class App extends React.Component {
         <Menu.Header>Patients</Menu.Header>
         <Menu.Menu>
           <Menu.Item
-            name="Composant 1"
-            //active
-            //onClick
-          />
-          <Menu.Item
-            name="Composant 2"
-            //active
-            //onClick
+            name="Recherche"
+            active={
+              this.state.group === "Patients" && this.state.name === "Recherche"
+            }
+            onClick={(e, d) => this.handleClickItem("Patients", d.name)}
           />
         </Menu.Menu>
       </Menu.Item>
@@ -201,11 +205,6 @@ export default class App extends React.Component {
             active={this.state.group === "Actes" && this.state.name === "Note"}
             onClick={(e, d) => this.handleClickItem("Actes", d.name)}
           />
-          {/*<Menu.Item
-            name="Document"
-            active={this.state.group === "Actes" && this.state.name === "Document"}
-            onClick={(e, d) => this.handleClickItem("Actes", d.name)}
-          />*/}
         </Menu.Menu>
       </Menu.Item>
     );
@@ -245,6 +244,28 @@ export default class App extends React.Component {
               this.state.name === "DocumentModeles"
             }
             onClick={(e, d) => this.handleClickItem("Documents", d.name)}
+          />
+        </Menu.Menu>
+      </Menu.Item>
+    );
+
+    let images = (
+      <Menu.Item>
+        <Menu.Header>Images</Menu.Header>
+        <Menu.Menu>
+          <Menu.Item
+            name="Importation"
+            active={
+              this.state.group === "Images" && this.state.name === "Importation"
+            }
+            onClick={(e, d) => this.handleClickItem("Images", d.name)}
+          />
+          <Menu.Item
+            name="Galerie"
+            active={
+              this.state.group === "Images" && this.state.name === "Galerie"
+            }
+            onClick={(e, d) => this.handleClickItem("Images", d.name)}
           />
         </Menu.Menu>
       </Menu.Item>
@@ -301,6 +322,7 @@ export default class App extends React.Component {
             {plannings}
             {actes}
             {documents}
+            {images}
             {shared}
           </Menu>
         </Grid.Column>
@@ -398,6 +420,20 @@ class ViewExample extends React.Component {
         return <DocumentsDocumentModeles />;
       } else if (name === "DocumentArchives") {
         return <DocumentsDocumentArchives />;
+      }
+    }
+
+    if (group === "Images") {
+      if (name === "Importation") {
+        return <ImagesImportation />;
+      } else if (name === "Galerie") {
+        return <ImagesGalerie />
+      }
+    }
+
+    if (group === "Patients") {
+      if (name === "Recherche") {
+        return <PatientSearch />;
       }
     }
   };

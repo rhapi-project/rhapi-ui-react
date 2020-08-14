@@ -72,10 +72,6 @@ const readPatient = (client, idPatient, onSuccess, onError) => {
       // TODO : rajouter les champs qui ne sont pas encore traités
       // se référer sur l'Aide des modèles
       // p.solde
-      // p.dernierRdv
-      // p.dernierRdvEnLettres
-      // p.prochainRdv
-      // p.prochainRdvEnLettres
       // p.dernierActe
       // p.dernierActeEnLettres
       onSuccess(p);
@@ -182,7 +178,12 @@ const readRdv = (client, idPatient, callback) => {
 };
 
 // TODO : gérér les sous-totaux
-const readSaisies = (client, arrayIdActes, callback) => {
+const readSaisies = (
+  client,
+  saisiesMaxLignesParPage,
+  arrayIdActes,
+  callback
+) => {
   let result = {};
   if (_.isEmpty(arrayIdActes)) {
     callback(result);
@@ -198,7 +199,6 @@ const readSaisies = (client, arrayIdActes, callback) => {
     devis => {
       result.saisiesDescription = devis.description;
       if (_.startsWith(devis.code, "#")) {
-        let maxItemsPerPage = 8;
         let currentPageItems = 0;
         let obj = {};
         obj.saisies = [];
@@ -206,7 +206,7 @@ const readSaisies = (client, arrayIdActes, callback) => {
           saisies.push(acte);
           obj.saisies.push(acte);
           currentPageItems += 1;
-          if (currentPageItems === maxItemsPerPage) {
+          if (currentPageItems === saisiesMaxLignesParPage) {
             blocTraitements.push(_.cloneDeepWith(obj));
             obj.saisies = [];
             currentPageItems = 0;
@@ -236,7 +236,9 @@ const remplissage = (client, modeleObj, idPatient, arrayIdActes, callback) => {
   let lectureSaisies = false;
   let lectureRdv = false;
 
-  let regex = /{{(#)?[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*}}/g;
+  let saisiesMaxLignesParPage = 8;
+
+  let regex = /{{(#)?[a-zA-Z0-9_]+(\.[a-zA-Z0-9]+)*}}/g;
   let champs = modeleObj.document.match(regex);
 
   let traitementChamps = champs => {
@@ -245,8 +247,19 @@ const remplissage = (client, modeleObj, idPatient, arrayIdActes, callback) => {
       callback(filledDocument);
     } else {
       let champ = champs.shift();
+      // pour le cas des saisies (devis), on peur récupérer le nombre de
+      // lignes d'actes qu'il faut avoir au maximum par page
+      if (_.startsWith(champ, "{{saisiesMaxLignesParPage_")) {
+        let c = _.replace(champ, /{+|}+/g, ""); // suppression des accolades
+        let splitChamp = _.split(c, "_");
+        let newMaxLignes = parseInt(splitChamp[splitChamp.length - 1]);
+        saisiesMaxLignesParPage = !_.isNaN(newMaxLignes)
+          ? newMaxLignes
+          : saisiesMaxLignesParPage;
+        traitementChamps(champs);
+      }
       // Gestion des champs praticien
-      if (_.startsWith(champ, "{{praticien") && !lecturePraticien) {
+      else if (_.startsWith(champ, "{{praticien") && !lecturePraticien) {
         lecturePraticien = true;
         readPraticien(
           client,
@@ -300,7 +313,7 @@ const remplissage = (client, modeleObj, idPatient, arrayIdActes, callback) => {
       else if (_.startsWith(champ, "{{#saisies") && !lectureSaisies) {
         // lignes d'actes (devis)
         lectureSaisies = true;
-        readSaisies(client, arrayIdActes, result => {
+        readSaisies(client, saisiesMaxLignesParPage, arrayIdActes, result => {
           data.saisies = _.get(result, "saisies", []);
           data.blocTraitements = _.get(result, "blocTraitements", []);
           data.saisiesDescription = _.get(result, "saisiesDescription", "");

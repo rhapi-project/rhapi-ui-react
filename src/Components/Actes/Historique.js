@@ -5,16 +5,8 @@ import PropTypes from "prop-types";
 import Note from "./Note";
 import Montant from "../Shared/Montant";
 import Localisations from "../Shared/Localisations";
-import {
-  tarif,
-  secteur03,
-  secteur04,
-  secteur05,
-  secteur06,
-  secteur07,
-  secteur08,
-  codesDocs
-} from "../lib/Helpers";
+import { tarif, codesDocs } from "../lib/Helpers";
+import { queriesLocalisation } from "../lib/LocalisationFilterHelper";
 import Actions from "../Shared/Actions";
 
 import {
@@ -291,7 +283,8 @@ export default class Historique extends React.Component {
     if (
       prevProps.idPatient !== this.props.idPatient ||
       prevProps.startAt !== this.props.startAt ||
-      prevProps.endAt !== this.props.endAt
+      prevProps.endAt !== this.props.endAt ||
+      prevProps.localisation !== this.props.localisation
     ) {
       this.reload(
         this.props.idPatient,
@@ -337,90 +330,9 @@ export default class Historique extends React.Component {
     let params = {};
 
     if (localisation) {
-      let dents = localisation.split(" ");
-
-      _.forEach(dents, dent => {
-        if (dent === "01") {
-          _.set(params, "q" + ++n, "OR,localisation,Like,1*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,* 1*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,5*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,* 5*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,2*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,* 2*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,6*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,* 6*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,*03*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,*04*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,*05*");
-        } else if (dent === "02") {
-          _.set(params, "q" + ++n, "OR,localisation,Like,3*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,* 3*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,7*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,* 7*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,4*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,* 4*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,8*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,* 8*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,*06*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,*07*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,*08*");
-        } else if (dent === "03") {
-          _.forEach(secteur03, dent03 => {
-            _.set(params, "q" + ++n, "OR,localisation,Like,*" + dent03 + "*");
-          });
-          _.set(params, "q" + ++n, "OR,localisation,Like,*03*");
-        } else if (dent === "04") {
-          _.forEach(secteur04, dent04 => {
-            _.set(params, "q" + ++n, "OR,localisation,Like,*" + dent04 + "*");
-          });
-          _.set(params, "q" + ++n, "OR,localisation,Like,*04*");
-        } else if (dent === "05") {
-          _.forEach(secteur05, dent05 => {
-            _.set(params, "q" + ++n, "OR,localisation,Like,*" + dent05 + "*");
-          });
-          _.set(params, "q" + ++n, "OR,localisation,Like,*05*");
-        } else if (dent === "06") {
-          _.forEach(secteur06, dent06 => {
-            _.set(params, "q" + ++n, "OR,localisation,Like,*" + dent06 + "*");
-          });
-          _.set(params, "q" + ++n, "OR,localisation,Like,*06*");
-        } else if (dent === "07") {
-          _.forEach(secteur07, dent07 => {
-            _.set(params, "q" + ++n, "OR,localisation,Like,*" + dent07 + "*");
-          });
-          _.set(params, "q" + ++n, "OR,localisation,Like,*07*");
-        } else if (dent === "08") {
-          _.forEach(secteur08, dent08 => {
-            _.set(params, "q" + ++n, "OR,localisation,Like,*" + dent08 + "*");
-          });
-          _.set(params, "q" + ++n, "OR,localisation,Like,*08*");
-        } else if (dent === "10") {
-          _.set(params, "q" + ++n, "OR,localisation,Like,1*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,* 1*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,5*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,* 5*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,*03*");
-        } else if (dent === "20") {
-          _.set(params, "q" + ++n, "OR,localisation,Like,2*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,* 2*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,6*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,* 6*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,*05*");
-        } else if (dent === "30") {
-          _.set(params, "q" + ++n, "OR,localisation,Like,3*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,* 3*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,7*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,* 7*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,*06*");
-        } else if (dent === "40") {
-          _.set(params, "q" + ++n, "OR,localisation,Like,4*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,* 4*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,8*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,* 8*");
-          _.set(params, "q" + ++n, "OR,localisation,Like,*08*");
-        } else {
-          _.set(params, "q" + ++n, "OR,localisation,Like,*" + dent + "*");
-        }
+      let queriesLoc = queriesLocalisation(localisation);
+      _.forEach(queriesLoc, q => {
+        _.set(params, "q" + ++n, q);
       });
     }
 
