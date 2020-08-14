@@ -81,30 +81,34 @@ export default class Galerie extends React.Component {
     this.setState({ loading: true });
     let params = {};
     let queriesLoc = queriesLocalisation(this.state.localisation);
-    params.q1 = "idPatient,Equal," + this.props.idPatient;
+    let numeroQuery = 0;
+    if (this.state.localisation) {
+      _.forEach(queriesLoc, query => {
+        _.set(params, "q" + ++numeroQuery, query);
+      });
+    }
+    _.set(
+      params,
+      "q" + ++numeroQuery,
+      "AND,idPatient,Equal," + this.props.idPatient
+    );
     params.limit = limit;
     params.offset = offset;
-    let numeroQuery = 2;
+
     if (this.state.periodeStartAt && this.state.periodeEndAt) {
       _.set(
         params,
-        "q" + numeroQuery++,
+        "q" + ++numeroQuery,
         "AND,createdAt,Between," +
           this.state.periodeStartAt +
           "," +
           this.state.periodeEndAt
       );
     }
-    if (this.state.localisation) {
-      _.forEach(queriesLoc, query => {
-        _.set(params, "q" + numeroQuery++, query);
-      });
-    }
 
     this.props.client.Images.readAll(
       params,
       result => {
-        //console.log(result);
         this.setState({
           loading: false,
           loadingDelete: false,
@@ -431,7 +435,7 @@ export default class Galerie extends React.Component {
           }}
         >
           {!_.isEmpty(galerieLignes) ? (
-            <Grid container={true} padded={false}>
+            <Grid /*container={true} */ padded={false}>
               {_.map(galerieLignes, (ligne, indexLigne) => (
                 <React.Fragment key={indexLigne}>
                   <Grid.Row
@@ -493,7 +497,7 @@ export default class Galerie extends React.Component {
                         //textAlign="center"
                         style={{ padding: 0 }}
                       >
-                        <span style={{ marginLeft: "10px" }}>
+                        <span style={{ marginLeft: "17px" }}>
                           {moment(image.createdAt).format("DD/MM/yyyy")}
                           &nbsp;
                           <span style={{ float: "right", marginRight: "10px" }}>
