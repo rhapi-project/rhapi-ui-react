@@ -35,6 +35,9 @@ import DocumentsDocumentArchives from "./Documents/DocumentArchives";
 import ImagesImportation from "./Images/Importation";
 import ImagesGalerie from "./Images/Galerie";
 
+// Exemples Patients
+import PatientSearch from "./Patients/PatientSearch";
+
 // CSS
 //import "rhapi-ui-react/dist/index.css";
 
@@ -136,14 +139,11 @@ export default class App extends React.Component {
         <Menu.Header>Patients</Menu.Header>
         <Menu.Menu>
           <Menu.Item
-            name="Composant 1"
-            //active
-            //onClick
-          />
-          <Menu.Item
-            name="Composant 2"
-            //active
-            //onClick
+            name="Recherche"
+            active={
+              this.state.group === "Patients" && this.state.name === "Recherche"
+            }
+            onClick={(e, d) => this.handleClickItem("Patients", d.name)}
           />
         </Menu.Menu>
       </Menu.Item>
@@ -205,11 +205,6 @@ export default class App extends React.Component {
             active={this.state.group === "Actes" && this.state.name === "Note"}
             onClick={(e, d) => this.handleClickItem("Actes", d.name)}
           />
-          {/*<Menu.Item
-            name="Document"
-            active={this.state.group === "Actes" && this.state.name === "Document"}
-            onClick={(e, d) => this.handleClickItem("Actes", d.name)}
-          />*/}
         </Menu.Menu>
       </Menu.Item>
     );
@@ -433,6 +428,12 @@ class ViewExample extends React.Component {
         return <ImagesImportation />;
       } else if (name === "Galerie") {
         return <ImagesGalerie />
+      }
+    }
+
+    if (group === "Patients") {
+      if (name === "Recherche") {
+        return <PatientSearch />;
       }
     }
   };
