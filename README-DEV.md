@@ -108,3 +108,9 @@ npm run build
 # npm login # s'authentifier sur NPM
 npm publish
 ```
+
+## TODO - Développements à finaliser
+
+- Implémentation de la création d'une image en `Base64` (code source en commentaire [Importation.js](https://github.com/rhapi-project/rhapi-ui-react/blob/master/src/Components/Images/Importation.js));
+- Implémentation du DRAG & DROP pour l'importation d'une image (Fichier [Importation.js](https://github.com/rhapi-project/rhapi-ui-react/blob/master/src/Components/Images/Importation.js));
+- Copie d'une image modifiée (Fichier [ImageLecteur.js](https://github.com/rhapi-project/rhapi-ui-react/blob/master/src/Components/Images/ImageLecteur.js)).

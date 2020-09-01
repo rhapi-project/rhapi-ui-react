@@ -126,6 +126,87 @@ export default App;
 
 Voir plus d'exemples d'utilisation [rhapi-ui-react/exemples](https://github.com/rhapi-project/rhapi-ui-react/tree/master/src/exemples).
 
+## Édition d'un modèle de document
+
+Les modèles utilisés sont des documents `HTML` avec des champs dynamiques qui sont remplis par le moteur de template [Mustache](https://mustache.github.io/). Quelques exemples de l'utilisation de Mustache sont fournis avec sa [documentation](https://github.com/janl/mustache.js/blob/master/README.md).
+
+Une liste des champs qui sont pris en compte dans l'édition d'un modèle :
+- Praticien :
+    - {{praticien.nom}}
+    - {{praticien.prenom}}
+    - {{praticien.denomination}}
+    - {{praticien.adresse1}}
+    - {{praticien.adresse2}}
+    - {{praticien.adresse3}}
+    - {{praticien.adresse}} : adresses du praticien séparées par des `-` (traits d'union)
+    - {{praticien.codePostal}}
+    - {{praticien.ville}}
+    - {{praticien.telephone}} : un numéro de téléphone de bureau
+    - {{praticien.telBureau}}
+    - {{praticien.telDomicile}}
+    - {{praticien.telMobile}}
+    - {{praticien.email}}
+    - {{praticien.organisation}}
+    - {{praticien.specialite}} : `non traité`
+    - {{praticien.titres}} : `non traité`
+    - {{praticien.adeli}} : `non traité`
+    - {{praticien.rpps}} : `non traité`
+    - {{praticien.siret}} : `non traité`
+    - {{praticien.finess}} : `non traité`
+
+- Patient :
+    - {{patient.nom}}
+    - {{patient.nomMinus}} : nom du patient écrit en minuscule
+    - {{patient.prenom}}
+    - {{patient.prenomMinus}} : prénom du patient écrit en minuscule
+    - {{patient.denomination}} : nom et prénom du patient
+    - {{patient.civilite}}
+    - {{patient.adresse1}}
+    - {{patient.adresse2}}
+    - {{patient.adresse3}}
+    - {{patient.adresse}} : adresses du patient séparées par des `-` (traits d'union)
+    - {{patient.codePostal}}
+    - {{patient.ville}}
+    - {{patient.ipp1}}
+    - {{patient.ipp2}}
+    - {{patient.nir}}
+    - {{patient.naissance}}
+    - {{patient.telBureau}}
+    - {{patient.telDomicile}}
+    - {{patient.telMobile}}
+    - {{patient.solde}} : `non traité`
+    - {{patient.dernierActe}} : `non traité`
+    - {{patient.dernierActeEnLettres}} : `non traité`
+
+- Actes : Une liste d'actes est entourée comme suit {{#actes}} `<LA_LISTE_ICI>` {{/actes}}. Ci-dessous, la description de chaque acte :
+    - {{acte.date}}
+    - {{acte.localisation}}
+    - {{acte.lettre}}
+    - {{acte.cotation}}
+    - {{acte.description}}
+    - {{acte.montant}}
+
+- Rendez-vous d'un patient
+    - {{patientRdv.precedentRdv}}
+    - {{patientRdv.precedentRdvEnLettres}}
+    - {{patientRdv.prochainRdv}}
+    - {{patientRdv.prochainRdvEnLettres}}
+    - {{patientRdv.precedentsRdv}}
+    - {{patientRdv.prochainsRdv}}
+    - {{patientRdv.precedentsRdvEnLettres}}
+    - {{patientRdv.prochainsRdvEnLettres}}
+
+- Nombre de saisies (pour un devis) maximum par page :
+    - {{saisiesMaxLignesParPage_`N`}} : N est un nombre entier
+
+- Les blocs de saisies paginables sur un devis sont entourés comme suit {{#blocTraitements}}{{/blocTraitements}}
+
+- Bloc des saisies d'un devis {{#saisies}}`<LISTE_DES_SAISIES_ICI>`{{/saisies}}. Ci-dessous, la description de chaque saisie :
+    - {{localisation}}
+    - {{code}}
+    - {{description}}
+    - les autres champs possibles ne sont pas encore traités
+
 ## License
 
 [Licence MIT ©](https://github.com/rhapi-project/rhapi-ui-react/blob/master/LICENSE)
